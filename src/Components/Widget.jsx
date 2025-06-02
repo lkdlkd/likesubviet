@@ -5,7 +5,6 @@ const Widget = ({ configWeb }) => {
     const lienhe = Array.isArray(config.lienhe) ? config.lienhe : []; // Đảm bảo lienhe là một mảng
 
     // Nếu không có liên hệ, không hiển thị gì
-    console.log("Lienhe:", lienhe.value);
    if (lienhe.logolienhe == "") {
         return null;
     }

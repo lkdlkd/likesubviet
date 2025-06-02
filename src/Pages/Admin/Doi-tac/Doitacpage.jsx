@@ -1,4 +1,4 @@
-'use client';
+import axios from "axios";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import Adddoitac from "@/Pages/Admin/Doi-tac/Adddoitac";
@@ -10,15 +10,38 @@ export default function Doitacpage() {
   const [isAdding, setIsAdding] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Lấy token từ localStorage
   const token = localStorage.getItem("token") || "";
 
-  // Gọi API để lấy danh sách đối tác
+  const fetchBalance = async (partner) => {
+    try {
+      const res = await axios.post(partner.url_api, {
+        key: partner.api_token,
+        action: "balance",
+      });
+      return res.data.balance || 0;
+    } catch (error) {
+      console.error(`Lỗi khi lấy số dư từ đối tác ${partner.name}:`, error);
+      return "Lỗi";
+    }
+  };
+
+  const fetchBalancesForPartners = async (partners) => {
+    const updatedPartners = await Promise.all(
+      partners.map(async (partner) => {
+        const balance = await fetchBalance(partner);
+        const convertedBalance = balance * (partner.tigia || 1); // Nhân balance với tigia (mặc định là 1 nếu không có)
+        return { ...partner, balance: convertedBalance };
+      })
+    );
+    setSmmPartners(updatedPartners);
+  };
+
   useEffect(() => {
     const fetchSmmPartners = async () => {
       try {
         const partners = await getAllSmmPartners(token);
         setSmmPartners(partners);
+        await fetchBalancesForPartners(partners);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách đối tác:", error);
         Swal.fire("Lỗi!", "Không thể tải danh sách đối tác. Vui lòng thử lại.", "error");
@@ -111,6 +134,7 @@ export default function Doitacpage() {
                     <th>Tên</th>
                     <th>URL API</th>
                     <th>API Token</th>
+                    <th>Số dư</th>
                     <th>Giá Cập Nhật</th>
                     <th>Tỉ Giá</th>
                     <th>Trạng Thái</th>
@@ -156,6 +180,7 @@ export default function Doitacpage() {
                       >
                         {partner.api_token}
                       </td>
+                      <td>{partner.balance !== undefined ? partner.balance : "Đang tải..."}</td>
                       <td>{partner.price_update}</td>
                       <td>{partner.tigia}</td>
                       <td>{partner.status === "on" ? "Bật" : "Tắt"}</td>
