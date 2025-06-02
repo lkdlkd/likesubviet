@@ -1,25 +1,99 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-dom";
+import { AuthProvider, AuthContext } from "@/Context/AuthContext";
+import Login from "@/Pages/Dang-nhap/Login";
+import Register from "@/Pages/Dang-Ky/Register";
+import Home from "@/Pages/Home";
+import Layout from "@/Components/Layout";
+import ProfilePage from "@/Pages/Profile/ProfilePage";
+import NaptienPage from "@/Pages/Nap-tien/NaptienPage";
+import HistoryPage from "@/Pages/Lich-su-hoat-dong/HistoryPage";
+import Ordernhanh from "./Pages/Order/Ordernhanh";
+import Danhsachdon from "./Pages/Danh-sach-don/Danhsachdon";
+import Order from "./Pages/Muadon/Order";
+import ThongkePage from "./Pages/Admin/Thong-ke/ThongkePage";
+import TaikhoanPage from "./Pages/Admin/Tai-khoan/TaikhoanPage";
+import Taothongbaopage from "./Pages/Admin/Thong-bao/Taothongbaopage";
+import BankingAdmin from "./Pages/Admin/Bank-king/BankingAdmin";
+import Doitacpage from "./Pages/Admin/Doi-tac/Doitacpage";
+import PlatformsPage from "./Pages/Admin/Nen-tang/PlatformsPage";
+import CategoriesPage from "./Pages/Admin/Dich-vu/CategoriesPage";
+import Dichvupage from "./Pages/Admin/Server/Dichvupage";
+import Setting from "./Pages/Admin/ConfigWeb/Setting";
+import ConfigCard from "./Pages/Admin/ConfigCard/ConfigCard";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Routes không có Layout */}
+          <Route path="/dang-nhap" element={<Login />} />
+          <Route path="/dang-ky" element={<Register />} />
+
+          {/* Routes cho User Layout */}
+          <Route
+            path="/"
+            element={
+              <AuthContext.Consumer>
+                {({ auth }) =>
+                  auth.token ? <Layout /> : <Navigate to="/dang-nhap" />
+                }
+              </AuthContext.Consumer>
+            }
+          >
+            <Route path="/home" element={<Home />} />
+            <Route index element={<Navigate to="/home" replace />} />
+            {/* <Route index element={<Home />} /> */}
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/nap-tien" element={<NaptienPage />} />
+            <Route path="/lich-su-hoat-dong" element={<HistoryPage />} />
+            <Route path="/order" element={<Ordernhanh />} />
+            <Route path="/danh-sach-don" element={<Danhsachdon />} />
+            <Route path="/:type/:path" element={<Order />} />
+
+            {/* Tạo router động từ groupedCategories */}
+            {/* <Route
+              path="*"
+              element={
+                <DynamicRoutes />
+              }
+            /> */}
+          </Route>
+
+          {/* Routes cho Admin Layout */}
+          <Route
+            path="/admin"
+            element={
+              <AuthContext.Consumer>
+                {({ auth }) =>
+                  auth.token && auth.role === "admin" ? (
+                    <Layout />
+                  ) : (
+                    <Navigate to="/dang-nhap" />
+                  )
+                }
+              </AuthContext.Consumer>
+            }
+          >
+            <Route path="/admin/thongke" element={<ThongkePage />} />
+            <Route index element={<Navigate to="/admin/thongke" replace />} />
+            <Route path="/admin/tai-khoan" element={<TaikhoanPage />} />
+            <Route path="/admin/taothongbao" element={<Taothongbaopage/>} />
+            <Route path="/admin/bank-king" element={<BankingAdmin/>} />
+            <Route path="/admin/doitac" element={<Doitacpage />} />
+            <Route path="/admin/nen-tang" element={<PlatformsPage />} />
+            <Route path="/admin/dich-vu" element={<CategoriesPage />} />
+            <Route path="/admin/server" element={<Dichvupage />} />
+            <Route path="/admin/setting" element={<Setting />} />
+            <Route path="/admin/setting-thecao" element={<ConfigCard />} />
+          </Route>
+
+          {/* 404 Not Found */}
+          <Route path="*" element={<h1>404 - Không tìm thấy trang</h1>} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
-
 export default App;

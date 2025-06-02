@@ -1,38 +1,35 @@
-.App {
-  text-align: center;
+.pc-sidebar {
+  height: 100vh;
+  /* Chiều cao toàn màn hình */
+  overflow-y: auto;
+  /* Cho phép cuộn dọc */
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.pc-sidebar .navbar-content {
+  max-height: calc(100vh - 50px);
+  /* Trừ đi chiều cao header nếu có */
+  overflow-y: auto;
+  /* Cho phép cuộn dọc */
+}
+.widget-container {
+    display: flex;
+    flex-direction: column; /* Hiển thị các liên hệ theo chiều dọc */
+    position: fixed; /* Đặt vị trí cố định */
+    bottom: 30px; /* Cách đáy 10px */
+    right: 30px; /* Cách phải 10px */
+    gap: 10px; /* Khoảng cách giữa các liên hệ */
+    z-index: 10000; /* Đảm bảo hiển thị trên các thành phần khác */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.widget-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.lienhe {
+    cursor: pointer;
+    width: 50px; /* Chiều rộng của logo */
+    height: 50px; /* Chiều cao của logo */
+    transition: all 0.5s ease; /* Hiệu ứng khi hover */
 }
