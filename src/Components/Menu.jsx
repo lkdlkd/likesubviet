@@ -30,18 +30,36 @@ function MenuUser({ user, categories, configWeb }) {
             return acc;
         }, {})
         : {};
-
+    const isValidUrl = (string) => {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    };
     return (
         <nav className="pc-sidebar">
             <div className="navbar-wrapper">
                 <div className="m-header">
                     <Link to="/" className="b-brand text-primary">
-                        <img
-                            src={config.logo}
-                            className="img-fluid logo-lg"
-                            alt="logo"
-                            style={{ maxWidth: "230px", maxHeight: "110px", objectFit: "contain" }}
-                        />
+                        <div className="m-header">
+                            <Link to="/" className="b-brand text-primary">
+                                {isValidUrl(config.logo) ? (
+                                    <img
+                                        src={config.logo}
+                                        className="img-fluid logo-lg"
+                                        alt="logo"
+                                        style={{ maxWidth: "230px", maxHeight: "110px", objectFit: "contain" }}
+                                        onError={(e) => (e.target.style.display = "none")} // Ẩn ảnh nếu không tải được
+                                    />
+                                ) : (
+                                    <span className="text-primary" style={{ fontSize: "20px", fontWeight: "bold" }}>
+                                        {config.logo || "Logo"}
+                                    </span>
+                                )}
+                            </Link>
+                        </div>
                     </Link>
                 </div>
                 <div className="navbar-content mb-3">
