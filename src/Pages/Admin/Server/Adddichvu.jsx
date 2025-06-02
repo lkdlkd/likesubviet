@@ -201,13 +201,17 @@ export default function Adddichvu({
               required
             >
               <option value="">Chọn nền tảng</option>
-              {Array.from(
-                new Set(categories.map((category) => category.platforms_id))
-              ).map((platform) => (
-                <option key={platform._id} value={platform._id}>
-                  {platform.name}
-                </option>
-              ))}
+              {categories
+                .map((category) => category.platforms_id)
+                .filter(
+                  (platform, index, self) =>
+                    platform && index === self.findIndex((p) => p._id === platform._id)
+                ) // Loại bỏ các nền tảng trùng lặp
+                .map((platform) => (
+                  <option key={platform._id} value={platform._id}>
+                    {platform.name}
+                  </option>
+                ))}
             </select>
           </div>
           <div className="col-md-6 mb-3">

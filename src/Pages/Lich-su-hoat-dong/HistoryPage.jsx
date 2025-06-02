@@ -88,7 +88,6 @@ export default function History() {
                     <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h2 className="card-title">Lịch sử hoạt động</h2>
                     </div>
-
                     <div className="card-body">
                         <div className="row">
                             {/* Tìm kiếm theo mã đơn */}

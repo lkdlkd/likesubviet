@@ -243,10 +243,7 @@ export default function Ordernhanh() {
             }
             try {
                 const res = await addOrder(payload, token);
-                if (res?.status === 401 || res?.message === "Token không hợp lệ") {
-                    logout(navigate);
-                    return;
-                }
+
                 Swal.fire({
                     title: "Thành công",
                     text: "Mua dịch vụ thành công",

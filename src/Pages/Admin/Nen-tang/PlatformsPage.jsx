@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { addPlatform, updatePlatform, deletePlatform, getPlatforms } from "@/Utils/api";
 import Swal from "sweetalert2";
 import PlatformModal from "./PlatformModal";
+import Table from "react-bootstrap/Table"; // Import Table từ react-bootstrap
 
 export default function PlatformsPage() {
   const [platforms, setPlatforms] = useState([]);
@@ -113,90 +114,97 @@ export default function PlatformsPage() {
   };
 
   return (
-    <div className="container">
-      <h1 className="my-4">Quản lý Nền tảng</h1>
-      <button className="btn btn-primary mb-3" onClick={() => setIsModalOpen(true)}>
-        Thêm Nền tảng
-      </button>
-      <table className="table table-bordered">
-        <thead>
-          <tr>
-            <th>Hành động</th>
-            <th>Tên</th>
-            <th>Logo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {platforms.length > 0 ? (
-            platforms.map((platform) =>
-              platform && platform._id ? (
-                <tr key={platform._id}>
-                  <td>
-                    <button
-                      className="btn btn-warning me-2"
-                      onClick={() => {
-                        if (platform && platform._id) {
-                          setSelectedPlatform(platform); // Đảm bảo platform có _id
-                          setIsModalOpen(true);
-                        } else {
-                          console.error("Không thể sửa nền tảng: `_id` không tồn tại.");
-                        }
-                      }}
-                    >
-                      Sửa
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => {
-                        if (platform && platform._id) {
-                          handleDeletePlatform(platform._id);
-                        } else {
-                          console.error("Không thể xóa nền tảng: `_id` không tồn tại.");
-                        }
-                      }}
-                    >
-                      Xóa
-                    </button>
-                  </td>
-                  <td>{platform.name}</td>
-                  <td>
-                    <img
-                      src={platform.logo}
-                      alt={platform.name}
-                      width={50}
-                      height={50}
-                      style={{ objectFit: "cover" }}
-                    />
+    <div className="row">
+      <div className="col-md-12">
+        <div className="card">
+          <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 className="card-title">Quản lý nền tảng</h2>
+            <button className="btn btn-info mb-3" onClick={() => setIsModalOpen(true)}>
+              Thêm Nền tảng
+            </button>
+          </div>
+
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Hành động</th>
+                <th>Tên</th>
+                <th>Logo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {platforms.length > 0 ? (
+                platforms.map((platform) =>
+                  platform && platform._id ? (
+                    <tr key={platform._id}>
+                      <td>
+                        <button
+                          className="btn btn-warning me-2"
+                          onClick={() => {
+                            if (platform && platform._id) {
+                              setSelectedPlatform(platform);
+                              setIsModalOpen(true);
+                            } else {
+                              console.error("Không thể sửa nền tảng: `_id` không tồn tại.");
+                            }
+                          }}
+                        >
+                          Sửa
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => {
+                            if (platform && platform._id) {
+                              handleDeletePlatform(platform._id);
+                            } else {
+                              console.error("Không thể xóa nền tảng: `_id` không tồn tại.");
+                            }
+                          }}
+                        >
+                          Xóa
+                        </button>
+                      </td>
+                      <td>{platform.name}</td>
+                      <td>
+                        <img
+                          src={platform.logo}
+                          alt={platform.name}
+                          width={50}
+                          height={50}
+                          style={{ objectFit: "cover" }}
+                        />
+                      </td>
+                    </tr>
+                  ) : null
+                )
+              ) : (
+                <tr>
+                  <td colSpan={3} className="text-center">
+                    Không có nền tảng nào.
                   </td>
                 </tr>
-              ) : null
-            )
-          ) : (
-            <tr>
-              <td colSpan={3} className="text-center">
-                Không có nền tảng nào.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+              )}
+            </tbody>
+          </Table>
 
-      {isModalOpen && (
-        <PlatformModal
-          platform={selectedPlatform || undefined}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedPlatform(null);
-          }}
-          onSave={(platformData) => {
-            if (selectedPlatform && selectedPlatform._id) {
-              handleUpdatePlatform(selectedPlatform._id, platformData);
-            } else {
-              handleAddPlatform(platformData);
-            }
-          }}
-        />
-      )}
+          {isModalOpen && (
+            <PlatformModal
+              platform={selectedPlatform || undefined}
+              onClose={() => {
+                setIsModalOpen(false);
+                setSelectedPlatform(null);
+              }}
+              onSave={(platformData) => {
+                if (selectedPlatform && selectedPlatform._id) {
+                  handleUpdatePlatform(selectedPlatform._id, platformData);
+                } else {
+                  handleAddPlatform(platformData);
+                }
+              }}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

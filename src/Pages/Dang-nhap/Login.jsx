@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "@/Utils/api"; // Đảm bảo alias @ đã được cấu hình
+import { AuthContext } from "@/Context/AuthContext"; // Import AuthContext
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -8,6 +9,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { updateAuth } = useContext(AuthContext); // Lấy updateAuth từ AuthContext
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,10 +18,17 @@ export default function Login() {
 
     try {
       const data = await login({ username, password });
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.token); // Lưu token vào localStorage
+
+      // Cập nhật trạng thái auth trong AuthContext
+      updateAuth({
+        token: data.token,
+        role: data.role, // Đảm bảo API trả về role
+      });
+
       setError("Đăng nhập thành công!");
       setTimeout(() => {
-        navigate("/"); // Chuyển hướng về trang home sau khi đăng nhập thành công
+        navigate("/home"); // Chuyển hướng về trang home sau khi đăng nhập thành công
       }, 1000); // Thời gian chờ 1 giây để hiển thị thông báo
     } catch (err) {
       console.error("Lỗi đăng nhập:", err);

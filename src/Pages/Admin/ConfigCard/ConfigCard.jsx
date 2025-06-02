@@ -44,53 +44,61 @@ const ConfigCard = () => {
   };
 
   return (
-    <div className="config-card-form">
-      <h2>Cấu hình thẻ nạp</h2>
-      <form onSubmit={handleSubmit}>
-        {/* API_URLCARD */}
-        <div className="mb-3">
-          <label className="form-label">Domain gạch thẻ</label>
-          <input
-            type="text"
-            className="form-control"
-            value={formData.API_URLCARD}
-            onChange={(e) => setFormData({ ...formData, API_URLCARD: e.target.value })}
-            placeholder="Nhập URL API thẻ nạp"
-            required
-          />
-        </div>
+    <div className="row">
+      <div className="col-md-12">
+        <div className=" card">
+          <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 className="card-title">Cấu hình nạp thẻ</h2>
+          </div>
+          <div className="card-body">      <h2>Cấu hình thẻ nạp</h2>
+            <form onSubmit={handleSubmit}>
+              {/* API_URLCARD */}
+              <div className="mb-3">
+                <label className="form-label">Domain gạch thẻ</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.API_URLCARD}
+                  onChange={(e) => setFormData({ ...formData, API_URLCARD: e.target.value })}
+                  placeholder="Nhập URL API thẻ nạp"
+                  required
+                />
+              </div>
 
-        {/* PARTNER_ID */}
-        <div className="mb-3">
-          <label className="form-label">PARTNER ID</label>
-          <input
-            type="text"
-            className="form-control"
-            value={formData.PARTNER_ID}
-            onChange={(e) => setFormData({ ...formData, PARTNER_ID: e.target.value })}
-            placeholder="Nhập ID đối tác"
-            required
-          />
-        </div>
+              {/* PARTNER_ID */}
+              <div className="mb-3">
+                <label className="form-label">PARTNER ID</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.PARTNER_ID}
+                  onChange={(e) => setFormData({ ...formData, PARTNER_ID: e.target.value })}
+                  placeholder="Nhập ID đối tác"
+                  required
+                />
+              </div>
 
-        {/* PARTNER_KEY */}
-        <div className="mb-3">
-          <label className="form-label">PARTNER KEY</label>
-          <input
-            type="text"
-            className="form-control"
-            value={formData.PARTNER_KEY}
-            onChange={(e) => setFormData({ ...formData, PARTNER_KEY: e.target.value })}
-            placeholder="Nhập khóa đối tác"
-            required
-          />
-        </div>
+              {/* PARTNER_KEY */}
+              <div className="mb-3">
+                <label className="form-label">PARTNER KEY</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.PARTNER_KEY}
+                  onChange={(e) => setFormData({ ...formData, PARTNER_KEY: e.target.value })}
+                  placeholder="Nhập khóa đối tác"
+                  required
+                />
+              </div>
 
-        {/* Nút lưu */}
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? "Đang lưu..." : "Lưu cấu hình"}
-        </button>
-      </form>
+              {/* Nút lưu */}
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? "Đang lưu..." : "Lưu cấu hình"}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

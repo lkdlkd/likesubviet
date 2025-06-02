@@ -98,7 +98,7 @@ export default function Order() {
                 const res = await getUid({ link: rawLink });
                 if (res.status !== "error" && res.uid) {
                     setConvertedUID(res.uid);
-                   toast.success("Chuyển đổi UID thành công!");
+                    toast.success("Chuyển đổi UID thành công!");
                 } else {
                     setConvertedUID("");
                 }
@@ -180,9 +180,6 @@ export default function Order() {
             }
             try {
                 const res = await addOrder(payload, token);
-                if (res.status !== "success") {
-                    throw new Error(res.message || "Không thể tạo đơn hàng");
-                }
                 Swal.fire({
                     title: "Thành công",
                     text: "Mua dịch vụ thành công",
@@ -201,6 +198,10 @@ export default function Order() {
             }
         }
     };
+    useEffect(() => {
+        setRawLink("");
+        setConvertedUID("");
+    }, [path]); // Theo dõi sự thay đổi của đường dẫn
 
     const category = servers.length > 0 ? servers[0].category : path;
 

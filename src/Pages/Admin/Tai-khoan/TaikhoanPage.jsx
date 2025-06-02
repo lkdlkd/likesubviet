@@ -117,93 +117,94 @@ export default function TaikhoanPage() {
   }
 
   return (
-    <div className="container mt-5">
-      <div className="card shadow-sm">
-        <div className="card-header bg-primary text-white">
-          <h4 className="mb-0">Danh sách Người dùng</h4>
-        </div>
-        <div className="card-body">
-          {/* Ô tìm kiếm */}
-          <form onSubmit={handleSearch} className="mb-4">
-            <div className="row g-2">
-              <div className="col-md-4">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Tìm kiếm theo username"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+    <div className="row">
+      <div className="col-md-12">
+        <div className=" card">
+          <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 className="card-title">Quản lý người dùng</h2>
+          </div>
+          <div className="card-body">
+            {/* Ô tìm kiếm */}
+            <form onSubmit={handleSearch} className="mb-4">
+              <div className="row g-2">
+                <div className="col-md-4">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Tìm kiếm theo username"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-2">
+                  <button type="submit" className="btn btn-primary w-100">
+                    <i className="bi bi-search"></i> Tìm kiếm
+                  </button>
+                </div>
+                <div className="col-md-2">
+                  <select
+                    className="form-select"
+                    value={limit}
+                    onChange={handleLimitChange}
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                  </select>
+                </div>
               </div>
-              <div className="col-md-2">
-                <button type="submit" className="btn btn-primary w-100">
-                  <i className="bi bi-search"></i> Tìm kiếm
-                </button>
-              </div>
-              <div className="col-md-2">
-                <select
-                  className="form-select"
-                  value={limit}
-                  onChange={handleLimitChange}
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-              </div>
-            </div>
-          </form>
+            </form>
 
-          {/* Bảng danh sách người dùng */}
-          <div className="table-responsive">
-            <Table striped bordered hover>
-              <thead className="table-primary">
-                <tr>
-                  <th>#</th>
-                  <th>Thao tác</th>
-                  <th>Tài khoản</th>
-                  <th>Số dư</th>
-                  <th>Tổng nạp</th>
-                  <th>Cấp bậc</th>
-                  <th>Thời gian tạo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user, index) => (
-                  <tr key={user._id}>
-                    <td>{(page - 1) * limit + index + 1}</td>
-                    <td>
-                      <button
-                        className="btn btn-success btn-sm me-2"
-                        onClick={() => setBalanceUser(user)}
-                      >
-                        Cộng tiền
-                      </button>
-                      <button
-                        className="btn btn-warning btn-sm"
-                        onClick={() => setDeductUser(user)}
-                      >
-                        Trừ tiền
-                      </button>
-                      <button
-                        className="btn btn-info btn-sm me-2"
-                        onClick={() => setEditingUser(user)}
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleDeleteUser(user._id)}
-                      >
-                        Xóa
-                      </button>
-                    </td>
-                    <td>{user.username}</td>
-                    <td>{Number(user.balance).toLocaleString("en-US")} VNĐ</td>
-                    <td>{Number(user.tongnap).toLocaleString("en-US")} VNĐ</td>
-                    <td>{user.capbac}</td>
-                    {/* <td>
+            {/* Bảng danh sách người dùng */}
+            <div className="table-responsive">
+              <Table striped bordered hover>
+                <thead className="table-primary">
+                  <tr>
+                    <th>#</th>
+                    <th>Thao tác</th>
+                    <th>Tài khoản</th>
+                    <th>Số dư</th>
+                    <th>Tổng nạp</th>
+                    <th>Cấp bậc</th>
+                    <th>Thời gian tạo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user, index) => (
+                    <tr key={user._id}>
+                      <td>{(page - 1) * limit + index + 1}</td>
+                      <td>
+                        <button
+                          className="btn btn-success btn-sm me-2"
+                          onClick={() => setBalanceUser(user)}
+                        >
+                          Cộng tiền
+                        </button>
+                        <button
+                          className="btn btn-warning btn-sm"
+                          onClick={() => setDeductUser(user)}
+                        >
+                          Trừ tiền
+                        </button>
+                        <button
+                          className="btn btn-info btn-sm me-2"
+                          onClick={() => setEditingUser(user)}
+                        >
+                          Sửa
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleDeleteUser(user._id)}
+                        >
+                          Xóa
+                        </button>
+                      </td>
+                      <td>{user.username}</td>
+                      <td>{Number(user.balance).toLocaleString("en-US")} VNĐ</td>
+                      <td>{Number(user.tongnap).toLocaleString("en-US")} VNĐ</td>
+                      <td>{user.capbac}</td>
+                      {/* <td>
                       {user.role === "admin" ? (
                         <span className="badge bg-danger">Quản trị viên</span>
                       ) : (
@@ -217,7 +218,7 @@ export default function TaikhoanPage() {
                         <span className="badge bg-secondary">Không hoạt động</span>
                       )}
                     </td> */}
-                    {/* <td>
+                      {/* <td>
                       <button
                         className="btn btn-info btn-sm me-2"
                         onClick={() => setEditingUser(user)}
@@ -231,70 +232,71 @@ export default function TaikhoanPage() {
                         Xóa
                       </button>
                     </td> */}
-                    <td>
-                      {new Date(user.createdAt).toLocaleString("vi-VN", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                      })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
+                      <td>
+                        {new Date(user.createdAt).toLocaleString("vi-VN", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
 
-          {/* Phân trang */}
-          <div className="d-flex justify-content-between align-items-center mt-4">
-            <button
-              className="btn btn-secondary"
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-            >
-              Trước
-            </button>
-            <span>
-              Trang {page} / {totalPages}
-            </span>
-            <button
-              className="btn btn-secondary"
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-            >
-              Tiếp
-            </button>
+            {/* Phân trang */}
+            <div className="d-flex justify-content-between align-items-center mt-4">
+              <button
+                className="btn btn-secondary"
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page === 1}
+              >
+                Trước
+              </button>
+              <span>
+                Trang {page} / {totalPages}
+              </span>
+              <button
+                className="btn btn-secondary"
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page === totalPages}
+              >
+                Tiếp
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Các modal chỉnh sửa */}
-      {editingUser && (
-        <UserEdit
-          user={editingUser}
-          token={token}
-          onClose={() => setEditingUser(null)}
-          onUserUpdated={handleUserUpdated}
-        />
-      )}
-      {deductUser && (
-        <DeductBalanceForm
-          token={token}
-          user={deductUser}
-          onClose={() => setDeductUser(null)}
-          onUserUpdated={handleUserUpdated}
-        />
-      )}
-      {balanceUser && (
-        <AddBalanceForm
-          token={token}
-          user={balanceUser}
-          onClose={() => setBalanceUser(null)}
-          onUserUpdated={handleUserUpdated}
-        />
-      )}
+        {/* Các modal chỉnh sửa */}
+        {editingUser && (
+          <UserEdit
+            user={editingUser}
+            token={token}
+            onClose={() => setEditingUser(null)}
+            onUserUpdated={handleUserUpdated}
+          />
+        )}
+        {deductUser && (
+          <DeductBalanceForm
+            token={token}
+            user={deductUser}
+            onClose={() => setDeductUser(null)}
+            onUserUpdated={handleUserUpdated}
+          />
+        )}
+        {balanceUser && (
+          <AddBalanceForm
+            token={token}
+            user={balanceUser}
+            onClose={() => setBalanceUser(null)}
+            onUserUpdated={handleUserUpdated}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -242,11 +242,7 @@ const Danhsachdon = () => {
                                             <th>Username</th>
                                             <th>Link</th>
                                             <th>Server</th>
-                                            <th>Bắt đầu</th>
-                                            <th>Đã chạy</th>
-                                            <th>Số lượng mua</th>
-                                            <th>Giá</th>
-                                            <th>Tổng tiền</th>
+                                            <th>Thông tin</th>
                                             <th>Trạng thái</th>
                                             {selectedCategory && selectedCategory.value === "BÌNH LUẬN" && <th>Bình luận</th>}
                                             <th>Ghi chú</th>
@@ -278,11 +274,25 @@ const Danhsachdon = () => {
                                                     {order.maychu}
                                                     {order.namesv}
                                                 </td>
-                                                <td>{order.start}</td>
-                                                <td>{order.dachay}</td>
-                                                <td>{order.quantity}</td>
-                                                <td>{Number(order.rate).toLocaleString("en-US")}</td>
-                                                <td>{Number(order.totalCost).toLocaleString("en-US")}</td>
+                                                <td>
+                                                    <ul>
+                                                        <li><b>Bắt đầu</b> : {order.start}</li>
+                                                        <li><b>Đã chạy</b> : {order.dachay}</li>
+                                                        <li><b>Số lượng mua</b> : {order.quantity}</li>
+                                                        <li><b>Giá</b> : {Number(order.rate).toLocaleString("en-US")}</li>
+                                                        <li><b>Tổng tiền</b> : {Number(order.totalCost).toLocaleString("en-US")}</li>
+                                                    </ul>
+                                                    {/* <td>{order.start}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <span>Bắt đầu</span>
+                                                    <span>Đã chạy</span>
+                                                    <span>Số lượng mua</span>
+                                                    <span>Giá</span> */}
+                                                </td>
+
+                                                {/* <td>{Number(order.totalCost).toLocaleString("en-US")}</td> */}
                                                 <td>
                                                     {order.status === "Completed" ? (
                                                         <span className="badge bg-success">
