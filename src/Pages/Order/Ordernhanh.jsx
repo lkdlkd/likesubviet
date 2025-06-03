@@ -323,20 +323,21 @@ export default function Ordernhanh() {
                 <div className="col-md-12 col-lg-8">
                     <div className="card">
                         <div className="card-body">
-                            <h3 className="card-title d-flex align-items-center gap-2 mb-5">
+                            <h3 className="card-title d-flex align-items-center gap-2 mb-3">
                                 <span className="text-primary">Tạo đơn hàng mới: </span>
                             </h3>
                             <div className="form-group mb-3">
-                                <label className="form-label fw-semibold">CHỌN NỀN TẢNG:</label>
+                                <label className="form-label fw-semibold md-2">CHỌN NỀN TẢNG:</label>
                                 <Select
                                     value={selectedType}
                                     onChange={handleTypeChange}
                                     options={typeOptions}
                                     placeholder="Chọn nền tảng"
+                                    className="mb-2"
                                 />
                                 {selectedType && (
                                     <>
-                                        <label className="form-label fw-semibold">PHÂN LOẠI:</label>
+                                        <label className="form-label fw-semibold mb-2">PHÂN LOẠI:</label>
                                         <Select
                                             value={selectedCategory}
                                             onChange={handleCategoryChange}
@@ -533,6 +534,7 @@ export default function Ordernhanh() {
                                             </label>
                                             <textarea
                                                 value={note}
+                                                className="form-control"
                                                 onChange={(e) => setNote(e.target.value)}
                                                 placeholder="Ghi chú đơn hàng"
                                             />

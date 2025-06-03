@@ -265,7 +265,7 @@ export default function Order() {
                 <div className="col-md-12 col-lg-8">
                     <div className="card">
                         <div className="card-body">
-                            <h3 className="card-title d-flex align-items-center gap-2 mb-5">
+                            <h3 className="card-title d-flex align-items-center gap-2 mb-4u">
                                 <span className="text-primary">{category}</span>
                             </h3>
                             <form onSubmit={handleSubmit}>
@@ -346,7 +346,7 @@ export default function Order() {
 
                                             <div
                                                 key={server.Magoi}
-                                                className="form-check mb-2 d-flex align-items-center gap-2"
+                                                className="form-check mb-3 d-flex align-items-center gap-2 "
                                             >
                                                 <input
                                                     id={`server-${server.Magoi}`}
@@ -455,6 +455,8 @@ export default function Order() {
                                             <strong>Ghi chú:</strong>
                                         </label>
                                         <textarea
+                                            className="form-control"
+
                                             value={note}
                                             onChange={(e) => setNote(e.target.value)}
                                             placeholder="Ghi chú đơn hàng"
