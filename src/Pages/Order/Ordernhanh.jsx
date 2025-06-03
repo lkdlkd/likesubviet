@@ -129,7 +129,7 @@ export default function Ordernhanh() {
                 (service) => service.Magoi === selectedMagoi
             );
             if (selectedService) {
-                if (selectedService.iscomment === "on") {
+                if (selectedService.comment === "on") {
                     const lines = comments.split(/\r?\n/).filter((line) => line.trim() !== "");
                     setTotalCost(lines.length * selectedService.rate);
                 } else {
@@ -215,7 +215,7 @@ export default function Ordernhanh() {
             (service) => service.Magoi === selectedMagoi
         );
         const qty =
-            selectedService && selectedService.iscomment === "on" ? cmtqlt : quantity;
+            selectedService && selectedService.comment === "on" ? cmtqlt : quantity;
         const confirmResult = await Swal.fire({
             title: "Xác nhận thanh toán",
             text: `Bạn sẽ tăng ${qty} lượng với giá ${rate} đ. Tổng thanh toán: ${totalCost.toLocaleString(
@@ -235,7 +235,7 @@ export default function Ordernhanh() {
                 magoi: selectedMagoi,
                 note,
             };
-            if (selectedService && selectedService.iscomment === "on") {
+            if (selectedService && selectedService.comment === "on") {
                 payload.quantity = qty;
                 payload.comments = comments;
             } else {
@@ -262,7 +262,61 @@ export default function Ordernhanh() {
             }
         }
     };
+    const convertNumberToWords = (num) => {
+        const units = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+        const tens = ["", "", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"];
+        const scales = ["", "nghìn", "triệu", "tỷ"];
 
+        if (num === 0) return "không đồng";
+
+        const [integerPart, decimalPart] = num.toString().split(".");
+        let result = "";
+
+        // Xử lý phần nguyên
+        if (integerPart === "0") {
+            result = "không";
+        } else {
+            let numStr = integerPart;
+            const numGroups = [];
+
+            while (numStr.length > 0) {
+                numGroups.unshift(numStr.slice(-3));
+                numStr = numStr.slice(0, -3);
+            }
+
+            const words = numGroups.map((group, index) => {
+                const [hundreds, tensDigit, unitsDigit] = group.padStart(3, "0").split("").map(Number);
+                const groupWords = [];
+
+                if (hundreds > 0) groupWords.push(`${units[hundreds]} trăm`);
+                if (tensDigit > 1) {
+                    groupWords.push(tens[tensDigit]);
+                    if (unitsDigit > 0) groupWords.push(units[unitsDigit]);
+                } else if (tensDigit === 1) {
+                    groupWords.push("mười");
+                    if (unitsDigit > 0) groupWords.push(unitsDigit === 5 ? "lăm" : units[unitsDigit]);
+                } else if (unitsDigit > 0) {
+                    groupWords.push(units[unitsDigit]);
+                }
+
+                return groupWords.join(" ") + (groupWords.length > 0 ? ` ${scales[numGroups.length - index - 1]}` : "");
+            });
+
+            result = words.filter(Boolean).join(" ");
+        }
+
+        // Xử lý phần thập phân
+        if (decimalPart) {
+            const decimalWords = decimalPart
+                .split("")
+                .map((digit) => units[Number(digit)])
+                .join(" ");
+            result += ` phẩy ${decimalWords}`;
+        }
+
+        return result + " đồng";
+    };
+    const tien = useMemo(() => convertNumberToWords(totalCost), [totalCost]);
     return (
         <div className="main-content">
             <div className="row">
@@ -424,7 +478,7 @@ export default function Ordernhanh() {
                                             const selectedService = filteredServers.find(
                                                 (service) => service.Magoi === selectedMagoi
                                             );
-                                            if (selectedService && selectedService.iscomment === "on") {
+                                            if (selectedService && selectedService.comment === "on") {
                                                 return (
                                                     <div
                                                         className="form-group mb-3 comments"
@@ -488,7 +542,7 @@ export default function Ordernhanh() {
                                                 (service) => service.Magoi === selectedMagoi
                                             );
                                             const qty =
-                                                selectedService && selectedService.iscomment === "on"
+                                                selectedService && selectedService.comment === "on"
                                                     ? cmtqlt
                                                     : quantity;
                                             return (
@@ -501,6 +555,7 @@ export default function Ordernhanh() {
                                                             </span>{" "}
                                                             VNĐ
                                                         </h3>
+                                                        <p className="fs-5 mb-0">{tien}</p>
                                                         <p className="fs-4 mb-0">
                                                             Bạn sẽ tăng{" "}
                                                             <span className="text-danger">{qty} </span>số lượng với giá{" "}

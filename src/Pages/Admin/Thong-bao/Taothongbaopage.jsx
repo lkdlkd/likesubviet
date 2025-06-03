@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { deleteNotification } from "@/Utils/api";
 import { toast } from "react-toastify";
-import { AnimatePresence, motion } from "framer-motion";
 import Swal from "sweetalert2";
 import Editthongbao from "./Editthongbao";
 import Addthongbao from "./Addthongbao";
@@ -16,6 +15,7 @@ export default function Taothongbaopage() {
   const [loading, setLoading] = useState(false);
   const [newlyAddedId, setNewlyAddedId] = useState(null);
   const [editingNotification, setEditingNotification] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false); // Trạng thái hiển thị modal thêm thông báo
 
   useEffect(() => {
     if (Array.isArray(initialNotifications)) {
@@ -79,8 +79,23 @@ export default function Taothongbaopage() {
 
   return (
     <div className="row">
-      {/* Form thêm thông báo */}
-      <Addthongbao token={token} onAdd={handleAdd} />
+      {/* Nút tạo thông báo */}
+      <div className="col-md-12 mb-3">
+        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+          Tạo thông báo
+        </button>
+      </div>
+
+      {/* Modal thêm thông báo */}
+      {showAddModal && (
+        <Addthongbao
+          token={token}
+          onAdd={handleAdd}
+          show={showAddModal}
+          onClose={() => setShowAddModal(false)}
+        />
+      )}
+
       {/* Danh sách thông báo */}
       <div className="col-md-12">
         <div className="card">
@@ -102,64 +117,69 @@ export default function Taothongbaopage() {
                       <th>Ngày tạo</th>
                     </tr>
                   </thead>
-                  <motion.tbody layout>
-                    <AnimatePresence>
-                      {Array.isArray(notification) &&
-                        notification.map((notification, idx) => (
-                          <motion.tr
-                            key={notification._id || `notification-${idx}`}
-                            layout
-                            initial={
-                              notification._id === newlyAddedId
-                                ? { scale: 0.8, opacity: 0 }
-                                : { opacity: 0, y: -10 }
-                            }
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, x: 50 }}
-                            transition={{ duration: 0.4 }}
+                  <tbody>
+                    {Array.isArray(notification) &&
+                      notification.map((notification, idx) => (
+                        <tr
+                          key={notification._id || `notification-${idx}`}
+                          style={{
+                            backgroundColor: notification._id === newlyAddedId ? "#e6ffe6" : "transparent",
+                          }}
+                        >
+                          <td>{idx + 1}</td>
+                          <td>
+                            <div className="dropdown">
+                              <button
+                                className="btn btn-primary dropdown-toggle"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                              >
+                                Thao tác <i className="las la-angle-right ms-1"></i>
+                              </button>
+                              <ul className="dropdown-menu">
+                                <li>
+                                  <button
+                                    onClick={() => openEditModal(notification)}
+                                    className="dropdown-item text-primary"
+                                  >
+                                    Sửa
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    onClick={() => handleDelete(notification._id)}
+                                    className="dropdown-item text-danger"
+                                  >
+                                    Xóa
+                                  </button>
+                                </li>
+                              </ul>
+                            </div>
+                          </td>
+                          <td>{notification.title}</td>
+                          <td
                             style={{
-                              backgroundColor: notification._id === newlyAddedId ? "#e6ffe6" : "transparent",
+                              maxWidth: "250px",
+                              whiteSpace: "normal",
+                              wordWrap: "break-word",
+                              overflowWrap: "break-word",
                             }}
-                          >
-                            <td>{idx + 1}</td>
-                            <td>
-                              <button
-                                onClick={() => openEditModal(notification)}
-                                className="btn btn-warning btn-sm me-1"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button
-                                onClick={() => handleDelete(notification._id)}
-                                className="btn btn-danger btn-sm"
-                              >
-                                <i className="fas fa-trash"></i>
-                              </button>
-                            </td>
-                            <td>{notification.title}</td>
-                            <td
-                              style={{
-                                maxWidth: "250px",
-                                whiteSpace: "normal",
-                                wordWrap: "break-word",
-                                overflowWrap: "break-word",
-                              }}
-                              dangerouslySetInnerHTML={{ __html: notification.content }}
-                            />
-                            <td>
-                              {new Date(notification.created_at).toLocaleString("vi-VN", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                second: "2-digit",
-                              })}
-                            </td>
-                          </motion.tr>
-                        ))}
-                    </AnimatePresence>
-                  </motion.tbody>
+                            dangerouslySetInnerHTML={{ __html: notification.content }}
+                          />
+                          <td>
+                            {new Date(notification.created_at).toLocaleString("vi-VN", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                            })}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
                 </Table>
               </div>
             )}

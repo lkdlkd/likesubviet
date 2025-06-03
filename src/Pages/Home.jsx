@@ -19,7 +19,8 @@ const Home = () => {
                             </div>
                             <div className="flex-grow-1 ms-3">
                                 <h4 className="mb-0">
-                                    {Number(user?.balance || 0).toLocaleString("en-US")}đ
+                                    {Number(Math.round(user?.balance || 0)).toLocaleString("en-US")}đ
+                                    {/* {Number(user?.balance || 0).toLocaleString("en-US")}đ */}
                                 </h4>
                                 <h6 className="mb-0">Số dư hiện tại</h6>
                             </div>

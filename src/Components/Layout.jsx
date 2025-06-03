@@ -3,8 +3,9 @@ import { Outlet } from "react-router-dom";
 import Header from "@/Components/Header";
 import Menu from "@/Components/Menu";
 import { ToastContainer } from "react-toastify";
+import { Helmet } from "react-helmet";
 
-import { getCategories, getMe, getNotifications ,getConfigWeb} from "@/Utils/api";
+import { getCategories, getMe, getNotifications, getConfigWeb } from "@/Utils/api";
 import Widget from "./Widget";
 
 const Layout = () => {
@@ -18,7 +19,7 @@ const Layout = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [categoriesData, userData, notificationData , configwebdata ] = await Promise.all([
+                const [categoriesData, userData, notificationData, configwebdata] = await Promise.all([
                     getCategories(token),
                     getMe(token),
                     getNotifications(token),
@@ -35,9 +36,14 @@ const Layout = () => {
 
         fetchData();
     }, [token]);
+    const title = configWeb ? configWeb.title : "Hệ thống tăng tương tác MXH";
     return (
         <>
             <Header user={user} />
+            <Helmet>
+                <title>{title}</title>
+                <meta name="description" content="Hệ thống tăng tương tác MXH uy tín, nhanh chóng, giá rẻ." />
+            </Helmet>
             <Menu categories={categories} user={user} configWeb={configWeb} />
             <div className="pc-container">
                 <div className="pc-content">

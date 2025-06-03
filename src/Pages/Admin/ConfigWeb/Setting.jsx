@@ -18,6 +18,7 @@ const platformLogos = {
 const Setting = () => {
     const [formData, setFormData] = useState({
         tieude: "",
+        title: "", // Thêm trường title
         logo: "",
         favicon: "",
         lienhe: [
@@ -52,6 +53,7 @@ const Setting = () => {
             const token = localStorage.getItem("token");
             const sanitizedData = {
                 tieude: formData.tieude,
+                title: formData.title, // Thêm trường title
                 logo: formData.logo,
                 favicon: formData.favicon,
                 lienhe: formData.lienhe.filter(
@@ -125,6 +127,19 @@ const Setting = () => {
                                         placeholder="Nhập URL logo"
                                     />
                                 </div>
+                                <fieldset className="mb-4">
+                                    <legend className="text-primary">Tiêu đề Website</legend>
+                                    <div className="mb-3">
+                                        <label className="form-label">Tiêu đề (title)</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={formData.title}
+                                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                            placeholder="Nhập tiêu đề website"
+                                        />
+                                    </div>
+                                </fieldset>
                                 <div className="mb-3">
                                     <label className="form-label">Favicon (URL)</label>
                                     <input

@@ -190,7 +190,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
             />
           </div>
           <div className="mb-3">
-            <label className="form-label">Giá (đã tính):</label>
+            <label className="form-label">Giá :</label>
             <input
               type="number"
               name="rate"

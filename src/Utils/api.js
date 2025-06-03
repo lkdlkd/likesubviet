@@ -164,7 +164,7 @@ export const getUserHistory = async (token, page = 1, limit = 10, orderId, searc
 };
 
 // Server
-export const getServer = async (token, page = 1, limit = 10, search = "") => {
+export const getServer = async (token, page = 1, limit = 100000, search = "") => {
   // Xây dựng query string
   let queryString = `?page=${page}&limit=${limit}`;
   if (search) queryString += `&search=${encodeURIComponent(search)}`;

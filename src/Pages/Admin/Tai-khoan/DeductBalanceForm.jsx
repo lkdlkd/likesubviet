@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { updateUser } from "@/Utils/api";
+import { deductBalance } from "@/Utils/api";
 import { toast } from "react-toastify";
 
 function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
@@ -22,11 +22,9 @@ function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
     try {
       setLoading(true);
 
-      // Tính toán số dư mới
-      const updatedBalance = user.balance - deductionAmount;
 
       // Gọi API để cập nhật số dư
-      const updatedUser = await updateUser(user._id, { balance: updatedBalance }, token);
+      const updatedUser = await deductBalance(user._id, { amount: deductionAmount }, token);
 
       // Gửi dữ liệu đã cập nhật về component cha
       onUserUpdated(updatedUser);

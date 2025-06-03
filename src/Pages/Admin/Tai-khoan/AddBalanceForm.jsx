@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { updateUser } from "@/Utils/api";
+import { addBalance } from "@/Utils/api";
 import { toast } from "react-toastify";
 
 function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
@@ -18,10 +18,9 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
             setLoading(true);
 
             // Tính toán số dư mới
-            const updatedBalance = user.balance + additionAmount;
 
             // Gọi API để cập nhật số dư
-            const updatedUser = await updateUser(user._id, { balance: updatedBalance }, token);
+            const updatedUser = await addBalance(user._id, { amount: additionAmount }, token);
 
             // Gửi dữ liệu đã cập nhật về component cha
             onUserUpdated(updatedUser);

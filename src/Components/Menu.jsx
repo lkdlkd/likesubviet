@@ -54,7 +54,7 @@ function MenuUser({ user, categories, configWeb }) {
                                         onError={(e) => (e.target.style.display = "none")} // Ẩn ảnh nếu không tải được
                                     />
                                 ) : (
-                                    <span className="text-primary" style={{ fontSize: "20px", fontWeight: "bold" }}>
+                                    <span className="text-dark" style={{ fontSize: "30px", fontWeight: "bold" }}>
                                         {config.logo || "Logo"}
                                     </span>
                                 )}
@@ -212,7 +212,7 @@ function MenuUser({ user, categories, configWeb }) {
                         <li className="pc-item pc-caption">
                             <label>Danh Sách Dịch Vụ</label>
                         </li>
-                        {Object.values(groupedCategories).map((group) => (
+                        {Object.values(groupedCategories).map((group) =>
                             group.platform && group.platform._id ? (
                                 <li key={group.platform._id} className="pc-item pc-hasmenu">
                                     <a
@@ -234,7 +234,7 @@ function MenuUser({ user, categories, configWeb }) {
                                     </a>
                                     {activeMenu === group.platform._id && (
                                         <ul className="pc-submenu" style={{ listStyleType: "none" }}>
-                                            {group.services.map((service) => (
+                                            {group.services.map((service) =>
                                                 service._id ? (
                                                     <li key={service._id} className="pc-item">
                                                         <Link
@@ -245,12 +245,12 @@ function MenuUser({ user, categories, configWeb }) {
                                                         </Link>
                                                     </li>
                                                 ) : null
-                                            ))}
+                                            )}
                                         </ul>
                                     )}
                                 </li>
                             ) : null
-                        ))}
+                        )}
                     </ul>
                 </div>
             </div>

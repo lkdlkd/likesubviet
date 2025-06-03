@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { addCategory, updateCategory, deleteCategory, getCategories, getPlatforms } from "@/Utils/api";
 import Swal from "sweetalert2";
 import CategoryModal from "@/Pages/Admin/Dich-vu/CategoryModal";
+import Table from "react-bootstrap/Table"; // Import Table từ react-bootstrap
 
 export default function CategoriesPage() {
     const [categories, setCategories] = useState([]);
@@ -49,7 +50,7 @@ export default function CategoriesPage() {
     const handleSaveCategory = async (categoryData) => {
         try {
             if (selectedCategory && selectedCategory._id) {
-                const response = await updateCategory(selectedCategory._id, categoryData,token);
+                const response = await updateCategory(selectedCategory._id, categoryData, token);
                 setCategories((prev) =>
                     prev.map((cat) => (cat._id === selectedCategory._id ? response.data : cat))
                 );
@@ -60,7 +61,7 @@ export default function CategoriesPage() {
                     confirmButtonText: "Xác nhận",
                 });
             } else {
-                const response = await addCategory(categoryData,token);
+                const response = await addCategory(categoryData, token);
                 setCategories((prev) => [...prev, response.data]);
                 Swal.fire({
                     title: "Thành công",
@@ -101,7 +102,7 @@ export default function CategoriesPage() {
 
         if (result.isConfirmed) {
             try {
-                await deleteCategory(categoryId,token);
+                await deleteCategory(categoryId, token);
                 setCategories((prev) => prev.filter((cat) => cat._id !== categoryId));
                 Swal.fire("Đã xóa!", "Danh mục đã được xóa.", "success");
             } catch (error) {
@@ -117,74 +118,104 @@ export default function CategoriesPage() {
     };
 
     return (
-        <div className="container">
-            <h1 className="my-4">Quản lý Danh mục</h1>
-            <button className="btn btn-primary mb-3" onClick={() => setIsModalOpen(true)}>
-                Thêm Danh mục
-            </button>
-            <table className="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Hành động</th>
-                        <th>Nền tảng</th>
-                        <th>Tên</th>
-                        <th>Đường dẫn</th>
-                        <th>Ghi chú</th>
-                        <th>Hiển thị Modal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {categories.length > 0 ? (
-                        categories.map((category) => (
-                            <tr key={category._id}>
-                                <td>
-                                    <button
-                                        className="btn btn-warning me-2"
-                                        onClick={() => {
-                                            setSelectedCategory(category);
-                                            setIsModalOpen(true);
-                                        }}
-                                    >
-                                        Sửa
-                                    </button>
-                                    <button
-                                        className="btn btn-danger"
-                                        onClick={() => {
-                                            if (category._id) {
-                                                handleDeleteCategory(category._id);
-                                            } else {
-                                                console.error("Không thể xóa danh mục: `_id` không tồn tại.");
-                                            }
-                                        }}
-                                    >
-                                        Xóa
-                                    </button>
-                                </td>
-                                <td>{category.platforms_id?.name || "Không xác định"}</td>
-                                <td>{category.name}</td>
-                                <td>{category.path}</td>
-                                <td>{category.notes || "Không có"}</td>
-                                <td>{category.modal_show || "Không có"}</td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan={6} className="text-center">
-                                Không có danh mục nào.
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
 
-            {isModalOpen && (
-                <CategoryModal
-                    category={selectedCategory}
-                    platforms={platforms}
-                    onSave={handleSaveCategory}
-                    onClose={() => setIsModalOpen(false)}
-                />
-            )}
+        <div className="row">
+            <div className="col-md-12">
+                <div className=" card">
+                    <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h2 className="card-title">Quản lý dịch vụ</h2>
+                        <button className="btn btn-info mb-3" onClick={() => setIsModalOpen(true)}>
+                            Thêm Danh mục
+                        </button>
+                    </div>
+                    <div className="card-body">
+                        <div className="table-responsive">
+                            <Table striped bordered hover responsive>
+                                <thead className="table-primary">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Thao tác</th>
+                                        <th>Nền tảng</th>
+                                        <th>Tên</th>
+                                        <th>Đường dẫn</th>
+                                        <th>Ghi chú</th>
+                                        <th>Hiển thị Modal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {categories.length > 0 ? (
+                                        categories.map((category, index) => (
+                                            <tr key={category._id}>
+                                                <td>{index + 1}</td>
+                                                <td>
+                                                    <div className="dropdown">
+                                                        <button
+                                                            className="btn btn-primary dropdown-toggle"
+                                                            type="button"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false"
+                                                        >
+                                                            Thao tác <i className="las la-angle-right ms-1"></i>
+                                                        </button>
+                                                        <ul className="dropdown-menu">
+                                                            <li>
+                                                                <button
+                                                                    className="dropdown-item text-danger"
+                                                                    onClick={() => {
+                                                                        setSelectedCategory(category);
+                                                                        setIsModalOpen(true);
+                                                                    }}
+                                                                >
+                                                                    Sửa
+                                                                </button>
+                                                            </li>
+
+                                                            <li>
+                                                                <button
+                                                                    className="dropdown-item text-danger"
+                                                                    onClick={() => {
+                                                                        if (category._id) {
+                                                                            handleDeleteCategory(category._id);
+                                                                        } else {
+                                                                            console.error("Không thể xóa danh mục: `_id` không tồn tại.");
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    Xóa
+                                                                </button>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                                <td>{category.platforms_id?.name || "Không xác định"}</td>
+                                                <td>{category.name}</td>
+                                                <td>{category.path}</td>
+                                                <td>{category.notes || "Không có"}</td>
+                                                <td>{category.modal_show || "Không có"}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={6} className="text-center">
+                                                Không có danh mục nào.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </Table>
+                        </div>
+
+                        {isModalOpen && (
+                            <CategoryModal
+                                category={selectedCategory}
+                                platforms={platforms}
+                                onSave={handleSaveCategory}
+                                onClose={() => setIsModalOpen(false)}
+                            />
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

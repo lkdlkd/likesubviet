@@ -121,6 +121,7 @@ export default function BankingAdmin() {
             bank_account: editingBank?.bank_account || "",
             bank_password: editingBank?.bank_password || "",
             min_recharge: editingBank?.min_recharge || 0,
+            token: editingBank?.token || "",
             status: editingBank?.status || false,
           }}
           handleChange={handleChange}
@@ -147,7 +148,7 @@ export default function BankingAdmin() {
               <Table striped bordered hover>
                 <thead className="table-primary">
                   <tr>
-                    <th>Hành động</th>
+                    <th>Thao tác</th>
                     <th>Ngân Hàng</th>
                     <th>Tên chủ tài khoản</th>
                     <th>Số tài khoản</th>
@@ -161,18 +162,34 @@ export default function BankingAdmin() {
                   {bankList.map((bank) => (
                     <tr key={bank._id}>
                       <td>
-                        <button
-                          className="btn btn-warning btn-sm me-2"
-                          onClick={() => handleEditClick(bank)}
-                        >
-                          Sửa
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(bank._id)}
-                        >
-                          Xóa
-                        </button>
+                        <div className="dropdown">
+                          <button
+                            className="btn btn-primary dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                          >
+                            Thao tác <i className="las la-angle-right ms-1"></i>
+                          </button>
+                          <ul className="dropdown-menu">
+                            <li>
+                              <button
+                                className="dropdown-item text-primary "
+                                onClick={() => handleEditClick(bank)}
+                              >
+                                Sửa
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                className="dropdown-item text-danger"
+                                onClick={() => handleDelete(bank._id)}
+                              >
+                                Xóa
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
                       </td>
                       <td>{bank.bank_name}</td>
                       <td>{bank.account_name}</td>

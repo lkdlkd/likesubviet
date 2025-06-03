@@ -1,16 +1,15 @@
 'use client';
 import { useState, useEffect, useCallback } from "react";
-import { createServer, updateServer, getAllSmmPartners } from "@/Utils/api";
+import { createServer, getAllSmmPartners } from "@/Utils/api";
 import axios from "axios";
 import { toast } from "react-toastify";
-import EditModal from "@/Pages/Admin/Server/EditModal";
+import Table from "react-bootstrap/Table";
 
 export default function Adddichvu({
   token,
   categories,
   editMode = false,
   initialData = {},
-  onClose,
   onSuccess,
 }) {
   const [formData, setFormData] = useState({
@@ -39,9 +38,18 @@ export default function Adddichvu({
   const [loadingServices, setLoadingServices] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedService, setSelectedService] = useState(null);
+  const [selectedServices, setSelectedServices] = useState([]);
+  // const handleQuickAddService = (e) => {
+  //   const selectedServiceIds = Array.from(e.target.selectedOptions).map(
+  //     (option) => option.value
+  //   );
 
+  //   const selected = services.filter((service) =>
+  //     selectedServiceIds.includes(String(service.service))
+  //   );
+
+  //   setSelectedServices(selected);
+  // };
   const loadSmmPartners = useCallback(async () => {
     setLoading(true);
     try {
@@ -129,9 +137,34 @@ export default function Adddichvu({
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      await createServer(formData, token);
-      toast.success("Dịch vụ mới đã được thêm thành công!");
+      const partner = smmPartners.find((p) => p.name === formData.DomainSmm);
+      const tigia = partner?.tigia || 1; // Lấy tỷ giá từ partner
+
+      if (selectedServices.length > 0) {
+        // Gọi API cho từng dịch vụ trong danh sách đã chọn
+        await Promise.all(
+          selectedServices.map(async (service) => {
+            const payload = {
+              ...formData,
+              serviceId: service.service,
+              serviceName: service.name, // Lấy tên từ dịch vụ bên thứ 3
+              name: service.name, // Lấy tên từ dịch vụ bên thứ 3
+              min: service.min || 0,
+              max: service.max || 0,
+              rate: service.rate * tigia, // Sử dụng partner.tigia
+              originalRate: service.rate * tigia,
+            };
+            await createServer(payload, token);
+          })
+        );
+      } else {
+
+        await createServer(formData, token);
+      }
+
+      toast.success("Dịch vụ đã được thêm thành công!");
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Lỗi khi thêm dịch vụ:", error);
@@ -152,22 +185,6 @@ export default function Adddichvu({
   );
 
 
-  const handleEdit = (service) => {
-    setSelectedService(service);
-    setShowEditModal(true);
-  };
-
-  const handleSave = async (updatedData) => {
-    try {
-      await updateServer(selectedService._id, updatedData, token);
-      toast.success("Dịch vụ đã được cập nhật thành công!");
-      setShowEditModal(false);
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      console.error("Lỗi khi cập nhật dịch vụ:", error);
-      toast.error("Lỗi khi cập nhật dịch vụ. Vui lòng thử lại!");
-    }
-  };
 
   return (
     <div className="form-group mb-3">
@@ -234,7 +251,7 @@ export default function Adddichvu({
             </select>
           </div>
           <div className="col-md-6 mb-3">
-            <label className="form-label">Máy chủ:</label>
+            <label className="form-label">Máy chủ ( thêm server nhanh bỏ trống ):</label>
             <input
               type="text"
               name="maychu"
@@ -256,20 +273,21 @@ export default function Adddichvu({
               <option value="Sv7" />
             </datalist>
           </div>
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Tên dịch vụ:</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="form-control"
-              placeholder="Like post VN"
-              required
-            />
-          </div>
+          {selectedServices.length === 0 && (
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Tên dịch vụ ( thêm server nhanh bỏ trống ): </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                className="form-control"
+                placeholder="Like post VN"
+              />
+            </div>
+          )}
           <div className="col-12 mb-3">
             <label className="form-label">Mô tả:</label>
             <textarea
@@ -384,7 +402,7 @@ export default function Adddichvu({
             )}
           </div>
           <div className="col-md-6 mb-3">
-            <label className="form-label">Tên dịch vụ bên SMM:</label>
+            <label className="form-label">Tên dịch vụ bên SMM ( thêm server nhanh bỏ trống ):</label>
             {loadingServices ? (
               <p>Đang tải danh sách dịch vụ...</p>
             ) : (
@@ -393,7 +411,7 @@ export default function Adddichvu({
                 value={formData.serviceId}
                 onChange={handleServiceChange}
                 className="form-select"
-                required
+
               >
                 <option value="">Chọn Dịch Vụ</option>
                 {filteredServices.map((service) => (
@@ -405,18 +423,17 @@ export default function Adddichvu({
             )}
           </div>
           <div className="col-md-6 mb-3">
-            <label className="form-label">Service ID (nhập trực tiếp):</label>
+            <label className="form-label">Service ID (nhập trực tiếp) ( thêm server nhanh bỏ trống ):</label>
             <input
               type="text"
               name="serviceId"
               value={formData.serviceId}
               onChange={handleServiceChange}
               className="form-control"
-              required
             />
           </div>
           <div className="col-md-6 mb-3">
-            <label className="form-label">Giới hạn Min:</label>
+            <label className="form-label">Giới hạn Min( thêm server nhanh bỏ trống ): </label>
             <input
               type="number"
               name="min"
@@ -425,11 +442,11 @@ export default function Adddichvu({
                 setFormData({ ...formData, min: Number(e.target.value) })
               }
               className="form-control"
-              required
+
             />
           </div>
           <div className="col-md-6 mb-3">
-            <label className="form-label">Giới hạn Max:</label>
+            <label className="form-label">Giới hạn Max ( thêm server nhanh bỏ trống ):</label>
             <input
               type="number"
               name="max"
@@ -438,11 +455,11 @@ export default function Adddichvu({
                 setFormData({ ...formData, max: Number(e.target.value) })
               }
               className="form-control"
-              required
+
             />
           </div>
           <div className="col-md-6 mb-3">
-            <label className="form-label">Giá (đã tính):</label>
+            <label className="form-label">Giá (đã tính) ( thêm server nhanh bỏ trống ):</label>
             <input
               type="number"
               name="rate"
@@ -451,11 +468,10 @@ export default function Adddichvu({
                 setFormData({ ...formData, rate: Number(e.target.value) })
               }
               className="form-control"
-              required
             />
           </div>
           <div className="col-md-6 mb-3">
-            <label className="form-label">Giá gốc (bên thứ 3):</label>
+            <label className="form-label">Giá gốc (bên thứ 3) ( thêm server nhanh bỏ trống ):</label>
             <input
               type="number"
               name="originalRate"
@@ -479,15 +495,123 @@ export default function Adddichvu({
             </select>
           </div>
         </div>
+        <div className="row mb-4">
+          <div className="col-md-12 mb-3">
+            <label className="form-label">Chọn nhanh dịch vụ theo danh mục:</label>
+            {loadingServices ? (
+              <p>Đang tải danh sách dịch vụ...</p>
+            ) : (
+              <Table bordered hover responsive>
+                <thead>
+                  <tr>
+                    <th>
+                      <input
+                        type="checkbox"
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedServices(filteredServices); // Chọn tất cả
+                          } else {
+                            setSelectedServices([]); // Bỏ chọn tất cả
+                          }
+                        }}
+                        checked={
+                          selectedServices.length === filteredServices.length &&
+                          filteredServices.length > 0
+                        }
+                      />
+                    </th>
+                    <th>MÃ</th>
+                    <th>Tên dịch vụ</th>
+                    <th>Giá</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredServices.map((service) => {
+                    const partner = smmPartners.find((p) => p.name === formData.DomainSmm); // Tìm đối tác hiện tại
+                    const tigia = partner?.tigia || 1; // Lấy tỷ giá, mặc định là 1 nếu không có
 
+                    return (
+                      <tr key={service.service}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedServices.some(
+                              (selected) => selected.service === service.service
+                            )}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedServices((prev) => [...prev, service]); // Thêm vào danh sách đã chọn
+                              } else {
+                                setSelectedServices((prev) =>
+                                  prev.filter(
+                                    (selected) => selected.service !== service.service
+                                  )
+                                ); // Loại bỏ khỏi danh sách đã chọn
+                              }
+                            }}
+                          />
+                        </td>
+                        <td>{service.service}</td>
+                        <td style={{
+                          maxWidth: "450px",
+                          whiteSpace: "normal",
+                          wordWrap: "break-word",
+                          overflowWrap: "break-word",
+                        }}>{service.name}</td>
+                        <td>{service.rate * tigia}</td>
+                        <td>{service.min}</td>
+                        <td>{service.max}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+            )}
+          </div>
+          <div className="col-md-12 mb-3">
+            <label className="form-label">Danh sách dịch vụ đã chọn:</label>
+            <Table bordered hover responsive>
+              <thead>
+                <tr>
+                  <th>MÃ</th>
+                  <th>Tên dịch vụ</th>
+                  <th>Giá</th>
+                  <th>Min</th>
+                  <th>Max</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedServices.map((service, index) => {
+                  const partner = smmPartners.find((p) => p.name === formData.DomainSmm); // Tìm đối tác hiện tại
+                  const tigia = partner?.tigia || 1; // Lấy tỷ giá, mặc định là 1 nếu không có
+
+                  return (
+                    <tr key={index}>
+                      <td>{service.service}</td>
+                      <td style={{
+                        maxWidth: "450px",
+                        whiteSpace: "normal",
+                        wordWrap: "break-word",
+                        overflowWrap: "break-word",
+                      }}>{service.name}</td>
+                      <td>{service.rate * tigia}</td>
+                      <td>{service.min}</td>
+                      <td>{service.max}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </div>
+        </div>
         <div className="text-center">
           <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading ? "Đang xử lý..." : editMode ? "Sửa Dịch Vụ" : "Thêm Dịch Vụ"}
           </button>
         </div>
       </form>
-
-
     </div>
   );
 }

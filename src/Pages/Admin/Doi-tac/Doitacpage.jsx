@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import Adddoitac from "@/Pages/Admin/Doi-tac/Adddoitac";
 import { deleteSmmPartner, getAllSmmPartners } from "@/Utils/api";
+import Table from "react-bootstrap/Table";
 
 export default function Doitacpage() {
   const [smmPartners, setSmmPartners] = useState([]);
@@ -91,106 +92,114 @@ export default function Doitacpage() {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="mb-0">Danh Sách Đối Tác SMM</h4>
-        <button
-          className="btn btn-primary"
-          onClick={() => {
-            setIsAdding(true);
-            setEditingPartner(null);
-          }}
-        >
-          Thêm Đối Tác
-        </button>
-      </div>
-
-      {(isAdding || editingPartner !== null) && (
-        <Adddoitac
-          token={token}
-          onAdd={handleAdd}
-          editingPartner={editingPartner}
-          onUpdate={handleUpdate}
-          onClose={() => {
-            setIsAdding(false);
-            setEditingPartner(null);
-          }}
-        />
-      )}
-
-      <div className="card shadow-sm">
-        <div className="card-body">
-          {loading ? (
-            <p className="text-center">Đang tải dữ liệu...</p>
-          ) : smmPartners.length === 0 ? (
-            <p className="text-center">Không có đối tác nào trong danh sách.</p>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-bordered table-hover">
-                <thead className="table-primary">
-                  <tr>
-                    <th>Hành Động</th>
-                    <th>#</th>
-                    <th>Tên</th>
-                    <th>URL API</th>
-                    <th>API Token</th>
-                    <th>Số dư</th>
-                    <th>Giá Cập Nhật</th>
-                    <th>Tỉ Giá</th>
-                    <th>Trạng Thái</th>
-                    <th>Cập Nhật Giá</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {smmPartners.map((partner, index) => (
-                    <tr key={partner._id || index}>
-                      <td>
-                        <button
-                          className="btn btn-warning btn-sm me-2"
-                          onClick={() => {
-                            setIsAdding(false);
-                            setEditingPartner(partner);
-                          }}
-                        >
-                          Sửa
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => {
-                            if (partner._id) {
-                              handleDelete(partner._id);
-                            } else {
-                              console.error("Không thể xóa đối tác: `_id` không tồn tại.");
-                            }
-                          }}
-                        >
-                          Xóa
-                        </button>
-                      </td>
-                      <td>{index + 1}</td>
-                      <td>{partner.name}</td>
-                      <td>{partner.url_api}</td>
-                      <td
-                        style={{
-                          maxWidth: "250px",
-                          whiteSpace: "normal",
-                          wordWrap: "break-word",
-                          overflowWrap: "break-word",
-                        }}
-                      >
-                        {partner.api_token}
-                      </td>
-                      <td>{partner.balance !== undefined ? partner.balance : "Đang tải..."}</td>
-                      <td>{partner.price_update}</td>
-                      <td>{partner.tigia}</td>
-                      <td>{partner.status === "on" ? "Bật" : "Tắt"}</td>
-                      <td>{partner.update_price === "on" ? "Bật" : "Tắt"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+    <div className="row">
+      <div className="col-md-12">
+        <div className="card">
+          <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 className="card-title">Danh Sách Đối Tác SMM</h2>
+            <button
+              className="btn btn-info"
+              onClick={() => {
+                setIsAdding(true);
+                setEditingPartner(null);
+              }}
+            >
+              Thêm Đối Tác
+            </button>
+          </div>
+          {(isAdding || editingPartner !== null) && (
+            <Adddoitac
+              token={token}
+              onAdd={handleAdd}
+              editingPartner={editingPartner}
+              onUpdate={handleUpdate}
+              onClose={() => {
+                setIsAdding(false);
+                setEditingPartner(null);
+              }}
+            />
           )}
+
+          <div className="card shadow-sm">
+            <div className="card-body">
+              {loading ? (
+                <p className="text-center">Đang tải dữ liệu...</p>
+              ) : smmPartners.length === 0 ? (
+                <p className="text-center">Không có đối tác nào trong danh sách.</p>
+              ) : (
+                <div className="table-responsive">
+                  <Table striped bordered hover>
+                    <thead className="table-primary">
+                      <tr>
+                        <th>#</th>
+                        <th>Thao tác</th>
+                        <th>Tên</th>
+                        <th>URL API</th>
+                        <th>Số dư</th>
+                        <th>Giá Cập Nhật</th>
+                        <th>Tỉ Giá</th>
+                        <th>Trạng Thái</th>
+                        <th>Cập Nhật Giá</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {smmPartners.map((partner, index) => (
+                        <tr key={partner._id || index}>
+                          <td>{index + 1}</td>
+                          <td>
+                            <div className="dropdown">
+                              <button
+                                className="btn btn-primary dropdown-toggle"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                              >
+                                Thao tác <i className="las la-angle-right ms-1"></i>
+                              </button>
+                              <ul className="dropdown-menu">
+                                <li>
+                                  <button
+                                    className="dropdown-item text-primary"
+                                    onClick={() => {
+                                      setIsAdding(false);
+                                      setEditingPartner(partner);
+                                    }}
+                                  >
+                                    Sửa
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    className="dropdown-item text-danger"
+                                    onClick={() => {
+                                      if (partner._id) {
+                                        handleDelete(partner._id);
+                                      } else {
+                                        console.error("Không thể xóa đối tác: `_id` không tồn tại.");
+                                      }
+                                    }}
+                                  >
+                                    Xóa
+                                  </button>
+                                </li>
+                              </ul>
+                            </div>
+                          </td>
+                          <td>{partner.name}</td>
+                          <td>{partner.url_api}</td>
+                          <td>{partner.balance !== undefined ? partner.balance : "Đang tải..."}</td>
+                          <td>{partner.price_update}</td>
+                          <td>{partner.tigia}</td>
+                          <td>{partner.status === "on" ? "Bật" : "Tắt"}</td>
+                          <td>{partner.update_price === "on" ? "Bật" : "Tắt"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

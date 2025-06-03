@@ -45,7 +45,7 @@ export default function ProfileInfo({ user }) {
                   className="form-control"
                   id="balance"
                   disabled
-                  value={Number(user?.balance || 0).toLocaleString("en-US")}
+                  value={Number(Math.round(user?.balance || 0)).toLocaleString("en-US")}
                 />
               </div>
               <div className="col-md-6 form-group">

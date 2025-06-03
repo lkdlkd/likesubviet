@@ -17,6 +17,7 @@ export default function ModalBanking({
     bank_account: "",
     bank_password: "",
     min_recharge: 0,
+    token: "",
     status: false,
   };
 
@@ -92,6 +93,17 @@ export default function ModalBanking({
                 className="form-control"
                 onChange={handleChange}
                 value={mergedFormData.bank_password}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Token auto</label>
+              <input
+                type="text"
+                name="token"
+                className="form-control"
+                onChange={handleChange}
+                value={mergedFormData.token}
                 required
               />
             </div>

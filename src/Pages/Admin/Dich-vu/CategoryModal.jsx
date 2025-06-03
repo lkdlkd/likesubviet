@@ -1,8 +1,7 @@
-'use client';
-
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-
 
 export default function CategoryModal({ category, platforms, onClose, onSave }) {
   const [formData, setFormData] = useState({
@@ -48,84 +47,79 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
   };
 
   return (
-    <div className="modal show d-block" tabIndex={-1}>
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">{category ? "Sửa Danh mục" : "Thêm Danh mục"}</h5>
-            <button type="button" className="btn-close" onClick={onClose}></button>
+    <Modal show={true} onHide={onClose} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>{category ? "Sửa Danh mục" : "Thêm Danh mục"}</Modal.Title>
+      </Modal.Header>
+      <form onSubmit={handleSubmit}>
+        <Modal.Body>
+          <div className="mb-3">
+            <label className="form-label">Nền tảng</label>
+            {platforms.length > 0 ? (
+              <select
+                className="form-select"
+                value={formData.platforms_id}
+                onChange={(e) => setFormData({ ...formData, platforms_id: e.target.value })}
+                required
+              >
+                <option value="">Chọn nền tảng</option>
+                {platforms.map((platform) => (
+                  <option key={platform._id} value={platform._id}>
+                    {platform.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="text-danger">Không có nền tảng nào để chọn.</p>
+            )}
           </div>
-          <form onSubmit={handleSubmit}>
-            <div className="modal-body">
-              <div className="mb-3">
-                <label className="form-label">Nền tảng</label>
-                {platforms.length > 0 ? (
-                  <select
-                    className="form-select"
-                    value={formData.platforms_id}
-                    onChange={(e) => setFormData({ ...formData, platforms_id: e.target.value })}
-                    required
-                  >
-                    <option value="">Chọn nền tảng</option>
-                    {platforms.map((platform) => (
-                      <option key={platform._id} value={platform._id}>
-                        {platform.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <p className="text-danger">Không có nền tảng nào để chọn.</p>
-                )}
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Tên Danh mục</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Đường dẫn</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.path}
-                  onChange={(e) => setFormData({ ...formData, path: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Ghi chú</label>
-                <textarea
-                  className="form-control"
-                  value={formData.notes || ""}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                ></textarea>
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Hiển thị Modal</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.modal_show || ""}
-                  onChange={(e) => setFormData({ ...formData, modal_show: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={onClose}>
-                Hủy
-              </button>
-              <button type="submit" className="btn btn-primary">
-                Lưu
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          <div className="mb-3">
+            <label className="form-label">Tên Danh mục</label>
+            <input
+              type="text"
+              className="form-control"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Đường dẫn</label>
+            <input
+              type="text"
+              className="form-control"
+              value={formData.path}
+              onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+              required
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Ghi chú</label>
+            <textarea
+              className="form-control"
+              value={formData.notes || ""}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            ></textarea>
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Hiển thị Modal</label>
+            <input
+              type="text"
+              className="form-control"
+              value={formData.modal_show || ""}
+              onChange={(e) => setFormData({ ...formData, modal_show: e.target.value })}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={onClose}>
+            Hủy
+          </Button>
+          <Button type="submit" variant="primary">
+            Lưu
+          </Button>
+        </Modal.Footer>
+      </form>
+    </Modal>
   );
 }

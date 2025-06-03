@@ -174,31 +174,52 @@ export default function TaikhoanPage() {
                   {users.map((user, index) => (
                     <tr key={user._id}>
                       <td>{(page - 1) * limit + index + 1}</td>
+
+
                       <td>
-                        <button
-                          className="btn btn-success btn-sm me-2"
-                          onClick={() => setBalanceUser(user)}
-                        >
-                          Cộng tiền
-                        </button>
-                        <button
-                          className="btn btn-warning btn-sm"
-                          onClick={() => setDeductUser(user)}
-                        >
-                          Trừ tiền
-                        </button>
-                        <button
-                          className="btn btn-info btn-sm me-2"
-                          onClick={() => setEditingUser(user)}
-                        >
-                          Sửa
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDeleteUser(user._id)}
-                        >
-                          Xóa
-                        </button>
+                        <div className="dropdown">
+                          <button
+                            className="btn btn-primary dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                          >
+                            Thao tác <i className="las la-angle-right ms-1"></i>
+                          </button>
+                          <ul className="dropdown-menu">
+                            <li>
+                              <button
+                                className="dropdown-item text-success"
+                                onClick={() => setBalanceUser(user)}
+                              >
+                                Cộng tiền
+                              </button>
+                            </li>
+                            <li>
+                              <button
+                                className="dropdown-item text-danger"
+                                onClick={() => setDeductUser(user)}
+                              >
+                                Trừ tiền
+                              </button>
+                            </li>
+
+                            <button
+                              className="dropdown-item text-warning"
+                              onClick={() => setEditingUser(user)}
+                            >
+                              Sửa
+                            </button>
+                            <li>
+                              <button
+                                className="dropdown-item text-danger"
+                                onClick={() => handleDeleteUser(user._id)}
+                              >
+                                Xóa
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
                       </td>
                       <td>{user.username}</td>
                       <td>{Number(user.balance).toLocaleString("en-US")} VNĐ</td>
