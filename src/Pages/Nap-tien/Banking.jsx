@@ -2,13 +2,14 @@
 import React from "react";
 import { toast } from "react-toastify";
 
-export default function Banking({ banking = [], user }) {
+export default function Banking({ banking = [], username }) {
     const handleCopy = (text) => {
         navigator.clipboard
             .writeText(text)
             .then(() => toast.success("Đã sao chép thành công!"))
             .catch(() => toast.error("Lỗi khi sao chép!"));
     };
+
     return (
         <>
             {banking.map((bank) => (
@@ -75,12 +76,12 @@ export default function Banking({ banking = [], user }) {
                                                         display: "inline-block",
                                                     }}
                                                 >
-                                                    lsv {user?.username}
+                                                    naptien {username}
                                                 </p>
                                                 <button
                                                     type="button"
                                                     className="btn btn-outline-primary btn-sm ms-2 btn-copy"
-                                                    onClick={() => handleCopy(`lsv ${user?.username}`)}
+                                                    onClick={() => handleCopy(`lsv ${username}`)}
                                                 >
                                                     <i className="fas fa-copy"></i>
                                                 </button>
@@ -113,7 +114,7 @@ export default function Banking({ banking = [], user }) {
                                     <img
                                         src={`https://img.vietqr.io/image/${bank.bank_name}-${bank.account_number}-qronly2.jpg?accountName=${encodeURIComponent(
                                             bank.account_name
-                                        )}&addInfo=${encodeURIComponent(`lsv ${user.username}`)}`}
+                                        )}&addInfo=${encodeURIComponent(`naptien ${username}`)}`}
                                         alt="QR CODE"
                                         width={300}
                                         height={300}

@@ -190,6 +190,14 @@ function MenuUser({ user, categories, configWeb }) {
                                 <span className="pc-mtext">Lịch Sử Hoạt Động</span>
                             </Link>
                         </li>
+                        <li className="pc-item">
+                            <Link to="/tai-lieu-api" className="pc-link">
+                                <span className="pc-micon">
+                                    <img src="/suitcase.png" className="wid-35" alt="" width={35} height={35} />
+                                </span>
+                                <span className="pc-mtext">Tài liệu API V2</span>
+                            </Link>
+                        </li>
                         <li className="pc-item pc-caption">
                             <label>Danh Sách Dịch Vụ</label>
                         </li>

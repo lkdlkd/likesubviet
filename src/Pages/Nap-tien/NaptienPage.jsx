@@ -7,11 +7,10 @@ import { getBanking, getCardHistory, getCard } from "@/Utils/api";
 
 export default function NaptienPage() {
     const { token, user } = useOutletContext();
-    const username = user?.username ||{} ; 
     const [banking, setBanking] = useState([]);
     const [historycard, setHistoryCard] = useState([]);
     const [cardData, setCardData] = useState([]);
-
+    const username = user?.username;
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -67,7 +66,7 @@ export default function NaptienPage() {
             </div>
 
             {/* Component Banking */}
-            <Banking banking={banking} user={username} />
+            <Banking banking={banking} username={username} />
 
             {/* Component Napthecao */}
             <Napthecao cardData={cardData} token={token} />

@@ -21,7 +21,8 @@ import CategoriesPage from "./Pages/Admin/Dich-vu/CategoriesPage";
 import Dichvupage from "./Pages/Admin/Server/Dichvupage";
 import Setting from "./Pages/Admin/ConfigWeb/Setting";
 import ConfigCard from "./Pages/Admin/ConfigCard/ConfigCard";
-
+import Tailieuapi from "./Pages/Tailieu/Tailieuapi";
+import NotFoundPage from "./Pages/404";
 function App() {
   return (
     <AuthProvider>
@@ -51,7 +52,7 @@ function App() {
             <Route path="/order" element={<Ordernhanh />} />
             <Route path="/danh-sach-don" element={<Danhsachdon />} />
             <Route path="/:type/:path" element={<Order />} />
-
+            <Route path="/tai-lieu-api" element={<Tailieuapi />} />
             {/* Tạo router động từ groupedCategories */}
             {/* <Route
               path="*"
@@ -70,7 +71,7 @@ function App() {
                   auth.token && auth.role === "admin" ? (
                     <Layout />
                   ) : (
-                    <Navigate to="/dang-nhap" />
+                    <Navigate to="/404" />
                   )
                 }
               </AuthContext.Consumer>
@@ -79,8 +80,8 @@ function App() {
             <Route path="/admin/thongke" element={<ThongkePage />} />
             <Route index element={<Navigate to="/admin/thongke" replace />} />
             <Route path="/admin/tai-khoan" element={<TaikhoanPage />} />
-            <Route path="/admin/taothongbao" element={<Taothongbaopage/>} />
-            <Route path="/admin/bank-king" element={<BankingAdmin/>} />
+            <Route path="/admin/taothongbao" element={<Taothongbaopage />} />
+            <Route path="/admin/bank-king" element={<BankingAdmin />} />
             <Route path="/admin/doitac" element={<Doitacpage />} />
             <Route path="/admin/nen-tang" element={<PlatformsPage />} />
             <Route path="/admin/dich-vu" element={<CategoriesPage />} />
@@ -90,7 +91,8 @@ function App() {
           </Route>
 
           {/* 404 Not Found */}
-          <Route path="*" element={<h1>404 - Không tìm thấy trang</h1>} />
+          <Route path="/404" element={<NotFoundPage/>} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

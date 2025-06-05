@@ -141,11 +141,13 @@ export default function Adddichvu({
     try {
       const partner = smmPartners.find((p) => p.name === formData.DomainSmm);
       const tigia = partner?.tigia || 1; // Lấy tỷ giá từ partner
-
+      const ptgia = partner?.price_update || 0; // Lấy tỷ giá cập nhật từ partner
       if (selectedServices.length > 0) {
         // Gọi API cho từng dịch vụ trong danh sách đã chọn
         await Promise.all(
           selectedServices.map(async (service) => {
+            const baseRate = service.rate * tigia; // Tính giá gốc
+            const finalRate = Math.ceil(baseRate * 10000 + (baseRate * ptgia) / 100 * 10000) / 10000;
             const payload = {
               ...formData,
               serviceId: service.service,
@@ -153,7 +155,7 @@ export default function Adddichvu({
               name: service.name, // Lấy tên từ dịch vụ bên thứ 3
               min: service.min || 0,
               max: service.max || 0,
-              rate: service.rate * tigia, // Sử dụng partner.tigia
+              rate: finalRate, // Sử dụng partner.tigia
               originalRate: service.rate * tigia,
             };
             await createServer(payload, token);
@@ -531,7 +533,6 @@ export default function Adddichvu({
                   {filteredServices.map((service) => {
                     const partner = smmPartners.find((p) => p.name === formData.DomainSmm); // Tìm đối tác hiện tại
                     const tigia = partner?.tigia || 1; // Lấy tỷ giá, mặc định là 1 nếu không có
-
                     return (
                       <tr key={service.service}>
                         <td>
@@ -586,6 +587,7 @@ export default function Adddichvu({
                 {selectedServices.map((service, index) => {
                   const partner = smmPartners.find((p) => p.name === formData.DomainSmm); // Tìm đối tác hiện tại
                   const tigia = partner?.tigia || 1; // Lấy tỷ giá, mặc định là 1 nếu không có
+                  const ptgia = partner.price_update; // Tính giá đã quy đổi
 
                   return (
                     <tr key={index}>
@@ -596,7 +598,7 @@ export default function Adddichvu({
                         wordWrap: "break-word",
                         overflowWrap: "break-word",
                       }}>{service.name}</td>
-                      <td>{service.rate * tigia}</td>
+                      <td>{(service.rate * tigia).toFixed(4)} + {ptgia} % giá update</td>
                       <td>{service.min}</td>
                       <td>{service.max}</td>
                     </tr>

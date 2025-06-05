@@ -23,6 +23,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
   const [form, setform] = useState({
     type: "",
     category: "",
+    originalRate: "",
     DomainSmm: "",
     serviceName: "",
     serviceId: "",
@@ -202,7 +203,16 @@ export default function EditModal({ show, onClose, initialData, token }) {
               required
             />
           </div>
-
+          <div className="mb-3">
+            <label className="form-label">Giá gốc :</label>
+            <input
+              type="number"
+              name="originalRate"
+              value={form.originalRate}
+              className="form-control"
+              disabled
+            />
+          </div>
           {/* Các chức năng */}
           <div className="mb-3">
             <label className="form-label">Chức năng Get ID:</label>
