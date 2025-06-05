@@ -60,6 +60,7 @@ export default function Order() {
         return servers; // Không cần lọc theo `selectedType` và `selectedCategory`
     }, [servers]);
 
+
     // Tính tổng chi phí dựa vào dịch vụ được chọn
     useEffect(() => {
         if (selectedMagoi) {
@@ -258,7 +259,128 @@ export default function Order() {
     };
     const tien = useMemo(() => convertNumberToWords(totalCost), [totalCost]);
     const category = servers.length > 0 ? servers[0].category : path;
+    if (!filteredServers || filteredServers.length === 0) {
+        return (
+            <div className="main-content">
+                <div className="row">
+                    <div className="col-md-12 col-lg-8">
+                        <div className="card">
+                            <div className="card-body">
+                                <h3 className="card-title d-flex align-items-center gap-2 mb-4u">
+                                </h3>
+                                <form onSubmit={handleSubmit}>
+                                    <>
+                                        <div className="form-group mb-3">
+                                            <label htmlFor="object_id" className="form-label">
+                                                <strong>Link Hoặc UID:</strong>
+                                            </label>
+                                            <input
+                                                className="form-control ipt-link"
+                                                type="text"
+                                                value={isConverting ? "Đang xử lý..." : displayLink}
+                                                onChange={(e) => {
+                                                    setRawLink(e.target.value);
+                                                    setConvertedUID("");
+                                                }}
+                                                placeholder="Nhập link hoặc ID tùy các máy chủ"
+                                                disabled={isConverting}
+                                            />
+                                        </div>
 
+                                        <div className="form-group mb-3">
+                                            <label className="form-label">
+                                                {/* <>Máy chủ:</strong> */}
+                                                <strong>Chọn máy chủ ( ấn vào máy chủ để đọc lưu ý )</strong>
+
+                                            </label>
+                                            <label className="form-label">
+                                                <h3>CHƯA CÓ MÁY CHỦ NÀO VUI LÒNG IB ADMIN  </h3>
+                                            </label>
+                                        </div>
+
+                                        <div className="form-group mb-3">
+                                            <label htmlFor="note" className="form-label">
+                                                <strong>Ghi chú:</strong>
+                                            </label>
+                                            <textarea
+                                                className="form-control"
+
+                                                value={note}
+                                                onChange={(e) => setNote(e.target.value)}
+                                                placeholder="Ghi chú đơn hàng"
+                                            />
+                                        </div>
+                                        {(() => {
+                                            const selectedService = filteredServers.find(
+                                                (service) => service.Magoi === selectedMagoi
+                                            );
+                                            const qty =
+                                                selectedService && selectedService.comment === "on"
+                                                    ? cmtqlt
+                                                    : quantity;
+                                            return (
+                                                <div className="form-group mb-3">
+                                                    <div className="alert bg-primary text-center text-white">
+                                                        <h3 className="alert-heading">
+                                                            Tổng thanh toán:{" "}
+                                                            <span className="text-danger">
+                                                                {Number(totalCost).toLocaleString("en-US")}
+                                                            </span>{" "}
+                                                            VNĐ
+                                                        </h3>
+                                                        <p className="fs-5 mb-0">{tien}</p>
+                                                        <p className="fs-4 mb-0">
+                                                            Bạn sẽ tăng{" "}
+                                                            <span className="text-danger">{qty} </span>số lượng với giá{" "}
+                                                            <span className="text-danger">{rate}</span> đ
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+                                        <div className="form-group">
+                                            <button
+                                                type="submit"
+                                                className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                                            >
+                                                <i className="fas fa-shopping-cart"></i>
+                                                {isSubmitting ? "Đang xử lý..." : "Tạo đơn hàng"}
+                                            </button>
+                                        </div>
+                                    </>
+                                </form>
+                                {isSubmitting && (
+                                    <div className="overlay">
+                                        <div className="spinner-container">
+                                            <div style={{ minHeight: "200px" }} className="d-flex justify-content-center align-items-center">
+                                                <div className="spinner-border text-primary" role="status" />
+                                                <span className="ms-2">Đang xử lý</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-md-12 col-lg-4">
+                        <div className="alert alert-danger bg-danger text-white mb-3">
+                            <h5 className="alert-heading">Lưu ý</h5>
+                            <span>
+                                Nghiêm cấm buff các đơn có nội dung vi phạm pháp luật, chính trị, đồ trụy...
+                                Nếu cố tình buff bạn sẽ bị trừ hết tiền và ban khỏi hệ thống vĩnh viễn, và phải chịu hoàn toàn trách nhiệm trước pháp luật.
+                                Nếu đơn đang chạy trên hệ thống mà bạn vẫn mua ở các hệ thống bên khác hoặc đè nhiều đơn, nếu có tình trạng hụt, thiếu số lượng giữa 2 bên thì sẽ không được xử lí.
+                                Đơn cài sai thông tin hoặc lỗi trong quá trình tăng hệ thống sẽ không hoàn lại tiền.
+                                Nếu gặp lỗi hãy nhắn tin hỗ trợ phía bên phải góc màn hình hoặc vào mục liên hệ hỗ trợ để được hỗ trợ tốt nhất.
+                            </span>
+                        </div>
+                        <div className="alert alert-primary bg-primary text-white">
+                            <h5 className="alert-heading">Các trường hợp huỷ đơn hoặc không chạy</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="main-content">
             <div className="row">
