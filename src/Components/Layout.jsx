@@ -37,12 +37,14 @@ const Layout = () => {
         fetchData();
     }, [token]);
     const title = configWeb ? configWeb.title : "Hệ thống tăng tương tác MXH";
+    const favicon = configWeb ? configWeb.favicon : "https://png.pngtree.com/png-clipart/20190520/original/pngtree-facebook-f-icon-png-image_3550243.jpg"; // Thay thế bằng URL favicon mặc định nếu không có
     return (
         <>
             <Header user={user} />
             <Helmet>
                 <title>{title}</title>
                 <meta name="description" content="Hệ thống tăng tương tác MXH uy tín, nhanh chóng, giá rẻ." />
+                <link rel="icon" type="image/png" href={favicon} />
             </Helmet>
             <Menu categories={categories} user={user} configWeb={configWeb} />
             <div className="pc-container">
