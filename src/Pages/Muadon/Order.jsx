@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import { getUid, addOrder, getServerByTypeAndCategory } from "@/Utils/api";
 import { toast } from "react-toastify";
-
+import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 export default function Order() {
     const { type, path } = useParams(); // Lấy `type` và `path` từ URL
     const [servers, setServers] = useState([]);
@@ -164,7 +164,7 @@ export default function Order() {
             cancelButtonText: "Hủy",
         });
         if (confirmResult.isConfirmed) {
-            setIsSubmitting(true);
+            loadingg("Đang xử lý, vui lòng không tắt trình duyệt hoặc F5!..."); // Hiển thị thông báo đang tìm kiếm
             const payload = {
                 category: servers.find((server) => server.Magoi === selectedMagoi)?.category || "",
                 link: finalLink,
@@ -187,6 +187,9 @@ export default function Order() {
                     icon: "success",
                     confirmButtonText: "Xác nhận",
                 });
+                setTimeout(() => {
+                    loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
+                }, 1000);
             } catch (error) {
                 Swal.fire({
                     title: "Lỗi",

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { rechargeCard } from "@/Utils/api";
-
+import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 export default function Napthecao({ cardData = [], token }) {
 
   const [cardInfo, setCardInfo] = useState({
@@ -50,8 +50,12 @@ export default function Napthecao({ cardData = [], token }) {
 
     try {
       setLoading(true);
-
+      loadingg("Vui lòng chờ..."); // Hiển thị thông báo đang tìm kiếm
+      setTimeout(() => {
+        loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
+      }, 1000);
       const response = await rechargeCard(cardInfo, token); // Gọi API rechargeCard
+
       Swal.fire({
         title: "Thành công",
         text: response.message || "Nạp thẻ thành công!",

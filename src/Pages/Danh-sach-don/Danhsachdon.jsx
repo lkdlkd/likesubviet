@@ -5,6 +5,7 @@ import Select from "react-select";
 import { useOutletContext } from "react-router-dom";
 import { getOrders, getServer } from "@/Utils/api";
 import { toast } from "react-toastify";
+import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 
 const Danhsachdon = () => {
     const { token } = useOutletContext();
@@ -115,18 +116,26 @@ const Danhsachdon = () => {
         e.preventDefault();
         setCurrentPage(1);
         fetchOrders();
+        loadingg("Đang tìm kiếm..."); // Hiển thị thông báo đang tìm kiếm
+        setTimeout(() => {
+            loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
+        }, 1000);
     };
 
     // Load dữ liệu mặc định khi component mount và mỗi khi currentPage hoặc limit thay đổi
     useEffect(() => {
         fetchOrders();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [username, currentPage, limit]);
 
     // Xử lý thay đổi số đơn hàng hiển thị mỗi trang
     const handleLimitChange = (e) => {
         setLimit(Number(e.target.value));
         setCurrentPage(1);
+        loadingg("Vui lòng chờ"); // Hiển thị thông báo đang tìm kiếm
+        setTimeout(() => {
+            loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
+        }, 1000);
     };
     const filteredOrders = useMemo(() => {
         if (!selectedStatus) return orders; // Nếu không chọn trạng thái, trả về toàn bộ orders

@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "@/Utils/api"; // Đảm bảo alias @ đã được cấu hình
 import { AuthContext } from "@/Context/AuthContext"; // Import AuthContext
-
+import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,10 +25,11 @@ export default function Login() {
         token: data.token,
         role: data.role, // Đảm bảo API trả về role
       });
-
+      loadingg("vui lòng chờ"); // Gọi hàm loading để hiển thị spinner
       setError("Đăng nhập thành công!");
       setTimeout(() => {
         navigate("/home"); // Chuyển hướng về trang home sau khi đăng nhập thành công
+        loadingg("", false);
       }, 1000); // Thời gian chờ 1 giây để hiển thị thông báo
     } catch (err) {
       console.error("Lỗi đăng nhập:", err);
@@ -40,11 +41,6 @@ export default function Login() {
 
   return (
     <>
-      {loading && (
-        <div className="spinner-overlay">
-          <div className="spinner"></div>
-        </div>
-      )}
       <div className="login-wrap d-flex flex-wrap justify-content-center align-items-md-center align-items-start min-vh-100 overflow-auto">
         <div className="container">
           <div className="row g-0">

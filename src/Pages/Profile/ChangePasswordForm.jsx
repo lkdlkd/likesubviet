@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { changePassword } from "@/Utils/api";
 import Swal from "sweetalert2";
-
+import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 export default function ChangePasswordForm({ token, user }) {
-    const userId = user?.userId ; // Kiểm tra user trước khi truy cập thuộc tính
+    const userId = user?.userId; // Kiểm tra user trước khi truy cập thuộc tính
 
 
     const [oldPassword, setOldPassword] = useState("");
@@ -26,6 +26,11 @@ export default function ChangePasswordForm({ token, user }) {
 
         try {
             setLoading(true);
+            setLoading(true);
+            loadingg("Vui lòng chờ..."); // Hiển thị thông báo đang tìm kiếm
+            setTimeout(() => {
+                loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
+            }, 1000);
             if (!token || !userId) {
                 Swal.fire({
                     title: "Lỗi",

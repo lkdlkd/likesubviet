@@ -3,7 +3,7 @@ import Table from "react-bootstrap/Table";
 import { getUserHistory } from "@/Utils/api";
 
 import { useOutletContext } from "react-router-dom";
-
+import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 export default function History() {
     const [historyData, setHistoryData] = useState([]);
     const [page, setPage] = useState(1);
@@ -23,7 +23,6 @@ export default function History() {
             setDebouncedSearchQuery(searchQuery);
             setDebouncedOrderIdSearch(orderIdSearch);
         }, 3000);
-
         return () => {
             clearTimeout(handler); // Xóa timeout nếu người dùng tiếp tục nhập
         };
@@ -65,12 +64,20 @@ export default function History() {
         setDebouncedSearchQuery(searchQuery); // Gọi API ngay lập tức
         setDebouncedOrderIdSearch(orderIdSearch); // Gọi API ngay lập tức
         setPage(1); // Reset về trang đầu tiên
+        loadingg("Đang tìm kiếm..."); // Hiển thị thông báo đang tìm kiếm
+        setTimeout(() => {
+            loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
+        }, 1000);
     };
 
     const handleLimitChange = (e) => {
         const newLimit = e.target.value;
         setLimit(parseInt(newLimit, 10));
         setPage(1); // Reset về trang đầu tiên
+        loadingg("Vui lòng chờ"); // Hiển thị thông báo đang tìm kiếm
+        setTimeout(() => {
+            loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
+        }, 1000);
     };
 
     if (loading) {

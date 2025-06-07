@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Select from "react-select";
-import { logout } from "@/Utils/Auth";
+import { loadingg } from "@/JS/Loading";
 import { getUid, addOrder, getServer } from "@/Utils/api";
 import { toast } from "react-toastify";
 
@@ -227,7 +227,7 @@ export default function Ordernhanh() {
             cancelButtonText: "Hủy",
         });
         if (confirmResult.isConfirmed) {
-            setIsSubmitting(true);
+            loadingg("Đang xử lý, vui lòng không tắt trình duyệt hoặc F5!..."); // Hiển thị thông báo đang tìm kiếm
             const payload = {
                 link: finalLink,
                 username,
@@ -250,6 +250,9 @@ export default function Ordernhanh() {
                     icon: "success",
                     confirmButtonText: "Xác nhận",
                 });
+                setTimeout(() => {
+                    loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
+                }, 1000);
             } catch (error) {
                 Swal.fire({
                     title: "Lỗi",
