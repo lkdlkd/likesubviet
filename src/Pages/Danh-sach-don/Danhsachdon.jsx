@@ -139,6 +139,21 @@ const Danhsachdon = () => {
         { value: "Pending", label: "Chờ xử lý" },
         { value: "Canceled", label: "Đã hủy" },
     ];
+    const handleCopyText = (order) => {
+        const textToCopy = `Mã đơn: ${order.Madon}\nLink: ${order.link}\nServer: ${order.maychu || "Không có"} - ${order.namesv || "Không có"}`;
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+                Swal.fire({
+                    icon: "success",
+                    title: "Sao chép thành công!",
+                    text: `Mã đơn: ${order.Madon}\nLink: ${order.link}\nServer: ${order.maychu || "Không có"} - ${order.namesv || "Không có"}`,
+                    confirmButtonText: "OK",
+                });
+            })
+            .catch(() => {
+                toast.error("Không thể sao chép!");
+            });
+    };
     return (
         <div className="row">
             <div className="col-md-12">
@@ -238,6 +253,7 @@ const Danhsachdon = () => {
                                     <thead>
                                         <tr>
                                             <th>STT</th>
+                                            <th>Thao tác</th>
                                             <th>Mã đơn</th>
                                             <th>Username</th>
                                             <th>Link</th>
@@ -253,6 +269,14 @@ const Danhsachdon = () => {
                                         {filteredOrders.map((order, index) => (
                                             <tr key={index}>
                                                 <td>{(currentPage - 1) * limit + index + 1}</td>
+                                                <td>
+                                                    <button
+                                                        className="btn btn-sm btn-info"
+                                                        onClick={() => handleCopyText(order)} // Truyền toàn bộ đối tượng `order`
+                                                    >
+                                                        Copy
+                                                    </button>
+                                                </td>
                                                 <td>{order.Madon}</td>
                                                 <td>{order.username}</td>
                                                 <td

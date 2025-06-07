@@ -468,7 +468,7 @@ export default function Order() {
 
                                             <div
                                                 key={server.Magoi}
-                                                className="form-check mb-3 d-flex align-items-center gap-2 "
+                                                className="form-check mb-2 d-flex align-items-center gap-2 "
                                             >
                                                 <input
                                                     id={`server-${server.Magoi}`}

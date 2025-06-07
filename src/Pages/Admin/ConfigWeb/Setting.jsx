@@ -128,7 +128,7 @@ const Setting = () => {
                                     />
                                 </div>
                                 <fieldset className="mb-4">
-                                    <legend className="text-primary">Tiêu đề Website</legend>
+                                    <legend className="text-primary">Tiêu đề Website SEO</legend>
                                     <div className="mb-3">
                                         <label className="form-label">Tiêu đề (title)</label>
                                         <input
@@ -191,6 +191,26 @@ const Setting = () => {
                                                 onChange={(e) => updateContact(index, "logolienhe", e.target.value)}
                                                 placeholder="Nhập URL logo liên hệ"
                                             />
+                                        </div>
+                                        <div className="mb-2">
+                                            <label className="form-label">Logo liên hệ (URL)</label>
+                                            <select
+                                                className="form-select"
+                                                value={contact.logolienhe}
+                                                onChange={(e) => updateContact(index, "logolienhe", e.target.value)}
+                                            >
+                                                <option value="">Chọn logo liên hệ</option>
+                                                {Object.entries(platformLogos).map(([platform, logoUrl]) => (
+                                                    <option key={platform} value={logoUrl}>
+                                                        {platform}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {contact.logolienhe && (
+                                                <div className="mt-2">
+                                                    <img src={contact.logolienhe} alt="Logo Preview" style={{ maxWidth: "50px", height: "auto" }} />
+                                                </div>
+                                            )}
                                         </div>
                                         <button type="button" className="btn btn-danger mt-2" onClick={() => removeContact(index)}>
                                             Xóa liên hệ

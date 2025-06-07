@@ -1,4 +1,5 @@
 import React from "react";
+import Table from "react-bootstrap/Table";
 
 export default function Tailieuapi() {
     const API_DOMAIN = `${window.location.origin}/api/v2`; // Lấy tên miền hiện tại và thêm đường dẫn API
@@ -8,7 +9,7 @@ export default function Tailieuapi() {
             <div className="container-fluid">
                 <div className="card-body">
                     <div className="table-responsive mb-5">
-                        <table className="table align-middle table-row-bordered table-rounded border rounded gy-2 gs-5">
+                        <Table striped bordered hover>
                             <tbody>
                                 <tr>
                                     <td className="text-gray-700">API URL</td>
@@ -33,7 +34,7 @@ export default function Tailieuapi() {
                                     <td className="fw-bolder">JSON</td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </Table>
                     </div>
 
                     <div className="d-flex flex-column flex-md-row">
@@ -68,7 +69,7 @@ export default function Tailieuapi() {
                                     id: "services",
                                     content: (
                                         <>
-                                            <table className="table align-middle table-row-bordered table-rounded border rounded gy-2 gs-5">
+                                            <Table striped bordered hover>
                                                 <tbody>
                                                     <tr className="bg-light">
                                                         <td className="fw-bolder" data-lang="Parameters">
@@ -87,7 +88,7 @@ export default function Tailieuapi() {
                                                         <td>"services"</td>
                                                     </tr>
                                                 </tbody>
-                                            </table>
+                                            </Table>
                                             <h6 data-lang="Example response">Example response</h6>
                                             <div className="bg-light p-3">
                                                 <pre className="language-html mb-0">
@@ -122,7 +123,7 @@ export default function Tailieuapi() {
                                     id: "add",
                                     content: (
                                         <>
-                                            <table className="table align-middle table-row-bordered table-rounded border rounded gy-2 gs-5">
+                                            <Table striped bordered hover>
                                                 <tbody>
                                                     <tr className="bg-light">
                                                         <td className="fw-bolder" data-lang="Parameters">
@@ -153,7 +154,7 @@ export default function Tailieuapi() {
                                                         <td>Needed quantity</td>
                                                     </tr>
                                                 </tbody>
-                                            </table>
+                                            </Table>
                                             <h6 data-lang="Example response">Example response</h6>
                                             <div className="bg-light p-3">
                                                 <pre className="language-html mb-0">{`{
@@ -167,7 +168,7 @@ export default function Tailieuapi() {
                                     id: "status",
                                     content: (
                                         <>
-                                            <table className="table align-middle table-row-bordered table-rounded border rounded gy-2 gs-5">
+                                            <Table striped bordered hover>
                                                 <tbody>
                                                     <tr className="bg-light">
                                                         <td className="fw-bolder" data-lang="Parameters">
@@ -189,11 +190,11 @@ export default function Tailieuapi() {
                                                         <td>order</td>
                                                         <td>Order ID</td>
                                                     </tr>
-                                                    <tr>
+                                                    {/* <tr>
                                                         <td>Status : Pending, Processing, In progress, Completed, Partial, Canceled</td>
-                                                    </tr>
+                                                    </tr> */}
                                                 </tbody>
-                                            </table>
+                                            </Table>
                                             <h6 data-lang="Example response">Example response</h6>
                                             <div className="bg-light p-3">
                                                 <pre className="language-html mb-0">
@@ -205,7 +206,10 @@ export default function Tailieuapi() {
     "remains": "-2"
 }`}
                                                 </pre>
+
                                             </div>
+                                            <span>Status : Pending, Processing, In progress, Completed, Partial, Canceled</span>
+
                                         </>
                                     ),
                                 },
@@ -213,7 +217,7 @@ export default function Tailieuapi() {
                                     id: "multistatus",
                                     content: (
                                         <>
-                                            <table className="table align-middle table-row-bordered table-rounded border rounded gy-2 gs-5">
+                                            <Table striped bordered hover>
                                                 <tbody>
                                                     <tr className="bg-light">
                                                         <td className="fw-bolder" data-lang="Parameters">
@@ -233,10 +237,15 @@ export default function Tailieuapi() {
                                                     </tr>
                                                     <tr>
                                                         <td>orders</td>
-                                                        <td>Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
+                                                        <td  style={{
+                                                            maxWidth: "570px",
+                                                            whiteSpace: "normal",
+                                                            wordWrap: "break-word",
+                                                            overflowWrap: "break-word",
+                                                        }}>Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
                                                     </tr>
                                                 </tbody>
-                                            </table>
+                                            </Table>
                                             <h6 data-lang="Example response">Example response</h6>
                                             <div className="bg-light p-3">
                                                 <pre className="language-html mb-0">
@@ -267,7 +276,7 @@ export default function Tailieuapi() {
                                     id: "balance",
                                     content: (
                                         <>
-                                            <table className="table align-middle table-row-bordered table-rounded border rounded gy-2 gs-5">
+                                            <Table striped bordered hover>
                                                 <tbody>
                                                     <tr className="bg-light">
                                                         <td className="fw-bolder" data-lang="Parameters">
@@ -285,9 +294,8 @@ export default function Tailieuapi() {
                                                         <td>action</td>
                                                         <td>"balance"</td>
                                                     </tr>
-
                                                 </tbody>
-                                            </table>
+                                            </Table>
                                             <h6 data-lang="Example response">Example response</h6>
                                             <div className="bg-light p-3">
                                                 <pre className="language-html mb-0">

@@ -597,8 +597,9 @@ export default function Adddichvu({
                         whiteSpace: "normal",
                         wordWrap: "break-word",
                         overflowWrap: "break-word",
-                      }}>{service.name}</td>
-                      <td>{(service.rate * tigia).toFixed(4)} + {ptgia} % giá update</td>
+                      }}>{service.name}
+                      </td>
+                      <td>{(service.rate * tigia).toFixed(4)} + {ptgia} % = {Math.ceil((service.rate * tigia).toFixed(4) * 10000 + ((service.rate * tigia).toFixed(4) * ptgia) / 100 * 10000) / 10000}</td>
                       <td>{service.min}</td>
                       <td>{service.max}</td>
                     </tr>
