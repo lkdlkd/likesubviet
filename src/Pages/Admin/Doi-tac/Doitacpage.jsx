@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import Adddoitac from "@/Pages/Admin/Doi-tac/Adddoitac";
-import { deleteSmmPartner, getAllSmmPartners } from "@/Utils/api";
+import { deleteSmmPartner, getAllSmmPartners, getBalanceFromSmm } from "@/Utils/api";
 import Table from "react-bootstrap/Table";
 
 export default function Doitacpage() {
@@ -13,24 +13,11 @@ export default function Doitacpage() {
 
   const token = localStorage.getItem("token") || "";
 
-  const fetchBalance = async (partner) => {
-    try {
-      const res = await axios.post(partner.url_api, {
-        key: partner.api_token,
-        action: "balance",
-      });
-      return res.data.balance || 0;
-    } catch (error) {
-      console.error(`Lỗi khi lấy số dư từ đối tác ${partner.name}:`, error);
-      return "Lỗi";
-    }
-  };
-
   const fetchBalancesForPartners = async (partners) => {
     const updatedPartners = await Promise.all(
       partners.map(async (partner) => {
-        const balance = await fetchBalance(partner);
-        const convertedBalance = balance * (partner.tigia || 1); // Nhân balance với tigia (mặc định là 1 nếu không có)
+        const balance = await getBalanceFromSmm(partner._id, token); // Sử dụng hàm mới
+        const convertedBalance = balance.data.balance * (partner.tigia || 1); // Nhân balance với tigia (mặc định là 1 nếu không có)
         return { ...partner, balance: convertedBalance };
       })
     );

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from "react";
-import { createServer, getAllSmmPartners } from "@/Utils/api";
+import { createServer, getAllSmmPartners , getServicesFromSmm } from "@/Utils/api";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Table from "react-bootstrap/Table";
@@ -91,14 +91,10 @@ export default function Adddichvu({
 
     try {
       setLoadingServices(true);
-      const res = await axios.post(partner.url_api, {
-        key: partner.api_token,
-        action: "services",
-      });
-      const servicesData = res.data;
-      setServices(servicesData);
+      const servicesData = await getServicesFromSmm(partner._id, token); // Gọi API từ backend
+      setServices(servicesData.data); // Cập nhật danh sách dịch vụ
     } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu từ bên thứ 3:", error);
+      console.error("Lỗi khi lấy dữ liệu từ backend:", error);
       toast.error("Không thể lấy danh sách dịch vụ từ đối tác. Vui lòng thử lại!");
     } finally {
       setLoadingServices(false);
