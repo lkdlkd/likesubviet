@@ -186,7 +186,7 @@ function MenuUser({ user, categories, configWeb }) {
                                 <span className="pc-micon">
                                     <img src="/dashboard.png" className="wid-35" alt="" />
                                 </span>
-                                <span className="pc-mtext">QUẢN LÝ HỆ THỐNG</span>
+                                <span className="pc-mtext">MENU HỆ THỐNG</span>
                                 <span className="pc-arrow">
                                     <i data-feather="chevron-right"></i>
                                 </span>
