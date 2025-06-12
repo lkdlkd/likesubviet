@@ -190,8 +190,28 @@ export default function CategoriesPage() {
                                                 <td>{category.platforms_id?.name || "Không xác định"}</td>
                                                 <td>{category.name}</td>
                                                 <td>{category.path}</td>
-                                                <td>{category.notes || "Không có"}</td>
-                                                <td>{category.modal_show || "Không có"}</td>
+                                                <td
+                                                    style={{
+                                                        maxWidth: "250px",
+                                                        whiteSpace: "nowrap", // Không cho phép xuống dòng
+                                                        overflow: "hidden", // Ẩn nội dung tràn
+                                                        textOverflow: "ellipsis", // Hiển thị dấu "..."
+                                                    }}
+                                                    title={category.notes || "Không có"} // Hiển thị nội dung đầy đủ khi hover
+                                                >
+                                                    {category.notes || "Không có"}
+                                                </td>
+                                                <td
+                                                    style={{
+                                                        maxWidth: "250px",
+                                                        whiteSpace: "nowrap", // Không cho phép xuống dòng
+                                                        overflow: "hidden", // Ẩn nội dung tràn
+                                                        textOverflow: "ellipsis", // Hiển thị dấu "..."
+                                                    }}
+                                                    title={category.modal_show || "Không có"} // Hiển thị nội dung đầy đủ khi hover
+                                                >
+                                                    {category.modal_show || "Không có"}
+                                                </td>
                                             </tr>
                                         ))
                                     ) : (

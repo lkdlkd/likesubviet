@@ -2,6 +2,8 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 export default function CategoryModal({ category, platforms, onClose, onSave }) {
   const [formData, setFormData] = useState({
@@ -93,21 +95,33 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
               required
             />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Ghi chú</label>
-            <textarea
-              className="form-control"
-              value={formData.notes || ""}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            ></textarea>
-          </div>
+
           <div className="mb-3">
             <label className="form-label">Hiển thị Modal</label>
-            <input
-              type="text"
-              className="form-control"
-              value={formData.modal_show || ""}
-              onChange={(e) => setFormData({ ...formData, modal_show: e.target.value })}
+            <CKEditor
+              editor={ClassicEditor}
+              data={formData.modal_show || ""}
+              onReady={(editor) => {
+                editor.ui.view.editable.element.style.height = "300px";
+              }}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                setFormData((prev) => ({ ...prev, modal_show: data }));
+              }}
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Ghi chú</label>
+            <CKEditor
+              editor={ClassicEditor}
+              data={formData.notes || ""}
+              onReady={(editor) => {
+                editor.ui.view.editable.element.style.height = "300px";
+              }}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                setFormData((prev) => ({ ...prev, notes: data }));
+              }}
             />
           </div>
         </Modal.Body>

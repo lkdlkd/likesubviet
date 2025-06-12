@@ -45,7 +45,6 @@ function MenuUser({ user, categories, configWeb }) {
         loadingg("Vui lòng chờ...");
         setTimeout(() => {
             navigate(path); // Chuyển trang
-            console.log("Đã chuyển trang"); // Kiểm tra xem `navigate` có hoạt động không
             Swal.close(); // Đóng thông báo tải
         }, 1000);
     };

@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^41.4.2",
+    "@ckeditor/ckeditor5-font": "^45.2.0",
     "@ckeditor/ckeditor5-react": "^9.5.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -49,6 +50,10 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.27.1",
+    "@babel/preset-react": "^7.27.1",
+    "@svgr/webpack": "^8.1.0",
+    "babel-loader": "^10.0.0",
     "react-app-rewired": "^2.2.1",
     "webpack-obfuscator": "^3.5.1"
   }

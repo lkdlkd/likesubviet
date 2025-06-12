@@ -4,6 +4,8 @@ import Swal from "sweetalert2";
 import { getUid, addOrder, getServerByTypeAndCategory } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
+import Modalnote from "./Modal_note"; // Giả sử bạn đã định nghĩa Modalnote trong cùng thư mục
+
 export default function Order() {
     const { type, path } = useParams(); // Lấy `type` và `path` từ URL
     const [servers, setServers] = useState([]);
@@ -20,7 +22,7 @@ export default function Order() {
     const [rate, setRate] = useState(0);
     const [cmtqlt, setcomputedQty] = useState(0);
     const [isConverting, setIsConverting] = useState(false);
-
+    const [modal_Show, setModalShow] = useState("");
     const token = localStorage.getItem("token");
     let decoded = {};
     if (token) {
@@ -31,13 +33,13 @@ export default function Order() {
         }
     }
     const username = decoded.username;
-
     // Gọi API để lấy danh sách servers
     useEffect(() => {
         const fetchServers = async () => {
             try {
                 const response = await getServerByTypeAndCategory(type, path, token);
                 setServers(response.data || []); // Giả sử API trả về `data`
+                setModalShow(response.notes || ""); // Lưu ý: `modal_show` cần được trả về từ API
             } catch (error) {
                 console.error("Lỗi khi gọi API getServerByTypeAndCategory:", error);
                 Swal.fire({
@@ -386,6 +388,7 @@ export default function Order() {
     }
     return (
         <div className="main-content">
+            <Modalnote modal_Show={modal_Show.modal_show} />
             <div className="row">
                 <div className="col-md-12 col-lg-8">
                     <div className="card">
@@ -640,15 +643,25 @@ export default function Order() {
                     </div>
                 </div>
                 <div className="col-md-12 col-lg-4">
-                    <div className="alert alert-danger bg-danger text-white mb-3">
-                        <h5 className="alert-heading">Lưu ý</h5>
-                        <span>
-                            Nghiêm cấm buff các đơn có nội dung vi phạm pháp luật, chính trị, đồ trụy...
-                            Nếu cố tình buff bạn sẽ bị trừ hết tiền và ban khỏi hệ thống vĩnh viễn, và phải chịu hoàn toàn trách nhiệm trước pháp luật.
-                            Nếu đơn đang chạy trên hệ thống mà bạn vẫn mua ở các hệ thống bên khác hoặc đè nhiều đơn, nếu có tình trạng hụt, thiếu số lượng giữa 2 bên thì sẽ không được xử lí.
-                            Đơn cài sai thông tin hoặc lỗi trong quá trình tăng hệ thống sẽ không hoàn lại tiền.
-                            Nếu gặp lỗi hãy nhắn tin hỗ trợ phía bên phải góc màn hình hoặc vào mục liên hệ hỗ trợ để được hỗ trợ tốt nhất.
-                        </span>
+                    <div className="alert alert-warning fade show mt-3 border-0 rounded-10">
+                        <h3 className="text-dark text-uppercase text-center">LƯU Ý NÊN ĐỌC TRÁNH MẤT TIỀN</h3>
+                        <div>
+                            {modal_Show.note ? (
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: modal_Show.note,
+                                    }}
+                                />
+                            ) : (
+                                <span>
+                                    Nghiêm cấm buff các đơn có nội dung vi phạm pháp luật, chính trị, đồ trụy...
+                                    Nếu cố tình buff bạn sẽ bị trừ hết tiền và ban khỏi hệ thống vĩnh viễn, và phải chịu hoàn toàn trách nhiệm trước pháp luật.
+                                    Nếu đơn đang chạy trên hệ thống mà bạn vẫn mua ở các hệ thống bên khác hoặc đè nhiều đơn, nếu có tình trạng hụt, thiếu số lượng giữa 2 bên thì sẽ không được xử lí.
+                                    Đơn cài sai thông tin hoặc lỗi trong quá trình tăng hệ thống sẽ không hoàn lại tiền.
+                                    Nếu gặp lỗi hãy nhắn tin hỗ trợ phía bên phải góc màn hình hoặc vào mục liên hệ hỗ trợ để được hỗ trợ tốt nhất.
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <div className="alert alert-primary bg-primary text-white">
                         <h5 className="alert-heading">Các trường hợp huỷ đơn hoặc không chạy</h5>
