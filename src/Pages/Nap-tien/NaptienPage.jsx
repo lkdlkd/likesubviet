@@ -88,55 +88,59 @@ export default function NaptienPage() {
 
             {/* Nội dung hiển thị dựa trên trạng thái activeTab */}
             {activeTab === "banking" && (
-                <div className="col-md-12">
-                    <Banking banking={banking} username={username} />
-                    <HistoryBank token={token} />
-                </div>
+                <>
+                    <div className="col-md-12">
+                        <Banking banking={banking} username={username} />
+                        <HistoryBank token={token} />
+                    </div>
+
+                    <div className="col-md-12">
+                        <div className="card shadow-sm">
+                            <div className="card-header ">
+                                <h3 className="mb-0">Danh sách khuyến mãi</h3>
+                            </div>
+
+                            <div className="card-body">
+                                {promotions.length > 0 ? (
+                                    <div className="row row-cols-1 row-cols-md-2  g-3">
+                                        {promotions.map((promotion, index) => (
+                                            <div className="col" key={promotion._id || index}>
+                                                <div className="card h-100 border-0 shadow-sm">
+                                                    <div className="card-body">
+                                                        <h4 className="mt-1 text-dark">
+                                                            {promotion.name} <b className="text-danger">{promotion.percentBonus}%</b>
+                                                        </h4>
+                                                        <p className="text-muted mb-1 fs-6">
+                                                            NẠP {Number(promotion.minAmount || 0).toLocaleString("en-US")} TRỞ LÊN
+                                                        </p>
+                                                        <p className="text-muted mb-1">
+                                                            Từ <b>{new Date(promotion.startTime).toLocaleString("vi-VN")}</b> đến{" "}
+                                                            <b>{new Date(promotion.endTime).toLocaleString("vi-VN")}</b>
+                                                        </p>
+
+                                                        <p className="text-muted  mb-1">
+                                                            {promotion.description}
+                                                        </p>
+                                                    </div>
+                                                    <div className="card-footer bg-light text-center">
+                                                        <small className="text-muted">Áp dụng cho tất cả giao dịch</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center">
+                                        <p>Không có chương trình khuyến mãi nào.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </>
             )}
 
-            <div className="col-md-12">
-                <div className="card shadow-sm">
-                    <div className="card-header ">
-                        <h3 className="mb-0">Danh sách khuyến mãi</h3>
-                    </div>
 
-                    <div className="card-body">
-                        {promotions.length > 0 ? (
-                            <div className="row row-cols-1 row-cols-md-2  g-3">
-                                {promotions.map((promotion, index) => (
-                                    <div className="col" key={promotion._id || index}>
-                                        <div className="card h-100 border-0 shadow-sm">
-                                            <div className="card-body">
-                                                <h4 className="mt-1 text-dark">
-                                                    {promotion.name} <b className="text-danger">{promotion.percentBonus}%</b>
-                                                </h4>
-                                                <p className="text-muted mb-1 fs-6">
-                                                    NẠP {Number(promotion.minAmount || 0).toLocaleString("en-US")} TRỞ LÊN
-                                                </p>
-                                                <p className="text-muted mb-1">
-                                                    Từ <b>{new Date(promotion.startTime).toLocaleString("vi-VN")}</b> đến{" "}
-                                                    <b>{new Date(promotion.endTime).toLocaleString("vi-VN")}</b>
-                                                </p>
-
-                                                <p className="text-muted  mb-1">
-                                                    {promotion.description}
-                                                </p>
-                                            </div>
-                                            <div className="card-footer bg-light text-center">
-                                                <small className="text-muted">Áp dụng cho tất cả giao dịch</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center">
-                                <p>Không có chương trình khuyến mãi nào.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
 
 
             {/* <div className="card">

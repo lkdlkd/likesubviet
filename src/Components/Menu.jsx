@@ -209,9 +209,9 @@ function MenuUser({ user, categories, configWeb }) {
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
-                                            <span className="pc-micon">
+                                            {/* <span className="pc-micon">
                                                 <img src="/home.png" className="wid-35" alt="" width={35} height={35} />
-                                            </span>
+                                            </span> */}
                                             <span className="pc-mtext">Thông Tin Cá Nhân</span>
                                         </a>
                                     </li>
@@ -221,9 +221,9 @@ function MenuUser({ user, categories, configWeb }) {
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
-                                            <span className="pc-micon">
+                                            {/* <span className="pc-micon">
                                                 <img src="/payment-method.png" className="wid-35" alt="" width={35} height={35} />
-                                            </span>
+                                            </span> */}
                                             <span className="pc-mtext">Nạp Tiền</span>
                                         </a>
                                     </li>
@@ -233,9 +233,9 @@ function MenuUser({ user, categories, configWeb }) {
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
-                                            <span className="pc-micon">
+                                            {/* <span className="pc-micon">
                                                 <img src="/transactions.png" className="wid-35" alt="" width={35} height={35} />
-                                            </span>
+                                            </span> */}
                                             <span className="pc-mtext">Lịch Sử Hoạt Động</span>
                                         </a>
                                     </li>
@@ -245,9 +245,9 @@ function MenuUser({ user, categories, configWeb }) {
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
-                                            <span className="pc-micon">
+                                            {/* <span className="pc-micon">
                                                 <img src="/suitcase.png" className="wid-35" alt="" width={35} height={35} />
-                                            </span>
+                                            </span> */}
                                             <span className="pc-mtext">Tài liệu API V2</span>
                                         </a>
                                     </li>
