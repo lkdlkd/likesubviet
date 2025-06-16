@@ -129,7 +129,7 @@ export default function CategoriesPage() {
                         </button>
                     </div>
                     <div className="card-body">
-                        <div className="table-responsive">
+                        <div className="">
                             <Table striped bordered hover responsive>
                                 <thead className="table-primary">
                                     <tr>
@@ -216,7 +216,7 @@ export default function CategoriesPage() {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={6} className="text-center">
+                                            <td colSpan={7} className="text-center">
                                                 Không có danh mục nào.
                                             </td>
                                         </tr>

@@ -6,10 +6,10 @@ import { toast } from "react-toastify";
 
 function UserEdit({ user, token, onClose, onUserUpdated }) {
   const [username, setUsername] = useState(user?.username || "");
-  const [balance, setBalance] = useState(user?.balance || 0);
+  const [balance, setBalance] = useState(user?.balance || "");
   const [capbac, setCapbac] = useState(user?.capbac || "");
-  const [tongnap, setTongnap] = useState(user?.tongnap || 0);
-  const [tongnapthang, setTongnapthang] = useState(user?.tongnapthang || 0);
+  const [tongnap, setTongnap] = useState(user?.tongnap || "");
+  const [tongnapthang, setTongnapthang] = useState(user?.tongnapthang || "");
   const [newPassword, setNewPassword] = useState(""); // Thêm state cho mật khẩu mới
   const [saving, setSaving] = useState(false); // Trạng thái lưu dữ liệu
 
@@ -19,11 +19,22 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
       return;
     }
 
+    if (balance < 0 || tongnap < 0 || tongnapthang < 0) {
+      toast.error("Số dư, tổng nạp và tổng nạp tháng không được âm!");
+      return;
+    }
+
     setSaving(true);
     try {
       const updatedUser = await updateUser(
         user._id,
-        { username, balance, capbac, tongnap, tongnapthang },
+        {
+          username,
+          balance: Number(balance) || 0,
+          capbac,
+          tongnap: Number(tongnap) || 0,
+          tongnapthang: Number(tongnapthang) || 0,
+        },
         token
       );
 
@@ -84,7 +95,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
               type="number"
               className="form-control"
               value={balance}
-              onChange={(e) => setBalance(Number(e.target.value))}
+              onChange={(e) => setBalance(e.target.value === "" ? "" : Number(e.target.value))}
               placeholder="Nhập số dư"
             />
           </div>
@@ -104,7 +115,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
               type="number"
               className="form-control"
               value={tongnap}
-              onChange={(e) => setTongnap(Number(e.target.value))}
+              onChange={(e) => setTongnap(e.target.value === "" ? "" : Number(e.target.value))}
               placeholder="Nhập tổng nạp"
             />
           </div>
@@ -114,7 +125,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
               type="number"
               className="form-control"
               value={tongnapthang}
-              onChange={(e) => setTongnapthang(Number(e.target.value))}
+              onChange={(e) => setTongnapthang(e.target.value === "" ? "" : Number(e.target.value))}
               placeholder="Nhập tổng nạp tháng"
             />
           </div>

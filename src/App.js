@@ -23,6 +23,8 @@ import Setting from "./Pages/Admin/ConfigWeb/Setting";
 import ConfigCard from "./Pages/Admin/ConfigCard/ConfigCard";
 import Tailieuapi from "./Pages/Tailieu/Tailieuapi";
 import NotFoundPage from "./Pages/404";
+import Khuyenmai from "./Pages/Admin/Khuyenmai/khuyenmai";
+import Naptientudong from "./Pages/Admin/Naptientudong/Naptientudong";
 function App() {
   return (
     <AuthProvider>
@@ -88,6 +90,8 @@ function App() {
             <Route path="/admin/server" element={<Dichvupage />} />
             <Route path="/admin/setting" element={<Setting />} />
             <Route path="/admin/setting-thecao" element={<ConfigCard />} />
+            <Route path="/admin/khuyen-mai" element={<Khuyenmai />} />
+            <Route path="/admin/nap-tien-tu-dong" element={<Naptientudong />} />
           </Route>
 
           {/* 404 Not Found */}

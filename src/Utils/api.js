@@ -4,6 +4,8 @@ const API_BASE = process.env.REACT_APP_API_BASE;
 const withNoStore = (headers = {}) => ({
   ...headers,
   "Cache-Control": "no-store",
+  'X-Client-Domain': window.location.host, // Gửi domain của frontend
+
 });
 // Helper để xử lý response
 const handleResponse = async (response) => {
@@ -609,20 +611,90 @@ export const updateConfigCard = async (data, token) => {
 };
 // Lấy số dư từ SMM
 export const getBalanceFromSmm = async (id, token) => {
-    const response = await fetch(`${API_BASE}/getbalance/${id}`, {
-        method: "GET",
-        headers: withNoStore({ Authorization: `Bearer ${token}` }),
-        cache: "no-store",
-    });
-    return handleResponse(response);
+  const response = await fetch(`${API_BASE}/getbalance/${id}`, {
+    method: "GET",
+    headers: withNoStore({ Authorization: `Bearer ${token}` }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
 };
 
 // Lấy danh sách dịch vụ từ SMM
 export const getServicesFromSmm = async (id, token) => {
-    const response = await fetch(`${API_BASE}/getservices/${id}`, {
-        method: "GET",
-        headers: withNoStore({ Authorization: `Bearer ${token}` }),
-        cache: "no-store",
-    });
-    return handleResponse(response);
+  const response = await fetch(`${API_BASE}/getservices/${id}`, {
+    method: "GET",
+    headers: withNoStore({ Authorization: `Bearer ${token}` }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+// Lấy danh sách chương trình khuyến mãi
+export const getPromotions = async (token) => {
+  const response = await fetch(`${API_BASE}/promotions`, {
+    method: "GET",
+    headers: withNoStore({ Authorization: `Bearer ${token}` }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Tạo mới chương trình khuyến mãi
+export const createPromotion = async (data, token) => {
+  const response = await fetch(`${API_BASE}/promotions`, {
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Cập nhật chương trình khuyến mãi
+export const updatePromotion = async (id, data, token) => {
+  const response = await fetch(`${API_BASE}/promotions/${id}`, {
+    method: "PUT",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Xóa chương trình khuyến mãi
+export const deletePromotion = async (id, token) => {
+  const response = await fetch(`${API_BASE}/promotions/${id}`, {
+    method: "DELETE",
+    headers: withNoStore({ Authorization: `Bearer ${token}` }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+export const getTransactions = async (token, page = 1, limit = 10, username = "", transactionID = "") => {
+  // Xây dựng query string
+  const queryParams = new URLSearchParams({
+    page,
+    limit,
+  });
+
+  if (username) {
+    queryParams.append("username", username);
+  }
+
+  if (transactionID) {
+    queryParams.append("transactionID", transactionID);
+  }
+
+  const response = await fetch(`${API_BASE}/transactions?${queryParams.toString()}`, {
+    method: "GET",
+    headers: withNoStore({ Authorization: `Bearer ${token}` }),
+    cache: "no-store",
+  });
+
+  return handleResponse(response);
 };

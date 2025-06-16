@@ -101,6 +101,11 @@ function MenuUser({ user, categories, configWeb }) {
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
+                                                <Link to="/admin/khuyen-mai" className="pc-link">
+                                                    <span className="pc-mtext">Cài đặt khuyễn mãi</span>
+                                                </Link>
+                                            </li>
+                                            <li className="pc-item">
                                                 <Link to="/admin/setting-thecao" className="pc-link">
                                                     <span className="pc-mtext">Cấu hình nạp thẻ</span>
                                                 </Link>
@@ -119,6 +124,11 @@ function MenuUser({ user, categories, configWeb }) {
                                             <li className="pc-item">
                                                 <Link to="/admin/bank-king" className="pc-link">
                                                     <span className="pc-mtext">Nạp tiền</span>
+                                                </Link>
+                                            </li>
+                                            <li className="pc-item">
+                                                <Link to="/admin/nap-tien-tu-dong" className="pc-link">
+                                                    <span className="pc-mtext">Quản lý nạp tiền tự động</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">

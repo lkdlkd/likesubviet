@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from "react";
-import { createServer, getAllSmmPartners , getServicesFromSmm } from "@/Utils/api";
-import axios from "axios";
+import { createServer, getAllSmmPartners, getServicesFromSmm } from "@/Utils/api";
 import { toast } from "react-toastify";
 import Table from "react-bootstrap/Table";
 
@@ -21,10 +20,10 @@ export default function Adddichvu({
     DomainSmm: "",
     serviceId: "",
     serviceName: "",
-    min: 0,
-    max: 0,
-    rate: 0,
-    originalRate: 0,
+    min: "",
+    max: "",
+    rate: "",
+    originalRate: "",
     getid: "off",
     comment: "off",
     reaction: "off",
@@ -39,17 +38,7 @@ export default function Adddichvu({
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedServices, setSelectedServices] = useState([]);
-  // const handleQuickAddService = (e) => {
-  //   const selectedServiceIds = Array.from(e.target.selectedOptions).map(
-  //     (option) => option.value
-  //   );
 
-  //   const selected = services.filter((service) =>
-  //     selectedServiceIds.includes(String(service.service))
-  //   );
-
-  //   setSelectedServices(selected);
-  // };
   const loadSmmPartners = useCallback(async () => {
     setLoading(true);
     try {
@@ -73,6 +62,14 @@ export default function Adddichvu({
     }
   }, [editMode, initialData]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: name === "min" || name === "max" || name === "rate" ? (value === "" ? "" : Number(value)) : value,
+    });
+  };
+
   const handleDomainChange = async (e) => {
     const domain = e.target.value;
     setFormData({
@@ -80,10 +77,10 @@ export default function Adddichvu({
       DomainSmm: domain,
       serviceId: "",
       serviceName: "",
-      originalRate: 0,
-      min: 0,
-      max: 0,
-      rate: 0,
+      originalRate: "",
+      min: "",
+      max: "",
+      rate: "",
     });
     setServices([]);
     const partner = smmPartners.find((p) => p.name === domain);
@@ -91,8 +88,8 @@ export default function Adddichvu({
 
     try {
       setLoadingServices(true);
-      const servicesData = await getServicesFromSmm(partner._id, token); // Gọi API từ backend
-      setServices(servicesData.data); // Cập nhật danh sách dịch vụ
+      const servicesData = await getServicesFromSmm(partner._id, token);
+      setServices(servicesData.data);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu từ backend:", error);
       toast.error("Không thể lấy danh sách dịch vụ từ đối tác. Vui lòng thử lại!");
@@ -112,53 +109,63 @@ export default function Adddichvu({
         ...formData,
         serviceId: svc.service,
         serviceName: svc.name,
-        min: svc.min || 0,
-        max: svc.max || 0,
-        rate: svc.rate * tigia,
-        originalRate: svc.rate * tigia || 0,
+        min: svc.min || "",
+        max: svc.max || "",
+        rate: svc.rate * tigia || "",
+        originalRate: svc.rate * tigia || "",
       });
     } else {
       setFormData({
         ...formData,
         serviceId: id,
         serviceName: "",
-        min: 0,
-        max: 0,
-        rate: 0,
-        originalRate: 0,
+        min: "",
+        max: "",
+        rate: "",
+        originalRate: "",
       });
     }
   };
 
   const handleAddSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
+    // Kiểm tra giá trị hợp lệ
+    if (formData.min < 0 || formData.max < 0 || formData.rate < 0) {
+      toast.error("Giá trị Min, Max và Giá không được âm!");
+      return;
+    }
+
+    if (formData.min > formData.max) {
+      toast.error("Giá trị Min không được lớn hơn Max!");
+      return;
+    }
+
+    setLoading(true);
     try {
-      const partner = smmPartners.find((p) => p.name === formData.DomainSmm);
-      const tigia = partner?.tigia || 1; // Lấy tỷ giá từ partner
-      const ptgia = partner?.price_update || 0; // Lấy tỷ giá cập nhật từ partner
       if (selectedServices.length > 0) {
-        // Gọi API cho từng dịch vụ trong danh sách đã chọn
         await Promise.all(
           selectedServices.map(async (service) => {
-            const baseRate = service.rate * tigia; // Tính giá gốc
+            const partner = smmPartners.find((p) => p.name === formData.DomainSmm);
+            const tigia = partner?.tigia || 1;
+            const ptgia = partner?.price_update || 0;
+            const baseRate = service.rate * tigia;
             const finalRate = Math.ceil(baseRate * 10000 + (baseRate * ptgia) / 100 * 10000) / 10000;
+
             const payload = {
               ...formData,
               serviceId: service.service,
-              serviceName: service.name, // Lấy tên từ dịch vụ bên thứ 3
-              name: service.name, // Lấy tên từ dịch vụ bên thứ 3
+              serviceName: service.name,
+              name: service.name,
               min: service.min || 0,
               max: service.max || 0,
-              rate: finalRate, // Sử dụng partner.tigia
+              rate: finalRate,
               originalRate: service.rate * tigia,
             };
             await createServer(payload, token);
           })
         );
       } else {
-
         await createServer(formData, token);
       }
 
@@ -171,9 +178,11 @@ export default function Adddichvu({
       setLoading(false);
     }
   };
+
   const filteredCategories = categories.filter(
     (category) => category.platforms_id?._id === selectedPlatform
   );
+
   const uniqueCategories = Array.from(
     new Set(services.map((service) => service.category))
   ).filter((category) => category);
@@ -181,8 +190,6 @@ export default function Adddichvu({
   const filteredServices = services.filter(
     (service) => service.category === selectedCategory
   );
-
-
 
   return (
     <div className="form-group mb-3">
@@ -436,9 +443,7 @@ export default function Adddichvu({
               type="number"
               name="min"
               value={formData.min}
-              onChange={(e) =>
-                setFormData({ ...formData, min: Number(e.target.value) })
-              }
+              onChange={handleChange}
               className="form-control"
 
             />
@@ -449,9 +454,7 @@ export default function Adddichvu({
               type="number"
               name="max"
               value={formData.max}
-              onChange={(e) =>
-                setFormData({ ...formData, max: Number(e.target.value) })
-              }
+              onChange={handleChange}
               className="form-control"
 
             />
@@ -462,9 +465,7 @@ export default function Adddichvu({
               type="number"
               name="rate"
               value={formData.rate}
-              onChange={(e) =>
-                setFormData({ ...formData, rate: Number(e.target.value) })
-              }
+              onChange={handleChange}
               className="form-control"
             />
           </div>

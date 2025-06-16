@@ -5,7 +5,7 @@ import { addBalance } from "@/Utils/api";
 import { toast } from "react-toastify";
 
 function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
-    const [additionAmount, setAdditionAmount] = useState(0);
+    const [additionAmount, setAdditionAmount] = useState("");
     const [loading, setLoading] = useState(false);
 
     const handleAddBalance = async () => {
@@ -66,7 +66,7 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
                             type="number"
                             className="form-control"
                             value={additionAmount}
-                            onChange={(e) => setAdditionAmount(Number(e.target.value))}
+                            onChange={(e) => setAdditionAmount(e.target.value === "" ? "" : Number(e.target.value))}
                             placeholder="Nhập số tiền muốn thêm"
                         />
                     </div>
