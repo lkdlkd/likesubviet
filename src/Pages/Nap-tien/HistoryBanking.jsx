@@ -12,9 +12,9 @@ const HistoryBanking = ({ token }) => {
             setLoading(true);
             try {
                 const data = await getTransactions(token, page, limit); // Gọi API với page và limit
-                setHistory(data); // Lưu danh sách giao dịch
+                setHistory(data || []); // Lưu danh sách giao dịch
             } catch (error) {
-                console.error("Lỗi khi lấy danh sách giao dịch:", error.message);
+                // console.error("Lỗi khi lấy danh sách giao dịch:", error.message);
             } finally {
                 setLoading(false);
             }
