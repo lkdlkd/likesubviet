@@ -52,7 +52,7 @@ function MenuUser({ user, categories, configWeb }) {
         <nav className="pc-sidebar">
             <div className="navbar-wrapper">
                 <div className="m-header">
-                    <Link to="/" className="b-brand text-primary">
+                    <div className="b-brand text-primary">
                         <div className="m-header">
                             <Link to="/" className="b-brand text-primary">
                                 {isValidUrl(config.logo) ? (
@@ -70,7 +70,7 @@ function MenuUser({ user, categories, configWeb }) {
                                 )}
                             </Link>
                         </div>
-                    </Link>
+                    </div>
                 </div>
                 <div className="navbar-content mb-3">
                     <ul className="pc-navbar">

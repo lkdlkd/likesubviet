@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import Header from "@/Components/Header";
 import Menu from "@/Components/Menu";
 import { ToastContainer } from "react-toastify";
-import { Helmet } from "react-helmet";
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 import { getCategories, getMe, getNotifications, getConfigWeb } from "@/Utils/api";
 import Widget from "./Widget";

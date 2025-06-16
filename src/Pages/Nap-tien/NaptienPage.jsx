@@ -68,6 +68,7 @@ export default function NaptienPage() {
         fetchData();
     }, [token]);
 
+
     return (
         <div className="row">
             {/* Phần tiêu đề và nút chọn */}
@@ -121,8 +122,21 @@ export default function NaptienPage() {
                                                             NẠP {Number(promotion.minAmount || 0).toLocaleString("en-US")} TRỞ LÊN
                                                         </p>
                                                         <p className="text-muted mb-1">
-                                                            Từ <b>{new Date(promotion.startTime).toLocaleString("vi-VN")}</b> đến{" "}
-                                                            <b>{new Date(promotion.endTime).toLocaleString("vi-VN")}</b>
+                                                            Từ <b>{new Date(promotion.startTime).toLocaleString("vi-VN", {
+                                                                day: "2-digit",
+                                                                month: "2-digit",
+                                                                year: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                                second: "2-digit",
+                                                            })}</b> đến <b>{new Date(promotion.endTime).toLocaleString("vi-VN", {
+                                                                day: "2-digit",
+                                                                month: "2-digit",
+                                                                year: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                                second: "2-digit",
+                                                            })}</b>
                                                         </p>
                                                         <p className="text-muted mb-1">{promotion.description}</p>
                                                     </div>

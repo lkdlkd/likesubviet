@@ -3,7 +3,6 @@ import { getPromotions, createPromotion, updatePromotion, deletePromotion } from
 import PromotionModal from "./PromotionModal";
 import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
-import moment from "moment";
 
 export default function Khuyenmai() {
     const [promotions, setPromotions] = useState([]); // Danh sách chương trình khuyến mãi
@@ -180,8 +179,24 @@ export default function Khuyenmai() {
                                         <td>{promotion.name}</td>
                                         <td>{promotion.percentBonus}%</td>
                                         <td>{promotion.minAmount}</td>
-                                        <td>{moment(promotion.startTime).format("YYYY-MM-DD HH:mm:ss")}</td>
-                                        <td>{moment(promotion.endTime).format("YYYY-MM-DD HH:mm:ss")}</td>
+                                        <td> {new Date(promotion.startTime).toLocaleString("vi-VN", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                        })}</td>
+                                        <td> {new Date(promotion.endTime).toLocaleString("vi-VN", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                        })}</td>
+                                        {/* <td>{formatDateTimeUTC(promotion.startTime)}</td>
+                                        <td>{formatDateTimeUTC(promotion.endTime)}</td> */}
                                         <td>{promotion.repeatMonthly ? "Có" : "Không"}</td>
                                     </tr>
                                 ))}
