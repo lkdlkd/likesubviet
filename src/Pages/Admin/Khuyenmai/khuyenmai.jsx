@@ -34,7 +34,11 @@ export default function Khuyenmai() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const dataToSubmit = { ...formData };
+            const dataToSubmit = {
+                ...formData,
+                startDate: new Date(formData.startDate).toISOString(),
+                endDate: new Date(formData.endDate).toISOString(),
+            };
 
             if (isEditing) {
                 await updatePromotion(formData.id, dataToSubmit, token);
@@ -63,7 +67,6 @@ export default function Khuyenmai() {
         }
     };
 
-    // Xử lý khi nhấn nút sửa
     const handleEdit = (promotion) => {
         setFormData({
             id: promotion._id,
@@ -71,13 +74,20 @@ export default function Khuyenmai() {
             description: promotion.description,
             percentBonus: promotion.percentBonus,
             minAmount: promotion.minAmount || 0,
-            startDate: promotion.startTime,
-            endDate: promotion.endTime,
-            repeatMonthly: promotion.repeatMonthly || false, // Gán giá trị lặp lại
+            startDate: toLocalDatetimeInputValue(promotion.startTime),
+            endDate: toLocalDatetimeInputValue(promotion.endTime),
+            repeatMonthly: promotion.repeatMonthly || false,
         });
         setIsEditing(true);
         setShowModal(true);
     };
+
+    function toLocalDatetimeInputValue(dateString) {
+        const date = new Date(dateString);
+        const offset = date.getTimezoneOffset();
+        const localDate = new Date(date.getTime() - offset * 60000);
+        return localDate.toISOString().slice(0, 16);
+    }
 
     // Xử lý khi nhấn nút xóa
     const handleDelete = async (id) => {
