@@ -81,7 +81,7 @@ export default function Banking({ banking = [], username }) {
                                                 <button
                                                     type="button"
                                                     className="btn btn-outline-primary btn-sm ms-2 btn-copy"
-                                                    onClick={() => handleCopy(`lsv ${username}`)}
+                                                    onClick={() => handleCopy(`naptien ${username}`)}
                                                 >
                                                     <i className="fas fa-copy"></i>
                                                 </button>
