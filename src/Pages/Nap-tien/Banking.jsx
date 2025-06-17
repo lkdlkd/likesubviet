@@ -5,8 +5,7 @@ import { useOutletContext } from "react-router-dom";
 
 export default function Banking({ banking = [], username }) {
     const { configWeb } = useOutletContext();
-const cuphap = configWeb?.cuphap ;
-console.log(cuphap);
+    const cuphap = configWeb?.cuphap;
     const handleCopy = (text) => {
         navigator.clipboard
             .writeText(text)

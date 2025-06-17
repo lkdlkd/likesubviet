@@ -265,61 +265,76 @@ export default function Ordernhanh() {
             }
         }
     };
-    const convertNumberToWords = (num) => {
-        const units = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
-        const tens = ["", "", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"];
-        const scales = ["", "nghìn", "triệu", "tỷ"];
+    const convertNumberToWords = (number) => {
+        const chuSo = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
 
-        if (num === 0) return "không đồng";
+        function docSoHangTram(so) {
+            let tram = Math.floor(so / 100);
+            let chuc = Math.floor((so % 100) / 10);
+            let donvi = so % 10;
+            let ketqua = "";
 
-        const [integerPart, decimalPart] = num.toString().split(".");
-        let result = "";
-
-        // Xử lý phần nguyên
-        if (integerPart === "0") {
-            result = "không";
-        } else {
-            let numStr = integerPart;
-            const numGroups = [];
-
-            while (numStr.length > 0) {
-                numGroups.unshift(numStr.slice(-3));
-                numStr = numStr.slice(0, -3);
+            if (tram > 0) {
+                ketqua += `${chuSo[tram]} trăm `;
             }
 
-            const words = numGroups.map((group, index) => {
-                const [hundreds, tensDigit, unitsDigit] = group.padStart(3, "0").split("").map(Number);
-                const groupWords = [];
+            if (chuc > 1) {
+                ketqua += `${chuSo[chuc]} mươi `;
+                if (donvi > 0) ketqua += chuSo[donvi];
+            } else if (chuc === 1) {
+                ketqua += "mười ";
+                if (donvi > 0) ketqua += donvi === 5 ? "lăm" : chuSo[donvi];
+            } else if (donvi > 0) {
+                ketqua += chuSo[donvi];
+            }
 
-                if (hundreds > 0) groupWords.push(`${units[hundreds]} trăm`);
-                if (tensDigit > 1) {
-                    groupWords.push(tens[tensDigit]);
-                    if (unitsDigit > 0) groupWords.push(units[unitsDigit]);
-                } else if (tensDigit === 1) {
-                    groupWords.push("mười");
-                    if (unitsDigit > 0) groupWords.push(unitsDigit === 5 ? "lăm" : units[unitsDigit]);
-                } else if (unitsDigit > 0) {
-                    groupWords.push(units[unitsDigit]);
-                }
-
-                return groupWords.join(" ") + (groupWords.length > 0 ? ` ${scales[numGroups.length - index - 1]}` : "");
-            });
-
-            result = words.filter(Boolean).join(" ");
+            return ketqua.trim();
         }
 
-        // Xử lý phần thập phân
-        if (decimalPart) {
-            const decimalWords = decimalPart
-                .split("")
-                .map((digit) => units[Number(digit)])
-                .join(" ");
-            result += ` phẩy ${decimalWords}`;
+        function docSoNguyen(n) {
+            if (n === 0) return "không";
+
+            let result = "";
+            let hangTy = Math.floor(n / 1_000_000_000);
+            let hangTrieu = Math.floor((n % 1_000_000_000) / 1_000_000);
+            let hangNghin = Math.floor((n % 1_000_000) / 1000);
+            let hangDonVi = n % 1000;
+
+            if (hangTy > 0) result += `${docSoHangTram(hangTy)} tỷ `;
+            if (hangTrieu > 0) result += `${docSoHangTram(hangTrieu)} triệu `;
+            if (hangNghin > 0) result += `${docSoHangTram(hangNghin)} nghìn `;
+            if (hangDonVi > 0) result += `${docSoHangTram(hangDonVi)}`;
+
+            return result.trim().replace(/,\s*$/, '');
         }
 
-        return result + " đồng";
+        // ✅ Loại bỏ dấu phẩy khỏi chuỗi số
+        number = number.toString().replace(/,/g, '');
+
+        // ✅ Làm tròn 4 chữ số phần thập phân
+        number = Number(number).toFixed(4);
+
+        // ✅ Xoá số 0 vô nghĩa ở cuối phần thập phân
+        number = number.replace(/(\.\d*?[1-9])0+$/g, '$1');
+        number = number.replace(/\.0+$/g, '');
+
+        const [phanNguyenStr, phanThapPhanStr] = number.split(".");
+        const phanNguyen = Number(phanNguyenStr);
+
+        let ketQua = docSoNguyen(phanNguyen);
+
+        if (phanThapPhanStr) {
+            ketQua += " phẩy";
+            for (let digit of phanThapPhanStr) {
+                ketQua += ` ${chuSo[Number(digit)]}`;
+            }
+        }
+
+        // ✅ Viết hoa chữ cái đầu & chuẩn dấu phẩy
+        ketQua = ketQua.charAt(0).toUpperCase() + ketQua.slice(1);
+        return ketQua;
     };
-    const tien = useMemo(() => convertNumberToWords(totalCost), [totalCost]);
+    const tien = useMemo(() => convertNumberToWords(Number(totalCost).toLocaleString("en-US")), [totalCost]);
     return (
         <div className="main-content">
             <div className="row">
@@ -560,7 +575,7 @@ export default function Ordernhanh() {
                                                             </span>{" "}
                                                             VNĐ
                                                         </h3>
-                                                        <p className="fs-5 mb-0">{tien}</p>
+                                                        <p className="fs-5 mb-0">{tien} đ</p>
                                                         <p className="fs-4 mb-0">
                                                             Bạn sẽ tăng{" "}
                                                             <span className="text-danger">{qty} </span>số lượng với giá{" "}
