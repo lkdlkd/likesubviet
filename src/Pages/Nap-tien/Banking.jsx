@@ -1,8 +1,12 @@
 
 import React from "react";
 import { toast } from "react-toastify";
+import { useOutletContext } from "react-router-dom";
 
 export default function Banking({ banking = [], username }) {
+    const { configWeb } = useOutletContext();
+const cuphap = configWeb?.cuphap ;
+console.log(cuphap);
     const handleCopy = (text) => {
         navigator.clipboard
             .writeText(text)
@@ -76,12 +80,12 @@ export default function Banking({ banking = [], username }) {
                                                         display: "inline-block",
                                                     }}
                                                 >
-                                                    naptien {username}
+                                                    {cuphap} {username}
                                                 </p>
                                                 <button
                                                     type="button"
                                                     className="btn btn-outline-primary btn-sm ms-2 btn-copy"
-                                                    onClick={() => handleCopy(`naptien ${username}`)}
+                                                    onClick={() => handleCopy(`${cuphap} ${username}`)}
                                                 >
                                                     <i className="fas fa-copy"></i>
                                                 </button>
@@ -114,7 +118,7 @@ export default function Banking({ banking = [], username }) {
                                     <img
                                         src={`https://img.vietqr.io/image/${bank.bank_name}-${bank.account_number}-qronly2.jpg?accountName=${encodeURIComponent(
                                             bank.account_name
-                                        )}&addInfo=${encodeURIComponent(`naptien ${username}`)}`}
+                                        )}&addInfo=${encodeURIComponent(`${cuphap} ${username}`)}`}
                                         alt="QR CODE"
                                         width={300}
                                         height={300}

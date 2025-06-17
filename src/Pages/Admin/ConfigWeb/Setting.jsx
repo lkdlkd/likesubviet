@@ -18,12 +18,13 @@ const platformLogos = {
 const Setting = () => {
     const [formData, setFormData] = useState({
         tieude: "",
-        title: "", // Thêm trường title
+        title: "",
         logo: "",
         favicon: "",
         lienhe: [
             { type: "", value: "", logolienhe: "" },
         ],
+        cuphap: "", // Thêm trường cuphap
     });
     const [loading, setLoading] = useState(false);
 
@@ -35,6 +36,7 @@ const Setting = () => {
                 setFormData({
                     ...config.data,
                     lienhe: Array.isArray(config.data.lienhe) ? config.data.lienhe : [],
+                    cuphap: config.data.cuphap || "", // Lấy giá trị cuphap từ API
                 });
             } catch (error) {
                 console.error("Lỗi khi lấy cấu hình website:", error.message);
@@ -53,12 +55,13 @@ const Setting = () => {
             const token = localStorage.getItem("token");
             const sanitizedData = {
                 tieude: formData.tieude,
-                title: formData.title, // Thêm trường title
+                title: formData.title,
                 logo: formData.logo,
                 favicon: formData.favicon,
                 lienhe: formData.lienhe.filter(
                     (contact) => contact.type || contact.value || contact.logolienhe
                 ),
+                cuphap: formData.cuphap, // Gửi trường cuphap lên API
             };
 
             await updateConfigWeb(sanitizedData, token);
@@ -154,6 +157,21 @@ const Setting = () => {
                                             <img src={formData.favicon} alt="Favicon Preview" style={{ maxWidth: "50px", height: "auto" }} />
                                         </div>
                                     )}
+                                </div>
+                            </fieldset>
+
+                            {/* Cú pháp */}
+                            <fieldset className="mb-4">
+                                <legend className="text-primary">Cú pháp nạp tiền</legend>
+                                <div className="mb-3">
+                                    <label className="form-label">Cú pháp ( naptien , donate,...)</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={formData.cuphap}
+                                        onChange={(e) => setFormData({ ...formData, cuphap: e.target.value })}
+                                        placeholder="Nhập cú pháp"
+                                    />
                                 </div>
                             </fieldset>
 
