@@ -5,15 +5,27 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 const platformLogos = {
-    Facebook: "https://media4.giphy.com/media/pejyg6fy1JpoQuLQQp/giphy.gif",
-    TikTok: "https://i.pinimg.com/originals/77/97/19/7797190f0f3efd9d5b0b96963d97ed5a.gif",
-    Instagram: "https://media2.giphy.com/media/QZOxRp5tZTemNQzpgc/giphy.gif",
-    YouTube: "https://media0.giphy.com/media/SVTPWzQWPCUKfji4fp/giphy.gif",
-    Twitter: "https://cliply.co/wp-content/uploads/2021/09/CLIPLY_372109260_TWITTER_LOGO_400.gif",
-    Telegram: "https://moein.video/wp-content/uploads/2022/12/Telegram-Logo-GIF.gif",
+    Zalo : "/zalo13.png",
+    Facebook: "https://cdn.mypanel.link/4cgr8h/9rjnzbd98rt8s5we.gif",
+    TikTok: "https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif",
+    Instagram: "https://cdn.mypanel.link/4cgr8h/15z7egnk0elz7gzm.gif",
+    YouTube: "https://cdn.mypanel.link/4cgr8h/z964hnh898piyhpp.png",
+    Twitter: "https://i.imgur.com/S9SejAz.gif",
+    Telegram: "https://cdn.mypanel.link/sw177w/7ea6iam2aygm0qws.gif",
     Shopee: "https://media4.giphy.com/media/4bjIfp3L4iCnare4iU/200w.gif",
+    Lazada: "https://classic.vn/wp-content/uploads/2022/04/logo-lazada.png",
+    Discord: "https://i.imgur.com/kDXT3yB.gif",
     Thread: "https://media.baamboozle.com/uploads/images/1465982/582bed70-c7c4-457f-95c9-c39811ac085f.gif",
+    
 };
+
+// Danh sách favicon có sẵn
+const faviconList = [
+    { url: "/favicon.ico", label: "Favicon mặc định" },
+    { url: "/logo192.png", label: "Logo 192x192" },
+    { url: "/logo512.png", label: "Logo 512x512" },
+    // Thêm favicon khác nếu muốn
+];
 
 const Setting = () => {
     const [formData, setFormData] = useState({
@@ -150,8 +162,24 @@ const Setting = () => {
                                         className="form-control"
                                         value={formData.favicon}
                                         onChange={(e) => setFormData({ ...formData, favicon: e.target.value })}
-                                        placeholder="Nhập URL favicon"
+                                        placeholder="Nhập URL favicon hoặc chọn bên dưới"
+                                        list="favicon-list"
                                     />
+                                    <datalist id="favicon-list">
+                                        {faviconList.map(f => (
+                                            <option value={f.url} key={f.url}>{f.label}</option>
+                                        ))}
+                                    </datalist>
+                                    <select
+                                        className="form-select mt-2"
+                                        value={formData.favicon}
+                                        onChange={(e) => setFormData({ ...formData, favicon: e.target.value })}
+                                    >
+                                        <option value="">Chọn favicon có sẵn</option>
+                                        {faviconList.map(f => (
+                                            <option value={f.url} key={f.url}>{f.label}</option>
+                                        ))}
+                                    </select>
                                     {formData.favicon && (
                                         <div className="mt-2">
                                             <img src={formData.favicon} alt="Favicon Preview" style={{ maxWidth: "50px", height: "auto" }} />

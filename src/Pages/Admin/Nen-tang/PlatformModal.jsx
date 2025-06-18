@@ -3,14 +3,16 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 
 const platformLogos = {
-  Facebook: "https://media4.giphy.com/media/pejyg6fy1JpoQuLQQp/giphy.gif?cid=6c09b952jc5fjcbbzw5nsgw5fhpel13egpoh3jza1ala341a&ep=v1_stickers_search&rid=giphy.gif&ct=s",
-  TikTok: "https://i.pinimg.com/originals/77/97/19/7797190f0f3efd9d5b0b96963d97ed5a.gif",
-  Instagram: "https://media2.giphy.com/media/QZOxRp5tZTemNQzpgc/giphy.gif?cid=6c09b952ja1qrjvvisx2jgbvrdj5ayheqlguw0cdayhndzo5&ep=v1_gifs_search&rid=giphy.gif&ct=g",
-  YouTube: "https://media0.giphy.com/media/SVTPWzQWPCUKfji4fp/giphy.gif?cid=6c09b9523af8s3o9dzscarda6feloua8n139hfndl2m3gbm3&ep=v1_stickers_search&rid=giphy.gif&ct=s",
-  Twitter: "https://cliply.co/wp-content/uploads/2021/09/CLIPLY_372109260_TWITTER_LOGO_400.gif",
-  Telegram: "https://moein.video/wp-content/uploads/2022/12/Telegram-Logo-GIF-Telegram-Icon-GIF-Royalty-Free-Animated-Icon-GIF-1080px-after-effects-project.gif",
-  Shopee :"https://media4.giphy.com/media/4bjIfp3L4iCnare4iU/200w.gif",
-  Thread : "https://media.baamboozle.com/uploads/images/1465982/582bed70-c7c4-457f-95c9-c39811ac085f.gif",
+  Facebook: "https://cdn.mypanel.link/4cgr8h/9rjnzbd98rt8s5we.gif",
+  TikTok: "https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif",
+  Instagram: "https://cdn.mypanel.link/4cgr8h/15z7egnk0elz7gzm.gif",
+  YouTube: "https://cdn.mypanel.link/4cgr8h/z964hnh898piyhpp.png",
+  Twitter: "https://i.imgur.com/S9SejAz.gif",
+  Telegram: "https://cdn.mypanel.link/sw177w/7ea6iam2aygm0qws.gif",
+  Shopee: "https://media4.giphy.com/media/4bjIfp3L4iCnare4iU/200w.gif",
+  Lazada: "https://classic.vn/wp-content/uploads/2022/04/logo-lazada.png",
+  Discord: "https://i.imgur.com/kDXT3yB.gif",
+  Thread: "https://media.baamboozle.com/uploads/images/1465982/582bed70-c7c4-457f-95c9-c39811ac085f.gif",
 };
 
 const PlatformModal = ({ platform, onClose, onSave }) => {
