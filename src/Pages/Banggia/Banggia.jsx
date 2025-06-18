@@ -3,6 +3,7 @@ import Table from "react-bootstrap/Table";
 import Select from "react-select";
 import { getServer } from "@/Utils/api";
 import { useNavigate } from "react-router-dom";
+import { type } from "@testing-library/user-event/dist/type";
 
 const Banggia = () => {
     const [servers, setServers] = useState([]);
@@ -33,16 +34,32 @@ const Banggia = () => {
         return Array.from(new Set(servers.map((s) => s.type)));
     }, [servers]);
 
-    // Tạo options cho react-select, thêm option "Tất cả" ở đầu
-    const serviceOptions = useMemo(() => [
-        { value: '', label: 'Tất cả' },
-        ...servers.map((s) => ({
-            value: s.Magoi,
-            label: `${s.Magoi} - ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
-            ...s
-        }))
+    // Tạo options cho react-select, thêm option "Tất cả" ở đầu, sắp xếp theo category (giữ nguyên thứ tự xuất hiện, không theo A-Z)
+    const serviceOptions = useMemo(() => {
+        // Lấy thứ tự category xuất hiện đầu tiên
+        const categoryOrder = [];
+        servers.forEach(s => {
+            if (s.category && !categoryOrder.includes(s.category)) {
+                categoryOrder.push(s.category);
+            }
+        });
+        // Sắp xếp theo thứ tự category xuất hiện trong dữ liệu
+        const sorted = [...servers].sort((a, b) => {
+            const aIdx = categoryOrder.indexOf(a.category);
+            const bIdx = categoryOrder.indexOf(b.category);
+            return aIdx - bIdx;
+        });
+        return [
+            { value: '', label: 'Tất cả' },
+            ...sorted.map((s) => ({
+                value: s.Magoi,
+                label: `${s.Magoi} - ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
 
-    ], [servers]);
+                // label: `${s.category ? `[${s.category}] ` : ''}${s.Magoi} - ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
+                ...s
+            }))
+        ];
+    }, [servers]);
 
     // Lọc servers theo searchService nếu có
     const filteredServers = useMemo(() => {
@@ -93,67 +110,71 @@ const Banggia = () => {
                                 >
                                     <div className="accordion accordion-flush" id={`accordion-${platform}`}>
                                         {/* Lấy các category của platform này */}
-                                        {Array.from(new Set(filteredServers.filter(s => s.type === platform).map(s => s.category))).map((category, cidx) => (
-                                            <div className="accordion-item" key={category}>
-                                                <h5 className="accordion-header m-0" id={`flush-heading-${platform}-${category}`}>
-                                                    <button
-                                                        className="accordion-button fw-semibold collapsed bg-light"
-                                                        type="button"
-                                                        data-bs-toggle="collapse"
-                                                        data-bs-target={`#flush-collapse-${platform}-${category}`}
-                                                        aria-expanded="false"
-                                                        aria-controls={`flush-collapse-${platform}-${category}`}
+                                        {Array.from(new Set(filteredServers.filter(s => s.type === platform).map(s => s.category))).map((category, cidx) => {
+                                            // Lấy id duy nhất cho accordion (tránh trùng lặp do ký tự đặc biệt)
+                                            const safeCategoryId = `${platform}-${category}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+                                            return (
+                                                <div className="accordion-item" key={category}>
+                                                    <h5 className="accordion-header m-0" id={`flush-heading-${safeCategoryId}`}>
+                                                        <button
+                                                            className="accordion-button fw-semibold collapsed bg-light"
+                                                            type="button"
+                                                            data-bs-toggle="collapse"
+                                                            data-bs-target={`#flush-collapse-${safeCategoryId}`}
+                                                            aria-expanded="false"
+                                                            aria-controls={`flush-collapse-${safeCategoryId}`}
+                                                        >
+                                                            {category}
+                                                        </button>
+                                                    </h5>
+                                                    <div
+                                                        id={`flush-collapse-${safeCategoryId}`}
+                                                        className={`accordion-collapse collapse${cidx === 0 ? " show" : ""}`}
+                                                        aria-labelledby={`flush-heading-${safeCategoryId}`}
+                                                        data-bs-parent={`#accordion-${platform}`}
                                                     >
-                                                        {category}
-                                                    </button>
-                                                </h5>
-                                                <div
-                                                    id={`flush-collapse-${platform}-${category}`}
-                                                    className={`accordion-collapse collapse${cidx === 0 ? " show" : ""}`}
-                                                    aria-labelledby={`flush-heading-${platform}-${category}`}
-                                                    data-bs-parent={`#accordion-${platform}`}
-                                                >
-                                                    <div className="accordion-body">
-                                                        <div className="table-responsive">
-                                                            <Table bordered hover className="mb-0 table-centered">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Id</th>
-                                                                        <th>Tên máy chủ</th>
-                                                                        <th>Giá</th>
-                                                                        <th>Mua</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {filteredServers.filter(s => s.type === platform && s.category === category).map((server) => (
-                                                                        <tr key={server.Magoi}>
-                                                                            <td>{server.Magoi}</td>
-                                                                            <td style={{
-                                                                                maxWidth: "250px",
-                                                                                whiteSpace: "normal",
-                                                                                wordWrap: "break-word",
-                                                                                overflowWrap: "break-word",
-                                                                            }}>{server.name}</td>
-                                                                            <td>{Number(server.rate).toLocaleString("en-US")}</td>
-                                                                            <td>
-                                                                                <button
-                                                                                    className="btn btn-sm btn-success"
-                                                                                    onClick={() => {
-                                                                                        window.location.href = `/order?id=${server.Magoi}`;
-                                                                                    }}
-                                                                                >
-                                                                                    Mua
-                                                                                </button>
-                                                                            </td>
+                                                        <div className="accordion-body">
+                                                            <div className="table-responsive">
+                                                                <Table bordered hover className="mb-0 table-centered">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Id</th>
+                                                                            <th>Tên máy chủ</th>
+                                                                            <th>Giá</th>
+                                                                            <th>Mua</th>
                                                                         </tr>
-                                                                    ))}
-                                                                </tbody>
-                                                            </Table>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {filteredServers.filter(s => s.type === platform && s.category === category).map((server) => (
+                                                                            <tr key={server.Magoi}>
+                                                                                <td>{server.Magoi}</td>
+                                                                                <td style={{
+                                                                                    maxWidth: "250px",
+                                                                                    whiteSpace: "normal",
+                                                                                    wordWrap: "break-word",
+                                                                                    overflowWrap: "break-word",
+                                                                                }}>{server.name}</td>
+                                                                                <td>{Number(server.rate).toLocaleString("en-US")}</td>
+                                                                                <td>
+                                                                                    <button
+                                                                                        className="btn btn-sm btn-success"
+                                                                                        onClick={() => {
+                                                                                            window.location.href = `/${server.type}/${server.path}`;
+                                                                                        }}
+                                                                                    >
+                                                                                        Mua
+                                                                                    </button>
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </Table>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             ))}
