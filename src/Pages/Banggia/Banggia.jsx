@@ -53,7 +53,7 @@ const Banggia = () => {
             { value: '', label: 'Tất cả' },
             ...sorted.map((s) => ({
                 value: s.Magoi,
-                label: `${s.Magoi} - ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
+                label: `${s.Magoi} - ${s.maychu} ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
 
                 // label: `${s.category ? `[${s.category}] ` : ''}${s.Magoi} - ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
                 ...s
@@ -153,7 +153,7 @@ const Banggia = () => {
                                                                                     whiteSpace: "normal",
                                                                                     wordWrap: "break-word",
                                                                                     overflowWrap: "break-word",
-                                                                                }}>{server.name}</td>
+                                                                                }}>{server.maychu} {server.name}</td>
                                                                                 <td>{Number(server.rate).toLocaleString("en-US")}</td>
                                                                                 <td>
                                                                                     <button
