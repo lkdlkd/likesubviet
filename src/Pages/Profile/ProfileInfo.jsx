@@ -124,12 +124,17 @@ export default function ProfileInfo({ user }) {
                     placeholder="Bạn cần ấn thay đổi Token"
                   />
                   <button
+                    onClick={() =>
+                      handleCopy(
+                        user?.token ? user.token : "Bạn chưa tạo Api Token!"
+                      )
+                    }
                     className="btn btn-primary"
                     type="button"
                     id="btn-reload-token"
                   >
                     <i className="ti ti-refresh"></i>
-                    Thay đổi
+                    COPY
                   </button>
                 </div>
               </div>

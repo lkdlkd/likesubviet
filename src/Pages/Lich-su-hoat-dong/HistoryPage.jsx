@@ -184,14 +184,17 @@ export default function History() {
                                             const isPlusAction =
                                                 actionText.includes("nạp tiền") ||
                                                 actionText.includes("cộng tiền");
+                                            const isRefundAction = actionText.includes("hoàn tiền");
+                                            let rowStyle = {};
+                                            if (isPlusAction) {
+                                                rowStyle = { backgroundColor: "#bcf0d6" };
+                                            } else if (isRefundAction) {
+                                                rowStyle = { backgroundColor: "#ffd6d6" };
+                                            }
                                             return (
                                                 <tr
                                                     key={item._id}
-                                                    style={
-                                                        isPlusAction
-                                                            ? { backgroundColor: "#bcf0d6" }
-                                                            : {}
-                                                    }
+                                                    style={rowStyle}
                                                 >
                                                     <td>{(page - 1) * limit + index + 1}</td>
                                                     <td>{item.madon}</td>
@@ -215,37 +218,33 @@ export default function History() {
                                                     <td>
                                                         <span
                                                             className="badge bg-info"
-                                                            style={{ backgroundColor: "#43bfe5" }}
+                                                            style={{ backgroundColor: "#43bfe5", display: "block", marginBottom: 2 }}
                                                         >
                                                             {Number(item.tienhientai).toLocaleString("en-US")}
-                                                        </span>{" "}
+                                                        </span>
                                                         {isPlusAction ? (
                                                             <>
                                                                 +
                                                                 <span
                                                                     className="badge"
-                                                                    style={{ backgroundColor: "#e53935" }}
+                                                                    style={{ backgroundColor: "#e53935", display: "block", marginBottom: 2 }}
                                                                 >
-                                                                    {Number(item.tongtien).toLocaleString(
-                                                                        "en-US"
-                                                                    )}
-                                                                </span>{" "}
+                                                                    {Number(item.tongtien).toLocaleString("en-US")}
+                                                                </span>
                                                             </>
                                                         ) : (
                                                             <>
                                                                 -
                                                                 <span
                                                                     className="badge"
-                                                                    style={{ backgroundColor: "#e53935" }}
+                                                                    style={{ backgroundColor: "#e53935", display: "block", marginBottom: 2 }}
                                                                 >
-                                                                    {Number(item.tongtien).toLocaleString(
-                                                                        "en-US"
-                                                                    )}
-                                                                </span>{" "}
+                                                                    {Number(item.tongtien).toLocaleString("en-US")}
+                                                                </span>
                                                             </>
                                                         )}
-                                                        ={" "}
-                                                        <span className="badge bg-success">
+                                                        =
+                                                        <span className="badge bg-success" style={{ display: "block" }}>
                                                             {Number(item.tienconlai).toLocaleString("en-US")}
                                                         </span>
                                                     </td>

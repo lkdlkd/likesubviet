@@ -16,7 +16,7 @@ export default function Tailieuapi() {
                                     <td className="fw-bolder">{API_DOMAIN}</td>
                                 </tr>
                                 <tr>
-                                    <td className="text-gray-700">API Key (TOKEN)</td>
+                                    <td className="text-gray-700">API Key</td>
                                     <td className="fw-bolder">
                                         <a href="/profile">Lấy tại đây</a>
                                     </td>

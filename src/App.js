@@ -25,6 +25,7 @@ import Tailieuapi from "./Pages/Tailieu/Tailieuapi";
 import NotFoundPage from "./Pages/404";
 import Khuyenmai from "./Pages/Admin/Khuyenmai/khuyenmai";
 import Naptientudong from "./Pages/Admin/Naptientudong/Naptientudong";
+import Banggia from "./Pages/Banggia/Banggia";
 function App() {
   return (
     <AuthProvider>
@@ -55,6 +56,7 @@ function App() {
             <Route path="/danh-sach-don" element={<Danhsachdon />} />
             <Route path="/:type/:path" element={<Order />} />
             <Route path="/tai-lieu-api" element={<Tailieuapi />} />
+            <Route path="/bang-gia" element={<Banggia />} />
             {/* Tạo router động từ groupedCategories */}
             {/* <Route
               path="*"

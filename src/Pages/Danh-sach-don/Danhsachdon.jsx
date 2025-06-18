@@ -146,6 +146,7 @@ const Danhsachdon = () => {
         { value: "Completed", label: "Hoàn thành" },
         { value: "In progress", label: "Đang chạy" },
         { value: "Pending", label: "Chờ xử lý" },
+        { value: "Partial", label: "Một phần" },
         { value: "Canceled", label: "Đã hủy" },
     ];
     const handleCopyText = (order) => {
@@ -337,11 +338,14 @@ const Danhsachdon = () => {
                                                         <span className="badge bg-primary">
                                                             Đang chạy
                                                         </span>
+                                                    ) : order.status === "Partial" ? (
+                                                        <span className="badge bg-warning text-dark">Đã hoàn 1 phần</span>
                                                     ) : order.status === "Canceled" ? (
                                                         <span className="badge bg-danger">Đã hủy</span>
                                                     ) : (
                                                         <span>{order.status}</span>
                                                     )}
+
                                                 </td>
                                                 {selectedCategory &&
                                                     selectedCategory.value === "BÌNH LUẬN" && (

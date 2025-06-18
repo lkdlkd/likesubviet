@@ -166,34 +166,35 @@ export default function Order() {
             cancelButtonText: "Hủy",
         });
         if (confirmResult.isConfirmed) {
-            loadingg("Đang xử lý, vui lòng không tắt trình duyệt hoặc F5!..."); // Hiển thị thông báo đang tìm kiếm
-            const payload = {
-                category: servers.find((server) => server.Magoi === selectedMagoi)?.category || "",
-                link: finalLink,
-                username,
-                magoi: selectedMagoi,
-                note,
-            };
-
-            if (selectedService && selectedService.comment === "on") {
-                payload.quantity = qty;
-                payload.comments = comments;
-            } else {
-                payload.quantity = quantity;
-            }
+            loadingg("Đang xử lý đơn hàng...", true, 9999999); // Hiển thị loading cho đến khi có response, không tự động tắt
+            setIsSubmitting(true);
             try {
+                const payload = {
+                    category: servers.find((server) => server.Magoi === selectedMagoi)?.category || "",
+                    link: finalLink,
+                    username,
+                    magoi: selectedMagoi,
+                    note,
+                };
+
+                if (selectedService && selectedService.comment === "on") {
+                    payload.quantity = qty;
+                    payload.comments = comments;
+                } else {
+                    payload.quantity = quantity;
+                }
                 const res = await addOrder(payload, token);
-                Swal.fire({
+                loadingg("", false); // Đóng loading khi xong
+                await Swal.fire({
                     title: "Thành công",
                     text: "Mua dịch vụ thành công",
                     icon: "success",
                     confirmButtonText: "Xác nhận",
                 });
-                setTimeout(() => {
-                    loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
-                }, 1000);
             } catch (error) {
-                Swal.fire({
+                loadingg("", false); // Đóng loading khi xong
+
+                await Swal.fire({
                     title: "Lỗi",
                     text: error.message || "Có lỗi xảy ra, vui lòng thử lại!",
                     icon: "error",
@@ -201,6 +202,7 @@ export default function Order() {
                 });
             } finally {
                 setIsSubmitting(false);
+                loadingg("", false); // Đóng loading khi xong
             }
         }
     };
@@ -698,7 +700,7 @@ export default function Order() {
                                     </div>
                                 </>
                             </form>
-                            {isSubmitting && (
+                            {/* {isSubmitting && (
                                 <div className="overlay">
                                     <div className="spinner-container">
                                         <div style={{ minHeight: "200px" }} className="d-flex justify-content-center align-items-center">
@@ -707,7 +709,7 @@ export default function Order() {
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </div>
