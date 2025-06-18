@@ -159,7 +159,7 @@ const Banggia = () => {
                                                                                     <button
                                                                                         className="btn btn-sm btn-success"
                                                                                         onClick={() => {
-                                                                                            window.location.href = `/${server.type}/${server.path}`;
+                                                                                            window.location.href = `/${String(server.type).toLowerCase()}/${String(server.path).toLowerCase()}`;
                                                                                         }}
                                                                                     >
                                                                                         Mua
