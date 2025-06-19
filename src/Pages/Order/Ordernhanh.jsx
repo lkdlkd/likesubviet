@@ -25,6 +25,7 @@ export default function Ordernhanh() {
     const [rate, setRate] = useState(0);
     const [cmtqlt, setcomputedQty] = useState(0);
     const [isConverting, setIsConverting] = useState(false);
+    const [searchService, setSearchService] = useState(null);
     const navigate = useNavigate();
 
     const token = localStorage.getItem("token");
@@ -185,7 +186,7 @@ export default function Ordernhanh() {
 
     // Hiển thị link: nếu có UID chuyển đổi thì ưu tiên nó
     const displayLink = useMemo(() => {
-        const selectedService = filteredServers.find((service) => service.Magoi === selectedMagoi);
+        const selectedService = filteredServers.find((server) => server.Magoi === selectedMagoi);
         return selectedService && selectedService.getid === "on" ? convertedUID || rawLink : rawLink;
     }, [convertedUID, rawLink, selectedMagoi, filteredServers]);
 
@@ -227,33 +228,34 @@ export default function Ordernhanh() {
             cancelButtonText: "Hủy",
         });
         if (confirmResult.isConfirmed) {
-            loadingg("Đang xử lý, vui lòng không tắt trình duyệt hoặc F5!..."); // Hiển thị thông báo đang tìm kiếm
-            const payload = {
-                link: finalLink,
-                username,
-                category: selectedCategory ? selectedCategory.value : "",
-                magoi: selectedMagoi,
-                note,
-            };
-            if (selectedService && selectedService.comment === "on") {
-                payload.quantity = qty;
-                payload.comments = comments;
-            } else {
-                payload.quantity = quantity;
-            }
+            loadingg("Đang xử lý đơn hàng...", true, 9999999); // Hiển thị loading cho đến khi có response, không tự động tắt
             try {
-                const res = await addOrder(payload, token);
+                const payload = {
+                    link: finalLink,
+                    username,
+                    category: selectedCategory ? selectedCategory.value : "",
+                    magoi: selectedMagoi,
+                    note,
+                };
+                if (selectedService && selectedService.comment === "on") {
+                    payload.quantity = qty;
+                    payload.comments = comments;
+                } else {
+                    payload.quantity = quantity;
+                }
 
-                Swal.fire({
+                const res = await addOrder(payload, token);
+                loadingg("", false); // Đóng loading khi xong
+
+                await Swal.fire({
                     title: "Thành công",
                     text: "Mua dịch vụ thành công",
                     icon: "success",
                     confirmButtonText: "Xác nhận",
                 });
-                setTimeout(() => {
-                    loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
-                }, 1000);
+
             } catch (error) {
+                loadingg("", false); // Đóng loading khi xong
                 Swal.fire({
                     title: "Lỗi",
                     text: error.message || "Có lỗi xảy ra, vui lòng thử lại!",
@@ -262,6 +264,7 @@ export default function Ordernhanh() {
                 });
             } finally {
                 setIsSubmitting(false);
+                loadingg("", false); // Đóng loading khi xong
             }
         }
     };
@@ -335,6 +338,27 @@ export default function Ordernhanh() {
         return ketQua;
     };
     const tien = useMemo(() => convertNumberToWords(Number(totalCost).toLocaleString("en-US")), [totalCost]);
+    // Tạo options cho Select tìm dịch vụ nhanh (chỉ giữ 1 useMemo, mỗi option có server)
+    const serviceOptions = useMemo(() => {
+        // Lấy thứ tự category xuất hiện đầu tiên
+        const categoryOrder = [];
+        servers.forEach(s => {
+            if (s.category && !categoryOrder.includes(s.category)) {
+                categoryOrder.push(s.category);
+            }
+        });
+        // Sắp xếp theo thứ tự category xuất hiện trong dữ liệu
+        const sorted = [...servers].sort((a, b) => {
+            const aIdx = categoryOrder.indexOf(a.category);
+            const bIdx = categoryOrder.indexOf(b.category);
+            return aIdx - bIdx;
+        });
+        return sorted.map((s) => ({
+            value: s.Magoi,
+            label: `${s.Magoi} - ${s.maychu} ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
+            server: s
+        }));
+    }, [servers]);
     return (
         <div className="main-content">
             <div className="row">
@@ -345,6 +369,31 @@ export default function Ordernhanh() {
                                 <span className="text-primary">Tạo đơn hàng mới: </span>
                             </h3>
                             <div className="form-group mb-3">
+                                <label className="form-label fw-semibold">TÌM DỊCH VỤ:</label>
+                                <Select
+                                    className="mb-3"
+                                    options={serviceOptions}
+                                    value={serviceOptions.find(opt => opt.value === selectedMagoi) || null}
+                                    onChange={opt => {
+                                        if (opt) {
+                                            setSelectedType(opt.server.type ? { value: opt.server.type, label: opt.server.type } : null);
+                                            // Nếu server có category, setSelectedCategory với giá trị đó, nếu không thì null
+                                            setSelectedCategory(opt.server.category ? { value: opt.server.category, label: opt.server.category } : null);
+                                            setSelectedMagoi(opt.value);
+                                            setMin(opt.server.min);
+                                            setMax(opt.server.max);
+                                            setRate(opt.server.rate);
+                                        } else {
+                                            setSelectedMagoi("");
+                                        }
+                                        setSearchService(opt);
+                                    }}
+                                    placeholder="---Tìm dịch vụ---"
+                                    isClearable
+                                    isSearchable
+                                />
+                            </div>
+                            <div className="form-group mb-3">
                                 <label className="form-label fw-semibold md-2">CHỌN NỀN TẢNG:</label>
                                 <Select
                                     value={selectedType}
@@ -352,6 +401,7 @@ export default function Ordernhanh() {
                                     options={typeOptions}
                                     placeholder="Chọn nền tảng"
                                     className="mb-2"
+                                    isClearable
                                 />
                                 {selectedType && (
                                     <>
@@ -361,10 +411,12 @@ export default function Ordernhanh() {
                                             onChange={handleCategoryChange}
                                             options={categoryOptions}
                                             placeholder="Chọn phân loại"
+                                            isClearable
                                         />
                                     </>
                                 )}
                             </div>
+
                             <form onSubmit={handleSubmit}>
                                 {selectedType && selectedCategory && (
                                     <>

@@ -185,6 +185,7 @@ const Danhsachdon = () => {
                                         onChange={handleTypeChange}
                                         options={typeOptions}
                                         placeholder="Chọn"
+                                        isClearable
                                     />
                                 </div>
                             </div>
@@ -197,6 +198,7 @@ const Danhsachdon = () => {
                                             onChange={handleCategoryChange}
                                             options={categoryOptions}
                                             placeholder="Chọn"
+                                            isClearable
                                         />
                                     </div>
                                 )}
@@ -249,6 +251,7 @@ const Danhsachdon = () => {
                                     onChange={(option) => setSelectedStatus(option.value)}
                                     options={statusOptions}
                                     placeholder="Chọn trạng thái"
+                                    isClearable
                                 />
                             </div>
                         </div>
