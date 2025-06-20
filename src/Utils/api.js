@@ -22,7 +22,7 @@ const handleResponse = async (response) => {
         }
       }
     } catch (e) {
-      console.error("Error parsing API response:", e);
+    //  console.error("Error parsing API response:", e);
     }
 
     throw new Error(errorMessage);

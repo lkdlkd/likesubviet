@@ -44,7 +44,7 @@ export default function History() {
                 setTotalPages(response.totalPages || 1);
                 setErrorMessage(null);
             } catch (error) {
-                console.error("Error fetching history:", error);
+              //  console.error("Error fetching history:", error);
                 setErrorMessage(
                     error.response?.data?.message || "Không thể tải dữ liệu lịch sử hoạt động."
                 );

@@ -17,7 +17,7 @@ export default function CategoriesPage() {
             const response = await getCategories(token);
             setCategories(response.data || []);
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách danh mục:", error);
+           // console.error("Lỗi khi lấy danh sách danh mục:", error);
             Swal.fire({
                 title: "Lỗi",
                 text: "Không thể lấy danh sách danh mục.",
@@ -32,7 +32,7 @@ export default function CategoriesPage() {
             const response = await getPlatforms(token);
             setPlatforms(response.platforms || []);
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách nền tảng:", error);
+          //  console.error("Lỗi khi lấy danh sách nền tảng:", error);
             Swal.fire({
                 title: "Lỗi",
                 text: "Không thể lấy danh sách nền tảng.",
@@ -73,7 +73,7 @@ export default function CategoriesPage() {
             setIsModalOpen(false);
             setSelectedCategory(null);
         } catch (error) {
-            console.error("Lỗi khi lưu danh mục:", error);
+            //console.error("Lỗi khi lưu danh mục:", error);
             Swal.fire({
                 title: "Lỗi",
                 text: "Không thể lưu danh mục.",
@@ -85,7 +85,7 @@ export default function CategoriesPage() {
 
     const handleDeleteCategory = async (categoryId) => {
         if (!categoryId) {
-            console.error("Không thể xóa danh mục: `_id` không tồn tại.");
+           // console.error("Không thể xóa danh mục: `_id` không tồn tại.");
             return;
         }
 
@@ -106,7 +106,7 @@ export default function CategoriesPage() {
                 setCategories((prev) => prev.filter((cat) => cat._id !== categoryId));
                 Swal.fire("Đã xóa!", "Danh mục đã được xóa.", "success");
             } catch (error) {
-                console.error("Lỗi khi xóa danh mục:", error);
+              //  console.error("Lỗi khi xóa danh mục:", error);
                 Swal.fire({
                     title: "Lỗi",
                     text: "Không thể xóa danh mục.",
@@ -177,7 +177,7 @@ export default function CategoriesPage() {
                                                                         if (category._id) {
                                                                             handleDeleteCategory(category._id);
                                                                         } else {
-                                                                            console.error("Không thể xóa danh mục: `_id` không tồn tại.");
+                                                                       //     console.error("Không thể xóa danh mục: `_id` không tồn tại.");
                                                                         }
                                                                     }}
                                                                 >

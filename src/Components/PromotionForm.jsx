@@ -19,7 +19,7 @@ export default function PromotionForm() {
       const data = await getPromotions(token);
       setPromotions(data);
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách chương trình khuyến mãi:", error.message);
+    //  console.error("Lỗi khi lấy danh sách chương trình khuyến mãi:", error.message);
     }
   };
 
@@ -40,7 +40,7 @@ export default function PromotionForm() {
       setIsEditing(false);
       fetchPromotions(); // Cập nhật danh sách
     } catch (error) {
-      console.error("Lỗi khi xử lý chương trình khuyến mãi:", error.message);
+    //  console.error("Lỗi khi xử lý chương trình khuyến mãi:", error.message);
     }
   };
 

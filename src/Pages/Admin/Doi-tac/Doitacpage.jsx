@@ -31,7 +31,7 @@ export default function Doitacpage() {
         setSmmPartners(partners);
         await fetchBalancesForPartners(partners);
       } catch (error) {
-        console.error("Lỗi khi lấy danh sách đối tác:", error);
+        //console.error("Lỗi khi lấy danh sách đối tác:", error);
         Swal.fire("Lỗi!", "Không thể tải danh sách đối tác. Vui lòng thử lại.", "error");
       } finally {
         setLoading(false);
@@ -59,7 +59,7 @@ export default function Doitacpage() {
         setSmmPartners((prev) => prev.filter((partner) => partner._id !== id));
         Swal.fire("Đã xóa!", "Đối tác đã được xóa thành công.", "success");
       } catch (error) {
-        console.error("Lỗi khi xóa đối tác:", error);
+       // console.error("Lỗi khi xóa đối tác:", error);
         Swal.fire("Lỗi!", "Không thể xóa đối tác. Vui lòng thử lại.", "error");
       }
     }
@@ -162,7 +162,7 @@ export default function Doitacpage() {
                                       if (partner._id) {
                                         handleDelete(partner._id);
                                       } else {
-                                        console.error("Không thể xóa đối tác: `_id` không tồn tại.");
+                                   //     console.error("Không thể xóa đối tác: `_id` không tồn tại.");
                                       }
                                     }}
                                   >

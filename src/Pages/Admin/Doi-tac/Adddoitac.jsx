@@ -63,7 +63,7 @@ export default function Adddoitac({
       }
       onClose(); // Đóng modal
     } catch (error) {
-      console.error("Lỗi khi thêm/cập nhật đối tác:", error);
+     // console.error("Lỗi khi thêm/cập nhật đối tác:", error);
       toast.error("Lỗi khi thêm/cập nhật đối tác. Vui lòng thử lại!");
     } finally {
       setLoading(false);
@@ -99,7 +99,7 @@ export default function Adddoitac({
               name="url_api"
               value={formData.url_api}
               onChange={handleChange}
-              placeholder="https://subviet.vn/api/v3"
+              placeholder="https://tenmien.com/api/v2"
               className="form-control"
               required
             />

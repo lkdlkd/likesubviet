@@ -25,7 +25,7 @@ export default function Editthongbao({ notification, token, onClose, onUpdate })
       onUpdate(updatedNotification); // Cập nhật thông báo trong danh sách
       onClose(); // Đóng modal
     } catch (error) {
-      console.error("Lỗi khi cập nhật thông báo:", error);
+    //  console.error("Lỗi khi cập nhật thông báo:", error);
       toast.error("Lỗi khi cập nhật thông báo. Vui lòng thử lại!");
     } finally {
       setLoading(false);

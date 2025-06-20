@@ -30,7 +30,7 @@ const Layout = () => {
                 setNotifications(notificationData);
                 setConfigWeb(configwebdata.data);
             } catch (error) {
-                console.error("Lỗi khi gọi API:", error);
+                // console.error("Lỗi khi gọi API:", error);
             }
         };
 

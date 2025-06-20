@@ -29,12 +29,13 @@ export default function Order() {
         try {
             decoded = JSON.parse(atob(token.split(".")[1]));
         } catch (error) {
-            console.error("Token decode error:", error);
+           // console.error("Token decode error:", error);
         }
     }
     const username = decoded.username;
     // Gọi API để lấy danh sách servers
     useEffect(() => {
+        loadingg("Đang tải dữ liệu...", true, 9999999); // Hiển thị loading khi bắt đầu fetch
         const fetchServers = async () => {
             try {
                 const response = await getServerByTypeAndCategory(type, path, token);
@@ -48,12 +49,17 @@ export default function Order() {
                     icon: "error",
                     confirmButtonText: "Xác nhận",
                 });
+            } finally {
+                loadingg("", false); // Đóng loading khi xong
             }
         };
 
         if (type && path) {
             fetchServers();
+        } else {
+            loadingg("", false); // Đóng loading nếu không có type/path
         }
+        // eslint-disable-next-line
     }, [type, path, token]); // Đảm bảo `type`, `path`, và `token` nằm trong mảng dependency
 
     // Lọc danh sách server

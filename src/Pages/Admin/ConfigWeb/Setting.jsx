@@ -51,7 +51,7 @@ const Setting = () => {
                     cuphap: config.data.cuphap || "", // Lấy giá trị cuphap từ API
                 });
             } catch (error) {
-                console.error("Lỗi khi lấy cấu hình website:", error.message);
+             //   console.error("Lỗi khi lấy cấu hình website:", error.message);
                 toast.error("Không thể tải cấu hình website!");
             }
         };
@@ -79,7 +79,7 @@ const Setting = () => {
             await updateConfigWeb(sanitizedData, token);
             toast.success("Cập nhật cấu hình thành công!");
         } catch (error) {
-            console.error("Lỗi khi cập nhật cấu hình website:", error.message);
+          //  console.error("Lỗi khi cập nhật cấu hình website:", error.message);
             toast.error("Cập nhật cấu hình thất bại!");
         } finally {
             setLoading(false);

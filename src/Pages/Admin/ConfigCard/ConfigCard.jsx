@@ -18,7 +18,7 @@ const ConfigCard = () => {
         const config = await getConfigCard(token);
         setFormData(config.data); // Gán dữ liệu từ API vào form
       } catch (error) {
-        console.error("Lỗi khi lấy cấu hình thẻ nạp:", error.message);
+       // console.error("Lỗi khi lấy cấu hình thẻ nạp:", error.message);
         toast.error("Không thể tải cấu hình thẻ nạp!");
       }
     };
@@ -36,7 +36,7 @@ const ConfigCard = () => {
       await updateConfigCard(formData, token);
       toast.success("Cập nhật cấu hình thẻ nạp thành công!");
     } catch (error) {
-      console.error("Lỗi khi cập nhật cấu hình thẻ nạp:", error.message);
+     // console.error("Lỗi khi cập nhật cấu hình thẻ nạp:", error.message);
       toast.error("Cập nhật cấu hình thẻ nạp thất bại!");
     } finally {
       setLoading(false);

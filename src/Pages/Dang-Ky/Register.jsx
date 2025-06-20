@@ -33,7 +33,7 @@ export default function Register() {
                 navigate("/dang-nhap"); // Chuyển hướng về trang đăng nhập sau khi đăng ký thành công
             }, 1000); // Thời gian chờ 1 giây để hiển thị thông báo
         } catch (err) {
-            console.error("Lỗi đăng ký:", err);
+           // console.error("Lỗi đăng ký:", err);
             setError(err.message || "Có lỗi xảy ra. Vui lòng thử lại.");
         } finally {
             setLoading(false);

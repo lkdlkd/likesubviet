@@ -2,10 +2,9 @@
 import { useState, useEffect } from "react";
 import Adddichvu from "./Adddichvu";
 import Table from "react-bootstrap/Table";
-import { deleteServer, getCategories, getServer, updateServer } from "@/Utils/api";
+import { deleteServer, getCategories, getServer } from "@/Utils/api";
 import Swal from "sweetalert2";
 import EditModal from "./EditModal";
-import { toast } from "react-toastify";
 
 export default function Dichvupage() {
   const [servers, setServers] = useState([]);
@@ -25,21 +24,33 @@ export default function Dichvupage() {
   const [selectedServer, setSelectedServer] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false); // Trạng thái hiển thị modal chỉnh sửa
   const [selectedService, setSelectedService] = useState(null); // Dịch vụ được chọn để chỉnh sửa
+  const [quickAddMode, setQuickAddMode] = useState(false); // <--- ADD THIS
+  const [showAddModal, setShowAddModal] = useState(false); // Trạng thái hiển thị modal thêm dịch vụ
+  // Lấy danh sách nền tảng duy nhất
+  const platforms = Array.from(new Set(servers.map((s) => s.type)));
+  const [selectedType, setSelectedType] = useState("");
 
   const token = localStorage.getItem("token") || "";
 
   const fetchServers = async () => {
     try {
-      const response = await getServer(token, currentPage, limit, debouncedSearch);
-      setServers(response.data || []);
-      setPagination(response.pagination || {
-        totalItems: 0,
-        currentPage: 1,
-        totalPages: 1,
-        pageSize: limit,
-      });
+      if (!quickAddMode) {
+        const response = await getServer(token, currentPage, limit, debouncedSearch);
+        setServers(response.data || []);
+        setPagination(response.pagination || {
+          totalItems: 0,
+          currentPage: 1,
+          totalPages: 1,
+          pageSize: limit,
+        });
+
+      } else {
+        // Nếu không ở chế độ hiển thị tất cả, gọi API với phân trang
+        const response = await getServer(token, undefined, undefined, debouncedSearch);
+        setServers(response.data || []);
+      }
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách server:", error);
+     // console.error("Lỗi khi lấy danh sách server:", error);
       Swal.fire({
         title: "Lỗi",
         text: "Không thể lấy danh sách server.",
@@ -53,7 +64,7 @@ export default function Dichvupage() {
       const response = await getCategories(token);
       setCategories(response.data || []);
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách danh mục:", error);
+    //  console.error("Lỗi khi lấy danh sách danh mục:", error);
       Swal.fire({
         title: "Lỗi",
         text: "Không thể lấy danh sách danh mục.",
@@ -66,7 +77,7 @@ export default function Dichvupage() {
   useEffect(() => {
     fetchServers();
     fetchCategories();
-  }, [currentPage, limit, debouncedSearch]);
+  }, [currentPage, limit, debouncedSearch, quickAddMode]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -117,13 +128,17 @@ export default function Dichvupage() {
         Swal.fire("Đã xóa!", "Server đã được xóa thành công.", "success");
         fetchServers(); // Tải lại danh sách server sau khi xóa
       } catch (error) {
-        console.error("Lỗi khi xóa server:", error);
+      //  console.error("Lỗi khi xóa server:", error);
         Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
       }
     }
   };
 
-
+  // Khi ở chế độ hiện tất cả, lọc servers theo search nếu có
+  const filteredServers = servers;
+  const categoriesByType = selectedType
+    ? Array.from(new Set(filteredServers.filter(s => s.type === selectedType).map(s => s.category)))
+    : [];
 
   return (
     <div className="main-content">
@@ -140,6 +155,39 @@ export default function Dichvupage() {
               onSuccess={() => {
                 setEditMode(false);
                 setSelectedServer(null);
+                fetchServers();
+              }}
+            />
+            <div className="mb-3">
+              <button
+                type="button"
+                className="btn btn-success me-2"
+                onClick={() => setShowAddModal(true)}
+              >
+                Thêm dịch vụ
+              </button>
+              <button
+                type="button"
+                className={`btn btn-${quickAddMode ? "secondary" : "warning"} me-2`}
+                onClick={() => setQuickAddMode((prev) => !prev)}
+              >
+                {quickAddMode ? "Hiển thị theo phân trang" : "Hiển thị theo dịch vụ"}
+              </button>
+              {quickAddMode && (
+                <span className="text-danger ms-2">
+                  Đang ở chế độ hiển thị theo dịch vụ, vui lòng tắt để sử dụng phân trang.
+                </span>
+              )}
+            </div>
+            <Adddichvu
+              show={showAddModal}
+              onClose={() => setShowAddModal(false)}
+              categories={categories}
+              token={token}
+              editMode={false}
+              initialData={{}}
+              onSuccess={() => {
+                setShowAddModal(false);
                 fetchServers();
               }}
             />
@@ -191,7 +239,7 @@ export default function Dichvupage() {
                       setSelectedServers([]); // Xóa danh sách đã chọn
                       fetchServers(); // Tải lại danh sách server
                     } catch (error) {
-                      console.error("Lỗi khi xóa server:", error);
+                   //   console.error("Lỗi khi xóa server:", error);
                       Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
                     }
                   }
@@ -200,177 +248,419 @@ export default function Dichvupage() {
                 Xóa server đã chọn
               </button>
             </div>
-            <div className="rsp-table">
-              <Table striped bordered hover responsive>
-                <thead>
-                  <tr>
-                    <th>
-                      <input
-                        type="checkbox"
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedServers(servers.map((server) => server._id)); // Chọn tất cả
-                          } else {
-                            setSelectedServers([]); // Bỏ chọn tất cả
-                          }
+
+            {/* Hiển thị dạng chọn nền tảng và accordion category khi ở chế độ hiện tất cả, dưới bảng tổng */}
+            {quickAddMode && (
+              <div className="d-flex flex-column flex-md-row mt-3">
+                {/* Nền tảng tab navigation */}
+                <ul cstyle={{ width: 300 }} className="nav nav-tabs nav-pills border-0 flex-row flex-md-column me-5 mb-3 mb-md-0 fs-6" role="tablist" style={{ width: "300px" }}>
+                  {platforms.map((type) => (
+                    <li className="nav-item w-md-200px me-0" role="presentation" key={type}>
+                      <a
+                        className={`nav-link${selectedType === type ? " active" : ""}`}
+                        data-bs-toggle="tab"
+                        href={`#services-${type}`}
+                        aria-selected={selectedType === type ? "true" : "false"}
+                        role="tab"
+                        onClick={e => {
+                          e.preventDefault();
+                          setSelectedType(type);
                         }}
-                        checked={
-                          selectedServers.length === servers.length && servers.length > 0
-                        }
-                      />
-                    </th>
-                    <th>#</th>
-                    <th>THAO TÁC</th>
-                    <th>TÊN</th>
-                    <th>GIÁ</th>
-                    <th>NGUỒN</th>
-                    <th>Thời gian thêm</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {servers.length > 0 ? (
-                    servers.map((serverItem, index) => (
-                      <tr key={serverItem.id || serverItem.serviceId}>
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={selectedServers.includes(serverItem._id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedServers((prev) => [...prev, serverItem._id]); // Thêm vào danh sách đã chọn
-                              } else {
-                                setSelectedServers((prev) =>
-                                  prev.filter((id) => id !== serverItem._id) // Loại bỏ khỏi danh sách đã chọn
-                                );
-                              }
-                            }}
-                          />
-                        </td>
-                        <td>{(pagination.currentPage - 1) * limit + index + 1}</td>
+                        style={{ cursor: "pointer" }}
+                      >
+                        {type}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                {/* End Nền tảng tab navigation */}
+                {/* <div className="col-md-6 mb-3">
+                  <label>Chọn nền tảng:</label>
+                  <select
+                    className="form-select"
+                    value={selectedType}
+                    onChange={e => setSelectedType(e.target.value)}
+                  >
+                    <option value="">-- Chọn nền tảng --</option>
+                    {platforms.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div> */}
+                <div className="tab-content w-100">
 
-                        <td>
-                          <div className="dropdown">
-                            <button
-                              className="btn btn-primary dropdown-toggle"
-                              type="button"
-                              data-bs-toggle="dropdown"
-                              aria-expanded="false"
+                  {selectedType && (
+                    <div className="accordion accordion-flush" id="accordion-category">
+                      {categoriesByType.map((category, cidx) => {
+                        const safeCategoryId = `cat-${category}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+                        return (
+                          <div className="accordion-item" key={category}>
+                            <h5 className="accordion-header m-0" id={`flush-heading-${safeCategoryId}`}>
+                              <button
+                                className="accordion-button fw-semibold collapsed bg-light"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target={`#flush-collapse-${safeCategoryId}`}
+                                aria-expanded="false"
+                                aria-controls={`flush-collapse-${safeCategoryId}`}
+                              >
+                                {category}
+                              </button>
+                            </h5>
+                            <div
+                              id={`flush-collapse-${safeCategoryId}`}
+                              className={`accordion-collapse collapse${cidx === 0 ? " show" : ""}`}
+                              aria-labelledby={`flush-heading-${safeCategoryId}`}
+                              data-bs-parent="#accordion-category"
                             >
-                              Thao tác <i className="las la-angle-right ms-1"></i>
-                            </button>
-                            <ul className="dropdown-menu">
-                              <li>
-                                <button
-                                  className="dropdown-item text-warning"
-                                  onClick={() => handleEdit(serverItem)}
-                                >
-                                  Sửa
-                                </button>
-                              </li>
-                              <li>
-                                <button
-                                  className="dropdown-item text-danger"
-                                  onClick={() => handleDelete(serverItem._id || "")}
-                                >
-                                  Xóa
-                                </button>
-                              </li>
-                            </ul>
+                              <div className="rsp-table">
+                                <Table striped bordered hover responsive>
+                                  <thead>
+                                    <tr>
+                                      <th>
+                                        <input
+                                          type="checkbox"
+                                          onChange={(e) => {
+                                            if (e.target.checked) {
+                                              setSelectedServers(servers.map((server) => server._id)); // Chọn tất cả
+                                            } else {
+                                              setSelectedServers([]); // Bỏ chọn tất cả
+                                            }
+                                          }}
+                                          checked={
+                                            selectedServers.length === servers.length && servers.length > 0
+                                          }
+                                        />
+                                      </th>
+                                      <th>#</th>
+                                      <th>THAO TÁC</th>
+                                      <th>TÊN</th>
+                                      <th>GIÁ</th>
+                                      <th>NGUỒN</th>
+                                      <th>Thời gian thêm</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {filteredServers.filter(s => s.type === selectedType && s.category === category).length > 0 ? (
+                                      filteredServers.filter(s => s.type === selectedType && s.category === category).map((serverItem, idx2) => (
+                                        <tr key={serverItem.id || serverItem.serviceId}>
+                                          <td>
+                                            <input
+                                              type="checkbox"
+                                              checked={selectedServers.includes(serverItem._id)}
+                                              onChange={(e) => {
+                                                if (e.target.checked) {
+                                                  setSelectedServers((prev) => [...prev, serverItem._id]);
+                                                } else {
+                                                  setSelectedServers((prev) =>
+                                                    prev.filter((id) => id !== serverItem._id)
+                                                  );
+                                                }
+                                              }}
+                                            />
+                                          </td>
+                                          <td>{(pagination.currentPage - 1) * limit + idx2 + 1}</td>
+                                          <td>
+                                            <div className="dropdown">
+                                              <button
+                                                className="btn btn-primary dropdown-toggle"
+                                                type="button"
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                              >
+                                                Thao tác <i className="las la-angle-right ms-1"></i>
+                                              </button>
+                                              <ul className="dropdown-menu">
+                                                <li>
+                                                  <button
+                                                    className="dropdown-item text-warning"
+                                                    onClick={() => handleEdit(serverItem)}
+                                                  >
+                                                    Sửa
+                                                  </button>
+                                                </li>
+                                                <li>
+                                                  <button
+                                                    className="dropdown-item text-danger"
+                                                    onClick={() => handleDelete(serverItem._id || "")}
+                                                  >
+                                                    Xóa
+                                                  </button>
+                                                </li>
+                                              </ul>
+                                            </div>
+                                          </td>
+                                          <td style={{
+                                            maxWidth: "350px",
+                                            whiteSpace: "normal",
+                                            wordWrap: "break-word",
+                                            overflowWrap: "break-word",
+                                          }}>
+                                            <ul>
+                                              <li>
+                                                <b>Mã gói</b> : {serverItem.Magoi}
+                                              </li>
+                                              <li>
+                                                <b>Tên</b> : {serverItem.maychu} {serverItem.name}
+                                              </li>
+                                              <li>
+                                                <b>Nền tảng</b> : {serverItem.type}
+                                              </li>
+                                              <li>
+                                                <b>Dịch vụ</b> : {serverItem.category}
+                                              </li>
+                                              <li>
+                                                <b>Min-Max</b> : {serverItem.min} - {serverItem.max}
+                                              </li>
+                                              <li>
+                                                <b>Trạng thái</b> :{" "}
+                                                {serverItem.isActive ? (
+                                                  <span className="badge bg-success">Hoạt động</span>
+                                                ) : (
+                                                  <span className="badge bg-danger">Đóng</span>
+                                                )}
+                                              </li>
+                                            </ul>
+                                          </td>
+                                          <td>
+                                            <ul>
+                                              <li>
+                                                <b>Giá gốc</b> : {serverItem.originalRate}
+                                              </li>
+                                              <li>
+                                                <b>Giá</b> : {serverItem.rate}
+                                              </li>
+                                            </ul>
+                                          </td>
+                                          <td style={{
+                                            maxWidth: "350px",
+                                            whiteSpace: "normal",
+                                            wordWrap: "break-word",
+                                            overflowWrap: "break-word",
+                                          }}>
+                                            <ul>
+                                              <li>
+                                                <b>Nguồn</b>: {serverItem.DomainSmm}
+                                              </li>
+                                              <li>
+                                                <b>ID server</b>: {serverItem.serviceId}
+                                              </li>
+                                              <li>
+                                                <b>Tên server</b>: {serverItem.serviceName}
+                                              </li>
+                                              <li>
+                                                <b>Trạng thái</b>:{" "}
+                                                <span className="badge bg-success">Hoạt động</span>
+                                              </li>
+                                            </ul>
+                                          </td>
+                                          <td>{new Date(serverItem.createdAt).toLocaleString()}</td>
+                                        </tr>
+                                      ))
+                                    ) : (
+                                      <tr>
+                                        <td colSpan={14} style={{ textAlign: "center" }}>
+                                          Không có server nào được tìm thấy.
+                                        </td>
+                                      </tr>
+                                    )}
+                                  </tbody>
+                                </Table>
+                              </div>
+                            </div>
                           </div>
-                        </td>
-                        <td style={{
-                          maxWidth: "350px",
-                          whiteSpace: "normal",
-                          wordWrap: "break-word",
-                          overflowWrap: "break-word",
-                        }}>
-                          <ul>
-                            <li>
-                              <b>Mã gói</b> : {serverItem.Magoi}
-                            </li>
-                            <li>
-                              <b>Tên</b> : {serverItem.maychu} {serverItem.name}
-                            </li>
-
-                            <li>
-                              <b>Nền tảng</b> : {serverItem.type}
-                            </li>
-                            <li>
-                              <b>Dịch vụ</b> : {serverItem.category}
-                            </li>
-
-                            <li>
-                              <b>Min-Max</b> : {serverItem.min} - {serverItem.max}
-                            </li>
-                            <li>
-                              <b>Trạng thái</b> :{" "}
-                              {serverItem.isActive ? (
-                                <span className="badge bg-success">Hoạt động</span>
-                              ) : (
-                                <span className="badge bg-danger">Đóng</span>
-                              )}
-                            </li>
-                          </ul>
-                        </td>
-                        <td>
-                          <ul>
-                            <li>
-                              <b>Giá gốc</b> : {serverItem.originalRate}
-                            </li>
-                            <li>
-                              <b>Giá</b> : {serverItem.rate}
-                            </li>
-                          </ul>
-                        </td>
-                        <td>
-                          <ul>
-                            <li>
-                              <b>Nguồn</b>: {serverItem.DomainSmm}
-                            </li>
-                            <li>
-                              <b>Máy chủ</b>: {serverItem.serviceId}
-                            </li>
-                            <li>
-                              <b>Trạng thái</b>:{" "}
-                              <span className="badge bg-success">Hoạt động</span>
-                            </li>
-                          </ul>
-                        </td>
-                        <td>{new Date(serverItem.createdAt).toLocaleString()}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={14} style={{ textAlign: "center" }}>
-                        Không có server nào được tìm thấy.
-                      </td>
-                    </tr>
+                        );
+                      })}
+                    </div>
                   )}
-                </tbody>
-              </Table>
-            </div>
-            {pagination.totalItems > 0 && pagination.totalPages > 1 && (
-              <div className="pagination d-flex justify-content-between align-items-center mt-3">
-                <button
-                  className="btn btn-secondary"
-                  onClick={handlePrevPage}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
-                <span>
-                  Trang {pagination.currentPage} / {pagination.totalPages}
-                </span>
-                <button
-                  className="btn btn-secondary"
-                  onClick={handleNextPage}
-                  disabled={currentPage === pagination.totalPages}
-                >
-                  Sau
-                </button>
+                </div>
               </div>
             )}
+            {!quickAddMode && (
+              <div className="rsp-table">
+                <Table striped bordered hover responsive>
+                  <thead>
+                    <tr>
+                      <th>
+                        <input
+                          type="checkbox"
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedServers(servers.map((server) => server._id)); // Chọn tất cả
+                            } else {
+                              setSelectedServers([]); // Bỏ chọn tất cả
+                            }
+                          }}
+                          checked={
+                            selectedServers.length === servers.length && servers.length > 0
+                          }
+                        />
+                      </th>
+                      <th>#</th>
+                      <th>THAO TÁC</th>
+                      <th>TÊN</th>
+                      <th>GIÁ</th>
+                      <th>NGUỒN</th>
+                      <th>Thời gian thêm</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {servers.length > 0 ? (
+                      servers.map((serverItem, index) => (
+                        <tr key={serverItem.id || serverItem.serviceId}>
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={selectedServers.includes(serverItem._id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedServers((prev) => [...prev, serverItem._id]); // Thêm vào danh sách đã chọn
+                                } else {
+                                  setSelectedServers((prev) =>
+                                    prev.filter((id) => id !== serverItem._id) // Loại bỏ khỏi danh sách đã chọn
+                                  );
+                                }
+                              }}
+                            />
+                          </td>
+                          <td>{(pagination.currentPage - 1) * limit + index + 1}</td>
+
+                          <td>
+                            <div className="dropdown">
+                              <button
+                                className="btn btn-primary dropdown-toggle"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                              >
+                                Thao tác <i className="las la-angle-right ms-1"></i>
+                              </button>
+                              <ul className="dropdown-menu">
+                                <li>
+                                  <button
+                                    className="dropdown-item text-warning"
+                                    onClick={() => handleEdit(serverItem)}
+                                  >
+                                    Sửa
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    className="dropdown-item text-danger"
+                                    onClick={() => handleDelete(serverItem._id || "")}
+                                  >
+                                    Xóa
+                                  </button>
+                                </li>
+                              </ul>
+                            </div>
+                          </td>
+                          <td style={{
+                            maxWidth: "350px",
+                            whiteSpace: "normal",
+                            wordWrap: "break-word",
+                            overflowWrap: "break-word",
+                          }}>
+                            <ul>
+                              <li>
+                                <b>Mã gói</b> : {serverItem.Magoi}
+                              </li>
+                              <li>
+                                <b>Tên</b> : {serverItem.maychu} {serverItem.name}
+                              </li>
+
+                              <li>
+                                <b>Nền tảng</b> : {serverItem.type}
+                              </li>
+                              <li>
+                                <b>Dịch vụ</b> : {serverItem.category}
+                              </li>
+
+                              <li>
+                                <b>Min-Max</b> : {serverItem.min} - {serverItem.max}
+                              </li>
+                              <li>
+                                <b>Trạng thái</b> :{" "}
+                                {serverItem.isActive ? (
+                                  <span className="badge bg-success">Hoạt động</span>
+                                ) : (
+                                  <span className="badge bg-danger">Đóng</span>
+                                )}
+                              </li>
+                            </ul>
+                          </td>
+                          <td>
+                            <ul>
+                              <li>
+                                <b>Giá gốc</b> : {serverItem.originalRate}
+                              </li>
+                              <li>
+                                <b>Giá</b> : {serverItem.rate}
+                              </li>
+                            </ul>
+                          </td>
+                          <td style={{
+                            maxWidth: "350px",
+                            whiteSpace: "normal",
+                            wordWrap: "break-word",
+                            overflowWrap: "break-word",
+                          }}>
+                            <ul>
+                              <li>
+                                <b>Nguồn</b>: {serverItem.DomainSmm}
+                              </li>
+
+                              <li>
+                                <b>ID server</b>: {serverItem.serviceId}
+                              </li>
+                              <li>
+                                <b>Tên server</b>: {serverItem.serviceName}
+                              </li>
+                              <li>
+                                <b>Trạng thái</b>:{" "}
+                                <span className="badge bg-success">Hoạt động</span>
+                              </li>
+                            </ul>
+                          </td>
+                          <td>{new Date(serverItem.createdAt).toLocaleString()}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={14} style={{ textAlign: "center" }}>
+                          Không có server nào được tìm thấy.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+              </div>
+            )}
+            {!quickAddMode &&
+              pagination.totalItems > 0 && pagination.totalPages > 1 && (
+                <div className="pagination d-flex justify-content-between align-items-center mt-3">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Trang {pagination.currentPage} / {pagination.totalPages}
+                  </span>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleNextPage}
+                    disabled={currentPage === pagination.totalPages}
+                  >
+                    Sau
+                  </button>
+                </div>
+              )
+            }
           </div>
+
         </div>
       </div>
       <EditModal

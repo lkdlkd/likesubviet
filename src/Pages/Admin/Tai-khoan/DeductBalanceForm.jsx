@@ -32,7 +32,7 @@ function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
       toast.success("Trừ số dư thành công!");
       onClose(); // Đóng modal
     } catch (error) {
-      console.error("Lỗi khi trừ số dư:", error);
+     // console.error("Lỗi khi trừ số dư:", error);
       toast.error("Trừ số dư thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);

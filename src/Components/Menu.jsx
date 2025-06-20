@@ -19,7 +19,7 @@ function MenuUser({ user, categories, configWeb }) {
         ? validCategories.reduce((acc, category) => {
             const platformId = category.platforms_id?._id; // Sử dụng optional chaining
             if (!platformId) {
-                console.error("Danh mục không có `platforms_id` hoặc `_id`:", category);
+              //  console.error("Danh mục không có `platforms_id` hoặc `_id`:", category);
                 return acc;
             }
             if (!acc[platformId]) {
@@ -45,6 +45,12 @@ function MenuUser({ user, categories, configWeb }) {
         loadingg("Vui lòng chờ...");
         setTimeout(() => {
             navigate(path); // Chuyển trang
+            // Đóng sidebar nếu đang mở (giống Header)
+            const sidebar = document.querySelector(".pc-sidebar");
+            if (sidebar && sidebar.classList.contains("open")) {
+                sidebar.classList.remove("open");
+                document.body.classList.remove("pc-sidebar-collapse");
+            }
             Swal.close(); // Đóng thông báo tải
         }, 1000);
     };

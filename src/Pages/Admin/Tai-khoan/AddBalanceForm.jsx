@@ -28,7 +28,7 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
             toast.success("Thêm số dư thành công!");
             onClose(); // Đóng modal
         } catch (error) {
-            console.error("Lỗi khi thêm số dư:", error);
+          //  console.error("Lỗi khi thêm số dư:", error);
             toast.error("Thêm số dư thất bại. Vui lòng thử lại.");
         } finally {
             setLoading(false);

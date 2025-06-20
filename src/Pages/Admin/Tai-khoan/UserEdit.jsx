@@ -44,7 +44,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
       toast.success("Cập nhật thông tin thành công!");
       onClose(); // Đóng modal
     } catch (error) {
-      console.error("Lỗi khi cập nhật thông tin:", error);
+     // console.error("Lỗi khi cập nhật thông tin:", error);
       toast.error("Cập nhật thông tin thất bại. Vui lòng thử lại.");
     } finally {
       setSaving(false);
@@ -64,7 +64,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
       toast.success("Mật khẩu đã được đặt lại thành công!");
       setNewPassword(""); // Xóa mật khẩu sau khi đổi thành công
     } catch (error) {
-      console.error("Lỗi khi đổi mật khẩu:", error);
+     // console.error("Lỗi khi đổi mật khẩu:", error);
       toast.error("Đổi mật khẩu thất bại. Vui lòng thử lại.");
     } finally {
       setSaving(false);

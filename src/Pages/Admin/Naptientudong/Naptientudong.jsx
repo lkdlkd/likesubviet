@@ -22,7 +22,7 @@ export default function Naptientudong() {
             setHasMore(data.length === limit); // Nếu số lượng giao dịch trả về bằng `limit`, có thể còn dữ liệu
         } catch (err) {
             setError("Không thể tải danh sách giao dịch.");
-            console.error(err);
+          //  console.error(err);
         } finally {
             setLoading(false); // Kết thúc tải dữ liệu
         }

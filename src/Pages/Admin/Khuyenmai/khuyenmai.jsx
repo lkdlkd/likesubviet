@@ -26,7 +26,7 @@ export default function Khuyenmai() {
             const data = await getPromotions(token);
             setPromotions(data);
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách chương trình khuyến mãi:", error.message);
+           // console.error("Lỗi khi lấy danh sách chương trình khuyến mãi:", error.message);
         }
     };
 
@@ -63,7 +63,7 @@ export default function Khuyenmai() {
             fetchPromotions();
         } catch (error) {
             Swal.fire("Lỗi!", "Không thể xử lý chương trình khuyến mãi.", "error");
-            console.error("Lỗi khi xử lý chương trình khuyến mãi:", error.message);
+           // console.error("Lỗi khi xử lý chương trình khuyến mãi:", error.message);
         }
     };
 
@@ -108,7 +108,7 @@ export default function Khuyenmai() {
                     fetchPromotions(); // Cập nhật danh sách
                 } catch (error) {
                     Swal.fire("Lỗi!", "Không thể xóa chương trình khuyến mãi.", "error");
-                    console.error("Lỗi khi xóa chương trình khuyến mãi:", error.message);
+                 //   console.error("Lỗi khi xóa chương trình khuyến mãi:", error.message);
                 }
             }
         });

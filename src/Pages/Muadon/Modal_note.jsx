@@ -41,11 +41,10 @@ export default function Modalnote({ modal_Show }) {
     if (type && path) {
       const hiddenUntilKey = `modalHiddenUntil_${type}_${path}`; // Tạo key riêng cho từng `type` và `path`
       const hiddenUntil = new Date();
-      hiddenUntil.setHours(hiddenUntil.getHours() + 2); // Ẩn modal trong 2 tiếng
+      hiddenUntil.setHours(hiddenUntil.getHours() + 5); // Ẩn modal trong 5 tiếng
       localStorage.setItem(hiddenUntilKey, hiddenUntil.toISOString());
     }
   };
-
   // Xử lý khi người dùng nhấn dấu "X"
   const handleClose = () => {
     setShow(false); // Chỉ tắt modal, không lưu trạng thái ẩn

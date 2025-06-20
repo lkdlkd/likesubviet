@@ -18,6 +18,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
     comment: "off",
     reaction: "off",
     matlive: "off",
+    isActive: true,
   });
 
   const [form, setForm] = useState({
@@ -27,6 +28,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
     DomainSmm: "",
     serviceName: "",
     serviceId: "",
+    isActive: true,
   });
 
   useEffect(() => {
@@ -75,6 +77,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
       comment: formData.comment,
       reaction: formData.reaction,
       matlive: formData.matlive,
+      isActive: formData.isActive,
     };
 
     try {
@@ -82,7 +85,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
       toast.success("Dịch vụ đã được cập nhật thành công!");
       onClose();
     } catch (error) {
-      console.error("Lỗi khi cập nhật dịch vụ:", error);
+      //console.error("Lỗi khi cập nhật dịch vụ:", error);
       toast.error("Lỗi khi cập nhật dịch vụ. Vui lòng thử lại!");
     }
   };
@@ -215,6 +218,23 @@ export default function EditModal({ show, onClose, initialData, token }) {
               className="form-control"
               disabled
             />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Trạng thái:</label>
+            <select
+              name="isActive"
+              value={formData.isActive ? "true" : "false"}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  isActive: e.target.value === "true",
+                })
+              }
+              className="form-select"
+            >
+              <option value="true">Hoạt động</option>
+              <option value="false">Đóng</option>
+            </select>
           </div>
           <h4>Các chức năng</h4>
           {["getid", "comment", "reaction", "matlive"].map((field) => (

@@ -20,7 +20,7 @@ export default function ThongkePage() {
                 setStatistics(data);
                 setErrorMessage(null);
             } catch (error) {
-                console.error("Error fetching statistics:", error.message || error);
+            //    console.error("Error fetching statistics:", error.message || error);
                 setErrorMessage(error.message || "Có lỗi xảy ra khi tải dữ liệu.");
             } finally {
                 setLoading(false);

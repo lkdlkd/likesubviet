@@ -30,7 +30,7 @@ export default function Addthongbao({ token, onAdd, show, onClose }) {
       setFormData({ title: "", content: "", color: "primary" }); // Reset form
       onClose(); // Đóng modal
     } catch (error) {
-      console.error("Lỗi khi thêm thông báo:", error);
+     // console.error("Lỗi khi thêm thông báo:", error);
       toast.error("Lỗi khi thêm thông báo. Vui lòng thử lại!");
     } finally {
       setLoading(false);

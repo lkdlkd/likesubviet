@@ -51,10 +51,8 @@ export default function Napthecao({ cardData = [], token }) {
     try {
       setLoading(true);
       loadingg("Vui lòng chờ..."); // Hiển thị thông báo đang tìm kiếm
-      setTimeout(() => {
-        loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
-      }, 1000);
       const response = await rechargeCard(cardInfo, token); // Gọi API rechargeCard
+      loadingg("", false); // Ẩn thông báo sau khi gọi API xong
 
       Swal.fire({
         title: "Thành công",
@@ -71,6 +69,7 @@ export default function Napthecao({ cardData = [], token }) {
         card_code: "",
       });
     } catch (error) {
+      loadingg("", false); // Ẩn thông báo khi có lỗi
       Swal.fire({
         title: "Lỗi",
         text: error.message || "Có lỗi xảy ra. Vui lòng thử lại!",

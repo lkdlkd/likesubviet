@@ -38,7 +38,7 @@ export default function BankingAdmin() {
       toast.success("Ngân hàng mới được tạo thành công!");
       setShowModal(false);
     } catch (error) {
-      console.error("Lỗi khi tạo ngân hàng:", error);
+   //   console.error("Lỗi khi tạo ngân hàng:", error);
       toast.error("Lỗi khi tạo ngân hàng. Vui lòng thử lại!");
     }
   };
@@ -52,7 +52,7 @@ export default function BankingAdmin() {
       toast.success("Ngân hàng đã được cập nhật thành công!");
       setShowModal(false);
     } catch (error) {
-      console.error("Lỗi khi cập nhật ngân hàng:", error);
+      //console.error("Lỗi khi cập nhật ngân hàng:", error);
       toast.error("Lỗi khi cập nhật ngân hàng. Vui lòng thử lại!");
     }
   };
@@ -76,7 +76,7 @@ export default function BankingAdmin() {
         toast.success("Ngân hàng đã bị xóa thành công!");
       }
     } catch (error) {
-      console.error("Lỗi khi xóa ngân hàng:", error);
+     // console.error("Lỗi khi xóa ngân hàng:", error);
       toast.error("Lỗi khi xóa ngân hàng. Vui lòng thử lại!");
     }
   };

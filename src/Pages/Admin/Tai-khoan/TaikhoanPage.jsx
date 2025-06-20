@@ -47,7 +47,7 @@ export default function TaikhoanPage() {
         setTotalPages(userRes.totalPages || 1);
         setErrorMessage(null);
       } catch (error) {
-        console.error("Error fetching users:", error.message || error);
+      //  console.error("Error fetching users:", error.message || error);
         setErrorMessage("Không thể tải danh sách người dùng. Vui lòng thử lại.");
       } finally {
         setLoading(false);
@@ -101,7 +101,7 @@ export default function TaikhoanPage() {
           Swal.fire("Đã xóa!", "Người dùng đã được xóa thành công.", "success");
           setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
         } catch (error) {
-          console.error("Lỗi khi xóa người dùng:", error);
+       //   console.error("Lỗi khi xóa người dùng:", error);
           Swal.fire("Lỗi!", "Không thể xóa người dùng. Vui lòng thử lại.", "error");
         }
       }

@@ -36,7 +36,7 @@ const Danhsachdon = () => {
                 const response = await getServer(token); // Gọi API với token
                 setServers(response.data || []); // Cập nhật danh sách servers
             } catch (error) {
-                console.error("Lỗi khi gọi API getServer:", error);
+              //  console.error("Lỗi khi gọi API getServer:", error);
                 toast.error("Không có server!");
 
             }
