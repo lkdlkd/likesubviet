@@ -576,8 +576,8 @@ export default function Order() {
                                                         {/* {server.rate}đ */}
                                                     </span>
 
-                                                    <span className="badge bg-success ms-1">
-                                                        {server.isActive ? "Hoạt động" : "Không hoạt động"}
+                                                    <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
+                                                      {server.isActive ? "Hoạt động" : "Không hoạt động"}
                                                     </span>
                                                     {/* <span className="custom-control-label">
                                                         {" "}

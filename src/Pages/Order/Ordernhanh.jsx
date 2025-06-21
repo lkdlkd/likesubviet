@@ -519,7 +519,7 @@ export default function Ordernhanh() {
                                                             {Number(server.rate).toLocaleString("en-US")}đ
                                                         </span>
 
-                                                        <span className="badge bg-success ms-1">
+                                                        <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
                                                             {server.isActive ? "Hoạt động" : "Không hoạt động"}
                                                         </span>
                                                         {/* <span className="custom-control-label">
