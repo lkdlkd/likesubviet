@@ -51,7 +51,7 @@ export default function Login() {
                   <img
                     className="img-fluid rounded mb-4"
                     style={{ maxWidth: "90%" }}
-                    src="/login-page-img.png"
+                    src="/img/login-page-img.png"
                     alt="banner"
                   />
                 </div>

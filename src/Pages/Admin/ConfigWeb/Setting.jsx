@@ -5,25 +5,22 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 const platformLogos = {
-    Zalo : "/zalo13.png",
-    Facebook: "https://cdn.mypanel.link/4cgr8h/9rjnzbd98rt8s5we.gif",
-    TikTok: "https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif",
-    Instagram: "https://cdn.mypanel.link/4cgr8h/15z7egnk0elz7gzm.gif",
-    YouTube: "https://cdn.mypanel.link/4cgr8h/z964hnh898piyhpp.png",
-    Twitter: "https://i.imgur.com/S9SejAz.gif",
-    Telegram: "https://cdn.mypanel.link/sw177w/7ea6iam2aygm0qws.gif",
-    Shopee: "https://media4.giphy.com/media/4bjIfp3L4iCnare4iU/200w.gif",
-    Lazada: "https://classic.vn/wp-content/uploads/2022/04/logo-lazada.png",
-    Discord: "https://i.imgur.com/kDXT3yB.gif",
-    Thread: "https://media.baamboozle.com/uploads/images/1465982/582bed70-c7c4-457f-95c9-c39811ac085f.gif",
-    
+    Gmail : "/img/gmail.png",
+    Zalo : "/img/zalo13.png",
+    Facebook: "/img/fb.png",
+    TikTok: "/img/tiktok.gif",
+    Instagram: "/img/instagram.gif",
+    Twitter: "/img/twitter.gif",
+    Telegram: "/img/telegram.gif",
+    Discord: "/img/discord.gif",
+    Thread: "/img/thread.gif",
 };
 
 // Danh sách favicon có sẵn
 const faviconList = [
-    { url: "/favicon.ico", label: "Favicon mặc định" },
-    { url: "/logo192.png", label: "Logo 192x192" },
-    { url: "/logo512.png", label: "Logo 512x512" },
+    { url: "/img/favicon.ico", label: "Favicon mặc định" },
+    { url: "/img/logo192.png", label: "Logo 192x192" },
+    { url: "/img/logo512.png", label: "Logo 512x512" },
     // Thêm favicon khác nếu muốn
 ];
 

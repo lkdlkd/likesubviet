@@ -3,16 +3,17 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 
 const platformLogos = {
-  Facebook: "https://cdn.mypanel.link/4cgr8h/9rjnzbd98rt8s5we.gif",
-  TikTok: "https://cdn.mypanel.link/4cgr8h/ewzs0f9k8ic2932y.gif",
-  Instagram: "https://cdn.mypanel.link/4cgr8h/15z7egnk0elz7gzm.gif",
-  YouTube: "https://cdn.mypanel.link/4cgr8h/z964hnh898piyhpp.png",
-  Twitter: "https://i.imgur.com/S9SejAz.gif",
-  Telegram: "https://cdn.mypanel.link/sw177w/7ea6iam2aygm0qws.gif",
-  Shopee: "https://media4.giphy.com/media/4bjIfp3L4iCnare4iU/200w.gif",
-  Lazada: "https://classic.vn/wp-content/uploads/2022/04/logo-lazada.png",
-  Discord: "https://i.imgur.com/kDXT3yB.gif",
-  Thread: "https://media.baamboozle.com/uploads/images/1465982/582bed70-c7c4-457f-95c9-c39811ac085f.gif",
+    Facebook: "/img/facebook.gif",
+    TikTok: "/img/tiktok.gif",
+    Instagram: "/img/instagram.gif",
+    YouTube: "/img/youtube.png",
+    Twitter: "/img/twitter.gif",
+    Telegram: "/img/telegram.gif",
+    Shopee: "/img/shoppe.gif",
+    Lazada: "/img/lazada.png",
+    Discord: "/img/discord.gif",
+    Thread: "/img/thread.gif",
+    traffic : "/img/traffic.png",
 };
 
 const PlatformModal = ({ platform, onClose, onSave }) => {

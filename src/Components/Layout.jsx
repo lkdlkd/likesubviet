@@ -73,9 +73,10 @@ const Layout = () => {
                         "name": title,
                         "url": API_DOMAIN,
                         "description": "Hệ thống tăng tương tác MXH uy tín, nhanh chóng, giá rẻ.",
-                        "image": favicon,
+                        "image": { favicon },
                     })}
                 </script>
+                
             </Helmet>
             <Menu categories={categories} user={user} configWeb={configWeb} />
             <div className="pc-container">

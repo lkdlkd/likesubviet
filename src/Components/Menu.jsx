@@ -60,7 +60,7 @@ function MenuUser({ user, categories, configWeb }) {
                 <div className="m-header">
                     <div className="b-brand text-primary">
                         <div className="m-header">
-                            <Link to="/" className="b-brand text-primary">
+                            <Link to="/home" className="b-brand text-primary">
                                 {isValidUrl(config.logo) ? (
                                     <img
                                         src={config.logo}
@@ -92,7 +92,7 @@ function MenuUser({ user, categories, configWeb }) {
                                         style={{ cursor: "pointer" }}
                                     >
                                         <span className="pc-micon">
-                                            <img src="/dashboard.png" className="wid-35" alt="" />
+                                            <img src="/img/dashboard.png" className="wid-35" alt="" />
                                         </span>
                                         <span className="pc-mtext">QUẢN LÝ HỆ THỐNG</span>
                                         <span className="pc-arrow">
@@ -153,7 +153,7 @@ function MenuUser({ user, categories, configWeb }) {
                                         style={{ cursor: "pointer" }}
                                     >
                                         <span className="pc-micon">
-                                            <img src="/dashboard.png" className="wid-35" alt="" width={35} height={35} />
+                                            <img src="/img/dashboard.png" className="wid-35" alt="" width={35} height={35} />
                                         </span>
                                         <span className="pc-mtext">MENU DỊCH VỤ</span>
                                         <span className="pc-arrow">
@@ -199,7 +199,7 @@ function MenuUser({ user, categories, configWeb }) {
                                 style={{ cursor: "pointer" }}
                             >
                                 <span className="pc-micon">
-                                    <img src="/dashboard.png" className="wid-35" alt="" />
+                                    <img src="/img/dashboard.png" className="wid-35" alt="" />
                                 </span>
                                 <span className="pc-mtext">MENU HỆ THỐNG</span>
                                 <span className="pc-arrow">
@@ -292,7 +292,7 @@ function MenuUser({ user, categories, configWeb }) {
                                 onClick={() => handleNavigation("/danh-sach-don")}
                                 className="pc-link">
                                 <span className="pc-micon">
-                                    <img src="/transactions.png" className="wid-35" alt="Service Platform 1" />
+                                    <img src="/img/transactions.png" className="wid-35" alt="Service Platform 1" />
                                 </span>
                                 <span className="pc-mtext">Danh sách đơn</span>
                             </a>
