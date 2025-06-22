@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import { getUid, addOrder, getServerByTypeAndCategory } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 import Modalnote from "./Modal_note"; // Giả sử bạn đã định nghĩa Modalnote trong cùng thư mục
+import MultiLinkModal from "./MultiLinkModal";
+// import { useTranslation } from "react-i18next";
+// import { useDispatch } from "react-redux";
+// import { setUser } from "@/redux/slices/userSlice";
+// import { io } from "socket.io-client";
+import { Button, Modal } from "react-bootstrap";
+import Select from "react-select";
 
 export default function Order() {
     const { type, path } = useParams(); // Lấy `type` và `path` từ URL
@@ -23,13 +30,24 @@ export default function Order() {
     const [cmtqlt, setcomputedQty] = useState(0);
     const [isConverting, setIsConverting] = useState(false);
     const [modal_Show, setModalShow] = useState("");
+    const [multiLinkModal, setMultiLinkModal] = useState(false);
+    const [isStopped, setIsStopped] = React.useState(false);
+    const isStoppedRef = React.useRef(isStopped);
+    React.useEffect(() => {
+        isStoppedRef.current = isStopped;
+    }, [isStopped]);
+
+    // Thêm state cho danh sách link và link nhập mới
+    const [multiLinkList, setMultiLinkList] = useState([]);
+    const [multiLinkInput, setMultiLinkInput] = useState("");
+    const [selectedMultiLinks, setSelectedMultiLinks] = useState([]);
     const token = localStorage.getItem("token");
     let decoded = {};
     if (token) {
         try {
             decoded = JSON.parse(atob(token.split(".")[1]));
         } catch (error) {
-           // console.error("Token decode error:", error);
+            // console.error("Token decode error:", error);
         }
     }
     const username = decoded.username;
@@ -210,6 +228,67 @@ export default function Order() {
                 setIsSubmitting(false);
                 loadingg("", false); // Đóng loading khi xong
             }
+        }
+    };
+    // Hàm xử lý mua nhiều link
+    const handleMultiLinkSubmit = async () => {
+        if (!selectedMagoi || !quantity || selectedMultiLinks.length === 0) return;
+        const selectedService = filteredServers.find(
+            (service) => service.Magoi === selectedMagoi
+        );
+        // Tính tổng số lượng và tổng tiền
+        const qty = selectedService && selectedService.comment === "on" ? cmtqlt : quantity;
+        loadingg("Đang xử lý đơn hàng...", true, 9999999);
+        setIsSubmitting(true);
+        let success = 0, fail = 0;
+        try {
+            for (const idx of selectedMultiLinks) {
+                console.log(isStoppedRef.current, "isStoppedRef.current");
+                if (isStoppedRef.current) break; // Sử dụng ref để lấy giá trị mới nhất
+                
+                const item = multiLinkList[idx];
+                const payload = {
+                    category: servers.find((server) => server.Magoi === selectedMagoi)?.category || "",
+                    link: item.link,
+                    username,
+                    magoi: selectedMagoi,
+                    note,
+                };
+                if (selectedService && selectedService.comment === "on") {
+                    payload.quantity = qty;
+                    payload.comments = item.comment || comments;
+                } else {
+                    payload.quantity = quantity;
+                }
+                try {
+                    await addOrder(payload, token);
+                    success++;
+                } catch {
+                    fail++;
+                }
+            }
+            loadingg("", false);
+            if (!isStopped) {
+                setMultiLinkModal(false);
+                setMultiLinkList([]);
+                setSelectedMultiLinks([]);
+                await Swal.fire({
+                    title: "Kết quả",
+                    text: `Thành công: ${success}, Thất bại: ${fail}`,
+                    icon: "info",
+                    confirmButtonText: "Xác nhận",
+                });
+            }
+        } catch (error) {
+            loadingg("", false);
+            await Swal.fire({
+                title: "Lỗi",
+                text: error.message || "Có lỗi xảy ra, vui lòng thử lại!",
+                icon: "error",
+                confirmButtonText: "Xác nhận",
+            });
+        } finally {
+            setIsSubmitting(false);
         }
     };
     useEffect(() => {
@@ -476,8 +555,11 @@ export default function Order() {
                             <form onSubmit={handleSubmit}>
                                 <>
                                     <div className="form-group mb-3">
-                                        <label htmlFor="object_id" className="form-label">
-                                            <strong>Link Hoặc UID:</strong>
+                                        <label htmlFor="object_id" className="form-label text-dark">
+                                            Link Hoặc UID:
+                                            <a className="text-primary" onClick={() => setMultiLinkModal(true)}>
+                                                Mua nhiều link cùng lúc
+                                            </a>
                                         </label>
                                         <input
                                             className="form-control ipt-link"
@@ -577,7 +659,7 @@ export default function Order() {
                                                     </span>
 
                                                     <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
-                                                      {server.isActive ? "Hoạt động" : "Không hoạt động"}
+                                                        {server.isActive ? "Hoạt động" : "Không hoạt động"}
                                                     </span>
                                                     {/* <span className="custom-control-label">
                                                         {" "}
@@ -630,7 +712,7 @@ export default function Order() {
                                                         onChange={(e) => setComments(e.target.value)}
                                                     ></textarea>
                                                 </div>
-                                            );
+                                            )
                                         } else {
                                             return (
                                                 <div className="form-group mb-3 quantity" id="quantity_type">
@@ -704,6 +786,7 @@ export default function Order() {
                                             {isSubmitting ? "Đang xử lý..." : "Tạo đơn hàng"}
                                         </button>
                                     </div>
+
                                 </>
                             </form>
                             {/* {isSubmitting && (
@@ -745,6 +828,36 @@ export default function Order() {
                     </div>
                 </div>
             </div>
+            {/* Modal mua nhiều link */}
+            <MultiLinkModal
+                show={multiLinkModal}
+                onHide={() => setMultiLinkModal(false)}
+                filteredServers={filteredServers}
+                selectedMagoi={selectedMagoi}
+                setSelectedMagoi={setSelectedMagoi}
+                isSubmitting={isSubmitting}
+                quantity={quantity}
+                setQuantity={setQuantity}
+                setIsStopped={setIsStopped}
+                isStopped={isStopped}
+                cmtqlt={cmtqlt}
+                setcomputedQty={setcomputedQty}
+                setMin={setMin}
+                comments={comments}
+                setComments={setComments}   
+                setMax={setMax}
+                min={min}
+                max={max}
+                multiLinkInput={multiLinkInput}
+                setMultiLinkInput={setMultiLinkInput}
+                multiLinkList={multiLinkList}
+                setMultiLinkList={setMultiLinkList}
+                selectedMultiLinks={selectedMultiLinks}
+                setSelectedMultiLinks={setSelectedMultiLinks}
+                rate={rate}
+                setRate={setRate} // truyền thêm setRate
+                handleMultiLinkSubmit={handleMultiLinkSubmit}
+            />
         </div>
     );
 }
