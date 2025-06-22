@@ -15,9 +15,18 @@ export default function CategoriesPage() {
     const fetchCategories = async () => {
         try {
             const response = await getCategories(token);
-            setCategories(response.data || []);
+            setPlatforms(response.platforms || []);
+
+            // Nếu response trả về platforms dạng mảng, gộp tất cả categories lại
+            let allCategories = [];
+            if (Array.isArray(response.platforms)) {
+                allCategories = response.platforms.flatMap(p => p.categories || []);
+            } else if (Array.isArray(response.data)) {
+                allCategories = response.data;
+            }
+            setCategories(allCategories);
         } catch (error) {
-           // console.error("Lỗi khi lấy danh sách danh mục:", error);
+            // console.error("Lỗi khi lấy danh sách danh mục:", error);
             Swal.fire({
                 title: "Lỗi",
                 text: "Không thể lấy danh sách danh mục.",
@@ -27,24 +36,10 @@ export default function CategoriesPage() {
         }
     };
 
-    const fetchPlatforms = async () => {
-        try {
-            const response = await getPlatforms(token);
-            setPlatforms(response.platforms || []);
-        } catch (error) {
-          //  console.error("Lỗi khi lấy danh sách nền tảng:", error);
-            Swal.fire({
-                title: "Lỗi",
-                text: "Không thể lấy danh sách nền tảng.",
-                icon: "error",
-                confirmButtonText: "Xác nhận",
-            });
-        }
-    };
+
 
     useEffect(() => {
         fetchCategories();
-        fetchPlatforms();
     }, []);
 
     const handleSaveCategory = async (categoryData) => {
@@ -85,7 +80,7 @@ export default function CategoriesPage() {
 
     const handleDeleteCategory = async (categoryId) => {
         if (!categoryId) {
-           // console.error("Không thể xóa danh mục: `_id` không tồn tại.");
+            // console.error("Không thể xóa danh mục: `_id` không tồn tại.");
             return;
         }
 
@@ -106,7 +101,7 @@ export default function CategoriesPage() {
                 setCategories((prev) => prev.filter((cat) => cat._id !== categoryId));
                 Swal.fire("Đã xóa!", "Danh mục đã được xóa.", "success");
             } catch (error) {
-              //  console.error("Lỗi khi xóa danh mục:", error);
+                //  console.error("Lỗi khi xóa danh mục:", error);
                 Swal.fire({
                     title: "Lỗi",
                     text: "Không thể xóa danh mục.",
@@ -133,7 +128,7 @@ export default function CategoriesPage() {
                             <Table striped bordered hover responsive>
                                 <thead className="table-primary">
                                     <tr>
-                                        <th>#</th>
+                                        <th>Thứ tự</th>
                                         <th>Thao tác</th>
                                         <th>Nền tảng</th>
                                         <th>Tên</th>
@@ -146,7 +141,7 @@ export default function CategoriesPage() {
                                     {categories.length > 0 ? (
                                         categories.map((category, index) => (
                                             <tr key={category._id}>
-                                                <td>{index + 1}</td>
+                                                <td>{category.thutu}</td>
                                                 <td>
                                                     <div className="dropdown">
                                                         <button
@@ -177,7 +172,7 @@ export default function CategoriesPage() {
                                                                         if (category._id) {
                                                                             handleDeleteCategory(category._id);
                                                                         } else {
-                                                                       //     console.error("Không thể xóa danh mục: `_id` không tồn tại.");
+                                                                            //     console.error("Không thể xóa danh mục: `_id` không tồn tại.");
                                                                         }
                                                                     }}
                                                                 >

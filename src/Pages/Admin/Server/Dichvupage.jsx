@@ -50,7 +50,7 @@ export default function Dichvupage() {
         setServers(response.data || []);
       }
     } catch (error) {
-     // console.error("Lỗi khi lấy danh sách server:", error);
+      // console.error("Lỗi khi lấy danh sách server:", error);
       Swal.fire({
         title: "Lỗi",
         text: "Không thể lấy danh sách server.",
@@ -62,9 +62,17 @@ export default function Dichvupage() {
   const fetchCategories = async () => {
     try {
       const response = await getCategories(token);
-      setCategories(response.data || []);
+      // Nếu response trả về platforms dạng mảng, gộp tất cả categories lại
+      let allCategories = [];
+      if (Array.isArray(response.platforms)) {
+        allCategories = response.platforms.flatMap(p => p.categories || []);
+      } else if (Array.isArray(response.data)) {
+        allCategories = response.data;
+      }
+      setCategories(allCategories);
+      //   setCategories(response.data || []);
     } catch (error) {
-    //  console.error("Lỗi khi lấy danh sách danh mục:", error);
+      //  console.error("Lỗi khi lấy danh sách danh mục:", error);
       Swal.fire({
         title: "Lỗi",
         text: "Không thể lấy danh sách danh mục.",
@@ -128,7 +136,7 @@ export default function Dichvupage() {
         Swal.fire("Đã xóa!", "Server đã được xóa thành công.", "success");
         fetchServers(); // Tải lại danh sách server sau khi xóa
       } catch (error) {
-      //  console.error("Lỗi khi xóa server:", error);
+        //  console.error("Lỗi khi xóa server:", error);
         Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
       }
     }
@@ -239,7 +247,7 @@ export default function Dichvupage() {
                       setSelectedServers([]); // Xóa danh sách đã chọn
                       fetchServers(); // Tải lại danh sách server
                     } catch (error) {
-                   //   console.error("Lỗi khi xóa server:", error);
+                      //console.error("Lỗi khi xóa server:", error);
                       Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
                     }
                   }

@@ -12,16 +12,20 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
     path: "",
     notes: "",
     modal_show: "",
+    thutu: "",
   });
 
   useEffect(() => {
     if (category && typeof category === "object") {
       setFormData({
-        platforms_id: category.platforms_id || "",
+        platforms_id: typeof category.platforms_id === "object" && category.platforms_id?._id
+          ? category.platforms_id._id
+          : category.platforms_id || "",
         name: category.name || "",
         path: category.path || "",
         notes: category.notes || "",
         modal_show: category.modal_show || "",
+        thutu: category.thutu || "",
       });
     } else {
       setFormData({
@@ -30,6 +34,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
         path: "",
         notes: "",
         modal_show: "",
+        thutu: "",
       });
     }
   }, [category]);
@@ -55,6 +60,16 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
       </Modal.Header>
       <form onSubmit={handleSubmit}>
         <Modal.Body>
+          <div className="mb-3">
+            <label className="form-label">Thứ tự hiển thị</label>
+            <input
+              type="number"
+              className="form-control"
+              value={formData.thutu}
+              onChange={(e) => setFormData({ ...formData, thutu: e.target.value })}
+              placeholder="Nhập số thứ tự (tùy chọn)"
+            />
+          </div>
           <div className="mb-3">
             <label className="form-label">Nền tảng</label>
             {platforms.length > 0 ? (

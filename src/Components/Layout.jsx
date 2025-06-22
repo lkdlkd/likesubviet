@@ -25,7 +25,14 @@ const Layout = () => {
                     getNotifications(token),
                     getConfigWeb(token),
                 ]);
-                setCategories(categoriesData.data);
+                let allCategories = [];
+                if (Array.isArray(categoriesData.platforms)) {
+                    allCategories = categoriesData.platforms.flatMap(p => p.categories || []);
+                } else if (Array.isArray(categoriesData.data)) {
+                    allCategories = categoriesData.data;
+                }
+                setCategories(allCategories);
+                // setCategories(categoriesData.data);
                 setUser(userData);
                 setNotifications(notificationData);
                 setConfigWeb(configwebdata.data);
@@ -76,7 +83,7 @@ const Layout = () => {
                         "image": { favicon },
                     })}
                 </script>
-                
+
             </Helmet>
             <Menu categories={categories} user={user} configWeb={configWeb} />
             <div className="pc-container">
