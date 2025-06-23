@@ -63,7 +63,7 @@ export default function PromotionForm() {
       alert("Xóa chương trình khuyến mãi thành công!");
       fetchPromotions(); // Cập nhật danh sách
     } catch (error) {
-      console.error("Lỗi khi xóa chương trình khuyến mãi:", error.message);
+      //console.error("Lỗi khi xóa chương trình khuyến mãi:", error.message);
     }
   };
 

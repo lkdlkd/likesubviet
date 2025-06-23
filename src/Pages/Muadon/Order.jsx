@@ -60,7 +60,7 @@ export default function Order() {
                 setServers(response.data || []); // Giả sử API trả về `data`
                 setModalShow(response.notes || ""); // Lưu ý: `modal_show` cần được trả về từ API
             } catch (error) {
-                console.error("Lỗi khi gọi API getServerByTypeAndCategory:", error);
+               // console.error("Lỗi khi gọi API getServerByTypeAndCategory:", error);
                 Swal.fire({
                     title: "Lỗi",
                     text: "Không thể tải danh sách máy chủ.",
@@ -243,7 +243,7 @@ export default function Order() {
         let success = 0, fail = 0;
         try {
             for (const idx of selectedMultiLinks) {
-                console.log(isStoppedRef.current, "isStoppedRef.current");
+                //console.log(isStoppedRef.current, "isStoppedRef.current");
                 if (isStoppedRef.current) break; // Sử dụng ref để lấy giá trị mới nhất
                 
                 const item = multiLinkList[idx];
