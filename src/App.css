@@ -1,13 +1,14 @@
-.pc-sidebar {
+/* .pc-sidebar {
   height: 100vh;
   overflow-y: auto;
-}
+} */
 
-
+/* 
 .pc-sidebar .navbar-content {
   max-height: calc(100vh - 50px);
   overflow-y: auto;
-}
+} */
+
 .widget-container {
     display: flex;
     flex-direction: column;
@@ -22,9 +23,6 @@
     /* Khoảng cách giữa các liên hệ */
     z-index: 10000;
     /* Đảm bảo hiển thị trên các thành phần khác */
-}
-.pc-sidebar .navbar-content {
-  padding-bottom: 60px; /* hoặc 80px nếu bạn muốn cách xa hơn */
 }
 
 .widget-item {
