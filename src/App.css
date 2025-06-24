@@ -1,46 +1,24 @@
-/* .pc-sidebar {
+.pc-sidebar {
   height: 100vh;
+  /* Chiều cao toàn màn hình */
   overflow-y: auto;
-} */
+  /* Cho phép cuộn dọc */
+}
 
-
-/* .pc-sidebar .navbar-content {
+.pc-sidebar .navbar-content {
   max-height: calc(100vh - 50px);
+  /* Trừ đi chiều cao header nếu có */
   overflow-y: auto;
-} */
-/* .simplebar-scrollbar {
-    position: absolute;
-    right: 2px;
-    width: 5px;
-    min-height: 10px;
+  /* Cho phép cuộn dọc */
 }
-.simplebar-track.simplebar-vertical {
-    top: 0;
-    width: 11px;
-}
-.simplebar-track {
-    z-index: 1;
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    overflow: hidden;
-} */
-
 .widget-container {
     display: flex;
-    flex-direction: column;
-    /* Hiển thị các liên hệ theo chiều dọc */
-    position: fixed;
-    /* Đặt vị trí cố định */
-    bottom: 70px;
-    /* Cách đáy 10px */
-    right: 30px;
-    /* Cách phải 10px */
-    gap: 10px;
-    /* Khoảng cách giữa các liên hệ */
-    z-index: 10000;
-    /* Đảm bảo hiển thị trên các thành phần khác */
+    flex-direction: column; /* Hiển thị các liên hệ theo chiều dọc */
+    position: fixed; /* Đặt vị trí cố định */
+    bottom: 70px; /* Cách đáy 10px */
+    right: 30px; /* Cách phải 10px */
+    gap: 10px; /* Khoảng cách giữa các liên hệ */
+    z-index: 10000; /* Đảm bảo hiển thị trên các thành phần khác */
 }
 
 .widget-item {
@@ -51,12 +29,9 @@
 
 .lienhe {
     cursor: pointer;
-    width: 50px;
-    /* Chiều rộng của logo */
-    height: 50px;
-    /* Chiều cao của logo */
-    transition: all 0.5s ease;
-    /* Hiệu ứng khi hover */
+    width: 50px; /* Chiều rộng của logo */
+    height: 50px; /* Chiều cao của logo */
+    transition: all 0.5s ease; /* Hiệu ứng khi hover */
 }
 
 .custom-loading-popup {
