@@ -3,10 +3,28 @@
   overflow-y: auto;
 } */
 
-/* 
-.pc-sidebar .navbar-content {
+
+/* .pc-sidebar .navbar-content {
   max-height: calc(100vh - 50px);
   overflow-y: auto;
+} */
+/* .simplebar-scrollbar {
+    position: absolute;
+    right: 2px;
+    width: 5px;
+    min-height: 10px;
+}
+.simplebar-track.simplebar-vertical {
+    top: 0;
+    width: 11px;
+}
+.simplebar-track {
+    z-index: 1;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
 } */
 
 .widget-container {

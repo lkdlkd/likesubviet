@@ -22,7 +22,7 @@ function MenuUser({ user, categories, configWeb }) {
         ? validCategories.reduce((acc, category) => {
             const platformId = category.platforms_id?._id; // Sử dụng optional chaining
             if (!platformId) {
-              //  console.error("Danh mục không có `platforms_id` hoặc `_id`:", category);
+                //  console.error("Danh mục không có `platforms_id` hoặc `_id`:", category);
                 return acc;
             }
             if (!acc[platformId]) {
@@ -81,7 +81,11 @@ function MenuUser({ user, categories, configWeb }) {
                         </div>
                     </div>
                 </div>
-                <SimpleBar className="navbar-content pc-trigger" >
+                <SimpleBar className="navbar-content pc-trigger" style={{
+                    maxHeight: "calc(100vh - 60px)", // 60px là ví dụ, bạn điều chỉnh cho đúng với header/logo của bạn
+                    display: "block",
+                    transform: "translate3d(0px, 0px, 0px)"
+                }}>
                     <ul className="pc-navbar">
                         {userRole === "admin" && (
                             <>
