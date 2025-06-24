@@ -1,27 +1,13 @@
-/* .pc-sidebar {
+.pc-sidebar {
   height: 100vh;
   overflow-y: auto;
-} */
-
-.pc-sidebar {
-    height: 100vh;
-    /* Giữ chiều cao full màn hình */
-    overflow-y: auto;
-    /* Cho phép cuộn dọc */
-    -webkit-overflow-scrolling: touch;
-    /* Mượt mà trên iOS */
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: #fff;
-    /* màu nền tùy chỉnh */
 }
 
-/* 
+
 .pc-sidebar .navbar-content {
   max-height: calc(100vh - 50px);
   overflow-y: auto;
-} */
+}
 .widget-container {
     display: flex;
     flex-direction: column;
