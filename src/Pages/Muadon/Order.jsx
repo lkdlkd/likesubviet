@@ -14,7 +14,7 @@ import { Button, Modal } from "react-bootstrap";
 import Select from "react-select";
 
 export default function Order() {
-    const { type, path } = useParams(); // Lấy `type` và `path` từ URL
+    const { path } = useParams(); // Lấy `type` và `path` từ URL
     const [servers, setServers] = useState([]);
     const [rawLink, setRawLink] = useState("");
     const [convertedUID, setConvertedUID] = useState("");
@@ -56,7 +56,7 @@ export default function Order() {
         loadingg("Đang tải dữ liệu...", true, 9999999); // Hiển thị loading khi bắt đầu fetch
         const fetchServers = async () => {
             try {
-                const response = await getServerByTypeAndCategory(type, path, token);
+                const response = await getServerByTypeAndCategory( path, token);
                 setServers(response.data || []); // Giả sử API trả về `data`
                 setModalShow(response.notes || ""); // Lưu ý: `modal_show` cần được trả về từ API
             } catch (error) {
@@ -72,13 +72,13 @@ export default function Order() {
             }
         };
 
-        if (type && path) {
+        if (path) {
             fetchServers();
         } else {
             loadingg("", false); // Đóng loading nếu không có type/path
         }
         // eslint-disable-next-line
-    }, [type, path, token]); // Đảm bảo `type`, `path`, và `token` nằm trong mảng dependency
+    }, [ path, token]); // Đảm bảo `type`, `path`, và `token` nằm trong mảng dependency
 
     // Lọc danh sách server
     const filteredServers = useMemo(() => {

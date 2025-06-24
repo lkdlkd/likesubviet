@@ -364,8 +364,9 @@ export default function Adddichvu({
                     if (option && option.platform) {
                       setFormData((prev) => ({
                         ...prev,
-                        type: option.platform.name,
+                        type: option.platform._id,
                       }));
+                      console.log("Selected platform:", option.platform._id);
                     }
                   }}
                   options={platformOptions}

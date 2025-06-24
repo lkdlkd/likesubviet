@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import Header from "@/Components/Header";
 import Menu from "@/Components/Menu";
 import { ToastContainer } from "react-toastify";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-
+import Logout from "./Logout";
 import { getCategories, getMe, getNotifications, getConfigWeb } from "@/Utils/api";
 import Widget from "./Widget";
 
@@ -37,7 +37,12 @@ const Layout = () => {
                 setNotifications(notificationData);
                 setConfigWeb(configwebdata.data);
             } catch (error) {
-                // console.error("Lỗi khi gọi API:", error);
+                console.log("Lỗi khi gọi API:", error.message);
+                if (error.message === "Người dùng không tồn tại") {
+                    // Nếu người dùng không tồn tại, đăng xuất
+                    localStorage.removeItem("token");
+                    window.location.href = "/dang-nhap";
+                }
             }
         };
 

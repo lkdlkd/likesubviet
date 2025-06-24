@@ -544,10 +544,10 @@ export const deletePlatform = async (id, token) => {
   });
   return handleResponse(response);
 };
-export const getServerByTypeAndCategory = async (type = "", category = "", token) => {
+export const getServerByTypeAndCategory = async ( category = "", token) => {
   // Xây dựng query string
   let queryString = "";
-  if (type) queryString += `type=${encodeURIComponent(type)}&`;
+  // if (type) queryString += `type=${encodeURIComponent(type)}&`;
   if (category) queryString += `path=${encodeURIComponent(category)}`;
 
   const response = await fetch(`${API_BASE}/servers?${queryString}`, {

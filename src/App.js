@@ -54,7 +54,7 @@ function App() {
             <Route path="/lich-su-hoat-dong" element={<HistoryPage />} />
             <Route path="/order" element={<Ordernhanh />} />
             <Route path="/danh-sach-don" element={<Danhsachdon />} />
-            <Route path="/:type/:path" element={<Order />} />
+            <Route path="/order/:path" element={<Order />} />
             <Route path="/tai-lieu-api" element={<Tailieuapi />} />
             <Route path="/bang-gia" element={<Banggia />} />
             {/* Tạo router động từ groupedCategories */}
