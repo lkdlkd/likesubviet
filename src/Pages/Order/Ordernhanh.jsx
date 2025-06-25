@@ -359,6 +359,42 @@ export default function Ordernhanh() {
             server: s
         }));
     }, [servers]);
+
+
+
+    const shortenTiktokLink = (url) => {
+        if (typeof url !== 'string') return url;
+        // Loại bỏ các tham số truy vấn và fragment
+        let cleanUrl = url.split('?')[0].split('#')[0];
+        // Xử lý các dạng link phổ biến
+        // 1. https://vt.tiktok.com/abc123/ (redirect link)
+        // 2. https://www.tiktok.com/@username/video/1234567890
+        // 3. https://m.tiktok.com/v/1234567890.html
+        // 4. https://www.tiktok.com/t/ZTxxxxxxx/ (short link)
+        // 5. https://www.tiktok.com/@username/video/1234567890?is_from_webapp=1&sender_device=pc
+
+        // Nếu là link redirect (vt.tiktok.com hoặc tiktok.com/t/), giữ nguyên vì cần client follow redirect
+        if (/vt\.tiktok\.com|tiktok\.com\/t\//.test(cleanUrl)) {
+            return url;
+        }
+        // Dạng m.tiktok.com/v/1234567890.html => chuyển về dạng video id
+        const mMatch = cleanUrl.match(/m\.tiktok\.com\/v\/(\d+)\.html/);
+        if (mMatch) {
+            return `https://www.tiktok.com/video/${mMatch[1]}`;
+        }
+        // Dạng www.tiktok.com/@username/video/1234567890
+        const userVideoMatch = cleanUrl.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
+        if (userVideoMatch) {
+            return `https://www.tiktok.com/@${userVideoMatch[1]}/video/${userVideoMatch[2]}`;
+        }
+        // Dạng www.tiktok.com/video/1234567890
+        const videoMatch = cleanUrl.match(/tiktok\.com\/video\/(\d+)/);
+        if (videoMatch) {
+            return `https://www.tiktok.com/video/${videoMatch[1]}`;
+        }
+        // Nếu không khớp, trả về url gốc
+        return url;
+    }
     return (
         <div className="main-content">
             <div className="row">
@@ -429,7 +465,12 @@ export default function Ordernhanh() {
                                                 type="text"
                                                 value={isConverting ? "Đang xử lý..." : displayLink}
                                                 onChange={(e) => {
-                                                    setRawLink(e.target.value);
+                                                    let val = e.target.value;
+                                                    // Nếu là link TikTok thì rút gọn
+                                                    if (val.includes('tiktok.com')) {
+                                                        val = shortenTiktokLink(val);
+                                                    }
+                                                    setRawLink(val);
                                                     setConvertedUID("");
                                                 }}
                                                 placeholder="Nhập link hoặc ID tùy các máy chủ"

@@ -56,11 +56,11 @@ export default function Order() {
         loadingg("Đang tải dữ liệu...", true, 9999999); // Hiển thị loading khi bắt đầu fetch
         const fetchServers = async () => {
             try {
-                const response = await getServerByTypeAndCategory( path, token);
+                const response = await getServerByTypeAndCategory(path, token);
                 setServers(response.data || []); // Giả sử API trả về `data`
                 setModalShow(response.notes || ""); // Lưu ý: `modal_show` cần được trả về từ API
             } catch (error) {
-               // console.error("Lỗi khi gọi API getServerByTypeAndCategory:", error);
+                // console.error("Lỗi khi gọi API getServerByTypeAndCategory:", error);
                 Swal.fire({
                     title: "Lỗi",
                     text: "Không thể tải danh sách máy chủ.",
@@ -78,7 +78,7 @@ export default function Order() {
             loadingg("", false); // Đóng loading nếu không có type/path
         }
         // eslint-disable-next-line
-    }, [ path, token]); // Đảm bảo `type`, `path`, và `token` nằm trong mảng dependency
+    }, [path, token]); // Đảm bảo `type`, `path`, và `token` nằm trong mảng dependency
 
     // Lọc danh sách server
     const filteredServers = useMemo(() => {
@@ -245,7 +245,7 @@ export default function Order() {
             for (const idx of selectedMultiLinks) {
                 //console.log(isStoppedRef.current, "isStoppedRef.current");
                 if (isStoppedRef.current) break; // Sử dụng ref để lấy giá trị mới nhất
-                
+
                 const item = multiLinkList[idx];
                 const payload = {
                     category: servers.find((server) => server.Magoi === selectedMagoi)?.category || "",
@@ -420,6 +420,42 @@ export default function Order() {
     };
     const tien = useMemo(() => convertNumberToWords(Number(totalCost).toLocaleString("en-US")), [totalCost]);
     const category = servers.length > 0 ? servers[0].category : path;
+
+
+    const shortenTiktokLink = (url) => {
+        if (typeof url !== 'string') return url;
+        // Loại bỏ các tham số truy vấn và fragment
+        let cleanUrl = url.split('?')[0].split('#')[0];
+        // Xử lý các dạng link phổ biến
+        // 1. https://vt.tiktok.com/abc123/ (redirect link)
+        // 2. https://www.tiktok.com/@username/video/1234567890
+        // 3. https://m.tiktok.com/v/1234567890.html
+        // 4. https://www.tiktok.com/t/ZTxxxxxxx/ (short link)
+        // 5. https://www.tiktok.com/@username/video/1234567890?is_from_webapp=1&sender_device=pc
+
+        // Nếu là link redirect (vt.tiktok.com hoặc tiktok.com/t/), giữ nguyên vì cần client follow redirect
+        if (/vt\.tiktok\.com|tiktok\.com\/t\//.test(cleanUrl)) {
+            return url;
+        }
+        // Dạng m.tiktok.com/v/1234567890.html => chuyển về dạng video id
+        const mMatch = cleanUrl.match(/m\.tiktok\.com\/v\/(\d+)\.html/);
+        if (mMatch) {
+            return `https://www.tiktok.com/video/${mMatch[1]}`;
+        }
+        // Dạng www.tiktok.com/@username/video/1234567890
+        const userVideoMatch = cleanUrl.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
+        if (userVideoMatch) {
+            return `https://www.tiktok.com/@${userVideoMatch[1]}/video/${userVideoMatch[2]}`;
+        }
+        // Dạng www.tiktok.com/video/1234567890
+        const videoMatch = cleanUrl.match(/tiktok\.com\/video\/(\d+)/);
+        if (videoMatch) {
+            return `https://www.tiktok.com/video/${videoMatch[1]}`;
+        }
+        // Nếu không khớp, trả về url gốc
+        return url;
+    }
+
     if (!filteredServers || filteredServers.length === 0) {
         return (
             <div className="main-content">
@@ -566,7 +602,12 @@ export default function Order() {
                                             type="text"
                                             value={isConverting ? "Đang xử lý..." : displayLink}
                                             onChange={(e) => {
-                                                setRawLink(e.target.value);
+                                                let val = e.target.value;
+                                                // Nếu là link TikTok thì rút gọn
+                                                if (val.includes('tiktok.com')) {
+                                                    val = shortenTiktokLink(val);
+                                                }
+                                                setRawLink(val);
                                                 setConvertedUID("");
                                             }}
                                             placeholder="Nhập link hoặc ID tùy các máy chủ"
@@ -844,7 +885,7 @@ export default function Order() {
                 setcomputedQty={setcomputedQty}
                 setMin={setMin}
                 comments={comments}
-                setComments={setComments}   
+                setComments={setComments}
                 setMax={setMax}
                 min={min}
                 max={max}

@@ -37,7 +37,6 @@ const Layout = () => {
                 setNotifications(notificationData);
                 setConfigWeb(configwebdata.data);
             } catch (error) {
-                console.log("Lỗi khi gọi API:", error.message);
                 if (error.message === "Người dùng không tồn tại") {
                     // Nếu người dùng không tồn tại, đăng xuất
                     localStorage.removeItem("token");
