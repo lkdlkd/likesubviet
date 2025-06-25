@@ -72,6 +72,7 @@ export default function ModalBanking({
                 className="form-control"
                 onChange={handleChange}
                 value={mergedFormData.logo}
+                required
               />
             </div>
             <div className="col-md-6">

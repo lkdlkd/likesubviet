@@ -327,7 +327,7 @@ function MenuUser({ user, categories, configWeb }) {
                                                     <li key={service._id} className="pc-item">
                                                         <a
                                                             style={{ cursor: "pointer" }}
-                                                            onClick={() => handleNavigation(`/order/${service.path}`)}
+                                                            onClick={() => handleNavigation(`/order/${service.path.toLowerCase()}`)}
                                                             className="pc-link"
                                                         >
                                                             <span className="pc-mtext">{service.name}</span>

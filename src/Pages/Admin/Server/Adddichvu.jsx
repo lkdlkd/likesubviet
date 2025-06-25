@@ -366,7 +366,6 @@ export default function Adddichvu({
                         ...prev,
                         type: option.platform._id,
                       }));
-                      console.log("Selected platform:", option.platform._id);
                     }
                   }}
                   options={platformOptions}
