@@ -1,9 +1,7 @@
-.pc-sidebar {
+/* .pc-sidebar {
   height: 100vh;
-  /* Chiều cao toàn màn hình */
   overflow-y: auto;
-  /* Cho phép cuộn dọc */
-}
+} */
 
 .pc-sidebar .navbar-content {
   max-height: calc(100vh - 50px);

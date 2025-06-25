@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
+import SimpleBar from 'simplebar-react';
+import 'simplebar-react/dist/simplebar.min.css';
+
 function MenuUser({ user, categories, configWeb }) {
     const navigate = useNavigate(); // Khởi tạo useNavigate
     const [activeMenu, setActiveMenu] = useState(null);
@@ -78,7 +81,7 @@ function MenuUser({ user, categories, configWeb }) {
                         </div>
                     </div>
                 </div>
-                <div className="navbar-content mb-3">
+                <SimpleBar style={{ maxHeight: '100dvh', minHeight: 0 }} className="navbar-content mb-3">
                     <ul className="pc-navbar">
                         {userRole === "admin" && (
                             <>
@@ -341,7 +344,7 @@ function MenuUser({ user, categories, configWeb }) {
                             ) : null
                         )}
                     </ul>
-                </div>
+                </SimpleBar>
             </div>
         </nav>
     );
