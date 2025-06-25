@@ -3,6 +3,7 @@ import { getPromotions, createPromotion, updatePromotion, deletePromotion } from
 import PromotionModal from "./PromotionModal";
 import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
+import { loadingg } from "@/JS/Loading";
 
 export default function Khuyenmai() {
     const [promotions, setPromotions] = useState([]); // Danh sách chương trình khuyến mãi
@@ -23,16 +24,20 @@ export default function Khuyenmai() {
     // Lấy danh sách chương trình khuyến mãi
     const fetchPromotions = async () => {
         try {
+            loadingg("Đang tải danh sách khuyến mãi...");
             const data = await getPromotions(token);
             setPromotions(data);
         } catch (error) {
-           // console.error("Lỗi khi lấy danh sách chương trình khuyến mãi:", error.message);
+            // console.error("Lỗi khi lấy danh sách chương trình khuyến mãi:", error.message);
+        } finally {
+            loadingg("", false);
         }
     };
 
     // Xử lý khi submit form
     const handleSubmit = async (e) => {
         e.preventDefault();
+        loadingg(isEditing ? "Đang cập nhật khuyến mãi..." : "Đang thêm khuyến mãi...");
         try {
             const dataToSubmit = {
                 ...formData,
@@ -63,7 +68,8 @@ export default function Khuyenmai() {
             fetchPromotions();
         } catch (error) {
             Swal.fire("Lỗi!", "Không thể xử lý chương trình khuyến mãi.", "error");
-           // console.error("Lỗi khi xử lý chương trình khuyến mãi:", error.message);
+        } finally {
+            loadingg("", false);
         }
     };
 
@@ -80,6 +86,7 @@ export default function Khuyenmai() {
         });
         setIsEditing(true);
         setShowModal(true);
+        fetchPromotions();
     };
 
     function toLocalDatetimeInputValue(dateString) {
@@ -103,12 +110,14 @@ export default function Khuyenmai() {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
+                    loadingg("Đang xóa khuyến mãi...");
                     await deletePromotion(id, token);
                     Swal.fire("Đã xóa!", "Chương trình khuyến mãi đã được xóa.", "success");
                     fetchPromotions(); // Cập nhật danh sách
                 } catch (error) {
                     Swal.fire("Lỗi!", "Không thể xóa chương trình khuyến mãi.", "error");
-                 //   console.error("Lỗi khi xóa chương trình khuyến mãi:", error.message);
+                } finally {
+                    loadingg("", false);
                 }
             }
         });

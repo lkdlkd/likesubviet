@@ -5,6 +5,7 @@ import { editNotification } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { loadingg } from "@/JS/Loading";
 
 export default function Editthongbao({ notification, token, onClose, onUpdate }) {
   const [editData, setEditData] = useState(notification);
@@ -18,17 +19,17 @@ export default function Editthongbao({ notification, token, onClose, onUpdate })
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+    loadingg(true, 9999999);
     try {
       const updatedNotification = await editNotification(editData._id, editData, token);
       toast.success("Thông báo đã được cập nhật thành công!");
       onUpdate(updatedNotification); // Cập nhật thông báo trong danh sách
       onClose(); // Đóng modal
     } catch (error) {
-    //  console.error("Lỗi khi cập nhật thông báo:", error);
       toast.error("Lỗi khi cập nhật thông báo. Vui lòng thử lại!");
     } finally {
       setLoading(false);
+      loadingg(false);
     }
   };
 

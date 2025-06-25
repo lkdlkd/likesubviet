@@ -4,6 +4,7 @@ import Select from "react-select";
 import { getServer } from "@/Utils/api";
 import { useNavigate } from "react-router-dom";
 import { type } from "@testing-library/user-event/dist/type";
+import { loadingg } from "@/JS/Loading";
 
 const Banggia = () => {
     const [servers, setServers] = useState([]);
@@ -16,6 +17,7 @@ const Banggia = () => {
     useEffect(() => {
         const fetchServers = async () => {
             setLoading(true);
+            loadingg("Đang tải danh sách server...",true, 9999999);
             try {
                 const response = await getServer(token);
                 setServers(response.data || []);
@@ -24,6 +26,7 @@ const Banggia = () => {
                 setError("Không thể tải bảng giá.");
             } finally {
                 setLoading(false);
+                loadingg(false);
             }
         };
         fetchServers();

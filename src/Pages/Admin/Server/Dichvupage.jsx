@@ -5,6 +5,7 @@ import Table from "react-bootstrap/Table";
 import { deleteServer, getCategories, getServer } from "@/Utils/api";
 import Swal from "sweetalert2";
 import EditModal from "./EditModal";
+import { loadingg } from "@/JS/Loading";
 
 export default function Dichvupage() {
   const [servers, setServers] = useState([]);
@@ -34,6 +35,7 @@ export default function Dichvupage() {
 
   const fetchServers = async () => {
     try {
+      loadingg("Đang tải danh sách server...",true, 9999999);
       if (!quickAddMode) {
         const response = await getServer(token, currentPage, limit, debouncedSearch);
         setServers(response.data || []);
@@ -43,26 +45,26 @@ export default function Dichvupage() {
           totalPages: 1,
           pageSize: limit,
         });
-
       } else {
-        // Nếu không ở chế độ hiển thị tất cả, gọi API với phân trang
         const response = await getServer(token, undefined, undefined, debouncedSearch);
         setServers(response.data || []);
       }
     } catch (error) {
-      // console.error("Lỗi khi lấy danh sách server:", error);
       Swal.fire({
         title: "Lỗi",
         text: "Không thể lấy danh sách server.",
         icon: "error",
         confirmButtonText: "Xác nhận",
       });
+    } finally {
+      loadingg(false);
     }
   };
+
   const fetchCategories = async () => {
     try {
+      loadingg("Đang tải danh sách danh mục...", 9999999);
       const response = await getCategories(token);
-      // Nếu response trả về platforms dạng mảng, gộp tất cả categories lại
       let allCategories = [];
       if (Array.isArray(response.platforms)) {
         allCategories = response.platforms.flatMap(p => p.categories || []);
@@ -70,15 +72,15 @@ export default function Dichvupage() {
         allCategories = response.data;
       }
       setCategories(allCategories);
-      //   setCategories(response.data || []);
     } catch (error) {
-      //  console.error("Lỗi khi lấy danh sách danh mục:", error);
       Swal.fire({
         title: "Lỗi",
         text: "Không thể lấy danh sách danh mục.",
         icon: "error",
         confirmButtonText: "Xác nhận",
       });
+    } finally {
+      loadingg(false);
     }
   };
 
@@ -132,12 +134,14 @@ export default function Dichvupage() {
 
     if (result.isConfirmed) {
       try {
+        loadingg("Đang xóa server...", true, 9999999);
         await deleteServer(serverId, token);
         Swal.fire("Đã xóa!", "Server đã được xóa thành công.", "success");
-        fetchServers(); // Tải lại danh sách server sau khi xóa
+        fetchServers();
       } catch (error) {
-        //  console.error("Lỗi khi xóa server:", error);
         Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
+      } finally {
+        loadingg(false);
       }
     }
   };
@@ -240,6 +244,7 @@ export default function Dichvupage() {
 
                   if (result.isConfirmed) {
                     try {
+                      loadingg(99999);
                       await Promise.all(
                         selectedServers.map((serverId) => deleteServer(serverId, token))
                       );
@@ -247,8 +252,9 @@ export default function Dichvupage() {
                       setSelectedServers([]); // Xóa danh sách đã chọn
                       fetchServers(); // Tải lại danh sách server
                     } catch (error) {
-                      //console.error("Lỗi khi xóa server:", error);
                       Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
+                    } finally {
+                      loadingg(false);
                     }
                   }
                 }}

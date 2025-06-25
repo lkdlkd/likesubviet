@@ -5,6 +5,7 @@ import { addNotification } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { loadingg } from "@/JS/Loading";
 
 export default function Addthongbao({ token, onAdd, show, onClose }) {
   const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ export default function Addthongbao({ token, onAdd, show, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+    loadingg("Đang thêm thông báo...", 9999999);
     try {
       const newNotification = await addNotification(formData, token);
       toast.success("Thông báo mới đã được thêm thành công!");
@@ -30,10 +31,10 @@ export default function Addthongbao({ token, onAdd, show, onClose }) {
       setFormData({ title: "", content: "", color: "primary" }); // Reset form
       onClose(); // Đóng modal
     } catch (error) {
-     // console.error("Lỗi khi thêm thông báo:", error);
       toast.error("Lỗi khi thêm thông báo. Vui lòng thử lại!");
     } finally {
       setLoading(false);
+      loadingg(false);
     }
   };
 

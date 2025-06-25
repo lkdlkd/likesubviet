@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { addBalance } from "@/Utils/api";
 import { toast } from "react-toastify";
+import { loadingg } from "@/JS/Loading";
 
 function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
     const [additionAmount, setAdditionAmount] = useState("");
@@ -16,9 +17,7 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
 
         try {
             setLoading(true);
-
-            // Tính toán số dư mới
-
+            loadingg(true);
             // Gọi API để cập nhật số dư
             const updatedUser = await addBalance(user._id, { amount: additionAmount }, token);
 
@@ -28,10 +27,11 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
             toast.success("Thêm số dư thành công!");
             onClose(); // Đóng modal
         } catch (error) {
-          //  console.error("Lỗi khi thêm số dư:", error);
+            //  console.error("Lỗi khi thêm số dư:", error);
             toast.error("Thêm số dư thất bại. Vui lòng thử lại.");
         } finally {
             setLoading(false);
+            loadingg(false);
         }
     };
 
@@ -61,7 +61,7 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
                         />
                     </div>
                     <div className="mb-3">
-                        <label className="form-label">Số tiền muốn thêm</label>
+                        <label className="form-label">Số tiền muốn thêm : {Number(additionAmount).toLocaleString()} VNĐ</label>
                         <input
                             type="number"
                             className="form-control"

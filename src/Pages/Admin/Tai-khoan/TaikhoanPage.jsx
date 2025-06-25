@@ -7,6 +7,7 @@ import UserEdit from "@/Pages/Admin/Tai-khoan/UserEdit";
 import AddBalanceForm from "@/Pages/Admin/Tai-khoan/AddBalanceForm";
 import DeductBalanceForm from "@/Pages/Admin/Tai-khoan/DeductBalanceForm";
 import Table from "react-bootstrap/Table";
+import { loadingg } from "@/JS/Loading";
 
 export default function TaikhoanPage() {
   const [users, setUsers] = useState([]);
@@ -41,16 +42,17 @@ export default function TaikhoanPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
+      loadingg("Đang tải...", true, 9999999);
       try {
         const userRes = await getUsers(token, page, limit, debouncedSearchQuery);
         setUsers(userRes.users || []);
         setTotalPages(userRes.totalPages || 1);
         setErrorMessage(null);
       } catch (error) {
-      //  console.error("Error fetching users:", error.message || error);
         setErrorMessage("Không thể tải danh sách người dùng. Vui lòng thử lại.");
       } finally {
         setLoading(false);
+        loadingg(false);
       }
     };
 
@@ -97,12 +99,14 @@ export default function TaikhoanPage() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
+          loadingg(true, 9999999);
           await deleteUser(userId, token);
           Swal.fire("Đã xóa!", "Người dùng đã được xóa thành công.", "success");
           setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
         } catch (error) {
-       //   console.error("Lỗi khi xóa người dùng:", error);
           Swal.fire("Lỗi!", "Không thể xóa người dùng. Vui lòng thử lại.", "error");
+        } finally {
+          loadingg(false);
         }
       }
     });

@@ -5,6 +5,7 @@ import ModalBanking from "./ModalBanking";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
+import { loadingg } from "@/JS/Loading";
 
 export default function BankingAdmin() {
   const [bankList, setBankList] = useState([]);
@@ -19,11 +20,13 @@ export default function BankingAdmin() {
   useEffect(() => {
     const fetchBanking = async () => {
       try {
+        loadingg("Đang tải dữ liệu ngân hàng...");
         const banks = await getBanking(token);
         setBankList(banks);
       } catch (error) {
         toast.error("Vui lòng thêm ngân hàng!");
       } finally {
+        loadingg("", false); // Đóng loading khi xong
         setLoading(false);
       }
     };
@@ -33,18 +36,21 @@ export default function BankingAdmin() {
 
   const handleCreate = async (data) => {
     try {
+      loadingg("Đang tạo ngân hàng...");
       const newBank = await createBanking(data, token);
       setBankList((prev) => [...prev, newBank]);
       toast.success("Ngân hàng mới được tạo thành công!");
       setShowModal(false);
     } catch (error) {
-   //   console.error("Lỗi khi tạo ngân hàng:", error);
       toast.error("Lỗi khi tạo ngân hàng. Vui lòng thử lại!");
+    } finally {
+      loadingg("", false);
     }
   };
 
   const handleUpdate = async (id, data) => {
     try {
+      loadingg("Đang cập nhật ngân hàng...");
       const updatedBank = await updateBanking(id, data, token);
       setBankList((prev) =>
         prev.map((bank) => (bank._id === id ? updatedBank : bank))
@@ -52,8 +58,9 @@ export default function BankingAdmin() {
       toast.success("Ngân hàng đã được cập nhật thành công!");
       setShowModal(false);
     } catch (error) {
-      //console.error("Lỗi khi cập nhật ngân hàng:", error);
       toast.error("Lỗi khi cập nhật ngân hàng. Vui lòng thử lại!");
+    } finally {
+      loadingg("", false);
     }
   };
 
@@ -71,13 +78,15 @@ export default function BankingAdmin() {
       });
 
       if (result.isConfirmed) {
+        loadingg("Đang xóa ngân hàng...");
         await deleteBanking(id, token);
         setBankList((prev) => prev.filter((bank) => bank._id !== id));
         toast.success("Ngân hàng đã bị xóa thành công!");
       }
     } catch (error) {
-     // console.error("Lỗi khi xóa ngân hàng:", error);
       toast.error("Lỗi khi xóa ngân hàng. Vui lòng thử lại!");
+    } finally {
+      loadingg("", false);
     }
   };
 

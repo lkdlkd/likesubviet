@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getTransactions } from "@/Utils/api";
 import Table from "react-bootstrap/Table";
 import moment from "moment";
+import { loadingg } from "@/JS/Loading";
 
 export default function Naptientudong() {
     const [transactions, setTransactions] = useState([]); // Lưu danh sách giao dịch
@@ -15,6 +16,7 @@ export default function Naptientudong() {
 
     const fetchTransactions = async () => {
         setLoading(true);
+        loadingg("Đang tải danh sách giao dịch...");
         try {
             const token = localStorage.getItem("token"); // Lấy token từ localStorage
             const data = await getTransactions(token, page, limit, search); // Gọi API với page, limit và search
@@ -22,9 +24,9 @@ export default function Naptientudong() {
             setHasMore(data.length === limit); // Nếu số lượng giao dịch trả về bằng `limit`, có thể còn dữ liệu
         } catch (err) {
             setError("Không thể tải danh sách giao dịch.");
-          //  console.error(err);
         } finally {
             setLoading(false); // Kết thúc tải dữ liệu
+            loadingg("", false);
         }
     };
 

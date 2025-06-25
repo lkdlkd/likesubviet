@@ -6,6 +6,7 @@ import Table from "react-bootstrap/Table";
 import Select from "react-select";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import { loadingg } from "@/JS/Loading";
 
 export default function Adddichvu({
   token,
@@ -14,7 +15,7 @@ export default function Adddichvu({
   initialData = {},
   onSuccess,
   show = false,
-  onClose = () => {},
+  onClose = () => { },
 }) {
   const [formData, setFormData] = useState({
     type: "",
@@ -47,14 +48,15 @@ export default function Adddichvu({
 
   const loadSmmPartners = useCallback(async () => {
     setLoading(true);
+    loadingg("Đang tải danh sách đối tác...", true, 9999999);
     try {
       const data = await getAllSmmPartners(token);
       setSmmPartners(data);
     } catch (error) {
-      //console.error("Lỗi khi tải danh sách đối tác:", error);
       toast.error("Không thể tải danh sách đối tác. Vui lòng thử lại!");
     } finally {
       setLoading(false);
+      loadingg(false);
     }
   }, [token]);
 
@@ -94,13 +96,14 @@ export default function Adddichvu({
 
     try {
       setLoadingServices(true);
+      loadingg("Đang tải danh sách dịch vụ...", true, 9999999);
       const servicesData = await getServicesFromSmm(partner._id, token);
       setServices(servicesData.data);
     } catch (error) {
-     // console.error("Lỗi khi lấy dữ liệu từ backend:", error);
       toast.error("Không thể lấy danh sách dịch vụ từ đối tác. Vui lòng thử lại!");
     } finally {
       setLoadingServices(false);
+      loadingg(false);
     }
   };
 
@@ -153,6 +156,7 @@ export default function Adddichvu({
     }
 
     setLoading(true);
+    loadingg("Đang thêm dịch vụ...", true, 9999999);
     try {
       if (selectedServices.length > 0) {
         await Promise.all(
@@ -207,10 +211,10 @@ export default function Adddichvu({
       setServices([]);
       if (onSuccess) onSuccess();
     } catch (error) {
-     // console.error("Lỗi khi thêm dịch vụ:", error);
       toast.error("Lỗi khi thêm dịch vụ. Vui lòng thử lại!");
     } finally {
       setLoading(false);
+      loadingg(false);
     }
   };
 
@@ -529,7 +533,7 @@ export default function Adddichvu({
                       const servicesData = await getServicesFromSmm(partner._id, token);
                       setServices(servicesData.data);
                     } catch (error) {
-                   //   console.error("Lỗi khi lấy dữ liệu từ backend:", error);
+                      //   console.error("Lỗi khi lấy dữ liệu từ backend:", error);
                       toast.error("Không thể lấy danh sách dịch vụ từ đối tác. Vui lòng thử lại!");
                     } finally {
                       setLoadingServices(false);

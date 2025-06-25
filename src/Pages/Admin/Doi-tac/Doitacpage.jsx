@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import Adddoitac from "@/Pages/Admin/Doi-tac/Adddoitac";
 import { deleteSmmPartner, getAllSmmPartners, getBalanceFromSmm } from "@/Utils/api";
 import Table from "react-bootstrap/Table";
+import { loadingg } from "@/JS/Loading";
 
 export default function Doitacpage() {
   const [smmPartners, setSmmPartners] = useState([]);
@@ -14,6 +15,7 @@ export default function Doitacpage() {
   const token = localStorage.getItem("token") || "";
 
   const fetchBalancesForPartners = async (partners) => {
+    loadingg("Đang tải số dư đối tác...");
     const updatedPartners = await Promise.all(
       partners.map(async (partner) => {
         const balance = await getBalanceFromSmm(partner._id, token); // Sử dụng hàm mới
@@ -22,18 +24,20 @@ export default function Doitacpage() {
       })
     );
     setSmmPartners(updatedPartners);
+    loadingg("", false);
   };
 
   useEffect(() => {
     const fetchSmmPartners = async () => {
       try {
+        loadingg("Đang tải danh sách đối tác...");
         const partners = await getAllSmmPartners(token);
         setSmmPartners(partners);
         await fetchBalancesForPartners(partners);
       } catch (error) {
-        //console.error("Lỗi khi lấy danh sách đối tác:", error);
         Swal.fire("Lỗi!", "Không thể tải danh sách đối tác. Vui lòng thử lại.", "error");
       } finally {
+        loadingg("", false);
         setLoading(false);
       }
     };
@@ -55,12 +59,14 @@ export default function Doitacpage() {
 
     if (result.isConfirmed) {
       try {
+        loadingg("Đang xóa đối tác...");
         await deleteSmmPartner(id, token);
         setSmmPartners((prev) => prev.filter((partner) => partner._id !== id));
         Swal.fire("Đã xóa!", "Đối tác đã được xóa thành công.", "success");
       } catch (error) {
-       // console.error("Lỗi khi xóa đối tác:", error);
         Swal.fire("Lỗi!", "Không thể xóa đối tác. Vui lòng thử lại.", "error");
+      } finally {
+        loadingg("", false);
       }
     }
   };

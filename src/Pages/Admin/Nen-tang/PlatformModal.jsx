@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import { loadingg } from "@/JS/Loading";
 
 const platformLogos = {
     Facebook: "/img/facebook.gif",
@@ -43,16 +44,19 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
     }
   }, [formData.name]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Kiểm tra dữ liệu trước khi gửi
-    if (!formData.name || !formData.logo) {
-      alert("Vui lòng điền đầy đủ thông tin!");
-      return;
+    loadingg(platform ? "Đang cập nhật nền tảng..." : "Đang thêm nền tảng...");
+    try {
+      // Kiểm tra dữ liệu trước khi gửi
+      if (!formData.name || !formData.logo) {
+        alert("Vui lòng điền đầy đủ thông tin!");
+        return;
+      }
+      await onSave(formData); // Gửi dữ liệu lên component cha (có thể là async)
+    } finally {
+      loadingg("", false);
     }
-
-    onSave(formData); // Gửi dữ liệu lên component cha
   };
 
   return (

@@ -3,6 +3,7 @@ import { getConfigWeb, updateConfigWeb } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { loadingg } from "@/JS/Loading";
 
 const platformLogos = {
     Gmail : "/img/gmail.png",
@@ -40,6 +41,7 @@ const Setting = () => {
     useEffect(() => {
         const fetchConfig = async () => {
             try {
+                loadingg("Đang tải cấu hình website...");
                 const token = localStorage.getItem("token");
                 const config = await getConfigWeb(token);
                 setFormData({
@@ -48,8 +50,9 @@ const Setting = () => {
                     cuphap: config.data.cuphap || "", // Lấy giá trị cuphap từ API
                 });
             } catch (error) {
-             //   console.error("Lỗi khi lấy cấu hình website:", error.message);
                 toast.error("Không thể tải cấu hình website!");
+            } finally {
+                loadingg("", false);
             }
         };
 
@@ -59,7 +62,7 @@ const Setting = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-
+        loadingg("Đang lưu cấu hình website...");
         try {
             const token = localStorage.getItem("token");
             const sanitizedData = {
@@ -76,10 +79,10 @@ const Setting = () => {
             await updateConfigWeb(sanitizedData, token);
             toast.success("Cập nhật cấu hình thành công!");
         } catch (error) {
-          //  console.error("Lỗi khi cập nhật cấu hình website:", error.message);
             toast.error("Cập nhật cấu hình thất bại!");
         } finally {
             setLoading(false);
+            loadingg("", false);
         }
     };
 

@@ -6,6 +6,7 @@ import Editthongbao from "./Editthongbao";
 import Addthongbao from "./Addthongbao";
 import Table from "react-bootstrap/Table";
 import { useOutletContext } from "react-router-dom";
+import { loadingg } from "@/JS/Loading";
 
 export default function Taothongbaopage() {
   const token = localStorage.getItem("token") || null;
@@ -39,15 +40,16 @@ export default function Taothongbaopage() {
 
       if (result.isConfirmed) {
         setLoading(true);
+        loadingg("Đang xóa thông báo...", 9999999);
         await deleteNotification(id, token);
         setNotifications((prev) => prev.filter((notification) => notification._id !== id));
         toast.success("Thông báo đã bị xóa thành công!");
       }
     } catch (error) {
-    //  console.error("Lỗi khi xóa thông báo:", error);
       toast.error("Lỗi khi xóa thông báo. Vui lòng thử lại!");
     } finally {
       setLoading(false);
+      loadingg(false);
     }
   };
 

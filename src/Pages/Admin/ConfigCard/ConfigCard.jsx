@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getConfigCard, updateConfigCard } from "@/Utils/api"; // Import từ api.js
 import { toast } from "react-toastify";
+import { loadingg } from "@/JS/Loading";
 
 const ConfigCard = () => {
   const [formData, setFormData] = useState({
@@ -14,12 +15,14 @@ const ConfigCard = () => {
   useEffect(() => {
     const fetchConfigCard = async () => {
       try {
+        loadingg("Đang tải cấu hình thẻ nạp...");
         const token = localStorage.getItem("token");
         const config = await getConfigCard(token);
         setFormData(config.data); // Gán dữ liệu từ API vào form
       } catch (error) {
-       // console.error("Lỗi khi lấy cấu hình thẻ nạp:", error.message);
         toast.error("Không thể tải cấu hình thẻ nạp!");
+      } finally {
+        loadingg("", false);
       }
     };
 
@@ -30,16 +33,16 @@ const ConfigCard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+    loadingg("Đang lưu cấu hình thẻ nạp...");
     try {
       const token = localStorage.getItem("token");
       await updateConfigCard(formData, token);
       toast.success("Cập nhật cấu hình thẻ nạp thành công!");
     } catch (error) {
-     // console.error("Lỗi khi cập nhật cấu hình thẻ nạp:", error.message);
       toast.error("Cập nhật cấu hình thẻ nạp thất bại!");
     } finally {
       setLoading(false);
+      loadingg("", false);
     }
   };
 
@@ -50,7 +53,8 @@ const ConfigCard = () => {
           <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h2 className="card-title">Cấu hình nạp thẻ</h2>
           </div>
-          <div className="card-body">      <h2>Cấu hình thẻ nạp</h2>
+          <div className="card-body">
+            <h2>Cấu hình thẻ nạp</h2>
             <form onSubmit={handleSubmit}>
               {/* API_URLCARD */}
               <div className="mb-3">
@@ -59,7 +63,9 @@ const ConfigCard = () => {
                   type="text"
                   className="form-control"
                   value={formData.API_URLCARD}
-                  onChange={(e) => setFormData({ ...formData, API_URLCARD: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, API_URLCARD: e.target.value })
+                  }
                   placeholder="Nhập URL API thẻ nạp"
                   required
                 />
@@ -72,7 +78,9 @@ const ConfigCard = () => {
                   type="text"
                   className="form-control"
                   value={formData.PARTNER_ID}
-                  onChange={(e) => setFormData({ ...formData, PARTNER_ID: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, PARTNER_ID: e.target.value })
+                  }
                   placeholder="Nhập ID đối tác"
                   required
                 />
@@ -85,14 +93,20 @@ const ConfigCard = () => {
                   type="text"
                   className="form-control"
                   value={formData.PARTNER_KEY}
-                  onChange={(e) => setFormData({ ...formData, PARTNER_KEY: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, PARTNER_KEY: e.target.value })
+                  }
                   placeholder="Nhập khóa đối tác"
                   required
                 />
               </div>
 
               {/* Nút lưu */}
-              <button type="submit" className="btn btn-primary" disabled={loading}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
                 {loading ? "Đang lưu..." : "Lưu cấu hình"}
               </button>
             </form>

@@ -3,6 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { toast } from "react-toastify";
 import { updateServer } from "@/Utils/api";
+import { loadingg } from "@/JS/Loading";
 
 export default function EditModal({ show, onClose, initialData, token }) {
   const [formData, setFormData] = useState({
@@ -80,13 +81,15 @@ export default function EditModal({ show, onClose, initialData, token }) {
       isActive: formData.isActive,
     };
 
+    loadingg("Đang cập nhật dịch vụ...", true);
     try {
       await updateServer(formData._id, updatedData, token);
       toast.success("Dịch vụ đã được cập nhật thành công!");
       onClose();
     } catch (error) {
-      //console.error("Lỗi khi cập nhật dịch vụ:", error);
       toast.error("Lỗi khi cập nhật dịch vụ. Vui lòng thử lại!");
+    } finally {
+      loadingg(false);
     }
   };
 

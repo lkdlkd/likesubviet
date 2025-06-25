@@ -5,6 +5,7 @@ import { addPlatform, updatePlatform, deletePlatform, getPlatforms } from "@/Uti
 import Swal from "sweetalert2";
 import PlatformModal from "./PlatformModal";
 import Table from "react-bootstrap/Table"; // Import Table từ react-bootstrap
+import { loadingg } from "@/JS/Loading";
 
 export default function PlatformsPage() {
   const [platforms, setPlatforms] = useState([]);
@@ -14,18 +15,20 @@ export default function PlatformsPage() {
 
   const fetchPlatforms = async () => {
     try {
+      loadingg("Đang tải danh sách nền tảng...");
       const response = await getPlatforms(token);
       // Lọc bỏ các phần tử không hợp lệ
       const validPlatforms = response.platforms?.filter((p) => p && p._id) || [];
       setPlatforms(validPlatforms);
     } catch (error) {
-      //console.error("Lỗi khi lấy danh sách nền tảng:", error);
       Swal.fire({
         title: "Lỗi",
         text: "Không thể lấy danh sách nền tảng.",
         icon: "error",
         confirmButtonText: "Xác nhận",
       });
+    } finally {
+      loadingg("", false);
     }
   };
 
@@ -35,6 +38,7 @@ export default function PlatformsPage() {
 
   const handleAddPlatform = async (platform) => {
     try {
+      loadingg("Đang thêm nền tảng...");
       const response = await addPlatform(platform, token);
       setPlatforms([...platforms, response.data]);
       Swal.fire({
@@ -45,23 +49,24 @@ export default function PlatformsPage() {
       });
       setIsModalOpen(false);
     } catch (error) {
-   //   console.error("Lỗi khi thêm nền tảng:", error);
       Swal.fire({
         title: "Lỗi",
         text: "Không thể thêm nền tảng.",
         icon: "error",
         confirmButtonText: "Xác nhận",
       });
+    } finally {
+      loadingg("", false);
     }
   };
 
   const handleUpdatePlatform = async (platformId, platformData) => {
     if (!platformId) {
-     // console.error("Không thể cập nhật nền tảng: `_id` không tồn tại.");
       return;
     }
 
     try {
+      loadingg("Đang cập nhật nền tảng...");
       const response = await updatePlatform(platformId, platformData, token);
       setPlatforms((prev) =>
         prev.map((p) => (p._id === platformId ? response.data : p))
@@ -74,19 +79,19 @@ export default function PlatformsPage() {
       });
       setIsModalOpen(false);
     } catch (error) {
-     // console.error("Lỗi khi cập nhật nền tảng:", error);
       Swal.fire({
         title: "Lỗi",
         text: "Không thể cập nhật nền tảng.",
         icon: "error",
         confirmButtonText: "Xác nhận",
       });
+    } finally {
+      loadingg("", false);
     }
   };
 
   const handleDeletePlatform = async (platformId) => {
     if (!platformId) {
-    //  console.error("Không thể xóa nền tảng: `_id` không tồn tại.");
       return;
     }
 
@@ -103,12 +108,14 @@ export default function PlatformsPage() {
 
     if (result.isConfirmed) {
       try {
+        loadingg("Đang xóa nền tảng...");
         await deletePlatform(platformId, token);
         Swal.fire("Đã xóa!", "Nền tảng đã được xóa.", "success");
         setPlatforms((prev) => prev.filter((platform) => platform._id !== platformId));
       } catch (error) {
-       // console.error("Lỗi khi xóa nền tảng:", error);
         Swal.fire("Lỗi", "Không thể xóa nền tảng!", "error");
+      } finally {
+        loadingg("", false);
       }
     }
   };
@@ -158,7 +165,7 @@ export default function PlatformsPage() {
                                       setSelectedPlatform(platform);
                                       setIsModalOpen(true);
                                     } else {
-                                   //   console.error("Không thể sửa nền tảng: `_id` không tồn tại.");
+                                    //   console.error("Không thể sửa nền tảng: `_id` không tồn tại.");
                                     }
                                   }}
                                 >
@@ -172,7 +179,7 @@ export default function PlatformsPage() {
                                     if (platform && platform._id) {
                                       handleDeletePlatform(platform._id);
                                     } else {
-                                  //    console.error("Không thể xóa nền tảng: `_id` không tồn tại.");
+                                    //    console.error("Không thể xóa nền tảng: `_id` không tồn tại.");
                                     }
                                   }}
                                 >

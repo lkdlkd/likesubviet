@@ -5,6 +5,7 @@ import { addCategory, updateCategory, deleteCategory, getCategories, getPlatform
 import Swal from "sweetalert2";
 import CategoryModal from "@/Pages/Admin/Dich-vu/CategoryModal";
 import Table from "react-bootstrap/Table"; // Import Table từ react-bootstrap
+import { loadingg } from "@/JS/Loading";
 
 export default function CategoriesPage() {
     const [categories, setCategories] = useState([]);
@@ -14,6 +15,7 @@ export default function CategoriesPage() {
     const token = localStorage.getItem("token") || "";
     const fetchCategories = async () => {
         try {
+            loadingg("Đang tải danh sách danh mục...");
             const response = await getCategories(token);
             setPlatforms(response.platforms || []);
 
@@ -33,6 +35,8 @@ export default function CategoriesPage() {
                 icon: "error",
                 confirmButtonText: "Xác nhận",
             });
+        } finally {
+            loadingg("", false);
         }
     };
 
@@ -44,6 +48,7 @@ export default function CategoriesPage() {
 
     const handleSaveCategory = async (categoryData) => {
         try {
+            loadingg("Đang lưu danh mục...");
             if (selectedCategory && selectedCategory._id) {
                 const response = await updateCategory(selectedCategory._id, categoryData, token);
                 setCategories((prev) =>
@@ -75,6 +80,8 @@ export default function CategoriesPage() {
                 icon: "error",
                 confirmButtonText: "Xác nhận",
             });
+        } finally {
+            loadingg("", false);
         }
     };
 
@@ -97,6 +104,7 @@ export default function CategoriesPage() {
 
         if (result.isConfirmed) {
             try {
+                loadingg("Đang xóa danh mục...");
                 await deleteCategory(categoryId, token);
                 setCategories((prev) => prev.filter((cat) => cat._id !== categoryId));
                 Swal.fire("Đã xóa!", "Danh mục đã được xóa.", "success");
@@ -108,6 +116,8 @@ export default function CategoriesPage() {
                     icon: "error",
                     confirmButtonText: "Xác nhận",
                 });
+            } finally {
+                loadingg("", false);
             }
         }
     };

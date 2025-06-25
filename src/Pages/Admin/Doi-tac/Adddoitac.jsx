@@ -4,6 +4,7 @@ import { createSmmPartner, updateSmmPartner } from "@/Utils/api";
 import { toast } from "react-toastify";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import { loadingg } from "@/JS/Loading";
 
 export default function Adddoitac({
   token,
@@ -48,7 +49,7 @@ export default function Adddoitac({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+    loadingg(editingPartner ? "Đang cập nhật đối tác..." : "Đang thêm đối tác...");
     try {
       if (editingPartner) {
         // Cập nhật đối tác
@@ -63,10 +64,10 @@ export default function Adddoitac({
       }
       onClose(); // Đóng modal
     } catch (error) {
-     // console.error("Lỗi khi thêm/cập nhật đối tác:", error);
       toast.error("Lỗi khi thêm/cập nhật đối tác. Vui lòng thử lại!");
     } finally {
       setLoading(false);
+      loadingg("", false);
     }
   };
 

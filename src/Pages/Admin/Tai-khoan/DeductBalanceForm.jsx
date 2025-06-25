@@ -3,9 +3,10 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { deductBalance } from "@/Utils/api";
 import { toast } from "react-toastify";
+import { loadingg } from "@/JS/Loading";
 
 function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
-  const [deductionAmount, setDeductionAmount] = useState(0);
+  const [deductionAmount, setDeductionAmount] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleDeductBalance = async () => {
@@ -21,14 +22,10 @@ function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
 
     try {
       setLoading(true);
-
-
+      loadingg("Đang xử lý...",true, 9999999);
       // Gọi API để cập nhật số dư
       const updatedUser = await deductBalance(user._id, { amount: deductionAmount }, token);
-
-      // Gửi dữ liệu đã cập nhật về component cha
       onUserUpdated(updatedUser);
-
       toast.success("Trừ số dư thành công!");
       onClose(); // Đóng modal
     } catch (error) {
@@ -36,6 +33,7 @@ function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
       toast.error("Trừ số dư thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
+      loadingg(false);
     }
   };
 
@@ -65,7 +63,7 @@ function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
             />
           </div>
           <div className="mb-3">
-            <label className="form-label">Số tiền muốn trừ</label>
+            <label className="form-label">Số tiền muốn trừ : {Number(deductionAmount).toLocaleString()} VNĐ</label>
             <input
               type="number"
               className="form-control"

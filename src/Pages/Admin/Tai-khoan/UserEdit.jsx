@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { updateUser, changePassword } from "@/Utils/api";
 import { toast } from "react-toastify";
+import { loadingg } from "@/JS/Loading";
 
 function UserEdit({ user, token, onClose, onUserUpdated }) {
   const [username, setUsername] = useState(user?.username || "");
@@ -25,6 +26,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
     }
 
     setSaving(true);
+    loadingg("Đang cập nhật thông tin...", true, 9999999);
     try {
       const updatedUser = await updateUser(
         user._id,
@@ -48,6 +50,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
       toast.error("Cập nhật thông tin thất bại. Vui lòng thử lại.");
     } finally {
       setSaving(false);
+      loadingg(false);
     }
   };
 
@@ -58,6 +61,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
     }
 
     setSaving(true);
+    loadingg(true, 9999999);
     try {
       // Gọi API để đổi mật khẩu
       await changePassword(user._id, { newPassword }, token);
@@ -68,6 +72,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
       toast.error("Đổi mật khẩu thất bại. Vui lòng thử lại.");
     } finally {
       setSaving(false);
+      loadingg(false);
     }
   };
 

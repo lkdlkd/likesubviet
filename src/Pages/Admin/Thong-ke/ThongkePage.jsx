@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getStatistics } from "@/Utils/api";
+import { loadingg } from "@/JS/Loading";
 
 export default function ThongkePage() {
     const [statistics, setStatistics] = useState(null);
@@ -15,15 +16,16 @@ export default function ThongkePage() {
     useEffect(() => {
         const fetchStatistics = async () => {
             setLoading(true);
+            loadingg("Đang tải...", 9999999);
             try {
                 const data = await getStatistics(token, napRange, doanhthuRange);
                 setStatistics(data);
                 setErrorMessage(null);
             } catch (error) {
-            //    console.error("Error fetching statistics:", error.message || error);
                 setErrorMessage(error.message || "Có lỗi xảy ra khi tải dữ liệu.");
             } finally {
                 setLoading(false);
+                loadingg(false);
             }
         };
 
