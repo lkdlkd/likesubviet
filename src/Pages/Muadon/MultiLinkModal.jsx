@@ -61,6 +61,40 @@ export default function MultiLinkModal({
             .filter((line) => line.trim() !== "").length;
         setcomputedQty(computedQty);
     }, [comments]);
+    // Hàm rút gọn link TikTok
+    const shortenTiktokLink = (url) => {
+        if (typeof url !== 'string') return url;
+        // Loại bỏ các tham số truy vấn và fragment
+        let cleanUrl = url.split('?')[0].split('#')[0];
+        // Xử lý các dạng link phổ biến
+        // 1. https://vt.tiktok.com/abc123/ (redirect link)
+        // 2. https://www.tiktok.com/@username/video/1234567890
+        // 3. https://m.tiktok.com/v/1234567890.html
+        // 4. https://www.tiktok.com/t/ZTxxxxxxx/ (short link)
+        // 5. https://www.tiktok.com/@username/video/1234567890?is_from_webapp=1&sender_device=pc
+
+        // Nếu là link redirect (vt.tiktok.com hoặc tiktok.com/t/), giữ nguyên vì cần client follow redirect
+        if (/vt\.tiktok\.com|tiktok\.com\/t\//.test(cleanUrl)) {
+            return url;
+        }
+        // Dạng m.tiktok.com/v/1234567890.html => chuyển về dạng video id
+        const mMatch = cleanUrl.match(/m\.tiktok\.com\/v\/(\d+)\.html/);
+        if (mMatch) {
+            return `https://www.tiktok.com/video/${mMatch[1]}`;
+        }
+        // Dạng www.tiktok.com/@username/video/1234567890
+        const userVideoMatch = cleanUrl.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
+        if (userVideoMatch) {
+            return `https://www.tiktok.com/@${userVideoMatch[1]}/video/${userVideoMatch[2]}`;
+        }
+        // Dạng www.tiktok.com/video/1234567890
+        const videoMatch = cleanUrl.match(/tiktok\.com\/video\/(\d+)/);
+        if (videoMatch) {
+            return `https://www.tiktok.com/video/${videoMatch[1]}`;
+        }
+        // Nếu không khớp, trả về url gốc
+        return url;
+    };
     return (
         <Modal show={show} onHide={onHide} size="xl" backdrop="static">
             <div className="modal-content">
@@ -188,7 +222,8 @@ export default function MultiLinkModal({
                                     const newLinks = multiLinkInput
                                         .split("\n")
                                         .map(l => l.trim())
-                                        .filter(l => l !== "" && !multiLinkList.some(item => item.link === l));
+                                        .filter(l => l !== "" && !multiLinkList.some(item => item.link === l))
+                                        .map(l => l.includes('tiktok.com') ? shortenTiktokLink(l) : l); // Áp dụng shortenTiktokLink cho link TikTok
                                     if (newLinks.length > 0) {
                                         // Sử dụng biến comments từ props, không khai báo lại
                                         const commentArr = comments
@@ -258,7 +293,18 @@ export default function MultiLinkModal({
                                                         <td>{server ? server.name : ''}</td>
                                                         <td>{(selectedService && selectedService.comment === "on") ? comments.split("\n").filter(c => c.trim() !== "").length : quantity}</td>
                                                         <td>{server ? Number(server.rate).toLocaleString('en-US') : ''}đ</td>
-                                                        <td>{server ? ((selectedService && selectedService.comment === "on") ? comments.split("\n").filter(c => c.trim() !== "").length : quantity) * Number(server.rate).toLocaleString("en-US") : ''}đ</td>
+                                                        <td>
+                                                            {server
+                                                                ? (
+                                                                    ((selectedService && selectedService.comment === "on")
+                                                                        ? comments.split("\n").filter(c => c.trim() !== "").length
+                                                                        : quantity
+                                                                    ) * Number(server.rate)
+                                                                ).toLocaleString("en-US")
+                                                                : ''
+                                                            }đ
+                                                        </td>
+                                                        {/* <td>{server ? ((selectedService && selectedService.comment === "on") ? comments.split("\n").filter(c => c.trim() !== "").length : quantity) * Number(server.rate).toLocaleString("en-US") : ''}đ</td> */}
                                                         {selectedService && selectedService.comment === "on" && (
                                                             <td style={{ whiteSpace: 'pre-line' }}>
                                                                 <textarea value={item.comment} readOnly style={{ width: "100%", minHeight: 40, resize: "vertical" }} />
