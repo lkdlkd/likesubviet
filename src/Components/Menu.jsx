@@ -81,7 +81,7 @@ function MenuUser({ user, categories, configWeb }) {
                         </div>
                     </div>
                 </div>
-                <SimpleBar style={{ maxHeight: '100dvh', minHeight: 0 }} className="navbar-content mb-3">
+                <SimpleBar style={{ maxHeight: '75dvh', minHeight: 0 }} className="navbar-content mb-3">
                     <ul className="pc-navbar">
                         {userRole === "admin" && (
                             <>
