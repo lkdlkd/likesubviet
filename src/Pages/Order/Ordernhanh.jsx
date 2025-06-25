@@ -465,7 +465,7 @@ export default function Ordernhanh() {
                                                 type="text"
                                                 value={isConverting ? "Đang xử lý..." : displayLink}
                                                 onChange={(e) => {
-                                                    let val = e.target.value;
+                                                    let val = e.target.value.replace(/\s+/g, ''); // Bỏ tất cả khoảng trắng
                                                     // Nếu là link TikTok thì rút gọn
                                                     if (val.includes('tiktok.com')) {
                                                         val = shortenTiktokLink(val);

@@ -476,7 +476,12 @@ export default function Order() {
                                                 type="text"
                                                 value={isConverting ? "Đang xử lý..." : displayLink}
                                                 onChange={(e) => {
-                                                    setRawLink(e.target.value);
+                                                    let val = e.target.value.replace(/\s+/g, ''); // Bỏ tất cả khoảng trắng
+                                                    // Nếu là link TikTok thì rút gọn
+                                                    if (val.includes('tiktok.com')) {
+                                                        val = shortenTiktokLink(val);
+                                                    }
+                                                    setRawLink(val);
                                                     setConvertedUID("");
                                                 }}
                                                 placeholder="Nhập link hoặc ID tùy các máy chủ"
@@ -602,7 +607,7 @@ export default function Order() {
                                             type="text"
                                             value={isConverting ? "Đang xử lý..." : displayLink}
                                             onChange={(e) => {
-                                                let val = e.target.value;
+                                                let val = e.target.value.replace(/\s+/g, ''); // Bỏ tất cả khoảng trắng
                                                 // Nếu là link TikTok thì rút gọn
                                                 if (val.includes('tiktok.com')) {
                                                     val = shortenTiktokLink(val);
