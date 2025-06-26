@@ -17,7 +17,7 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
 
         try {
             setLoading(true);
-            loadingg(true);
+            loadingg("Đang xử lý...", true, 9999999);
             // Gọi API để cập nhật số dư
             const updatedUser = await addBalance(user._id, { amount: additionAmount }, token);
 

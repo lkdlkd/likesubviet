@@ -16,7 +16,7 @@ export default function ThongkePage() {
     useEffect(() => {
         const fetchStatistics = async () => {
             setLoading(true);
-            loadingg("Đang tải...", 9999999);
+            loadingg("Đang tải...", true, 9999999);
             try {
                 const data = await getStatistics(token, napRange, doanhthuRange);
                 setStatistics(data);
@@ -28,13 +28,7 @@ export default function ThongkePage() {
                 loadingg(false);
             }
         };
-
-        if (token) {
-            fetchStatistics();
-        } else {
-            setErrorMessage("Token không hợp lệ hoặc đã hết hạn.");
-            setLoading(false);
-        }
+        fetchStatistics();
     }, [token, napRange, doanhthuRange]);
 
     // Xử lý thay đổi khoảng thời gian

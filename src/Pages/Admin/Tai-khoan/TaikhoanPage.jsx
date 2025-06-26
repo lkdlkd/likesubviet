@@ -98,8 +98,8 @@ export default function TaikhoanPage() {
       cancelButtonText: "Hủy",
     }).then(async (result) => {
       if (result.isConfirmed) {
+        loadingg("Đang xóa người dùng ", true, 9999999);
         try {
-          loadingg(true, 9999999);
           await deleteUser(userId, token);
           Swal.fire("Đã xóa!", "Người dùng đã được xóa thành công.", "success");
           setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));

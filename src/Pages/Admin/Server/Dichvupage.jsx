@@ -2,14 +2,16 @@
 import { useState, useEffect } from "react";
 import Adddichvu from "./Adddichvu";
 import Table from "react-bootstrap/Table";
-import { deleteServer, getCategories, getServer } from "@/Utils/api";
+import { deleteServer, getServer } from "@/Utils/api";
 import Swal from "sweetalert2";
 import EditModal from "./EditModal";
 import { loadingg } from "@/JS/Loading";
+import { useOutletContext } from "react-router-dom";
 
 export default function Dichvupage() {
+  const { categories: cate } = useOutletContext();
   const [servers, setServers] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState([]); // Sử dụng categories từ Outlet context
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,7 +37,7 @@ export default function Dichvupage() {
 
   const fetchServers = async () => {
     try {
-      loadingg("Đang tải danh sách server...",true, 9999999);
+      loadingg("Đang tải danh sách server...", true, 9999999);
       if (!quickAddMode) {
         const response = await getServer(token, currentPage, limit, debouncedSearch);
         setServers(response.data || []);
@@ -61,34 +63,39 @@ export default function Dichvupage() {
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      loadingg("Đang tải danh sách danh mục...", 9999999);
-      const response = await getCategories(token);
-      let allCategories = [];
-      if (Array.isArray(response.platforms)) {
-        allCategories = response.platforms.flatMap(p => p.categories || []);
-      } else if (Array.isArray(response.data)) {
-        allCategories = response.data;
-      }
-      setCategories(allCategories);
-    } catch (error) {
-      Swal.fire({
-        title: "Lỗi",
-        text: "Không thể lấy danh sách danh mục.",
-        icon: "error",
-        confirmButtonText: "Xác nhận",
-      });
-    } finally {
-      loadingg(false);
+  // const fetchCategories = async () => {
+  //   try {
+  //     loadingg("Đang tải danh sách danh mục...",true, 9999999);
+  //     const response = await getCategories(token);
+  //     let allCategories = [];
+  //     if (Array.isArray(response.platforms)) {
+  //       allCategories = response.platforms.flatMap(p => p.categories || []);
+  //     } else if (Array.isArray(response.data)) {
+  //       allCategories = response.data;
+  //     }
+  //     setCategories(allCategories);
+  //   } catch (error) {
+  //     Swal.fire({
+  //       title: "Lỗi",
+  //       text: "Không thể lấy danh sách danh mục.",
+  //       icon: "error",
+  //       confirmButtonText: "Xác nhận",
+  //     });
+  //   } finally {
+  //     loadingg(false);
+  //   }
+  // };
+  useEffect(() => {
+    if (cate && Array.isArray(cate)) {
+      setCategories(cate);
+    } else {
+      setCategories([]); // Đặt về mảng rỗng nếu cate không hợp lệ
     }
-  };
-
+  }, [cate]);
   useEffect(() => {
     fetchServers();
-    fetchCategories();
+    // fetchCategories();
   }, [currentPage, limit, debouncedSearch, quickAddMode]);
-
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -158,7 +165,7 @@ export default function Dichvupage() {
         <div className="card">
           <div className="card-body">
             <h2 className="smmdv-title">Danh Sách Server</h2>
-            <Adddichvu
+            {/* <Adddichvu
               categories={categories}
               token={token}
               editMode={editMode}
@@ -169,7 +176,7 @@ export default function Dichvupage() {
                 setSelectedServer(null);
                 fetchServers();
               }}
-            />
+            /> */}
             <div className="mb-3">
               <button
                 type="button"
@@ -244,7 +251,7 @@ export default function Dichvupage() {
 
                   if (result.isConfirmed) {
                     try {
-                      loadingg(99999);
+                      loadingg("Đang xóa server đã chọn...", true, 9999999);
                       await Promise.all(
                         selectedServers.map((serverId) => deleteServer(serverId, token))
                       );

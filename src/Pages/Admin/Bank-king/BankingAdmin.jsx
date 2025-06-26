@@ -26,8 +26,8 @@ export default function BankingAdmin() {
       } catch (error) {
         toast.error("Vui lòng thêm ngân hàng!");
       } finally {
-        loadingg("", false); // Đóng loading khi xong
         setLoading(false);
+        loadingg("", false); // Chỉ gọi loadingg một lần ở đây
       }
     };
 

@@ -81,7 +81,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
       isActive: formData.isActive,
     };
 
-    loadingg("Đang cập nhật dịch vụ...", true);
+    loadingg("Đang cập nhật dịch vụ...", true, 99999999);
     try {
       await updateServer(formData._id, updatedData, token);
       toast.success("Dịch vụ đã được cập nhật thành công!");

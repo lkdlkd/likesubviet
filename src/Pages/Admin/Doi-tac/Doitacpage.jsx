@@ -15,7 +15,7 @@ export default function Doitacpage() {
   const token = localStorage.getItem("token") || "";
 
   const fetchBalancesForPartners = async (partners) => {
-    loadingg("Đang tải số dư đối tác...");
+    loadingg("Đang tải số dư đối tác...",true , 9999999);
     const updatedPartners = await Promise.all(
       partners.map(async (partner) => {
         const balance = await getBalanceFromSmm(partner._id, token); // Sử dụng hàm mới
@@ -30,7 +30,7 @@ export default function Doitacpage() {
   useEffect(() => {
     const fetchSmmPartners = async () => {
       try {
-        loadingg("Đang tải danh sách đối tác...");
+        loadingg("Đang tải danh sách đối tác...", true, 9999999);
         const partners = await getAllSmmPartners(token);
         setSmmPartners(partners);
         await fetchBalancesForPartners(partners);

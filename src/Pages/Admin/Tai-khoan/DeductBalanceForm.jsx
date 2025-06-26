@@ -22,7 +22,7 @@ function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
 
     try {
       setLoading(true);
-      loadingg("Đang xử lý...",true, 9999999);
+      loadingg("Đang xử lý...", true, 9999999);
       // Gọi API để cập nhật số dư
       const updatedUser = await deductBalance(user._id, { amount: deductionAmount }, token);
       onUserUpdated(updatedUser);
