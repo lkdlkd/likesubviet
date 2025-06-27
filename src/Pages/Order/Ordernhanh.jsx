@@ -23,6 +23,7 @@ export default function Ordernhanh() {
     const [max, setMax] = useState(10000);
     const [rate, setRate] = useState(0);
     const [cmtqlt, setcomputedQty] = useState(0);
+    const [ObjectLink, setObjectLink] = useState(""); // Lưu input gốc
     const [isConverting, setIsConverting] = useState(false);
     const [searchService, setSearchService] = useState(null);
     const navigate = useNavigate();
@@ -144,6 +145,7 @@ export default function Ordernhanh() {
             setSelectedCategory(null);
             setSelectedMagoi("");
         }
+        setObjectLink(""); // Reset link gốc
         setTotalCost(0);
         setRawLink("");
         setConvertedUID("");
@@ -155,6 +157,7 @@ export default function Ordernhanh() {
     // Handler cho khi chọn Category từ react-select
     const handleCategoryChange = (option) => {
         setSelectedCategory(option);
+        setObjectLink(""); // Reset link gốc
         setSelectedMagoi("");
         setTotalCost(0);
         setRawLink("");
@@ -273,10 +276,10 @@ export default function Ordernhanh() {
             try {
                 const payload = {
                     link: finalLink,
-                    username,
                     category: selectedCategory ? selectedCategory.value : "",
                     magoi: selectedMagoi,
                     note,
+                    ObjectLink: ObjectLink, // Lưu input gốc
                 };
                 if (selectedService && selectedService.comment === "on") {
                     payload.quantity = qty;
@@ -571,6 +574,7 @@ export default function Ordernhanh() {
                                             // Nếu là link TikTok thì rút gọn
                                             if (val !== "") {
                                                 val = shortenSocialLink(val);
+                                                setObjectLink(val); // Lưu input gốc
                                             }
                                             setRawLink(val);
                                             setConvertedUID("");

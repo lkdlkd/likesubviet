@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 
 const Danhsachdon = () => {
-    const { token ,categories } = useOutletContext();
+    const { token, categories } = useOutletContext();
     // const [servers, setServers] = useState([]);
     const [selectedType, setSelectedType] = useState(null); // react-select object
     const [selectedCategory, setSelectedCategory] = useState(null); // react-select object
@@ -140,17 +140,17 @@ const Danhsachdon = () => {
         { value: "Completed", label: "Hoàn thành" },
         { value: "In progress", label: "Đang chạy" },
         { value: "Pending", label: "Chờ xử lý" },
-        { value: "Partial", label: "Một phần" },
+        { value: "Partial", label: "Hoàn một phần" },
         { value: "Canceled", label: "Đã hủy" },
     ];
     const handleCopyText = (order) => {
-        const textToCopy = `Mã đơn: ${order.Madon}\nLink: ${order.link}\nServer: ${order.maychu || "Không có"} - ${order.namesv || "Không có"}`;
+        const textToCopy = `Mã đơn : ${order.Madon} \nJob id : ${order.link} \nTên Sv : ${order.maychu || ""}${order.namesv || ""}`;
         navigator.clipboard.writeText(textToCopy)
             .then(() => {
                 Swal.fire({
                     icon: "success",
                     title: "Sao chép thành công!",
-                    text: `Mã đơn: ${order.Madon}\nLink: ${order.link}\nServer: ${order.maychu || "Không có"} - ${order.namesv || "Không có"}`,
+                    text: `Mã đơn : ${order.Madon} \nJob id : ${order.link} \nTên Sv : ${order.maychu || ""}${order.namesv || ""}`,
                     confirmButtonText: "OK",
                 });
             })
@@ -184,7 +184,7 @@ const Danhsachdon = () => {
                                 </div>
                             </div>
                             <div className="col-md-6 col-lg-3">
-                                {selectedType && (
+                                {/* {selectedType && ( */}
                                     <div className="form-group">
                                         <label>Phân Loại:</label>
                                         <Select
@@ -195,7 +195,7 @@ const Danhsachdon = () => {
                                             isClearable
                                         />
                                     </div>
-                                )}
+                                {/* )} */}
                             </div>
                             <div className="col-md-6 col-lg-3">
                                 <div className="form">
@@ -256,6 +256,7 @@ const Danhsachdon = () => {
                                     <span className="ms-2">Đang tải dữ liệu...</span>
                                 </div>
                             ) : orders.length > 0 ? (
+                                // <Table striped bordered hover responsive>
                                 <Table striped bordered hover responsive>
                                     <thead>
                                         <tr>
@@ -272,7 +273,7 @@ const Danhsachdon = () => {
                                             <th>Ngày tạo</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody >
                                         {filteredOrders.map((order, index) => (
                                             <tr key={index}>
                                                 <td>{(currentPage - 1) * limit + index + 1}</td>
@@ -286,7 +287,7 @@ const Danhsachdon = () => {
                                                 </td>
                                                 <td>{order.Madon}</td>
                                                 <td>{order.username}</td>
-                                                <td
+                                                {/* <td
                                                     style={{
                                                         maxWidth: "250px",
                                                         whiteSpace: "normal",
@@ -294,7 +295,15 @@ const Danhsachdon = () => {
                                                         overflowWrap: "break-word",
                                                     }}
                                                 >
-                                                    {order.link}
+                                                    <a href={order.ObjectLink || ""}>{order.link}</a>
+                                                </td> */}
+                                                <td style={{
+                                                    maxWidth: "250px",
+                                                    whiteSpace: "normal",
+                                                    wordWrap: "break-word",
+                                                    overflowWrap: "break-word",
+                                                }}>
+                                                    <p><a href={order.ObjectLink} target="_blank">{order.link}</a></p>
                                                 </td>
                                                 <td style={{
                                                     maxWidth: "250px",

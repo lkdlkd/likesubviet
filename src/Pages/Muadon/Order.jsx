@@ -27,6 +27,7 @@ export default function Order() {
     const [min, setMin] = useState(100);
     const [max, setMax] = useState(10000);
     const [rate, setRate] = useState(0);
+    const [ObjectLink, setObjectLink] = useState("");
     const [cmtqlt, setcomputedQty] = useState(0);
     const [isConverting, setIsConverting] = useState(false);
     const [modal_Show, setModalShow] = useState("");
@@ -47,7 +48,7 @@ export default function Order() {
         try {
             decoded = JSON.parse(atob(token.split(".")[1]));
         } catch (error) {
-            // console.error("Token decode error:", error);
+
         }
     }
     const username = decoded.username;
@@ -60,7 +61,7 @@ export default function Order() {
                 setServers(response.data || []); // Giả sử API trả về `data`
                 setModalShow(response.notes || ""); // Lưu ý: `modal_show` cần được trả về từ API
             } catch (error) {
-                // console.error("Lỗi khi gọi API getServerByTypeAndCategory:", error);
+
                 Swal.fire({
                     title: "Lỗi",
                     text: "Không thể tải danh sách máy chủ.",
@@ -196,9 +197,9 @@ export default function Order() {
                 const payload = {
                     category: servers.find((server) => server.Magoi === selectedMagoi)?.category || "",
                     link: finalLink,
-                    username,
                     magoi: selectedMagoi,
                     note,
+                    ObjectLink: ObjectLink, // Lưu input gốc
                 };
 
                 if (selectedService && selectedService.comment === "on") {
@@ -243,16 +244,14 @@ export default function Order() {
         let success = 0, fail = 0;
         try {
             for (const idx of selectedMultiLinks) {
-                //console.log(isStoppedRef.current, "isStoppedRef.current");
-                if (isStoppedRef.current) break; // Sử dụng ref để lấy giá trị mới nhất
-
+                if (isStoppedRef.current) break;
                 const item = multiLinkList[idx];
                 const payload = {
                     category: servers.find((server) => server.Magoi === selectedMagoi)?.category || "",
                     link: item.link,
-                    username,
                     magoi: selectedMagoi,
                     note,
+                    ObjectLink: item.ObjectLink || item.link, // Thêm trường ObjectLink là link gốc
                 };
                 if (selectedService && selectedService.comment === "on") {
                     payload.quantity = qty;
@@ -292,6 +291,7 @@ export default function Order() {
         }
     };
     useEffect(() => {
+        setObjectLink("");
         setRawLink("");
         setConvertedUID("");
     }, [path]); // Theo dõi sự thay đổi của đường dẫn
@@ -623,6 +623,7 @@ export default function Order() {
                                                 // Nếu là link TikTok thì rút gọn
                                                 if (val !== "") {
                                                     val = shortenSocialLink(val);
+                                                    setObjectLink(val); // Lưu link gốc
                                                 }
                                                 setRawLink(val);
                                                 setConvertedUID("");

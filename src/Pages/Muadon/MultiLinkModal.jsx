@@ -233,20 +233,19 @@ export default function MultiLinkModal({
                                 variant="info"
                                 size="sm"
                                 onClick={() => {
-                                    const newLinks = multiLinkInput
+                                    const rawLinks = multiLinkInput
                                         .split("\n")
                                         .map(l => l.trim())
-                                        .filter(l => l !== "" && !multiLinkList.some(item => item.link === l))
-                                        .map(l => shortenSocialLink(l)); // Luôn gọi shortenSocialLink cho mọi link hợp lệ
+                                        .filter(l => l !== "" && !multiLinkList.some(item => item.link === shortenSocialLink(l)));
+                                    const newLinks = rawLinks.map(l => ({ link: shortenSocialLink(l), ObjectLink: l }));
                                     if (newLinks.length > 0) {
-                                        // Sử dụng biến comments từ props, không khai báo lại
                                         const commentArr = comments
                                             .split("\n")
                                             .map(c => c.trim())
                                             .filter(c => c !== "");
                                         setMultiLinkList(list => [
                                             ...list,
-                                            ...newLinks.map(link => ({ link, comment: commentArr.join("\n"), }))
+                                            ...newLinks.map(item => ({ ...item, comment: commentArr.join("\n") }))
                                         ]);
                                         setMultiLinkInput("");
                                     }
