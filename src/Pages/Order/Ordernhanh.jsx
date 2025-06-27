@@ -403,39 +403,53 @@ export default function Ordernhanh() {
 
 
 
-    const shortenTiktokLink = (url) => {
-        if (typeof url !== 'string') return url;
-        // Loại bỏ các tham số truy vấn và fragment
-        let cleanUrl = url.split('?')[0].split('#')[0];
-        // Xử lý các dạng link phổ biến
-        // 1. https://vt.tiktok.com/abc123/ (redirect link)
-        // 2. https://www.tiktok.com/@username/video/1234567890
-        // 3. https://m.tiktok.com/v/1234567890.html
-        // 4. https://www.tiktok.com/t/ZTxxxxxxx/ (short link)
-        // 5. https://www.tiktok.com/@username/video/1234567890?is_from_webapp=1&sender_device=pc
 
-        // Nếu là link redirect (vt.tiktok.com hoặc tiktok.com/t/), giữ nguyên vì cần client follow redirect
-        if (/vt\.tiktok\.com|tiktok\.com\/t\//.test(cleanUrl)) {
-            return url;
+    const shortenSocialLink = (url) => {
+        if (typeof url !== 'string') return url;
+
+        // Loại bỏ query và fragment
+        let cleanUrl = url.split('?')[0].split('#')[0];
+
+        // Xử lý TikTok
+        if (cleanUrl.includes('tiktok.com') || cleanUrl.includes('vt.tiktok.com')) {
+            if (/vt\.tiktok\.com|tiktok\.com\/t\//.test(cleanUrl)) {
+                return url; // giữ nguyên link redirect TikTok
+            }
+            const mMatch = cleanUrl.match(/m\.tiktok\.com\/v\/(\d+)\.html/);
+            if (mMatch) {
+                return `https://www.tiktok.com/video/${mMatch[1]}`;
+            }
+            const userVideoMatch = cleanUrl.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
+            if (userVideoMatch) {
+                return `https://www.tiktok.com/@${userVideoMatch[1]}/video/${userVideoMatch[2]}`;
+            }
+            const userPhotoMatch = cleanUrl.match(/tiktok\.com\/@([\w.-]+)\/photo\/(\d+)/);
+            if (userPhotoMatch) {
+                return `https://www.tiktok.com/@${userPhotoMatch[1]}/photo/${userPhotoMatch[2]}`;
+            }
+            const videoMatch = cleanUrl.match(/tiktok\.com\/video\/(\d+)/);
+            if (videoMatch) {
+                return `https://www.tiktok.com/video/${videoMatch[1]}`;
+            }
+            return cleanUrl;
         }
-        // Dạng m.tiktok.com/v/1234567890.html => chuyển về dạng video id
-        const mMatch = cleanUrl.match(/m\.tiktok\.com\/v\/(\d+)\.html/);
-        if (mMatch) {
-            return `https://www.tiktok.com/video/${mMatch[1]}`;
+
+        // Xử lý Instagram: chỉ giữ lại đường dẫn gốc
+        if (cleanUrl.includes('instagram.com')) {
+            return cleanUrl;
         }
-        // Dạng www.tiktok.com/@username/video/1234567890
-        const userVideoMatch = cleanUrl.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
-        if (userVideoMatch) {
-            return `https://www.tiktok.com/@${userVideoMatch[1]}/video/${userVideoMatch[2]}`;
+
+        // Xử lý YouTube
+        if (url.includes('youtube.com/watch') || url.includes('youtu.be')) {
+            const ytMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:[&#?]|$)/);
+            if (ytMatch) {
+                return `https://www.youtube.com/watch?v=${ytMatch[1]}`;
+            }
         }
-        // Dạng www.tiktok.com/video/1234567890
-        const videoMatch = cleanUrl.match(/tiktok\.com\/video\/(\d+)/);
-        if (videoMatch) {
-            return `https://www.tiktok.com/video/${videoMatch[1]}`;
-        }
-        // Nếu không khớp, trả về url gốc
-        return url;
-    }
+
+        // Mặc định: trả về URL không có query và fragment
+        return cleanUrl;
+    };
 
     const serverOptions = filteredServers.map(server => ({
         value: server.Magoi,
@@ -555,8 +569,8 @@ export default function Ordernhanh() {
                                         onChange={(e) => {
                                             let val = e.target.value.replace(/\s+/g, ''); // Bỏ tất cả khoảng trắng
                                             // Nếu là link TikTok thì rút gọn
-                                            if (val.includes('tiktok.com')) {
-                                                val = shortenTiktokLink(val);
+                                            if (val !== "") {
+                                                val = shortenSocialLink(val);
                                             }
                                             setRawLink(val);
                                             setConvertedUID("");
