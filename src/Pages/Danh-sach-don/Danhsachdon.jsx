@@ -8,8 +8,8 @@ import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 
 const Danhsachdon = () => {
-    const { token } = useOutletContext();
-    const [servers, setServers] = useState([]);
+    const { token ,categories } = useOutletContext();
+    // const [servers, setServers] = useState([]);
     const [selectedType, setSelectedType] = useState(null); // react-select object
     const [selectedCategory, setSelectedCategory] = useState(null); // react-select object
     const [searchTerm, setSearchTerm] = useState("");
@@ -19,7 +19,6 @@ const Danhsachdon = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [limit, setLimit] = useState(10); // Số đơn hàng mỗi trang, mặc định là 10
     const [selectedStatus, setSelectedStatus] = useState(""); // Lưu trạng thái được chọn
-
     let decoded = {};
     if (token) {
         try {
@@ -30,26 +29,27 @@ const Danhsachdon = () => {
     }
     const username = decoded.username;
 
-    useEffect(() => {
-        const fetchServers = async () => {
-            try {
-                const response = await getServer(token); // Gọi API với token
-                setServers(response.data || []); // Cập nhật danh sách servers
-            } catch (error) {
-              //  console.error("Lỗi khi gọi API getServer:", error);
-                toast.error("Không có server!");
+    // useEffect(() => {
+    //     const fetchServers = async () => {
+    //         try {
+    //             const response = await getServer(token); // Gọi API với token
+    //             setServers(response.data || []); // Cập nhật danh sách servers
+    //         } catch (error) {
+    //           //  console.error("Lỗi khi gọi API getServer:", error);
+    //             toast.error("Không có server!");
 
-            }
-        };
+    //         }
+    //     };
 
-        if (token) {
-            fetchServers(); // Gọi hàm fetchServers nếu có token
-        }
-    }, [token]); // Chỉ gọi lại khi `token` thay đổi
-    // Tạo danh sách các loại nền tảng (Type) độc nhất từ servers
+    //     if (token) {
+    //         fetchServers(); // Gọi hàm fetchServers nếu có token
+    //     }
+    // }, [token]); // Chỉ gọi lại khi `token` thay đổi
+    // Lấy danh sách nền tảng (type) duy nhất từ categories
     const uniqueTypes = useMemo(() => {
-        return Array.from(new Set(servers.map((server) => server.type)));
-    }, [servers]);
+        if (!Array.isArray(categories)) return [];
+        return Array.from(new Set(categories.map((cat) => cat.platforms_id?.name)));
+    }, [categories]);
 
     // Tạo options cho react-select cho Nền tảng (Type)
     const typeOptions = uniqueTypes.map((type) => ({
@@ -57,21 +57,15 @@ const Danhsachdon = () => {
         label: type,
     }));
 
-    // Nếu đã chọn một Type, tạo danh sách options cho Category dựa theo Type đó
+    // Nếu đã chọn một Type, tạo danh sách options cho Category dựa theo Type đóW
     const categoryOptions = useMemo(() => {
-        if (!selectedType) return [];
-        const categories = Array.from(
-            new Set(
-                servers
-                    .filter((server) => server.type === selectedType.value)
-                    .map((server) => server.category)
-            )
-        );
-        return categories.map((cat) => ({
-            value: cat,
-            label: cat,
+        if (!selectedType || !Array.isArray(categories)) return [];
+        const filtered = categories.filter((cat) => cat.platforms_id?.name === selectedType.value);
+        return filtered.map((cat) => ({
+            value: cat.name, // hoặc cat.path nếu muốn
+            label: cat.name, // hoặc cat.path nếu muốn
         }));
-    }, [servers, selectedType]);
+    }, [categories, selectedType]);
 
     // Khi thay đổi Type, reset Category
     const handleTypeChange = (option) => {
