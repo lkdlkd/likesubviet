@@ -14,7 +14,7 @@ export default function History() {
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
     const [debouncedOrderIdSearch, setDebouncedOrderIdSearch] = useState("");
     const [loading, setLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState(null);
+    // const [errorMessage, setErrorMessage] = useState(null);
     const { token, user } = useOutletContext();
     const role = user?.role || "user"; // Lấy role của người dùng, mặc định là "user" nếu không có
     // Debounce logic cho `searchQuery` và `orderIdSearch`
@@ -42,12 +42,11 @@ export default function History() {
                 );
                 setHistoryData(response.history || []);
                 setTotalPages(response.totalPages || 1);
-                setErrorMessage(null);
+                // setErrorMessage(null);
             } catch (error) {
-              //  console.error("Error fetching history:", error);
-                setErrorMessage(
-                    error.response?.data?.message || "Không thể tải dữ liệu lịch sử hoạt động."
-                );
+                // setErrorMessage(
+                //     error.response?.data?.message || "Không thể tải dữ liệu lịch sử hoạt động."
+                // );
             } finally {
                 setLoading(false);
             }
@@ -84,9 +83,9 @@ export default function History() {
         return <div>Đang tải...</div>;
     }
 
-    if (errorMessage) {
-        return <div className="alert alert-danger">{errorMessage}</div>;
-    }
+    // if (errorMessage) {
+    //     return <div className="alert alert-danger">{errorMessage}</div>;
+    // }
 
     return (
         <div className="row">
@@ -169,8 +168,8 @@ export default function History() {
                                     <thead>
                                         <tr>
                                             <th>STT</th>
-                                            <th>Mã đơn</th>
                                             <th>Username</th>
+                                            <th>Mã đơn</th>
                                             <th>Hành động</th>
                                             <th>Link</th>
                                             <th>Số tiền</th>
@@ -197,8 +196,8 @@ export default function History() {
                                                     style={rowStyle}
                                                 >
                                                     <td>{(page - 1) * limit + index + 1}</td>
-                                                    <td>{item.madon}</td>
                                                     <td>{item.username}</td>
+                                                    <td>{item.madon}</td>
                                                     <td style={{
                                                         maxWidth: "250px",
                                                         whiteSpace: "normal",
@@ -222,7 +221,7 @@ export default function History() {
                                                         >
                                                             {Number(item.tienhientai).toLocaleString("en-US")}
                                                         </span>
-                                                        {isPlusAction ? (
+                                                        {isPlusAction || isRefundAction ? (
                                                             <>
                                                                 +
                                                                 <span
@@ -274,7 +273,7 @@ export default function History() {
                                     </tbody>
                                 </Table>
                             ) : (
-                                <p>Không có đơn hàng nào.</p>
+                                <p>Không có lịch sử hoạt động nào.</p>
                             )}
                         </div>
 

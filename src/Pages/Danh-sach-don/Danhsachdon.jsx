@@ -99,7 +99,7 @@ const Danhsachdon = () => {
             setCurrentPage(response.currentPage || 1);
             setTotalPages(response.totalPages || 1);
         } catch (error) {
-            toast.error("Không có đơn hàng nào!");
+            // toast.error("Không có đơn hàng nào!");
         } finally {
             setLoadingOrders(false);
         }
@@ -185,16 +185,16 @@ const Danhsachdon = () => {
                             </div>
                             <div className="col-md-6 col-lg-3">
                                 {/* {selectedType && ( */}
-                                    <div className="form-group">
-                                        <label>Phân Loại:</label>
-                                        <Select
-                                            value={selectedCategory}
-                                            onChange={handleCategoryChange}
-                                            options={categoryOptions}
-                                            placeholder="Chọn"
-                                            isClearable
-                                        />
-                                    </div>
+                                <div className="form-group">
+                                    <label>Phân Loại:</label>
+                                    <Select
+                                        value={selectedCategory}
+                                        onChange={handleCategoryChange}
+                                        options={categoryOptions}
+                                        placeholder="Chọn"
+                                        isClearable
+                                    />
+                                </div>
                                 {/* )} */}
                             </div>
                             <div className="col-md-6 col-lg-3">
@@ -260,23 +260,23 @@ const Danhsachdon = () => {
                                 <Table striped bordered hover responsive>
                                     <thead>
                                         <tr>
-                                            <th>STT</th>
-                                            <th>Thao tác</th>
                                             <th>Mã đơn</th>
+                                            <th>Thao tác</th>
                                             <th>Username</th>
                                             <th>Link</th>
                                             <th>Server</th>
                                             <th>Thông tin</th>
                                             <th>Trạng thái</th>
                                             {selectedCategory && selectedCategory.value === "BÌNH LUẬN" && <th>Bình luận</th>}
-                                            <th>Ghi chú</th>
                                             <th>Ngày tạo</th>
+                                            <th>Ghi chú</th>
+
                                         </tr>
                                     </thead>
                                     <tbody >
                                         {filteredOrders.map((order, index) => (
                                             <tr key={index}>
-                                                <td>{(currentPage - 1) * limit + index + 1}</td>
+                                                <td>{order.Madon}</td>
                                                 <td>
                                                     <button
                                                         className="btn btn-sm btn-info"
@@ -285,7 +285,6 @@ const Danhsachdon = () => {
                                                         Copy
                                                     </button>
                                                 </td>
-                                                <td>{order.Madon}</td>
                                                 <td>{order.username}</td>
                                                 {/* <td
                                                     style={{
@@ -366,7 +365,6 @@ const Danhsachdon = () => {
                                                             </textarea>
                                                         </td>
                                                     )}
-                                                <td>{order.note}</td>
                                                 <td>
                                                     {new Date(order.createdAt).toLocaleString("vi-VN", {
                                                         day: "2-digit",
@@ -377,6 +375,7 @@ const Danhsachdon = () => {
                                                         second: "2-digit",
                                                     })}
                                                 </td>
+                                                <td>{order.note}</td>
                                             </tr>
                                         ))}
                                     </tbody>

@@ -89,7 +89,7 @@ const HistoryBanking = ({ token }) => {
                                         ) : (
                                             <tr>
                                                 <td colSpan="5" className="text-center">
-                                                    Không tìm thấy dữ liệu
+                                                    Không có dữ liệu nạp tiền
                                                 </td>
                                             </tr>
                                         )}
