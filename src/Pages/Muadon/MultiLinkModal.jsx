@@ -124,9 +124,10 @@ export default function MultiLinkModal({
                 .split("\n")
                 .map(c => c.trim())
                 .filter(c => c !== "");
+            const qty = commentArr.length;
             setMultiLinkList(list => [
                 ...list,
-                ...newLinks.map(item => ({ ...item, comment: commentArr.join("\n") }))
+                ...newLinks.map(item => ({ ...item, comment: commentArr.join("\n"),quantity: qty }))
             ]);
             setMultiLinkInput("");
         }
@@ -183,7 +184,14 @@ export default function MultiLinkModal({
                                                 className="form-control"
                                                 placeholder="Mỗi dòng 1 comment, sẽ áp dụng cho tất cả link khi thêm vào danh sách"
                                                 value={comments}
-                                                onChange={e => setComments(e.target.value)}
+                                                onChange={e => {
+                                                    const val = e.target.value;
+                                                    setComments(val);
+                                                    if (selectedService && selectedService.comment === "on" && multiLinkList.length > 0) {
+                                                        const qty = val.split("\n").filter(c => c.trim() !== "").length;
+                                                        setMultiLinkList(list => list.map(it => ({ ...it, comment: val, quantity: qty })));
+                                                    }
+                                                }}
                                                 disabled={isSubmitting || multiLinkList.length > 0}
                                                 rows={3}
                                             />
@@ -334,36 +342,63 @@ export default function MultiLinkModal({
                                                             }}>Xóa</Button>
                                                         </td>
                                                         <td>
-                                                          <span className={
-                                                            item.status === 200 || /success|thành công/i.test(item.trangthai)
-                                                              ? "badge bg-success"
-                                                              : item.status === 500 || /error|thất bại|lỗi|fail/i.test(item.trangthai)
-                                                              ? "badge bg-danger"
-                                                              : item.status === 1 || /đang xử lý/i.test(item.trangthai)
-                                                              ? "badge bg-warning text-dark"
-                                                              : "badge bg-secondary"
-                                                          }>
-                                                            {item.trangthai || "Chờ mua"}
-                                                          </span>
+                                                            <span className={
+                                                                item.status === 200 || /success|thành công/i.test(item.trangthai)
+                                                                    ? "badge bg-success"
+                                                                    : item.status === 500 || /error|thất bại|lỗi|fail/i.test(item.trangthai)
+                                                                        ? "badge bg-danger"
+                                                                        : item.status === 1 || /đang xử lý/i.test(item.trangthai)
+                                                                            ? "badge bg-warning text-dark"
+                                                                            : "badge bg-secondary"
+                                                            }>
+                                                                {item.trangthai || "Chờ mua"}
+                                                            </span>
                                                         </td>
                                                         <td style={{ wordBreak: 'break-all' }}>{item.link}</td>
-                                                        <td>{(selectedService && selectedService.comment === "on") ? comments.split("\n").filter(c => c.trim() !== "").length : quantity}</td>
+                                                        <td>
+                                                            {selectedService && selectedService.comment === "on"
+                                                                ? (item.comment ? item.comment.split("\n").filter(c => c.trim() !== "").length : 0)
+                                                                : <input
+                                                                    type="number"
+                                                                    min={min}
+                                                                    max={max}
+                                                                    className="form-control form-control-sm"
+                                                                    style={{ width: 80 }}
+                                                                    value={typeof item.quantity !== 'undefined' ? item.quantity : quantity}
+                                                                    onChange={e => {
+                                                                        const val = e.target.value;
+                                                                        setMultiLinkList(list => list.map((it, i) => i === idx ? { ...it, quantity: val === "" ? "" : Number(val) } : it));
+                                                                    }}
+                                                                    disabled={isSubmitting}
+                                                                />
+                                                            }
+                                                        </td>
                                                         <td>{server ? Number(server.rate).toLocaleString('en-US') : ''}đ</td>
                                                         <td>
                                                             {server
                                                                 ? (
-                                                                    ((selectedService && selectedService.comment === "on")
-                                                                        ? comments.split("\n").filter(c => c.trim() !== "").length
-                                                                        : quantity
-                                                                    ) * Number(server.rate)
-                                                                ).toLocaleString("en-US")
+                                                                    selectedService && selectedService.comment === "on"
+                                                                        ? ((item.comment ? item.comment.split("\n").filter(c => c.trim() !== "").length : 0) * Number(server.rate)).toLocaleString("en-US")
+                                                                        : (typeof item.quantity !== 'undefined' && item.quantity !== "")
+                                                                            ? (Number(item.quantity) * Number(server.rate)).toLocaleString("en-US")
+                                                                            : (quantity * Number(server.rate)).toLocaleString("en-US")
+                                                                )
                                                                 : ''
                                                             }đ
                                                         </td>
                                                         {/* <td>{server ? ((selectedService && selectedService.comment === "on") ? comments.split("\n").filter(c => c.trim() !== "").length : quantity) * Number(server.rate).toLocaleString("en-US") : ''}đ</td> */}
                                                         {selectedService && selectedService.comment === "on" && (
                                                             <td style={{ whiteSpace: 'pre-line' }}>
-                                                                <textarea value={item.comment} readOnly style={{ width: "100%", minHeight: 40, resize: "vertical" }} />
+                                                                <textarea
+                                                                    value={item.comment || ''}
+                                                                    onChange={e => {
+                                                                        const val = e.target.value;
+                                                                        const qty = val.split("\n").filter(c => c.trim() !== "").length;
+                                                                        setMultiLinkList(list => list.map((it, i) => i === idx ? { ...it, comment: val, quantity: qty } : it));
+                                                                    }}
+                                                                    style={{ width: "100%", minHeight: 40, resize: "vertical" }}
+                                                                    disabled={isSubmitting}
+                                                                />
                                                             </td>
                                                         )}
                                                         <td>{server ? server.name : ''}</td>
@@ -382,9 +417,18 @@ export default function MultiLinkModal({
                     <div className="mb-2 text-end">
                         <b>Tổng số link chọn: <span style={{ color: 'red' }}>{totalSelected}</span></b>
                         <b className="ms-3">Tổng tiền: <span style={{ color: 'red', fontSize: 18 }}>
-                            {(selectedService && selectedService.comment === "on")
-                                ? Number(comments.split("\n").filter(c => c.trim() !== "").length * Number(rate) * totalSelected).toLocaleString('en-US')
-                                : (totalAmount ? totalAmount.toLocaleString('en-US') : '0')}
+                            {multiLinkList && multiLinkList.length > 0
+                                ? selectedMultiLinks.reduce((sum, idx) => {
+                                    const item = multiLinkList[idx];
+                                    const server = filteredServers.find(s => s.Magoi === selectedMagoi);
+                                    const qty = selectedService && selectedService.comment === "on"
+                                        ? (item.comment ? item.comment.split("\n").filter(c => c.trim() !== "").length : 0)
+                                        : (typeof item.quantity !== 'undefined' && item.quantity !== "")
+                                            ? Number(item.quantity)
+                                            : quantity;
+                                    return sum + (server ? qty * Number(server.rate) : 0);
+                                }, 0).toLocaleString('en-US')
+                                : '0'}
                         </span> VNĐ</b>
                     </div>
                     <div className="d-flex gap-2 justify-content-end">

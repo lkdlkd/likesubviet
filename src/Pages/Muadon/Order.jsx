@@ -257,10 +257,10 @@ export default function Order() {
                     ObjectLink: item.ObjectLink || item.link,
                 };
                 if (selectedService && selectedService.comment === "on") {
-                    payload.quantity = qty;
-                    payload.comments = item.comment || comments;
+                    payload.quantity = item.quantity ;
+                    payload.comments = item.comment;
                 } else {
-                    payload.quantity = quantity;
+                    payload.quantity = item.quantity;
                 }
                 try {
                     const res = await addOrder(payload, token);
