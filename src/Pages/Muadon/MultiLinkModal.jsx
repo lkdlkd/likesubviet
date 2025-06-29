@@ -124,10 +124,10 @@ export default function MultiLinkModal({
                 .split("\n")
                 .map(c => c.trim())
                 .filter(c => c !== "");
-            const qty = commentArr.length;
+            const qty = commentArr.length || quantity;
             setMultiLinkList(list => [
                 ...list,
-                ...newLinks.map(item => ({ ...item, comment: commentArr.join("\n"),quantity: qty }))
+                ...newLinks.map(item => ({ ...item, comment: commentArr.join("\n"), quantity: qty }))
             ]);
             setMultiLinkInput("");
         }
@@ -210,7 +210,10 @@ export default function MultiLinkModal({
                                                 onChange={e => {
                                                     const val = e.target.value;
                                                     setQuantity(val === "" ? "" : Number(val));
+                                                    setMultiLinkList(list => list.map(it => ({ ...it, quantity: val  })));
+
                                                 }}
+
                                                 disabled={isSubmitting || multiLinkList.length > 0}
                                             />
                                         </div>

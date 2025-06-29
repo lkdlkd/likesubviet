@@ -246,7 +246,7 @@ export default function Order() {
             for (const idx of selectedMultiLinks) {
                 if (isStoppedRef.current) break;
                 // Đánh dấu đang xử lý
-                updatedList[idx] = { ...updatedList[idx], trangthai: "Đang xử lý" , status : 1 };
+                updatedList[idx] = { ...updatedList[idx], trangthai: "Đang xử lý", status: 1 };
                 setMultiLinkList([...updatedList]);
                 const item = updatedList[idx];
                 const payload = {
@@ -257,17 +257,17 @@ export default function Order() {
                     ObjectLink: item.ObjectLink || item.link,
                 };
                 if (selectedService && selectedService.comment === "on") {
-                    payload.quantity = item.quantity ;
+                    payload.quantity = item.quantity;
                     payload.comments = item.comment;
                 } else {
                     payload.quantity = item.quantity;
                 }
                 try {
                     const res = await addOrder(payload, token);
-                    updatedList[idx] = { ...updatedList[idx], trangthai: res.message || "Thành công" , status: res.status || 200 };
+                    updatedList[idx] = { ...updatedList[idx], trangthai: res.message || "Thành công", status: res.status || 200 };
                     success++;
                 } catch (error) {
-                    updatedList[idx] = { ...updatedList[idx], trangthai: error.message || "Thất bại" , status: error.status || 500  };
+                    updatedList[idx] = { ...updatedList[idx], trangthai: error.message || "Thất bại", status: error.status || 500 };
                     fail++;
                 }
                 setMultiLinkList([...updatedList]);
@@ -831,7 +831,12 @@ export default function Order() {
                                                         <span className="text-danger">
                                                             {Number(totalCost).toLocaleString("en-US")}
                                                         </span>{" "}
-                                                        VNĐ
+                                                        đ 
+                                                        {/* -{" "}
+                                                        <span class="text-danger">
+                                                            {Number(totalCost / 25000)}
+                                                        </span>{" "}
+                                                        $ */}
                                                     </h3>
                                                     <p className="fs-5 mb-0">{tien} đ</p>
                                                     <p className="fs-4 mb-0">
