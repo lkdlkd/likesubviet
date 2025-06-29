@@ -62,11 +62,37 @@ export default function Ordernhanh() {
         if (servers.length > 0) {
             // Lấy type đầu tiên
             const firstType = servers[0].type;
-            setSelectedType({ value: firstType, label: firstType });
+            // Tìm server đầu tiên có type này để lấy logo (nếu có)
+            const serverWithLogo = servers.find(s => s.type === firstType && s.logo);
+            setSelectedType({
+                value: firstType,
+                label: (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {serverWithLogo && serverWithLogo.logo && (
+                            <img src={serverWithLogo.logo} alt={firstType} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                        )}
+                        {firstType}
+                    </span>
+                ),
+                rawLabel: firstType
+            });
             // Lấy category đầu tiên theo type
             const firstCategory = servers.find(s => s.type === firstType)?.category;
             if (firstCategory) {
-                setSelectedCategory({ value: firstCategory, label: firstCategory });
+                // Tìm server đầu tiên có type và category này để lấy logo (nếu có)
+                const serverWithLogoCat = servers.find(s => s.type === firstType && s.category === firstCategory && s.logo);
+                setSelectedCategory({
+                    value: firstCategory,
+                    label: (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {serverWithLogoCat && serverWithLogoCat.logo && (
+                                <img src={serverWithLogoCat.logo} alt={firstCategory} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                            )}
+                            {firstCategory}
+                        </span>
+                    ),
+                    rawLabel: firstCategory
+                });
             }
             // Lấy server đầu tiên theo type và category
             const firstServer = servers.find(s => s.type === firstType && s.category === firstCategory);
@@ -85,26 +111,50 @@ export default function Ordernhanh() {
         return Array.from(new Set(servers.map((server) => server.type)));
     }, [servers]);
 
-    // Tạo options cho react-select cho Type
-    const typeOptions = uniqueTypes.map((type) => ({
-        value: type,
-        label: type,
-    }));
+    // Tạo options cho react-select cho Type (bổ sung logo)
+    const typeOptions = uniqueTypes.map((type) => {
+        // Tìm server đầu tiên có type này để lấy logo (nếu có)
+        const serverWithLogo = servers.find(s => s.type === type && s.logo);
+        return {
+            value: type,
+            label: (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {serverWithLogo && serverWithLogo.logo && (
+                        <img src={serverWithLogo.logo} alt={type} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                    )}
+                    {type}
+                </span>
+            ),
+            rawLabel: type // giữ lại label gốc nếu cần
+        };
+    });
 
-    // Nếu đã chọn một Type, tạo danh sách options cho Category dựa theo Type đó
+    // Nếu đã chọn một Type, tạo danh sách options cho Category dựa theo Type đó (bổ sung logo)
     const categoryOptions = useMemo(() => {
         if (!selectedType || !Array.isArray(servers)) return [];
         const categories = Array.from(
             new Set(
                 servers
-                    .filter((server) => server.type === selectedType.value)
+                    .filter((server) => server.type === (selectedType.value || selectedType.rawLabel))
                     .map((server) => server.category)
             )
         );
-        return categories.map((cat) => ({
-            value: cat,
-            label: cat,
-        }));
+        return categories.map((cat) => {
+            // Tìm server đầu tiên có type và category này để lấy logo (nếu có)
+            const serverWithLogo = servers.find(s => (s.type === (selectedType.value || selectedType.rawLabel)) && s.category === cat && s.logo);
+            return {
+                value: cat,
+                label: (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {serverWithLogo && serverWithLogo.logo && (
+                            <img src={serverWithLogo.logo} alt={cat} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                        )}
+                        {cat}
+                    </span>
+                ),
+                rawLabel: cat // giữ lại label gốc nếu cần
+            };
+        });
     }, [servers, selectedType]);
 
     // Lọc danh sách server theo Type và Category đã chọn
@@ -121,12 +171,38 @@ export default function Ordernhanh() {
 
     // Handler cho khi chọn Type từ react-select
     const handleTypeChange = (option) => {
-        setSelectedType(option);
-        // Tìm category đầu tiên theo type mới chọn
         if (option) {
+            // Tìm server đầu tiên có type này để lấy logo (nếu có)
+            const serverWithLogo = servers.find(s => s.type === option.value && s.logo);
+            setSelectedType({
+                value: option.value,
+                label: (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {serverWithLogo && serverWithLogo.logo && (
+                            <img src={serverWithLogo.logo} alt={option.value} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                        )}
+                        {option.value}
+                    </span>
+                ),
+                rawLabel: option.value
+            });
+            // Tìm category đầu tiên theo type mới chọn
             const firstCategory = servers.find(s => s.type === option.value)?.category;
             if (firstCategory) {
-                setSelectedCategory({ value: firstCategory, label: firstCategory });
+                // Tìm server đầu tiên có type và category này để lấy logo (nếu có)
+                const serverWithLogoCat = servers.find(s => s.type === option.value && s.category === firstCategory && s.logo);
+                setSelectedCategory({
+                    value: firstCategory,
+                    label: (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {serverWithLogoCat && serverWithLogoCat.logo && (
+                                <img src={serverWithLogoCat.logo} alt={firstCategory} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                            )}
+                            {firstCategory}
+                        </span>
+                    ),
+                    rawLabel: firstCategory
+                });
                 // Tìm server đầu tiên theo type và category
                 const firstServer = servers.find(s => s.type === option.value && s.category === firstCategory);
                 if (firstServer) {
@@ -142,6 +218,7 @@ export default function Ordernhanh() {
                 setSelectedMagoi("");
             }
         } else {
+            setSelectedType(null);
             setSelectedCategory(null);
             setSelectedMagoi("");
         }
@@ -454,20 +531,43 @@ export default function Ordernhanh() {
         return cleanUrl;
     };
 
-    const serverOptions = filteredServers.map(server => ({
-        value: server.Magoi,
-        label: (
-            <div>
-                <strong className="badge bg-info">[{server.Magoi}]</strong>
-                <span className="font-semibold"> - {server.maychu} {server.name} </span>
-                <span className="badge bg-primary">{Number(server.rate).toLocaleString("en-US")}đ</span>
-                <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
-                    {server.isActive ? "Hoạt động" : "Không hoạt động"}
-                </span>
-            </div>
-        ),
-        server
-    }));
+    // const typeOptions = uniqueTypes.map((type) => {
+    //     // Tìm server đầu tiên có type này để lấy logo (nếu có)
+    //     const serverWithLogo = servers.find(s => s.type === type && s.logo);
+    //     return {
+    //         value: type,
+    //         label: (
+    //             <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    //                 {serverWithLogo && serverWithLogo.logo && (
+    //                     <img src={serverWithLogo.logo} alt={type} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+    //                 )}
+    //                 {type}
+    //             </span>
+    //         ),
+    //         rawLabel: type // giữ lại label gốc nếu cần
+    //     };
+    // });
+    const serverOptions = filteredServers.map(server => {
+        // Lấy logo từ server.logo nếu có
+        return {
+            value: server.Magoi,
+            label: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {server.logo && (
+                        <img src={server.logo} alt={server.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                    )}
+                    <strong className="badge bg-info">[{server.Magoi}]</strong>
+                    <span className="font-semibold"> - {server.maychu} {server.name} </span>
+                    <span className="badge bg-primary">{Number(server.rate).toLocaleString("en-US")}đ</span>
+                    <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
+                        {server.isActive ? "Hoạt động" : "Không hoạt động"}
+                    </span>
+                </div>
+            ),
+            server
+        };
+
+    });
     return (
         <div className="main-content">
             <div className="row">

@@ -269,8 +269,8 @@ const Danhsachdon = () => {
                                             <th>Trạng thái</th>
                                             {selectedCategory && selectedCategory.value === "BÌNH LUẬN" && <th>Bình luận</th>}
                                             <th>Ngày tạo</th>
+                                            <th>Thời gian cập nhật</th>
                                             <th>Ghi chú</th>
-
                                         </tr>
                                     </thead>
                                     <tbody >
@@ -367,6 +367,16 @@ const Danhsachdon = () => {
                                                     )}
                                                 <td>
                                                     {new Date(order.createdAt).toLocaleString("vi-VN", {
+                                                        day: "2-digit",
+                                                        month: "2-digit",
+                                                        year: "numeric",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                        second: "2-digit",
+                                                    })}
+                                                </td>
+                                                <td>
+                                                    {new Date(order.updatedAt).toLocaleString("vi-VN", {
                                                         day: "2-digit",
                                                         month: "2-digit",
                                                         year: "numeric",
