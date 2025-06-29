@@ -19,7 +19,7 @@ export default function Order() {
     const [rawLink, setRawLink] = useState("");
     const [convertedUID, setConvertedUID] = useState("");
     const [selectedMagoi, setSelectedMagoi] = useState("");
-    const [quantity, setQuantity] = useState(100);
+    const [quantity, setQuantity] = useState("");
     const [comments, setComments] = useState("");
     const [note, setNote] = useState("");
     const [totalCost, setTotalCost] = useState(0);
@@ -237,21 +237,24 @@ export default function Order() {
         const selectedService = filteredServers.find(
             (service) => service.Magoi === selectedMagoi
         );
-        // Tính tổng số lượng và tổng tiền
         const qty = selectedService && selectedService.comment === "on" ? cmtqlt : quantity;
-        loadingg("Đang xử lý đơn hàng...", true, 9999999);
         setIsSubmitting(true);
+        // Tạo bản sao để cập nhật trạng thái từng link
+        let updatedList = [...multiLinkList];
         let success = 0, fail = 0;
         try {
             for (const idx of selectedMultiLinks) {
                 if (isStoppedRef.current) break;
-                const item = multiLinkList[idx];
+                // Đánh dấu đang xử lý
+                updatedList[idx] = { ...updatedList[idx], trangthai: "Đang xử lý" , status : 1 };
+                setMultiLinkList([...updatedList]);
+                const item = updatedList[idx];
                 const payload = {
                     category: servers.find((server) => server.Magoi === selectedMagoi)?.category || "",
                     link: item.link,
                     magoi: selectedMagoi,
                     note,
-                    ObjectLink: item.ObjectLink || item.link, // Thêm trường ObjectLink là link gốc
+                    ObjectLink: item.ObjectLink || item.link,
                 };
                 if (selectedService && selectedService.comment === "on") {
                     payload.quantity = qty;
@@ -260,26 +263,27 @@ export default function Order() {
                     payload.quantity = quantity;
                 }
                 try {
-                    await addOrder(payload, token);
+                    const res = await addOrder(payload, token);
+                    updatedList[idx] = { ...updatedList[idx], trangthai: res.message || "Thành công" , status: res.status || 200 };
                     success++;
-                } catch {
+                } catch (error) {
+                    updatedList[idx] = { ...updatedList[idx], trangthai: error.message || "Thất bại" , status: error.status || 500  };
                     fail++;
                 }
+                setMultiLinkList([...updatedList]);
             }
-            loadingg("", false);
-            if (!isStopped) {
-                setMultiLinkModal(false);
-                setMultiLinkList([]);
-                setSelectedMultiLinks([]);
-                await Swal.fire({
-                    title: "Kết quả",
-                    text: `Thành công: ${success}, Thất bại: ${fail}`,
-                    icon: "info",
-                    confirmButtonText: "Xác nhận",
-                });
-            }
+            // if (!isStopped) {
+            //     setMultiLinkModal(false);
+            //     setMultiLinkList([]);
+            //     setSelectedMultiLinks([]);
+            //     await Swal.fire({
+            //         title: "Kết quả",
+            //         text: `Thành công: ${success}, Thất bại: ${fail}`,
+            //         icon: "info",
+            //         confirmButtonText: "Xác nhận",
+            //     });
+            // }
         } catch (error) {
-            loadingg("", false);
             await Swal.fire({
                 title: "Lỗi",
                 text: error.message || "Có lỗi xảy ra, vui lòng thử lại!",
@@ -294,6 +298,8 @@ export default function Order() {
         setObjectLink("");
         setRawLink("");
         setConvertedUID("");
+        setMultiLinkList([]);
+        setSelectedMagoi(""); // Reset selectedMagoi khi path thay đổi
     }, [path]); // Theo dõi sự thay đổi của đường dẫn
     // const convertNumberToWords = (num) => {
     //     const units = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
@@ -706,6 +712,7 @@ export default function Order() {
                                                         setMin(server.min);
                                                         setMax(server.max);
                                                         setRate(server.rate);
+                                                        setQuantity(server.min); // Đặt giá trị mặc định cho quantity
                                                     }}
                                                 />
                                                 <label className="form-check-label" htmlFor={`server-${server.Magoi}`}>

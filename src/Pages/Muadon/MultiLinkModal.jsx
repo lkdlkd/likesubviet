@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Modal, Table, Form } from "react-bootstrap";
 import Select from "react-select";
 
@@ -14,7 +13,6 @@ export default function MultiLinkModal({
     setQuantity,
     setIsStopped,
     isStopped,
-    cmtqty,
     comments,
     setComments,
     setcomputedQty,
@@ -109,6 +107,30 @@ export default function MultiLinkModal({
         // Mặc định: trả về URL không có query và fragment
         return cleanUrl;
     };
+    const [showServerWarning, setShowServerWarning] = useState(false);
+    const handleAddLinks = () => {
+        if (!selectedMagoi) {
+            setShowServerWarning(true);
+            return;
+        }
+        setShowServerWarning(false);
+        const rawLinks = multiLinkInput
+            .split("\n")
+            .map(l => l.trim())
+            .filter(l => l !== "" && !multiLinkList.some(item => item.link === shortenSocialLink(l)));
+        const newLinks = rawLinks.map(l => ({ link: shortenSocialLink(l), ObjectLink: l }));
+        if (newLinks.length > 0) {
+            const commentArr = comments
+                .split("\n")
+                .map(c => c.trim())
+                .filter(c => c !== "");
+            setMultiLinkList(list => [
+                ...list,
+                ...newLinks.map(item => ({ ...item, comment: commentArr.join("\n") }))
+            ]);
+            setMultiLinkInput("");
+        }
+    };
     return (
         <Modal show={show} onHide={onHide} size="xl" backdrop="static">
             <div className="modal-content">
@@ -175,9 +197,12 @@ export default function MultiLinkModal({
                                                 type="number"
                                                 className="form-control"
                                                 value={quantity}
-                                                min={min}
-                                                max={max}
-                                                onChange={e => setQuantity(Number(e.target.value))}
+                                                // min={min}
+                                                // max={max}
+                                                onChange={e => {
+                                                    const val = e.target.value;
+                                                    setQuantity(val === "" ? "" : Number(val));
+                                                }}
                                                 disabled={isSubmitting || multiLinkList.length > 0}
                                             />
                                         </div>
@@ -221,36 +246,27 @@ export default function MultiLinkModal({
                                         className="form-control"
                                         placeholder="Mỗi dòng 1 link, nhập nhiều link và nhấn Thêm"
                                         value={multiLinkInput}
-                                        onChange={e => setMultiLinkInput(e.target.value)}
+                                        onChange={e => {
+                                            setMultiLinkInput(e.target.value);
+                                            setShowServerWarning(false);
+                                        }}
                                         disabled={isSubmitting || multiLinkList.length > 0}
                                         rows={5}
                                     />
 
                                 </div>
+                                {showServerWarning && (
+                                    <div className="alert alert-warning mt-2 py-2 px-3" style={{ fontSize: 14 }}>
+                                        <b>Chưa chọn máy chủ:</b> Vui lòng chọn máy chủ trước khi thêm link.
+                                    </div>
+                                )}
                             </div>
                             <Button
                                 className="btn btn-info btn-sm"
                                 variant="info"
                                 size="sm"
-                                onClick={() => {
-                                    const rawLinks = multiLinkInput
-                                        .split("\n")
-                                        .map(l => l.trim())
-                                        .filter(l => l !== "" && !multiLinkList.some(item => item.link === shortenSocialLink(l)));
-                                    const newLinks = rawLinks.map(l => ({ link: shortenSocialLink(l), ObjectLink: l }));
-                                    if (newLinks.length > 0) {
-                                        const commentArr = comments
-                                            .split("\n")
-                                            .map(c => c.trim())
-                                            .filter(c => c !== "");
-                                        setMultiLinkList(list => [
-                                            ...list,
-                                            ...newLinks.map(item => ({ ...item, comment: commentArr.join("\n") }))
-                                        ]);
-                                        setMultiLinkInput("");
-                                    }
-                                }}
-                                disabled={isSubmitting || !selectedMagoi || multiLinkInput.split("\n").filter(l => l.trim() !== "").length === 0}
+                                onClick={handleAddLinks}
+                                disabled={isSubmitting || multiLinkInput.split("\n").filter(l => l.trim() !== "").length === 0}
                             >
                                 Thêm vào danh sách
                             </Button>
@@ -258,25 +274,32 @@ export default function MultiLinkModal({
                         <div className="col-md-8 card card-body">
 
                             <div className="table-responsive">
-                                <Button className="mb-2" variant="danger" size="sm" onClick={() => {
+                                <Button className="mb-2 me-2" variant="danger" size="sm" onClick={() => {
                                     setMultiLinkList([]);
                                     setSelectedMultiLinks([]);
                                 }} disabled={isSubmitting || multiLinkList.length === 0}>
                                     Xóa nhanh tất cả
                                 </Button>
+                                <Button className="mb-2" variant="warning" size="sm" onClick={() => {
+                                    setMultiLinkList(list => list.filter((_, idx) => !selectedMultiLinks.includes(idx)));
+                                    setSelectedMultiLinks([]);
+                                }} disabled={isSubmitting || multiLinkList.length === 0}>
+                                    Xóa các đơn đã chọn
+                                </Button>
+
                                 <Table hover size="sm" className="mb-0">
                                     <thead>
                                         <tr>
                                             <th>#</th>
                                             <th><input type="checkbox" onChange={handleCheckAll} checked={selectedMultiLinks.length === multiLinkList.length && multiLinkList.length > 0} /></th>
+                                            <th>Thao tác</th>
                                             <th>Trạng thái</th>
                                             <th>Link</th>
-                                            <th>Máy chủ</th>
                                             <th>Số lượng</th>
                                             <th>Giá</th>
                                             <th>Tạm tính</th>
                                             {selectedService && selectedService.comment === "on" && <th>Bình luận</th>}
-                                            <th></th>
+                                            <th>Máy chủ</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -301,9 +324,29 @@ export default function MultiLinkModal({
                                                                 }}
                                                             />
                                                         </td>
-                                                        <td><span className="badge bg-success">Chờ mua</span></td>
+                                                        <td>
+                                                            <Button size="sm" variant="danger" onClick={() => {
+                                                                setMultiLinkList(list => list.filter((_, i) => i !== idx));
+                                                                setSelectedMultiLinks(sel => sel
+                                                                    .filter(i => i !== idx) // loại bỏ index vừa xóa
+                                                                    .map(i => i > idx ? i - 1 : i) // cập nhật lại index các phần tử phía sau
+                                                                );
+                                                            }}>Xóa</Button>
+                                                        </td>
+                                                        <td>
+                                                          <span className={
+                                                            item.status === 200 || /success|thành công/i.test(item.trangthai)
+                                                              ? "badge bg-success"
+                                                              : item.status === 500 || /error|thất bại|lỗi|fail/i.test(item.trangthai)
+                                                              ? "badge bg-danger"
+                                                              : item.status === 1 || /đang xử lý/i.test(item.trangthai)
+                                                              ? "badge bg-warning text-dark"
+                                                              : "badge bg-secondary"
+                                                          }>
+                                                            {item.trangthai || "Chờ mua"}
+                                                          </span>
+                                                        </td>
                                                         <td style={{ wordBreak: 'break-all' }}>{item.link}</td>
-                                                        <td>{server ? server.name : ''}</td>
                                                         <td>{(selectedService && selectedService.comment === "on") ? comments.split("\n").filter(c => c.trim() !== "").length : quantity}</td>
                                                         <td>{server ? Number(server.rate).toLocaleString('en-US') : ''}đ</td>
                                                         <td>
@@ -323,12 +366,8 @@ export default function MultiLinkModal({
                                                                 <textarea value={item.comment} readOnly style={{ width: "100%", minHeight: 40, resize: "vertical" }} />
                                                             </td>
                                                         )}
-                                                        <td>
-                                                            <Button size="sm" variant="danger" onClick={() => {
-                                                                setMultiLinkList(list => list.filter((_, i) => i !== idx));
-                                                                setSelectedMultiLinks(sel => sel.filter(i => i !== idx));
-                                                            }}>Xóa</Button>
-                                                        </td>
+                                                        <td>{server ? server.name : ''}</td>
+
                                                     </tr>
                                                 );
                                             })
@@ -366,7 +405,7 @@ export default function MultiLinkModal({
                         </Button>
                     </div>
                     {isStopped && (
-                        <div className="alert alert-danger text-center mt-2">Đã dừng mua, bạn có thể đóng modal hoặc chọn lại để tiếp tục.</div>
+                        <div className="alert alert-danger text-center mt-2">Đã dừng mua đơn tiếp theo, vui lòng chờ thực hiện xong đơn đang xử lý.</div>
                     )}
                 </div>
             </div>
