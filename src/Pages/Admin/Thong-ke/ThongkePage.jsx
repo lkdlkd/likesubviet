@@ -185,8 +185,8 @@ export default function ThongkePage() {
                                             {statistics.laiTheoDomain.map((item, idx) => (
                                                 <tr key={idx}>
                                                     <td>{item._id || <i>Không xác định</i>}</td>
-                                                    <td>{item.totalLai}</td>
-                                                    {/* <td>{Number(item.totalLai).toLocaleString('en-US')}</td> */}
+                                                    {/* <td>{item.totalLai}</td> */}
+                                                    <td>{Number(item.totalLai).toLocaleString('en-US')}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
