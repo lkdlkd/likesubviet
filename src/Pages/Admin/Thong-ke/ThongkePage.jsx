@@ -8,6 +8,7 @@ export default function ThongkePage() {
     const [doanhthuRange, setDoanhthuRange] = useState("today");
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
+    const [showLaiTheoDomain, setShowLaiTheoDomain] = useState(false);
 
     // Lấy token từ localStorage (hoặc từ context nếu cần)
     const token = localStorage.getItem("token");
@@ -69,11 +70,18 @@ export default function ThongkePage() {
             bg: "bg-light-primary",
         },
         {
-            label: `Doanh thu ${rangeLabels[doanhthuRange] || doanhthuRange}`,
+            label: `Tiền tiêu ${rangeLabels[doanhthuRange] || doanhthuRange}`,
             value: statistics.tongdoanhthuhnay,
             icon: "ti ti-coin",
             bg: "bg-light-primary",
         },
+        {
+            label: "Tổng lãi ( ấn vào để xem chi tiết )",
+            value: statistics.tongdoanhthu,
+            icon: "ti ti-coin",
+            bg: "bg-light-warning",
+            isLaiTheoDomain: true
+        }, 
         {
             label: "Tổng thành viên",
             value: statistics.tonguser,
@@ -81,7 +89,7 @@ export default function ThongkePage() {
             bg: "bg-light-success",
         },
         {
-            label: "Tổng số dư",
+            label: "Tổng số dư còn lại",
             value: statistics.tongtienweb,
             icon: "ti ti-coin",
             bg: "bg-light-warning",
@@ -97,12 +105,6 @@ export default function ThongkePage() {
             value: statistics.tongnapthang,
             icon: "ti ti-users",
             bg: "bg-light-info",
-        },
-        {
-            label: "Tổng doanh thu",
-            value: statistics.tongdoanhthu,
-            icon: "ti ti-coin",
-            bg: "bg-light-warning",
         },
         {
             label: "Đơn hàng đang chạy",
@@ -150,7 +152,11 @@ export default function ThongkePage() {
             <div className="row">
                 {stats.map((stat, index) => (
                     <div className="col-md-3" key={index}>
-                        <div className="card">
+                        <div className="card" style={{ cursor: stat.isLaiTheoDomain ? 'pointer' : undefined }}
+                            onClick={() => {
+                                if (stat.isLaiTheoDomain) setShowLaiTheoDomain(v => !v);
+                            }}
+                        >
                             <div className="card-body p-3">
                                 <div className="d-flex align-items-center">
                                     <div className={`avtar ${stat.bg} me-3`}>
@@ -163,6 +169,31 @@ export default function ThongkePage() {
                                 </div>
                             </div>
                         </div>
+                        {/* Hiển thị bảng laiTheoDomain khi click Tổng lãi */}
+                        {stat.isLaiTheoDomain && showLaiTheoDomain && statistics.laiTheoDomain && (
+                            <div className="mt-2">
+                                <div className="card card-body p-2">
+                                    <h5 className="mb-2">Chi tiết lãi theo nguồn</h5>
+                                    <table className="table table-sm table-bordered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Nguồn</th>
+                                                <th>Lãi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {statistics.laiTheoDomain.map((item, idx) => (
+                                                <tr key={idx}>
+                                                    <td>{item._id || <i>Không xác định</i>}</td>
+                                                    <td>{item.totalLai}</td>
+                                                    {/* <td>{Number(item.totalLai).toLocaleString('en-US')}</td> */}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>

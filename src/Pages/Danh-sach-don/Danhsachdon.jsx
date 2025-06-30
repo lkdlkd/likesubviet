@@ -27,6 +27,7 @@ const Danhsachdon = () => {
             // Có thể log lỗi nếu cần
         }
     }
+    const userRole = decoded?.role || "user";
     const username = decoded.username;
 
     // useEffect(() => {
@@ -320,6 +321,10 @@ const Danhsachdon = () => {
                                                         <li><b>Số lượng mua</b> : {order.quantity}</li>
                                                         <li><b>Giá</b> : {Number(order.rate).toLocaleString("en-US")}</li>
                                                         <li><b>Tổng tiền</b> : {Number(order.totalCost).toLocaleString("en-US")}</li>
+                                                        {userRole === "admin" && (
+                                                            <li><b>Lãi</b> : {Number(order.lai ||0).toLocaleString("en-US")} - {order.DomainSmm || ""} - {order.orderId}</li>
+                                                        )}
+
                                                     </ul>
                                                     {/* <td>{order.start}</td>
                                                     <td></td>
