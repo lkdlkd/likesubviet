@@ -647,6 +647,29 @@ export default function Ordernhanh() {
                             </div>
                             {servers.map((server, index) => (
                                 selectedMagoi === server.Magoi && (
+                                    <div key={index} >
+
+                                        <div className="alert text-white alert-info bg-info">
+                                            <h6>
+                                                Mã máy chủ: <span className="text-white">{server.Magoi}</span>
+                                            </h6>
+                                            <h6 >
+                                                Lưu ý :
+                                            </h6>
+                                            <div
+                                                dangerouslySetInnerHTML={{ __html: server.description }}
+                                            />
+                                        </div>
+                                        <div >
+                                            <label className="form-label" data-lang="">Thời gian hoàn thành trung bình</label>
+                                            <input type="text" value={server.tocdodukien} className="form-control form-control-solid" disabled="" />
+                                            <small className="form-text text-muted fst-italic"><span data-lang="">Thời gian trung bình hoàn thành số lượng 1000 của 10 đơn hàng gần nhất</span></small>
+                                        </div>
+                                    </div>
+                                )
+                            ))}
+                            {/* {servers.map((server, index) => (
+                                selectedMagoi === server.Magoi && (
                                     <div key={index} className="alert text-white alert-info bg-info">
                                         <h6>
                                             Mã máy chủ: <span className="text-white">{server.Magoi}</span>
@@ -659,7 +682,7 @@ export default function Ordernhanh() {
                                         />
                                     </div>
                                 )
-                            ))}
+                            ))} */}
                             <form onSubmit={handleSubmit}>
                                 <div className="form-group mb-3">
                                     <label htmlFor="object_id" className="form-label">
