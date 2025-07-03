@@ -3,7 +3,6 @@ import Table from "react-bootstrap/Table";
 import Select from "react-select";
 import { getServer } from "@/Utils/api";
 import { useNavigate } from "react-router-dom";
-import { type } from "@testing-library/user-event/dist/type";
 import { loadingg } from "@/JS/Loading";
 
 const Banggia = () => {
@@ -11,6 +10,7 @@ const Banggia = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchService, setSearchService] = useState(null);
+    const [activePlatform, setActivePlatform] = useState("");
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
 
@@ -70,6 +70,24 @@ const Banggia = () => {
         return servers.filter((s) => s.Magoi === searchService.value);
     }, [servers, searchService]);
 
+    // Khi chọn dịch vụ, tự động set platform tương ứng
+    useEffect(() => {
+        if (searchService && searchService.value) {
+            // Tìm server theo Magoi
+            const found = servers.find(s => s.Magoi === searchService.value);
+            if (found && found.type) {
+                setActivePlatform(found.type);
+            }
+        }
+    }, [searchService, servers]);
+
+    // Khi load lần đầu, set tab đầu tiên
+    useEffect(() => {
+        if (!activePlatform && platforms.length > 0) {
+            setActivePlatform(platforms[0]);
+        }
+    }, [platforms, activePlatform]);
+
     if (loading) return <div>Đang tải bảng giá...</div>;
     if (error) return <div className="alert alert-danger">{error}</div>;
     if (!servers.length) return <div>Không có dữ liệu bảng giá.</div>;
@@ -89,98 +107,104 @@ const Banggia = () => {
                     />
                     <div className="d-flex flex-column flex-md-row mt-3">
                         <ul style={{ width: 300 }} className="nav nav-tabs nav-pills border-0 flex-row flex-md-column me-5 mb-3 mb-md-0 fs-6" role="tablist">
-                            {platforms.map((platform, idx) => (
-                                <li className="nav-item w-md-200px me-0" role="presentation" key={platform}>
-                                    <a
-                                        className={`nav-link${idx === 0 ? " active" : ""}`}
-                                        data-bs-toggle="tab"
-                                        href={`#services-${platform}`}
-                                        aria-selected={idx === 0 ? "true" : "false"}
-                                        role="tab"
-                                    >
-                                        {platform}
-                                    </a>
-                                </li>
-                            ))}
+                            {platforms.map((platform, idx) => {
+                                const safePlatformId = `services-${platform.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+                                return (
+                                    <li className="nav-item w-md-200px me-0" role="presentation" key={platform}>
+                                        <a
+                                            className={`nav-link${activePlatform === platform ? " active" : ""}`}
+                                            data-bs-toggle="tab"
+                                            href={`#${safePlatformId}`}
+                                            aria-selected={activePlatform === platform ? "true" : "false"}
+                                            role="tab"
+                                            onClick={() => setActivePlatform(platform)}
+                                        >
+                                            {platform}
+                                        </a>
+                                    </li>
+                                );
+                            })}
                         </ul>
                         <div className="tab-content w-100">
-                            {platforms.map((platform, idx) => (
-                                <div
-                                    className={`tab-pane fade${idx === 0 ? " active show" : ""}`}
-                                    id={`services-${platform}`}
-                                    role="tabpanel"
-                                    key={platform}
-                                >
-                                    <div className="accordion accordion-flush" id={`accordion-${platform}`}>
-                                        {/* Lấy các category của platform này */}
-                                        {Array.from(new Set(filteredServers.filter(s => s.type === platform).map(s => s.category))).map((category, cidx) => {
-                                            // Lấy id duy nhất cho accordion (tránh trùng lặp do ký tự đặc biệt)
-                                            const safeCategoryId = `${platform}-${category}`.replace(/[^a-zA-Z0-9_-]/g, "_");
-                                            return (
-                                                <div className="accordion-item" key={category}>
-                                                    <h5 className="accordion-header m-0" id={`flush-heading-${safeCategoryId}`}>
-                                                        <button
-                                                            className="accordion-button fw-semibold collapsed bg-light"
-                                                            type="button"
-                                                            data-bs-toggle="collapse"
-                                                            data-bs-target={`#flush-collapse-${safeCategoryId}`}
-                                                            aria-expanded="false"
-                                                            aria-controls={`flush-collapse-${safeCategoryId}`}
+                            {platforms.map((platform, idx) => {
+                                const safePlatformId = `services-${platform.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+                                return (
+                                    <div
+                                        className={`tab-pane fade${activePlatform === platform ? " active show" : ""}`}
+                                        id={safePlatformId}
+                                        role="tabpanel"
+                                        key={platform}
+                                    >
+                                        <div className="accordion accordion-flush" id={`accordion-${safePlatformId}`}>
+                                            {/* Lấy các category của platform này */}
+                                            {Array.from(new Set(filteredServers.filter(s => (s.type || '').trim() === platform.trim()).map(s => (s.category || '').trim()))).map((category, cidx) => {
+                                                const safeCategoryId = `${platform}-${category}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+                                                return (
+                                                    <div className="accordion-item" key={category}>
+                                                        <h5 className="accordion-header m-0" id={`flush-heading-${safeCategoryId}`}>
+                                                            <button
+                                                                className="accordion-button fw-semibold collapsed bg-light"
+                                                                type="button"
+                                                                data-bs-toggle="collapse"
+                                                                data-bs-target={`#flush-collapse-${safeCategoryId}`}
+                                                                aria-expanded="false"
+                                                                aria-controls={`flush-collapse-${safeCategoryId}`}
+                                                            >
+                                                                {category}
+                                                            </button>
+                                                        </h5>
+                                                        <div
+                                                            id={`flush-collapse-${safeCategoryId}`}
+                                                            className={`accordion-collapse collapse${cidx === 0 ? " show" : ""}`}
+                                                            aria-labelledby={`flush-heading-${safeCategoryId}`}
+                                                            data-bs-parent={`#accordion-${safePlatformId}`}
                                                         >
-                                                            {category}
-                                                        </button>
-                                                    </h5>
-                                                    <div
-                                                        id={`flush-collapse-${safeCategoryId}`}
-                                                        className={`accordion-collapse collapse${cidx === 0 ? " show" : ""}`}
-                                                        aria-labelledby={`flush-heading-${safeCategoryId}`}
-                                                        data-bs-parent={`#accordion-${platform}`}
-                                                    >
-                                                        <div className="accordion-body">
-                                                            <div className="table-responsive">
-                                                                <Table bordered hover className="mb-0 table-centered">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>Id</th>
-                                                                            <th>Tên máy chủ</th>
-                                                                            <th>Giá</th>
-                                                                            <th>Mua</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        {filteredServers.filter(s => s.type === platform && s.category === category).map((server) => (
-                                                                            <tr key={server.Magoi}>
-                                                                                <td>{server.Magoi}</td>
-                                                                                <td style={{
-                                                                                    maxWidth: "250px",
-                                                                                    whiteSpace: "normal",
-                                                                                    wordWrap: "break-word",
-                                                                                    overflowWrap: "break-word",
-                                                                                }}>{server.maychu} {server.name}</td>
-                                                                                <td>{Number(server.rate).toLocaleString("en-US")}</td>
-                                                                                <td>
-                                                                                    <button
-                                                                                        className="btn btn-sm btn-success"
-                                                                                        onClick={() => {
-                                                                                            window.location.href = `/order/${String(server.path).toLowerCase()}`;
-                                                                                        }}
-                                                                                    >
-                                                                                        Mua
-                                                                                    </button>
-                                                                                </td>
+                                                            <div className="accordion-body">
+                                                                <div className="table-responsive">
+                                                                    <Table bordered hover className="mb-0 table-centered">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Id</th>
+                                                                                <th>Tên máy chủ</th>
+                                                                                <th>Giá</th>
+                                                                                <th>Mua</th>
                                                                             </tr>
-                                                                        ))}
-                                                                    </tbody>
-                                                                </Table>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {filteredServers.filter(s => (s.type || '').trim() === platform.trim() && (s.category || '').trim() === category).map((server) => (
+                                                                                <tr key={server.Magoi}>
+                                                                                    <td>{server.Magoi}</td>
+                                                                                    <td style={{
+                                                                                        maxWidth: "250px",
+                                                                                        whiteSpace: "normal",
+                                                                                        wordWrap: "break-word",
+                                                                                        overflowWrap: "break-word",
+                                                                                    }}>{server.maychu} {server.name}</td>
+                                                                                    <td>{Number(server.rate).toLocaleString("en-US")}</td>
+                                                                                    <td>
+                                                                                        <button
+                                                                                            className="btn btn-sm btn-success"
+                                                                                            onClick={() => {
+                                                                                                window.location.href = `/order/${String(server.path).toLowerCase()}`;
+                                                                                            }}
+                                                                                        >
+                                                                                            Mua
+                                                                                        </button>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </Table>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            );
-                                        })}
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
