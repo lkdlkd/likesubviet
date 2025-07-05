@@ -36,7 +36,7 @@ export default function Order() {
     const [isStopped, setIsStopped] = React.useState(false);
     const isStoppedRef = React.useRef(isStopped);
     const [activeTab, setActiveTab] = useState("muadichvu");
-
+    const [showcmt, setShowcmt] = useState(false);
     React.useEffect(() => {
         isStoppedRef.current = isStopped;
     }, [isStopped]);
@@ -155,7 +155,15 @@ export default function Order() {
         const selectedService = filteredServers.find((server) => server.Magoi === selectedMagoi);
         return selectedService && selectedService.getid === "on" ? convertedUID || rawLink : rawLink;
     }, [convertedUID, rawLink, selectedMagoi, filteredServers]);
-
+    // Theo dõi selectedService để setShowcmt đúng cách
+    useEffect(() => {
+        const hasCommentService = filteredServers.some(service => service.comment === "on");
+        if (hasCommentService) {
+            setShowcmt(true);
+        } else {
+            setShowcmt(false);
+        }
+    }, [selectedMagoi, filteredServers]);
     // Xử lý gửi đơn hàng
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -778,7 +786,7 @@ export default function Order() {
                                                         {/* <div className="alert text-white alert-info bg-info"> */}
                                                         <div >
                                                             <label className="form-label" data-lang="">Thời gian hoàn thành trung bình</label>
-                                                            <br/>
+                                                            <br />
                                                             <small className="form-text text-muted fst-italic">Thời gian cập nhật : {new Date(server.updatedAt).toLocaleString("vi-VN", {
                                                                 day: "2-digit",
                                                                 month: "2-digit",
@@ -983,6 +991,7 @@ export default function Order() {
                 <div >
                     <div >
                         <Dondamua
+                            showcmt={showcmt}
                             category={servers.length > 0 ? servers[0].category : path}
                         />
                     </div>

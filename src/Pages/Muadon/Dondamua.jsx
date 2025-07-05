@@ -5,7 +5,7 @@ import { getOrders } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading";
 
-const Dondamua = ({ category }) => {
+const Dondamua = ({ category, showcmt }) => {
     const token = localStorage.getItem("token");
     let decoded = {};
     if (token) {
@@ -191,6 +191,8 @@ const Dondamua = ({ category }) => {
                                             <th>Server</th>
                                             <th>Thông tin</th>
                                             <th>Trạng thái</th>
+                                            {showcmt && <th>Bình luận</th>}
+                                            {/* <th>Bình luận</th> */}
                                             <th>Ngày tạo</th>
                                             <th>Thời gian cập nhật</th>
                                             <th>Ghi chú</th>
@@ -251,6 +253,23 @@ const Dondamua = ({ category }) => {
                                                         <span>{order.status}</span>
                                                     )}
                                                 </td>
+                                                {showcmt && (
+                                                    <td>
+                                                        {order.comments ? (
+                                                            <textarea
+                                                                readOnly
+                                                                rows={2}
+                                                                style={{
+                                                                    maxWidth: "100px",
+                                                                }}
+                                                            >
+                                                                {order.comments}
+                                                            </textarea>
+                                                        ) : (
+                                                            <span className="badge bg-secondary">Không có</span>
+                                                        )}
+                                                    </td>
+                                                )}
                                                 <td>
                                                     {new Date(order.createdAt).toLocaleString("vi-VN", {
                                                         day: "2-digit",

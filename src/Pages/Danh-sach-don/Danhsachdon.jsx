@@ -275,7 +275,7 @@ const Danhsachdon = () => {
                                             <th>Server</th>
                                             <th>Thông tin</th>
                                             <th>Trạng thái</th>
-                                            {selectedCategory && selectedCategory.value === "BÌNH LUẬN" && <th>Bình luận</th>}
+                                            <th>Bình luận</th>
                                             <th>Ngày tạo</th>
                                             <th>Thời gian cập nhật</th>
                                             <th>Ghi chú</th>
@@ -364,19 +364,20 @@ const Danhsachdon = () => {
                                                     )}
 
                                                 </td>
-                                                {selectedCategory &&
-                                                    selectedCategory.value === "BÌNH LUẬN" && (
-                                                        <td>
-                                                            <textarea
-                                                                readOnly
-                                                                rows={2}
-                                                            >
-                                                                {order.category === "BÌNH LUẬN"
-                                                                    ? order.comments || "Không có bình luận"
-                                                                    : ""}
-                                                            </textarea>
-                                                        </td>
-                                                    )}
+
+                                                <td >
+                                                    <textarea
+                                                        readOnly
+                                                        rows={2}
+                                                        style={{
+                                                            maxWidth: "100px",
+                                                        }}
+                                                    >
+                                                        {order.category === "BÌNH LUẬN"
+                                                            ? order.comments || "Không có bình luận"
+                                                            : ""}
+                                                    </textarea>
+                                                </td>
                                                 <td>
                                                     {new Date(order.createdAt).toLocaleString("vi-VN", {
                                                         day: "2-digit",
