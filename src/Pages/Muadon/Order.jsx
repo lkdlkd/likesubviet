@@ -12,6 +12,7 @@ import MultiLinkModal from "./MultiLinkModal";
 // import { io } from "socket.io-client";
 import { Button, Modal } from "react-bootstrap";
 import Select from "react-select";
+import Dondamua from "./Dondamua";
 
 export default function Order() {
     const { path } = useParams(); // Lấy `type` và `path` từ URL
@@ -34,6 +35,8 @@ export default function Order() {
     const [multiLinkModal, setMultiLinkModal] = useState(false);
     const [isStopped, setIsStopped] = React.useState(false);
     const isStoppedRef = React.useRef(isStopped);
+    const [activeTab, setActiveTab] = useState("muadichvu");
+
     React.useEffect(() => {
         isStoppedRef.current = isStopped;
     }, [isStopped]);
@@ -300,6 +303,7 @@ export default function Order() {
         setConvertedUID("");
         setMultiLinkList([]);
         setSelectedMagoi(""); // Reset selectedMagoi khi path thay đổi
+        setActiveTab("muadichvu"); // Reset activeTab khi path thay đổi
     }, [path]); // Theo dõi sự thay đổi của đường dẫn
     // const convertNumberToWords = (num) => {
     //     const units = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
@@ -604,277 +608,309 @@ export default function Order() {
     return (
         <div className="main-content">
             <Modalnote modal_Show={modal_Show.modal_show} />
-            <div className="row">
-                <div className="col-md-12 col-lg-8">
-                    <div className="card">
-                        <div className="card-body">
-                            <h3 className="card-title d-flex align-items-center gap-2 mb-4u">
-                                <span className="text-primary">{category}</span>
-                            </h3>
-                            <form onSubmit={handleSubmit}>
-                                <>
-                                    <div className="form-group mb-3">
-                                        <label htmlFor="object_id" className="form-label text-dark">
-                                            Link Hoặc UID:
-                                            <a className="text-primary" onClick={() => setMultiLinkModal(true)}>
-                                                Mua nhiều link cùng lúc
-                                            </a>
-                                        </label>
-                                        <input
-                                            className="form-control ipt-link"
-                                            type="text"
-                                            value={isConverting ? "Đang xử lý..." : displayLink}
-                                            onChange={(e) => {
-                                                let val = e.target.value.replace(/\s+/g, ''); // Bỏ tất cả khoảng trắng
-                                                // Nếu là link TikTok thì rút gọn
-                                                if (val !== "") {
-                                                    val = shortenSocialLink(val);
-                                                    setObjectLink(val); // Lưu link gốc
-                                                }
-                                                setRawLink(val);
-                                                setConvertedUID("");
-                                            }}
-                                            placeholder="Nhập link hoặc ID tùy các máy chủ"
-                                            disabled={isConverting}
-                                        />
-                                    </div>
+            <div className="col-md-12 mb-4">
+                <div className="row">
+                    <div className="col-6 d-grid gap-2">
+                        <button
+                            className={`btn rounded-pill shadow-sm fw-bold ${activeTab === "muadichvu" ? "btn-primary" : "btn-outline-primary"
+                                }`}
+                            onClick={() => setActiveTab("muadichvu")}
+                        >
+                            <i className="fa fa-shopping-cart"></i> Mua dịch vụ
+                        </button>
+                    </div>
+                    <div className="col-6 d-grid gap-2">
+                        <button
+                            className={`btn rounded-pill shadow-sm fw-bold ${activeTab === "danhsachdon" ? "btn-primary" : "btn-outline-primary"
+                                }`}
+                            onClick={() => setActiveTab("danhsachdon")}
+                        >
+                            <i className="fa fa-history"></i> Danh sách đơn
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {activeTab === "muadichvu" && (
+                <div className="row">
+                    <div className="col-md-12 col-lg-8">
+                        <div className="card">
+                            <div className="card-body">
+                                <h3 className="card-title d-flex align-items-center gap-2 mb-4u">
+                                    <span className="text-primary">{category}</span>
+                                </h3>
+                                <form onSubmit={handleSubmit}>
+                                    <>
+                                        <div className="form-group mb-3">
+                                            <label htmlFor="object_id" className="form-label text-dark">
+                                                Link Hoặc UID:
+                                                <a className="text-primary" onClick={() => setMultiLinkModal(true)}>
+                                                    Mua nhiều link cùng lúc
+                                                </a>
+                                            </label>
+                                            <input
+                                                className="form-control ipt-link"
+                                                type="text"
+                                                value={isConverting ? "Đang xử lý..." : displayLink}
+                                                onChange={(e) => {
+                                                    let val = e.target.value.replace(/\s+/g, ''); // Bỏ tất cả khoảng trắng
+                                                    // Nếu là link TikTok thì rút gọn
+                                                    if (val !== "") {
+                                                        val = shortenSocialLink(val);
+                                                        setObjectLink(val); // Lưu link gốc
+                                                    }
+                                                    setRawLink(val);
+                                                    setConvertedUID("");
+                                                }}
+                                                placeholder="Nhập link hoặc ID tùy các máy chủ"
+                                                disabled={isConverting}
+                                            />
+                                        </div>
 
-                                    <div className="form-group mb-3">
-                                        <label className="form-label">
-                                            {/* <>Máy chủ:</strong> */}
-                                            <strong>Chọn máy chủ ( ấn vào máy chủ để đọc lưu ý )</strong>
+                                        <div className="form-group mb-3">
+                                            <label className="form-label">
+                                                {/* <>Máy chủ:</strong> */}
+                                                <strong>Chọn máy chủ ( ấn vào máy chủ để đọc lưu ý )</strong>
 
-                                        </label>
-                                        {filteredServers.map((server) => (
+                                            </label>
+                                            {filteredServers.map((server) => (
 
-                                            // <div className="mb-3">
-                                            //     <div className="mb-0">
-                                            //         <div
-                                            //             className="form-check mb-2 d-flex align-items-start"
-                                            //             style={{ gap: "10px" }} // Thêm khoảng cách giữa các phần tử
-                                            //         >
-                                            //             <input
-                                            //                 type="radio"
-                                            //                 id={`server-${server.Magoi}`}
-                                            //                 name="server"
-                                            //                 value={server.Magoi}
-                                            //                 checked={selectedMagoi === server.Magoi}
-                                            //                 onChange={(e) => {
-                                            //                     setSelectedMagoi(e.target.value);
-                                            //                     setMin(server.min);
-                                            //                     setMax(server.max);
-                                            //                     setRate(server.rate);
-                                            //                 }}
-                                            //                 className="form-check-input radio-custom"
-                                            //                 style={{ cursor: "pointer", marginTop: "7px" }}
-                                            //             />
-                                            //             <label
-                                            //                 className="form-check-label"
-                                            //                 htmlFor={`server-${server.Magoi}`}
-                                            //                 style={{ cursor: "pointer" }}
-                                            //             >
-                                            //                 <strong className="text-sm fw-semibold">[{server.Magoi}]  </strong>
-                                            //                 <span
-                                            //                     className="text-danger fw-bold small-number"
-                                            //                     style={{ fontSize: "17px" }}
-                                            //                 >
-                                            //                     {server.maychu}
-                                            //                 </span> - <span className="text-sm fw-semibold">{server.name} </span> - <span
-                                            //                     className="text-danger fw-bold small-number"
-                                            //                     style={{ fontSize: "17px" }}
-                                            //                 >
-                                            //                     {Number(server.rate).toLocaleString("en-US")}đ
-                                            //                 </span>
-                                            //                 <div>
-                                            //                     {/* <span className="badge bg-secondary">Đã bán: 15</span> */}
-                                            //                     <span className="badge bg-success">{server.trangthai ? "Hoạt động" : "Không hoạt động"}
-                                            //                     </span>
-                                            //                     {/* <span className="badge bg-primary">Tỷ lệ: 66%</span> */}
-                                            //                 </div>
-                                            //             </label>
-                                            //         </div>
-                                            //     </div>
-                                            // </div>
+                                                // <div className="mb-3">
+                                                //     <div className="mb-0">
+                                                //         <div
+                                                //             className="form-check mb-2 d-flex align-items-start"
+                                                //             style={{ gap: "10px" }} // Thêm khoảng cách giữa các phần tử
+                                                //         >
+                                                //             <input
+                                                //                 type="radio"
+                                                //                 id={`server-${server.Magoi}`}
+                                                //                 name="server"
+                                                //                 value={server.Magoi}
+                                                //                 checked={selectedMagoi === server.Magoi}
+                                                //                 onChange={(e) => {
+                                                //                     setSelectedMagoi(e.target.value);
+                                                //                     setMin(server.min);
+                                                //                     setMax(server.max);
+                                                //                     setRate(server.rate);
+                                                //                 }}
+                                                //                 className="form-check-input radio-custom"
+                                                //                 style={{ cursor: "pointer", marginTop: "7px" }}
+                                                //             />
+                                                //             <label
+                                                //                 className="form-check-label"
+                                                //                 htmlFor={`server-${server.Magoi}`}
+                                                //                 style={{ cursor: "pointer" }}
+                                                //             >
+                                                //                 <strong className="text-sm fw-semibold">[{server.Magoi}]  </strong>
+                                                //                 <span
+                                                //                     className="text-danger fw-bold small-number"
+                                                //                     style={{ fontSize: "17px" }}
+                                                //                 >
+                                                //                     {server.maychu}
+                                                //                 </span> - <span className="text-sm fw-semibold">{server.name} </span> - <span
+                                                //                     className="text-danger fw-bold small-number"
+                                                //                     style={{ fontSize: "17px" }}
+                                                //                 >
+                                                //                     {Number(server.rate).toLocaleString("en-US")}đ
+                                                //                 </span>
+                                                //                 <div>
+                                                //                     {/* <span className="badge bg-secondary">Đã bán: 15</span> */}
+                                                //                     <span className="badge bg-success">{server.trangthai ? "Hoạt động" : "Không hoạt động"}
+                                                //                     </span>
+                                                //                     {/* <span className="badge bg-primary">Tỷ lệ: 66%</span> */}
+                                                //                 </div>
+                                                //             </label>
+                                                //         </div>
+                                                //     </div>
+                                                // </div>
 
-                                            <div
-                                                key={server.Magoi}
-                                                className="form-check mb-2 d-flex align-items-center gap-2 "
-                                            >
-                                                <input
-                                                    id={`server-${server.Magoi}`}
-                                                    className="form-check-input "
-                                                    type="radio"
-                                                    name="server"
-                                                    value={server.Magoi}
-                                                    checked={selectedMagoi === server.Magoi}
-                                                    onChange={(e) => {
-                                                        setSelectedMagoi(e.target.value);
-                                                        setMin(server.min);
-                                                        setMax(server.max);
-                                                        setRate(server.rate);
-                                                        setQuantity(server.min); // Đặt giá trị mặc định cho quantity
-                                                    }}
-                                                />
-                                                <label className="form-check-label" htmlFor={`server-${server.Magoi}`}>
-                                                    <strong className="badge bg-info">[{server.Magoi}] </strong>
-                                                    {/* <span className="badge bg-success ">{server.maychu}</span> */}
-                                                    <span className="font-semibold"> - {server.maychu} {server.name} </span>
-                                                    <span className="badge bg-primary ">
-                                                        {Number(server.rate).toLocaleString("en-US")}đ
-                                                        {/* {server.rate}đ */}
-                                                    </span>
+                                                <div
+                                                    key={server.Magoi}
+                                                    className="form-check mb-2 d-flex align-items-center gap-2 "
+                                                >
+                                                    <input
+                                                        id={`server-${server.Magoi}`}
+                                                        className="form-check-input "
+                                                        type="radio"
+                                                        name="server"
+                                                        value={server.Magoi}
+                                                        checked={selectedMagoi === server.Magoi}
+                                                        onChange={(e) => {
+                                                            setSelectedMagoi(e.target.value);
+                                                            setMin(server.min);
+                                                            setMax(server.max);
+                                                            setRate(server.rate);
+                                                            setQuantity(server.min); // Đặt giá trị mặc định cho quantity
+                                                        }}
+                                                    />
+                                                    <label className="form-check-label" htmlFor={`server-${server.Magoi}`}>
+                                                        <strong className="badge bg-info">[{server.Magoi}] </strong>
+                                                        {/* <span className="badge bg-success ">{server.maychu}</span> */}
+                                                        <span className="font-semibold"> - {server.maychu} {server.name} </span>
+                                                        <span className="badge bg-primary ">
+                                                            {Number(server.rate).toLocaleString("en-US")}đ
+                                                            {/* {server.rate}đ */}
+                                                        </span>
 
-                                                    <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
-                                                        {server.isActive ? "Hoạt động" : "Không hoạt động"}
-                                                    </span>
-                                                    {/* <span className="custom-control-label">
+                                                        <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
+                                                            {server.isActive ? "Hoạt động" : "Không hoạt động"}
+                                                        </span>
+                                                        {/* <span className="custom-control-label">
                                                         {" "}
                                                         - ID server - {server.Magoi}
                                                     </span> */}
-                                                </label>
-                                            </div>
-                                        ))}
-                                        {servers.map((server, index) => (
-                                            selectedMagoi === server.Magoi && (
-                                                <div key={index} >
+                                                    </label>
+                                                </div>
+                                            ))}
+                                            {servers.map((server, index) => (
+                                                selectedMagoi === server.Magoi && (
+                                                    <div key={index} >
 
-                                                    <div className="alert text-white alert-info bg-info">
-                                                        <h6>
-                                                            Mã máy chủ: <span className="text-white">{server.Magoi}</span>
-                                                        </h6>
-                                                        <h6 >
-                                                            Lưu ý :
-                                                        </h6>
-                                                        <div
-                                                            dangerouslySetInnerHTML={{ __html: server.description }}
-                                                        />
-                                                    </div>
-                                                    {/* <div className="alert text-white alert-info bg-info"> */}
-                                                    <div >
-                                                        <label className="form-label" data-lang="">Thời gian hoàn thành trung bình</label>
-                                                        <input type="text" value={server.tocdodukien} className="form-control form-control-solid" disabled="" />
-                                                        <small className="form-text text-muted fst-italic"><span data-lang="">Thời gian trung bình hoàn thành số lượng 1000 của 10 đơn hàng gần nhất</span></small>
-                                                    </div>
-                                                    {/* <div className="alert text-white alert-info bg-info">
+                                                        <div className="alert text-white alert-info bg-info">
+                                                            <h6>
+                                                                Mã máy chủ: <span className="text-white">{server.Magoi}</span>
+                                                            </h6>
+                                                            <h6 >
+                                                                Lưu ý :
+                                                            </h6>
+                                                            <div
+                                                                dangerouslySetInnerHTML={{ __html: server.description }}
+                                                            />
+                                                        </div>
+                                                        {/* <div className="alert text-white alert-info bg-info"> */}
+                                                        <div >
+                                                            <label className="form-label" data-lang="">Thời gian hoàn thành trung bình</label>
+                                                            <br/>
+                                                            <small className="form-text text-muted fst-italic">Thời gian cập nhật : {new Date(server.updatedAt).toLocaleString("vi-VN", {
+                                                                day: "2-digit",
+                                                                month: "2-digit",
+                                                                year: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                                second: "2-digit",
+                                                            })}</small>
+                                                            <input type="text" value={server.tocdodukien} className="form-control form-control-solid" disabled="" />
+                                                            <small className="form-text text-muted fst-italic"><span data-lang="">Thời gian trung bình hoàn thành số lượng 1000 của 10 đơn hàng gần nhất</span></small>
+                                                        </div>
+                                                        {/* <div className="alert text-white alert-info bg-info">
                                                         Tốc độ dự kiến {server.tocdodukien}
                                                     </div> */}
 
-                                                </div>
-                                            )
-                                        ))}
+                                                    </div>
+                                                )
+                                            ))}
 
-                                    </div>
-                                    {(() => {
-                                        const selectedService = filteredServers.find(
-                                            (service) => service.Magoi === selectedMagoi
-                                        );
-                                        if (selectedService && selectedService.comment === "on") {
-                                            return (
-                                                <div
-                                                    className="form-group mb-3 comments"
-                                                    id="comments_type"
-                                                    style={{ display: "block" }}
-                                                >
-                                                    <strong>
-                                                        Số lượng: <span id="quantity_limit">({min} ~ {max})</span>
-                                                    </strong>
-                                                    <label htmlFor="comments" className="form-label">
-                                                        <strong>Nội dung bình luận: </strong>
-                                                        <strong>số lượng: {cmtqlt}</strong>
-                                                    </label>
-                                                    <textarea
-                                                        className="form-control"
-                                                        name="comments"
-                                                        id="comments"
-                                                        rows="3"
-                                                        placeholder="Nhập nội dung bình luận, mỗi dòng là 1 comment"
-                                                        value={comments}
-                                                        onChange={(e) => setComments(e.target.value)}
-                                                    ></textarea>
-                                                </div>
-                                            )
-                                        } else {
-                                            return (
-                                                <div className="form-group mb-3 quantity" id="quantity_type">
-                                                    <label htmlFor="quantity" className="form-label">
+                                        </div>
+                                        {(() => {
+                                            const selectedService = filteredServers.find(
+                                                (service) => service.Magoi === selectedMagoi
+                                            );
+                                            if (selectedService && selectedService.comment === "on") {
+                                                return (
+                                                    <div
+                                                        className="form-group mb-3 comments"
+                                                        id="comments_type"
+                                                        style={{ display: "block" }}
+                                                    >
                                                         <strong>
                                                             Số lượng: <span id="quantity_limit">({min} ~ {max})</span>
                                                         </strong>
-                                                    </label>
-                                                    <input
-                                                        list="suggestions"
-                                                        type="number"
-                                                        className="form-control"
-                                                        value={quantity}
-                                                        onChange={(e) => setQuantity(e.target.value)}
-                                                    />
-                                                    <datalist id="suggestions">
-                                                        <option value="100"></option>
-                                                        <option value="1000"></option>
-                                                        <option value="10000"></option>
-                                                    </datalist>
-                                                </div>
-                                            );
-                                        }
-                                    })()}
-                                    <div className="form-group mb-3">
-                                        <label htmlFor="note" className="form-label">
-                                            <strong>Ghi chú:</strong>
-                                        </label>
-                                        <textarea
-                                            className="form-control"
+                                                        <label htmlFor="comments" className="form-label">
+                                                            <strong>Nội dung bình luận: </strong>
+                                                            <strong>số lượng: {cmtqlt}</strong>
+                                                        </label>
+                                                        <textarea
+                                                            className="form-control"
+                                                            name="comments"
+                                                            id="comments"
+                                                            rows="3"
+                                                            placeholder="Nhập nội dung bình luận, mỗi dòng là 1 comment"
+                                                            value={comments}
+                                                            onChange={(e) => setComments(e.target.value)}
+                                                        ></textarea>
+                                                    </div>
+                                                )
+                                            } else {
+                                                return (
+                                                    <div className="form-group mb-3 quantity" id="quantity_type">
+                                                        <label htmlFor="quantity" className="form-label">
+                                                            <strong>
+                                                                Số lượng: <span id="quantity_limit">({min} ~ {max})</span>
+                                                            </strong>
+                                                        </label>
+                                                        <input
+                                                            list="suggestions"
+                                                            type="number"
+                                                            className="form-control"
+                                                            value={quantity}
+                                                            onChange={(e) => setQuantity(e.target.value)}
+                                                        />
+                                                        <datalist id="suggestions">
+                                                            <option value="100"></option>
+                                                            <option value="1000"></option>
+                                                            <option value="10000"></option>
+                                                        </datalist>
+                                                    </div>
+                                                );
+                                            }
+                                        })()}
+                                        <div className="form-group mb-3">
+                                            <label htmlFor="note" className="form-label">
+                                                <strong>Ghi chú:</strong>
+                                            </label>
+                                            <textarea
+                                                className="form-control"
 
-                                            value={note}
-                                            onChange={(e) => setNote(e.target.value)}
-                                            placeholder="Ghi chú đơn hàng"
-                                        />
-                                    </div>
-                                    {(() => {
-                                        const selectedService = filteredServers.find(
-                                            (service) => service.Magoi === selectedMagoi
-                                        );
-                                        const qty =
-                                            selectedService && selectedService.comment === "on"
-                                                ? cmtqlt
-                                                : quantity;
-                                        return (
-                                            <div className="form-group mb-3">
-                                                <div className="alert bg-primary text-center text-white">
-                                                    <h3 className="alert-heading">
-                                                        Tổng thanh toán:{" "}
-                                                        <span className="text-danger">
-                                                            {Number(totalCost).toLocaleString("en-US")}
-                                                        </span>{" "}
-                                                        đ
-                                                        {/* -{" "}
+                                                value={note}
+                                                onChange={(e) => setNote(e.target.value)}
+                                                placeholder="Ghi chú đơn hàng"
+                                            />
+                                        </div>
+                                        {(() => {
+                                            const selectedService = filteredServers.find(
+                                                (service) => service.Magoi === selectedMagoi
+                                            );
+                                            const qty =
+                                                selectedService && selectedService.comment === "on"
+                                                    ? cmtqlt
+                                                    : quantity;
+                                            return (
+                                                <div className="form-group mb-3">
+                                                    <div className="alert bg-primary text-center text-white">
+                                                        <h3 className="alert-heading">
+                                                            Tổng thanh toán:{" "}
+                                                            <span className="text-danger">
+                                                                {Number(totalCost).toLocaleString("en-US")}
+                                                            </span>{" "}
+                                                            đ
+                                                            {/* -{" "}
                                                         <span class="text-danger">
                                                             {Number(totalCost / 25000)}
                                                         </span>{" "}
                                                         $ */}
-                                                    </h3>
-                                                    <p className="fs-5 mb-0">{tien} đ</p>
-                                                    <p className="fs-4 mb-0">
-                                                        Bạn sẽ tăng{" "}
-                                                        <span className="text-danger">{qty} </span>số lượng với giá{" "}
-                                                        <span className="text-danger">{rate}</span> đ
-                                                    </p>
+                                                        </h3>
+                                                        <p className="fs-5 mb-0">{tien} đ</p>
+                                                        <p className="fs-4 mb-0">
+                                                            Bạn sẽ tăng{" "}
+                                                            <span className="text-danger">{qty} </span>số lượng với giá{" "}
+                                                            <span className="text-danger">{rate}</span> đ
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })()}
-                                    <div className="form-group">
-                                        <button
-                                            type="submit"
-                                            className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
-                                        >
-                                            <i className="fas fa-shopping-cart"></i>
-                                            {isSubmitting ? "Đang xử lý..." : "Tạo đơn hàng"}
-                                        </button>
-                                    </div>
+                                            );
+                                        })()}
+                                        <div className="form-group">
+                                            <button
+                                                type="submit"
+                                                className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                                            >
+                                                <i className="fas fa-shopping-cart"></i>
+                                                {isSubmitting ? "Đang xử lý..." : "Tạo đơn hàng"}
+                                            </button>
+                                        </div>
 
-                                </>
-                            </form>
-                            {/* {isSubmitting && (
+                                    </>
+                                </form>
+                                {/* {isSubmitting && (
                                 <div className="overlay">
                                     <div className="spinner-container">
                                         <div style={{ minHeight: "200px" }} className="d-flex justify-content-center align-items-center">
@@ -884,35 +920,36 @@ export default function Order() {
                                     </div>
                                 </div>
                             )} */}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-md-12 col-lg-4">
+                        <div className="alert alert-warning fade show mt-3 border-0 rounded-10">
+                            <h3 className="text-dark text-uppercase text-center">LƯU Ý NÊN ĐỌC TRÁNH MẤT TIỀN</h3>
+                            <div>
+                                {modal_Show.note ? (
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: modal_Show.note,
+                                        }}
+                                    />
+                                ) : (
+                                    <span>
+                                        Nghiêm cấm buff các đơn có nội dung vi phạm pháp luật, chính trị, đồ trụy...
+                                        Nếu cố tình buff bạn sẽ bị trừ hết tiền và ban khỏi hệ thống vĩnh viễn, và phải chịu hoàn toàn trách nhiệm trước pháp luật.
+                                        Nếu đơn đang chạy trên hệ thống mà bạn vẫn mua ở các hệ thống bên khác hoặc đè nhiều đơn, nếu có tình trạng hụt, thiếu số lượng giữa 2 bên thì sẽ không được xử lí.
+                                        Đơn cài sai thông tin hoặc lỗi trong quá trình tăng hệ thống sẽ không hoàn lại tiền.
+                                        Nếu gặp lỗi hãy nhắn tin hỗ trợ phía bên phải góc màn hình hoặc vào mục liên hệ hỗ trợ để được hỗ trợ tốt nhất.
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="alert alert-primary bg-primary text-white">
+                            <h5 className="alert-heading">Các trường hợp huỷ đơn hoặc không chạy</h5>
                         </div>
                     </div>
                 </div>
-                <div className="col-md-12 col-lg-4">
-                    <div className="alert alert-warning fade show mt-3 border-0 rounded-10">
-                        <h3 className="text-dark text-uppercase text-center">LƯU Ý NÊN ĐỌC TRÁNH MẤT TIỀN</h3>
-                        <div>
-                            {modal_Show.note ? (
-                                <div
-                                    dangerouslySetInnerHTML={{
-                                        __html: modal_Show.note,
-                                    }}
-                                />
-                            ) : (
-                                <span>
-                                    Nghiêm cấm buff các đơn có nội dung vi phạm pháp luật, chính trị, đồ trụy...
-                                    Nếu cố tình buff bạn sẽ bị trừ hết tiền và ban khỏi hệ thống vĩnh viễn, và phải chịu hoàn toàn trách nhiệm trước pháp luật.
-                                    Nếu đơn đang chạy trên hệ thống mà bạn vẫn mua ở các hệ thống bên khác hoặc đè nhiều đơn, nếu có tình trạng hụt, thiếu số lượng giữa 2 bên thì sẽ không được xử lí.
-                                    Đơn cài sai thông tin hoặc lỗi trong quá trình tăng hệ thống sẽ không hoàn lại tiền.
-                                    Nếu gặp lỗi hãy nhắn tin hỗ trợ phía bên phải góc màn hình hoặc vào mục liên hệ hỗ trợ để được hỗ trợ tốt nhất.
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                    <div className="alert alert-primary bg-primary text-white">
-                        <h5 className="alert-heading">Các trường hợp huỷ đơn hoặc không chạy</h5>
-                    </div>
-                </div>
-            </div>
+            )}
             {/* Modal mua nhiều link */}
             <MultiLinkModal
                 show={multiLinkModal}
@@ -943,6 +980,17 @@ export default function Order() {
                 setRate={setRate} // truyền thêm setRate
                 handleMultiLinkSubmit={handleMultiLinkSubmit}
             />
+            {activeTab === "danhsachdon" && (
+                <div >
+                    <div >
+                        <Dondamua
+                            category={servers.length > 0 ? servers[0].category : path}
+                        />
+                    </div>
+
+                </div>
+
+            )}
         </div>
     );
 }
