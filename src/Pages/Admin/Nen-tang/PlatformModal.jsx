@@ -3,20 +3,27 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { loadingg } from "@/JS/Loading";
 
-const platformLogos = {
-    Facebook: "/img/facebook.gif",
-    TikTok: "/img/tiktok.gif",
-    Instagram: "/img/instagram.gif",
-    YouTube: "/img/youtube.png",
-    Twitter: "/img/twitter.gif",
-    Telegram: "/img/telegram.gif",
-    Shopee: "/img/shoppe.gif",
-    Lazada: "/img/lazada.png",
-    Discord: "/img/discord.gif",
-    Thread: "/img/thread.gif",
-    traffic : "/img/traffic.png",
-};
-
+// const platformLogos = {
+//     Facebook: "/img/facebook.gif",
+//     TikTok: "/img/tiktok.gif",
+//     Instagram: "/img/instagram.gif",
+//     YouTube: "/img/youtube.png",
+//     Twitter: "/img/twitter.gif",
+//     Telegram: "/img/telegram.gif",
+//     Shopee: "/img/shoppe.gif",
+//     Lazada: "/img/lazada.png",
+//     Discord: "/img/discord.gif",
+//     Thread: "/img/thread.gif",
+//     traffic : "/img/traffic.gif",
+// };
+// Thay thế platformLogos bằng đoạn này:
+const images = require.context('@/assets/img', false, /\.(png|jpe?g|gif)$/);
+const platformLogos = {};
+images.keys().forEach((key) => {
+  // Lấy tên file không có đuôi mở rộng, viết hoa chữ cái đầu
+  const name = key.replace('./', '').replace(/\.[^/.]+$/, '');
+  platformLogos[name.charAt(0).toUpperCase() + name.slice(1)] = images(key);
+});
 const PlatformModal = ({ platform, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -90,18 +97,29 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
           </div>
           <div className="mb-3">
             <label className="form-label">Chọn logo nền tảng</label>
-            <select
-              className="form-select"
-              onChange={(e) => setFormData({ ...formData, logo: platformLogos[e.target.value] })}
-              value={Object.keys(platformLogos).find((key) => platformLogos[key] === formData.logo) || ""}
-            >
-              <option value="">-- Chọn nền tảng --</option>
-              {Object.keys(platformLogos).map((platform, index) => (
-                <option key={index} value={platform}>
-                  {platform}
-                </option>
-              ))}
-            </select>
+            <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #ddd', borderRadius: 6, padding: 8 }}>
+              <div className="row g-2">
+                {Object.entries(platformLogos).map(([platform, url], idx) => (
+                  <div className="col-4 col-md-3" key={idx}>
+                    <div
+                      onClick={() => setFormData({ ...formData, logo: url })}
+                      style={{
+                        border: formData.logo === url ? '2px solid #007bff' : '1px solid #ccc',
+                        borderRadius: 8,
+                        padding: 6,
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        background: formData.logo === url ? '#eaf4ff' : '#fff',
+                        boxShadow: formData.logo === url ? '0 0 4px #007bff55' : 'none',
+                      }}
+                    >
+                      <img src={url} alt={platform} style={{ maxWidth: 40, maxHeight: 40, objectFit: 'contain', marginBottom: 4 }} />
+                      <div style={{ fontSize: 13 }}>{platform}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <div className="mb-3">
             <label className="form-label">Xem trước logo</label>

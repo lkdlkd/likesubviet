@@ -5,18 +5,24 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { loadingg } from "@/JS/Loading";
 
-const platformLogos = {
-    Gmail : "/img/gmail.png",
-    Zalo : "/img/zalo13.png",
-    Facebook: "/img/fb.png",
-    TikTok: "/img/tiktok.gif",
-    Instagram: "/img/instagram.gif",
-    Twitter: "/img/twitter.gif",
-    Telegram: "/img/telegram.gif",
-    Discord: "/img/discord.gif",
-    Thread: "/img/thread.gif",
-};
-
+// const platformLogos = {
+//     Gmail : "/img/gmail.png",
+//     Zalo : "/img/zalo13.png",
+//     Facebook: "/img/fb.png",
+//     TikTok: "/img/tiktok.gif",
+//     Instagram: "/img/instagram.gif",
+//     Twitter: "/img/twitter.gif",
+//     Telegram: "/img/telegram.gif",
+//     Discord: "/img/discord.gif",
+//     Thread: "/img/thread.gif",
+// };
+const images = require.context('@/assets/img', false, /\.(png|jpe?g|gif)$/);
+const platformLogos = {};
+images.keys().forEach((key) => {
+  // Lấy tên file không có đuôi mở rộng, viết hoa chữ cái đầu
+  const name = key.replace('./', '').replace(/\.[^/.]+$/, '');
+  platformLogos[name.charAt(0).toUpperCase() + name.slice(1)] = images(key);
+});
 // Danh sách favicon có sẵn
 const faviconList = [
     { url: "/img/favicon.ico", label: "Favicon mặc định" },
@@ -239,19 +245,30 @@ const Setting = () => {
                                             />
                                         </div>
                                         <div className="mb-2">
-                                            <label className="form-label">Logo liên hệ (URL)</label>
-                                            <select
-                                                className="form-select"
-                                                value={contact.logolienhe}
-                                                onChange={(e) => updateContact(index, "logolienhe", e.target.value)}
-                                            >
-                                                <option value="">Chọn logo liên hệ</option>
-                                                {Object.entries(platformLogos).map(([platform, logoUrl]) => (
-                                                    <option key={platform} value={logoUrl}>
-                                                        {platform}
-                                                    </option>
+                                            <label className="form-label">Logo liên hệ</label>
+                                            <div style={{ maxHeight: 120, overflowY: 'auto', border: '1px solid #ddd', borderRadius: 6, padding: 8 }}>
+                                              <div className="row g-2">
+                                                {Object.entries(platformLogos).map(([platform, url], idx) => (
+                                                  <div className="col-4 col-md-3" key={idx}>
+                                                    <div
+                                                      onClick={() => updateContact(index, "logolienhe", url)}
+                                                      style={{
+                                                        border: contact.logolienhe === url ? '2px solid #007bff' : '1px solid #ccc',
+                                                        borderRadius: 8,
+                                                        padding: 6,
+                                                        cursor: 'pointer',
+                                                        textAlign: 'center',
+                                                        background: contact.logolienhe === url ? '#eaf4ff' : '#fff',
+                                                        boxShadow: contact.logolienhe === url ? '0 0 4px #007bff55' : 'none',
+                                                      }}
+                                                    >
+                                                      <img src={url} alt={platform} style={{ maxWidth: 32, maxHeight: 32, objectFit: 'contain', marginBottom: 4 }} />
+                                                      <div style={{ fontSize: 12 }}>{platform}</div>
+                                                    </div>
+                                                  </div>
                                                 ))}
-                                            </select>
+                                              </div>
+                                            </div>
                                             {contact.logolienhe && (
                                                 <div className="mt-2">
                                                     <img src={contact.logolienhe} alt="Logo Preview" style={{ maxWidth: "50px", height: "auto" }} />
