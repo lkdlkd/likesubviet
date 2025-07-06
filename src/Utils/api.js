@@ -698,3 +698,29 @@ export const getTransactions = async (token, page = 1, limit = 10, username = ""
 
   return handleResponse(response);
 };
+
+// Lấy cấu hình Telegram
+export const getConfigTele = async (token) => {
+  const response = await fetch(`${API_BASE}/configtele`, {
+    method: "GET",
+    headers: withNoStore({
+      Authorization: `Bearer ${token}`,
+    }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Cập nhật cấu hình Telegram
+export const updateConfigTele = async (data, token) => {
+  const response = await fetch(`${API_BASE}/configtele`, {
+    method: "PUT",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};

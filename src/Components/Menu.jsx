@@ -22,7 +22,7 @@ function MenuUser({ user, categories, configWeb }) {
         ? validCategories.reduce((acc, category) => {
             const platformId = category.platforms_id?._id; // Sử dụng optional chaining
             if (!platformId) {
-              //  console.error("Danh mục không có `platforms_id` hoặc `_id`:", category);
+                //  console.error("Danh mục không có `platforms_id` hoặc `_id`:", category);
                 return acc;
             }
             if (!acc[platformId]) {
@@ -117,6 +117,11 @@ function MenuUser({ user, categories, configWeb }) {
                                             <li className="pc-item">
                                                 <Link to="/admin/setting-thecao" className="pc-link">
                                                     <span className="pc-mtext">Cấu hình nạp thẻ</span>
+                                                </Link>
+                                            </li>
+                                            <li className="pc-item">
+                                                <Link to="/admin/config-tele" className="pc-link">
+                                                    <span className="pc-mtext">Cấu hình Telegram</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
