@@ -127,7 +127,7 @@ const Danhsachdon = () => {
     const handleLimitChange = (e) => {
         setLimit(Number(e.target.value));
         setCurrentPage(1);
-        loadingg("Vui lòng chờ"); // Hiển thị thông báo đang tìm kiếm
+        loadingg("Vui lòng chờ...",true , 9999999); // Hiển thị thông báo đang tìm kiếm
         setTimeout(() => {
             loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
         }, 1000);

@@ -80,9 +80,9 @@ export default function History() {
         }, 1000);
     };
 
-    if (loading) {
-        return <div>Đang tải...</div>;
-    }
+    // if (loading) {
+    //     return <div>Đang tải...</div>;
+    // }
 
     // if (errorMessage) {
     //     return <div className="alert alert-danger">{errorMessage}</div>;
@@ -205,7 +205,12 @@ export default function History() {
 
                                 {/* Hiển thị bảng lịch sử */}
                                 <div className="table-responsive">
-                                    {historyData && historyData.length > 0 ? (
+                                    {loading ? (
+                                        <div style={{ minHeight: "200px" }} className="d-flex justify-content-center align-items-center">
+                                            <div className="spinner-border text-primary" role="status" />
+                                            <span className="ms-2">Đang tải dữ liệu...</span>
+                                        </div>
+                                    ) : historyData && historyData.length > 0 ? (
                                         <Table striped bordered hover>
                                             <thead>
                                                 <tr>
@@ -345,7 +350,7 @@ export default function History() {
                         )}
                         {activeTab === "hoantien" && (
                             <div>
-                               <HistoryHoantien  />
+                                <HistoryHoantien />
                             </div>
                         )}
                     </div>

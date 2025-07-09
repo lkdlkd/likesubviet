@@ -27,13 +27,18 @@ export default function HistoryHoantien() {
         fetchRefundHistory();
     }, [token, page, limit]);
 
-    if (loading) return <div>Đang tải danh sách hoàn tiền...</div>;
+    // if (loading) return <div>Đang tải danh sách hoàn tiền...</div>;
 
     return (
         <div>
             <h3>Danh sách hoàn tiền</h3>
             <div className="table-responsive">
-                {data && data.length > 0 ? (
+                {loading ? (
+                    <div style={{ minHeight: "200px" }} className="d-flex justify-content-center align-items-center">
+                        <div className="spinner-border text-primary" role="status" />
+                        <span className="ms-2">Đang tải dữ liệu...</span>
+                    </div>
+                ) : data && data.length > 0 ? (
                     <Table striped bordered hover>
                         <thead>
                             <tr>

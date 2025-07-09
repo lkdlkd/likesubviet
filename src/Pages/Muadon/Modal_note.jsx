@@ -6,40 +6,37 @@ import Button from "react-bootstrap/Button";
 export default function Modalnote({ modal_Show }) {
   const [show, setShow] = useState(false); // Trạng thái hiển thị modal
   const [timeLeft, setTimeLeft] = useState(3); // Thời gian đếm ngược (3 giây)
-  const { type, path } = useParams(); // Lấy `type` và `path` từ URL
+  const { path } = useParams(); // Chỉ lấy path, bỏ type
   // Kiểm tra trạng thái ẩn modal từ `localStorage`
   useEffect(() => {
-    if (type && path) {
-      const hiddenUntilKey = `modalHiddenUntil_${type}_${path}`; // Tạo key riêng cho từng `type` và `path`
+    if (path) {
+      const hiddenUntilKey = `modalHiddenUntil_${path}`; // Key chỉ theo path
       const hiddenUntil = localStorage.getItem(hiddenUntilKey);
 
       if (hiddenUntil && new Date(hiddenUntil) > new Date()) {
-        // Nếu modal đang bị ẩn, không hiển thị
         setShow(false);
       } else {
-        // Nếu không bị ẩn, hiển thị modal
         setShow(true);
-        setTimeLeft(3); // Đặt lại thời gian đếm ngược
+        setTimeLeft(3);
         const timer = setInterval(() => {
           setTimeLeft((prev) => {
             if (prev <= 1) {
-              clearInterval(timer); // Dừng timer khi đếm ngược kết thúc
+              clearInterval(timer);
               return 0;
             }
-            return prev - 1; // Giảm thời gian đếm ngược
+            return prev - 1;
           });
-        }, 1000); // Cập nhật mỗi giây
-
-        return () => clearInterval(timer); // Dọn dẹp timer khi component bị unmount
+        }, 1000);
+        return () => clearInterval(timer);
       }
     }
-  }, [type, path]);
+  }, [path]);
 
   // Xử lý khi người dùng nhấn "Tôi đã đọc"
   const handleConfirm = () => {
     setShow(false);
-    if (type && path) {
-      const hiddenUntilKey = `modalHiddenUntil_${type}_${path}`; // Tạo key riêng cho từng `type` và `path`
+    if (path) {
+      const hiddenUntilKey = `modalHiddenUntil_${path}`;
       const hiddenUntil = new Date();
       hiddenUntil.setHours(hiddenUntil.getHours() + 5); // Ẩn modal trong 5 tiếng
       localStorage.setItem(hiddenUntilKey, hiddenUntil.toISOString());

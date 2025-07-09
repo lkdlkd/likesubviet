@@ -57,7 +57,7 @@ export default function Order() {
     const username = decoded.username;
     // Gọi API để lấy danh sách servers
     useEffect(() => {
-        loadingg("Đang tải dữ liệu...", true, 9999999); // Hiển thị loading khi bắt đầu fetch
+        loadingg("Vui lòng chờ...", true, 9999999); // Hiển thị loading khi bắt đầu fetch
         const fetchServers = async () => {
             try {
                 const response = await getServerByTypeAndCategory(path, token);
@@ -65,12 +65,12 @@ export default function Order() {
                 setModalShow(response.notes || ""); // Lưu ý: `modal_show` cần được trả về từ API
             } catch (error) {
 
-                Swal.fire({
-                    title: "Lỗi",
-                    text: "Không thể tải danh sách máy chủ.",
-                    icon: "error",
-                    confirmButtonText: "Xác nhận",
-                });
+                // Swal.fire({
+                //     title: "Lỗi",
+                //     text: "Không thể tải danh sách máy chủ.",
+                //     icon: "error",
+                //     confirmButtonText: "Xác nhận",
+                // });
             } finally {
                 loadingg("", false); // Đóng loading khi xong
             }

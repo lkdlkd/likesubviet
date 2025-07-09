@@ -40,17 +40,20 @@ export default function Ordernhanh() {
 
     // Cập nhật danh sách servers khi `server` thay đổi
     useEffect(() => {
+        loadingg("Vui lòng chờ...", true, 9999999); // Hiển thị loading khi bắt đầu fetch
         const fetchServers = async () => {
             try {
                 const response = await getServer(token); // Gọi API với token
                 setServers(response.data || []); // Cập nhật danh sách servers
             } catch (error) {
-                Swal.fire({
-                    title: "Lỗi",
-                    text: "Không thể tải danh sách máy chủ.",
-                    icon: "error",
-                    confirmButtonText: "Xác nhận",
-                });
+                // Swal.fire({
+                //     title: "Lỗi",
+                //     text: "Không thể tải danh sách máy chủ.",
+                //     icon: "error",
+                //     confirmButtonText: "Xác nhận",
+                // });
+            }finally {
+                loadingg("", false); // Đóng loading khi xong
             }
         };
 

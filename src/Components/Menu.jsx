@@ -266,16 +266,19 @@ function MenuUser({ user, categories, configWeb }) {
                                         </a>
                                     </li>
                                     <li className="pc-item">
-                                        <a
+                                        <Link to="/bang-gia" className="pc-link"
+                                            style={{ cursor: "pointer" }}
+                                        >
+                                            <span className="pc-mtext">Bảng giá</span>
+                                        </Link>
+                                        {/* <a
                                             onClick={() => handleNavigation("/bang-gia")}
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
-                                            {/* <span className="pc-micon">
-                                                <img src="/suitcase.png" className="wid-35" alt="" width={35} height={35} />
-                                            </span> */}
+                                          
                                             <span className="pc-mtext">Bảng giá</span>
-                                        </a>
+                                        </a> */}
                                     </li>
                                 </ul>
                             )}
@@ -284,7 +287,14 @@ function MenuUser({ user, categories, configWeb }) {
                             <label>Danh Sách Dịch Vụ</label>
                         </li>
                         <li className="pc-item pc-hasmenu">
-                            <a
+                            <Link to="/order" className="pc-link"
+                                style={{ cursor: "pointer" }}
+                            >
+                                <span className="pc-micon">
+                                    <img src="https://i.imgur.com/LtJfhAt.gif" className="wid-35" alt="" width={35} height={35} />
+                                </span>
+                                <span className="pc-mtext">Mua dịch vụ</span>                            </Link>
+                            {/* <a
                                 style={{ cursor: "pointer" }}
                                 onClick={() => handleNavigation("/order")}
                                 className="pc-link">
@@ -292,7 +302,7 @@ function MenuUser({ user, categories, configWeb }) {
                                     <img src="https://i.imgur.com/LtJfhAt.gif" className="wid-35" alt="" width={35} height={35} />
                                 </span>
                                 <span className="pc-mtext">Mua dịch vụ</span>
-                            </a>
+                            </a> */}
                         </li>
                         <li className="pc-item">
                             <a
@@ -333,13 +343,16 @@ function MenuUser({ user, categories, configWeb }) {
                                             {group.services.map((service) =>
                                                 service._id ? (
                                                     <li key={service._id} className="pc-item">
-                                                        <a
+                                                        <Link to={`/order/${service.path.toLowerCase()}`} className="pc-link">
+                                                            <span className="pc-mtext">{service.name}</span>
+                                                        </Link>
+                                                        {/* <a
                                                             style={{ cursor: "pointer" }}
                                                             onClick={() => handleNavigation(`/order/${service.path.toLowerCase()}`)}
                                                             className="pc-link"
                                                         >
                                                             <span className="pc-mtext">{service.name}</span>
-                                                        </a>
+                                                        </a> */}
                                                     </li>
                                                 ) : null
                                             )}

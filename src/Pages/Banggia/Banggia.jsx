@@ -17,7 +17,7 @@ const Banggia = () => {
     useEffect(() => {
         const fetchServers = async () => {
             setLoading(true);
-            loadingg("Đang tải danh sách server...",true, 9999999);
+            loadingg("Vui lòng chờ...", true, 9999999);
             try {
                 const response = await getServer(token);
                 setServers(response.data || []);
@@ -88,9 +88,9 @@ const Banggia = () => {
         }
     }, [platforms, activePlatform]);
 
-    if (loading) return <div>Đang tải bảng giá...</div>;
-    if (error) return <div className="alert alert-danger">{error}</div>;
-    if (!servers.length) return <div>Không có dữ liệu bảng giá.</div>;
+    // if (loading) return <div>Đang tải bảng giá...</div>;
+    // if (error) return <div className="alert alert-danger">{error}</div>;
+    // if (!servers.length) return <div>Không có dữ liệu bảng giá.</div>;
 
     return (
         <div className="">
@@ -205,6 +205,11 @@ const Banggia = () => {
                                     </div>
                                 );
                             })}
+                            {!loading &&(
+                                <div className="text-center mt-5">
+                                    <p>Không có dữ liệu bảng giá.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
