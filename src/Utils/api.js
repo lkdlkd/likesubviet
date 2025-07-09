@@ -22,7 +22,7 @@ const handleResponse = async (response) => {
         }
       }
     } catch (e) {
-    //  console.error("Error parsing API response:", e);
+      //  console.error("Error parsing API response:", e);
     }
 
     throw new Error(errorMessage);
@@ -150,12 +150,12 @@ export const changePassword = async (id, data, token) => {
   return handleResponse(response);
 };
 
-export const getUserHistory = async (token, page = 1, limit = 10, orderId, search) => {
+export const getUserHistory = async (token, page = 1, limit = 10, orderId, search, action) => {
   // Xây dựng query string thủ công
   let queryString = `?page=${page}&limit=${limit}`;
   if (search) queryString += `&search=${encodeURIComponent(search)}`;
   if (orderId) queryString += `&orderId=${encodeURIComponent(orderId)}`;
-
+  if (action) queryString += `&action=${encodeURIComponent(action)}`; // Thêm action nếu có
   const response = await fetch(`${API_BASE}/user/history${queryString}`, {
     method: "GET",
     headers: withNoStore({ Authorization: `Bearer ${token}` }),
@@ -544,7 +544,7 @@ export const deletePlatform = async (id, token) => {
   });
   return handleResponse(response);
 };
-export const getServerByTypeAndCategory = async ( category = "", token) => {
+export const getServerByTypeAndCategory = async (category = "", token) => {
   // Xây dựng query string
   let queryString = "";
   // if (type) queryString += `type=${encodeURIComponent(type)}&`;

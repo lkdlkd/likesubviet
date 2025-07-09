@@ -180,7 +180,8 @@ export default function Doitacpage() {
                           </td>
                           <td>{partner.name}</td>
                           <td>{partner.url_api}</td>
-                          <td>{partner.balance !== undefined ? partner.balance : "Đang tải..."}</td>
+                          <td>{Number(partner.balance).toLocaleString("en-US") !== undefined ? Number(partner.balance).toLocaleString("es-US") : "Đang tải..."}</td>
+                          {/* <td>{partner.balance !== undefined ? partner.balance : "Đang tải..."}</td> */}
                           <td>{partner.price_update}</td>
                           <td>{partner.tigia}</td>
                           <td>{partner.status === "on" ? "Bật" : "Tắt"}</td>
