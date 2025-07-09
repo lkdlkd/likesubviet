@@ -77,6 +77,7 @@ export default function Order() {
         };
 
         if (path) {
+            setModalShow(""); // Reset modal_Show khi có path mới
             fetchServers();
         } else {
             loadingg("", false); // Đóng loading nếu không có type/path
@@ -615,7 +616,9 @@ export default function Order() {
     // }
     return (
         <div className="main-content">
-            <Modalnote modal_Show={modal_Show.modal_show} />
+            {modal_Show && modal_Show.modal_show && modal_Show.modal_show.trim() !== "" && (
+                <Modalnote modal_Show={modal_Show.modal_show} />
+            )}
             <div className="col-md-12 mb-4">
                 <div className="row">
                     <div className="col-6 d-grid gap-2">
