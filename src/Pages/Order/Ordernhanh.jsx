@@ -52,7 +52,7 @@ export default function Ordernhanh() {
                 //     icon: "error",
                 //     confirmButtonText: "Xác nhận",
                 // });
-            }finally {
+            } finally {
                 loadingg("", false); // Đóng loading khi xong
             }
         };
@@ -588,9 +588,32 @@ export default function Ordernhanh() {
                                     value={serviceOptions.find(opt => opt.value === selectedMagoi) || null}
                                     onChange={opt => {
                                         if (opt) {
-                                            setSelectedType(opt.server.type ? { value: opt.server.type, label: opt.server.type } : null);
-                                            // Nếu server có category, setSelectedCategory với giá trị đó, nếu không thì null
-                                            setSelectedCategory(opt.server.category ? { value: opt.server.category, label: opt.server.category } : null);
+                                            // Lấy logo cho type
+                                            setSelectedType(opt.server.type ? {
+                                                value: opt.server.type,
+                                                label: (
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                        {opt.server.logo && (
+                                                            <img src={opt.server.logo} alt={opt.server.type} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                                                        )}
+                                                        {opt.server.type}
+                                                    </span>
+                                                ),
+                                                rawLabel: opt.server.type
+                                            } : null);
+                                            // Lấy logo cho category
+                                            setSelectedCategory(opt.server.category ? {
+                                                value: opt.server.category,
+                                                label: (
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                        {opt.server.logo && (
+                                                            <img src={opt.server.logo} alt={opt.server.category} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                                                        )}
+                                                        {opt.server.category}
+                                                    </span>
+                                                ),
+                                                rawLabel: opt.server.category
+                                            } : null);
                                             setSelectedMagoi(opt.value);
                                             setMin(opt.server.min);
                                             setMax(opt.server.max);
@@ -826,8 +849,8 @@ export default function Ordernhanh() {
                     </div>
                 </div>
                 <div className="col-md-12 col-lg-4">
-                    <div className="alert alert-danger bg-danger text-white mb-3">
-                        <h5 className="alert-heading">Lưu ý</h5>
+                    <div className="alert alert-warning fade show mt-3 border-0 rounded-10">
+                        <h3 className="text-dark text-uppercase text-center">LƯU Ý NÊN ĐỌC TRÁNH MẤT TIỀN</h3>
                         <span>
                             Nghiêm cấm buff các đơn có nội dung vi phạm pháp luật, chính trị, đồ trụy...
                             Nếu cố tình buff bạn sẽ bị trừ hết tiền và ban khỏi hệ thống vĩnh viễn, và phải chịu hoàn toàn trách nhiệm trước pháp luật.

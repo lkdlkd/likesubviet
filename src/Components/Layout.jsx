@@ -101,6 +101,19 @@ const Layout = () => {
                     <Outlet context={{ configWeb, categories, token, user, notifications }} />
                 </div>
             </div>
+            <footer className="pc-footer">
+                <div className="footer-wrapper container-fluid">
+                    <div className="row">
+                        <div className="col-sm-6 my-1">
+                            <strong>
+                                <p className="m-0 text-muted">
+                                    Copyright © {new Date().getFullYear()}. <a target="_blank">{API_DOMAIN} - Hệ Thống Dịch Vụ MXH Số 1 Việt Nam</a> - Social Media Marketing.
+                                </p>
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            </footer>
             <Widget configWeb={configWeb} />
             <ToastContainer />
 
