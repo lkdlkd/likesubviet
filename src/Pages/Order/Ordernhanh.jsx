@@ -686,8 +686,22 @@ export default function Ordernhanh() {
                                                 dangerouslySetInnerHTML={{ __html: server.description }}
                                             />
                                         </div>
+                                        {/* <div >
+                                            <label className="form-label" data-lang="">Thời gian hoàn thành trung bình</label>
+                                            <input type="text" value={server.tocdodukien} className="form-control form-control-solid" disabled="" />
+                                            <small className="form-text text-muted fst-italic"><span data-lang="">Thời gian trung bình hoàn thành số lượng 1000 của 10 đơn hàng gần nhất</span></small>
+                                        </div> */}
                                         <div >
                                             <label className="form-label" data-lang="">Thời gian hoàn thành trung bình</label>
+                                            <br />
+                                            <small className="form-text text-muted fst-italic">Thời gian cập nhật : {new Date(server.updatedAt).toLocaleString("vi-VN", {
+                                                day: "2-digit",
+                                                month: "2-digit",
+                                                year: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                second: "2-digit",
+                                            })}</small>
                                             <input type="text" value={server.tocdodukien} className="form-control form-control-solid" disabled="" />
                                             <small className="form-text text-muted fst-italic"><span data-lang="">Thời gian trung bình hoàn thành số lượng 1000 của 10 đơn hàng gần nhất</span></small>
                                         </div>
