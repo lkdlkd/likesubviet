@@ -373,9 +373,7 @@ const Danhsachdon = () => {
                                                             maxWidth: "100px",
                                                         }}
                                                     >
-                                                        {order.category === "BÌNH LUẬN"
-                                                            ? order.comments || "Không có bình luận"
-                                                            : ""}
+                                                        { order.comments || "" }
                                                     </textarea>
                                                 </td>
                                                 <td>
