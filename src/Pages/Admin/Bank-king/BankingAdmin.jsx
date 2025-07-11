@@ -104,7 +104,11 @@ export default function BankingAdmin() {
     const { name, value, type, checked } = e.target;
     setEditingBank((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox"
+        ? checked
+        : name === "account_name"
+          ? value
+          : value.trim(),
     }));
   };
 
@@ -129,7 +133,7 @@ export default function BankingAdmin() {
             logo: editingBank?.logo || "",
             bank_account: editingBank?.bank_account || "",
             bank_password: editingBank?.bank_password || "",
-            min_recharge: editingBank?.min_recharge || 0,
+            min_recharge: editingBank?.min_recharge || "",
             token: editingBank?.token || "",
             status: editingBank?.status || false,
           }}

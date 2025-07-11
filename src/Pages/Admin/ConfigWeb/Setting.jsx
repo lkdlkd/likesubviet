@@ -16,12 +16,13 @@ import { loadingg } from "@/JS/Loading";
 //     Discord: "/img/discord.gif",
 //     Thread: "/img/thread.gif",
 // };
-const images = require.context('@/assets/img', false, /\.(png|jpe?g|gif)$/);
+const images = require.context('@/assets/img/', false, /\.(png|jpe?g|gif)$/); // false: không lấy thư mục con
 const platformLogos = {};
 images.keys().forEach((key) => {
-  // Lấy tên file không có đuôi mở rộng, viết hoa chữ cái đầu
   const name = key.replace('./', '').replace(/\.[^/.]+$/, '');
-  platformLogos[name.charAt(0).toUpperCase() + name.slice(1)] = images(key);
+  if (!name.includes('/')) {
+    platformLogos[name.charAt(0).toUpperCase() + name.slice(1)] = images(key);
+  }
 });
 // Danh sách favicon có sẵn
 const faviconList = [

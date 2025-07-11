@@ -17,6 +17,7 @@ export default function PromotionModal({ show, handleClose, handleSubmit, formDa
                             className="form-control"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            placeholder="Khuyến mãi đầu tháng"
                             required
                         />
                     </div>
@@ -28,6 +29,7 @@ export default function PromotionModal({ show, handleClose, handleSubmit, formDa
                             value={formData.percentBonus}
                             onChange={(e) => setFormData({ ...formData, percentBonus: e.target.value })}
                             required
+                            placeholder="10"
                         />
                     </div>
                     <div className="mb-3">
@@ -82,6 +84,7 @@ export default function PromotionModal({ show, handleClose, handleSubmit, formDa
                             value={formData.description || ""}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             rows="3"
+                            placeholder="có thể để trống"
                         ></textarea>
                     </div>
                 </Modal.Body>

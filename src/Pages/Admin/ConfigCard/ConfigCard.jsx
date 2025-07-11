@@ -66,8 +66,7 @@ const ConfigCard = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, API_URLCARD: e.target.value })
                   }
-                  placeholder="Nhập URL API thẻ nạp"
-                  required
+                  placeholder="https://tenmien.com"
                 />
               </div>
 
@@ -82,7 +81,7 @@ const ConfigCard = () => {
                     setFormData({ ...formData, PARTNER_ID: e.target.value })
                   }
                   placeholder="Nhập ID đối tác"
-                  required
+                  
                 />
               </div>
 
@@ -97,7 +96,7 @@ const ConfigCard = () => {
                     setFormData({ ...formData, PARTNER_KEY: e.target.value })
                   }
                   placeholder="Nhập khóa đối tác"
-                  required
+                  
                 />
               </div>
 

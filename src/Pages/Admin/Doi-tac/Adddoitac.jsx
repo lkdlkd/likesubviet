@@ -88,7 +88,7 @@ export default function Adddoitac({
               value={formData.name}
               onChange={handleChange}
               className="form-control"
-              placeholder="VD : subvietvn"
+              placeholder="doitac1, doitac2, ..."
               required
             />
           </div>
@@ -113,7 +113,7 @@ export default function Adddoitac({
               name="api_token"
               value={formData.api_token}
               onChange={handleChange}
-              placeholder="token"
+              placeholder="token hoặc api key"
               className="form-control"
             />
           </div>
@@ -125,7 +125,7 @@ export default function Adddoitac({
               name="price_update"
               value={formData.price_update}
               onChange={handleChange}
-              placeholder="5,10,15..."
+              placeholder="10"
               className="form-control"
             />
           </div>

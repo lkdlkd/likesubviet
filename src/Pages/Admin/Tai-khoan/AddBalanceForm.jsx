@@ -54,14 +54,14 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
                     <div className="mb-3">
                         <label className="form-label">Số dư hiện tại</label>
                         <input
-                            type="number"
+                            type="text"
                             className="form-control"
-                            value={user.balance}
+                            value={Number(user.balance).toLocaleString("en-US")}
                             disabled
                         />
                     </div>
                     <div className="mb-3">
-                        <label className="form-label">Số tiền muốn thêm : {Number(additionAmount).toLocaleString()} VNĐ</label>
+                        <label className="form-label">Số tiền muốn thêm : {Number(additionAmount).toLocaleString("en-US")} VNĐ</label>
                         <input
                             type="number"
                             className="form-control"

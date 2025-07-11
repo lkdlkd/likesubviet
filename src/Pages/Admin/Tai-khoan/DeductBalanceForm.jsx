@@ -29,7 +29,7 @@ function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
       toast.success("Trừ số dư thành công!");
       onClose(); // Đóng modal
     } catch (error) {
-     // console.error("Lỗi khi trừ số dư:", error);
+      // console.error("Lỗi khi trừ số dư:", error);
       toast.error("Trừ số dư thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
@@ -56,14 +56,14 @@ function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
           <div className="mb-3">
             <label className="form-label">Số dư hiện tại</label>
             <input
-              type="number"
+              type="text"
               className="form-control"
-              value={user.balance}
+              value={Number(user.balance).toLocaleString("en-US")}
               disabled
             />
           </div>
           <div className="mb-3">
-            <label className="form-label">Số tiền muốn trừ : {Number(deductionAmount).toLocaleString()} VNĐ</label>
+            <label className="form-label">Số tiền muốn trừ : {Number(deductionAmount).toLocaleString("en-US")} VNĐ</label>
             <input
               type="number"
               className="form-control"

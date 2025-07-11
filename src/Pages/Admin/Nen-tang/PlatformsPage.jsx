@@ -134,7 +134,7 @@ export default function PlatformsPage() {
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
-                  <th>#</th>
+                  <th>Thứ tự hiển thị</th>
                   <th>Hành động</th>
                   <th>Tên</th>
                   <th>Logo</th>
@@ -145,7 +145,7 @@ export default function PlatformsPage() {
                   platforms.map((platform, index) =>
                     platform && platform._id ? (
                       <tr key={platform._id}>
-                        <td>{index + 1}</td>
+                        <td>{platform.thutu}</td>
                         <td>
                           <div className="dropdown">
                             <button
@@ -204,7 +204,7 @@ export default function PlatformsPage() {
                   )
                 ) : (
                   <tr>
-                    <td colSpan={3} className="text-center">
+                    <td colSpan={4} className="text-center">
                       Không có nền tảng nào.
                     </td>
                   </tr>

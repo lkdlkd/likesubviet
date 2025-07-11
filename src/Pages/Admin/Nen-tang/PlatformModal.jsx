@@ -3,54 +3,47 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { loadingg } from "@/JS/Loading";
 
-// const platformLogos = {
-//     Facebook: "/img/facebook.gif",
-//     TikTok: "/img/tiktok.gif",
-//     Instagram: "/img/instagram.gif",
-//     YouTube: "/img/youtube.png",
-//     Twitter: "/img/twitter.gif",
-//     Telegram: "/img/telegram.gif",
-//     Shopee: "/img/shoppe.gif",
-//     Lazada: "/img/lazada.png",
-//     Discord: "/img/discord.gif",
-//     Thread: "/img/thread.gif",
-//     traffic : "/img/traffic.gif",
-// };
-// Thay thế platformLogos bằng đoạn này:
-const images = require.context('@/assets/img', false, /\.(png|jpe?g|gif)$/);
+const images = require.context('@/assets/img/', false, /\.(png|jpe?g|gif)$/); // false: không lấy thư mục con
 const platformLogos = {};
 images.keys().forEach((key) => {
-  // Lấy tên file không có đuôi mở rộng, viết hoa chữ cái đầu
   const name = key.replace('./', '').replace(/\.[^/.]+$/, '');
-  platformLogos[name.charAt(0).toUpperCase() + name.slice(1)] = images(key);
+  if (!name.includes('/')) {
+    platformLogos[name.charAt(0).toUpperCase() + name.slice(1)] = images(key);
+  }
 });
 const PlatformModal = ({ platform, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     name: "",
     logo: "",
+    thutu: "",
   });
-
   // Đồng bộ hóa `formData` với `platform` khi `platform` thay đổi
   useEffect(() => {
     if (platform) {
       setFormData({
         name: platform.name || "",
         logo: platform.logo || "",
+        thutu: platform.thutu || "",
       });
     } else {
       setFormData({
         name: "",
         logo: "",
+        thutu: "",
       });
     }
   }, [platform]);
 
   useEffect(() => {
-    if (formData.name && platformLogos[formData.name]) {
+    if (
+      formData.name &&
+      platformLogos[formData.name] &&
+      (!formData.logo || formData.logo === "")
+    ) {
       setFormData((prev) => ({ ...prev, logo: platformLogos[formData.name] }));
     }
+    // eslint-disable-next-line
   }, [formData.name]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     loadingg(platform ? "Đang cập nhật nền tảng..." : "Đang thêm nền tảng...");
@@ -74,18 +67,30 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
       <form onSubmit={handleSubmit}>
         <Modal.Body>
           <div className="mb-3">
+            <label className="form-label">Thứ tự hiển thị</label>
+            <input
+              type="number"
+              className="form-control"
+              value={formData.thutu}
+              onChange={e => setFormData({ ...formData, thutu: Number(e.target.value) })}
+              placeholder="1"
+              min={0}
+              required
+            />
+          </div>
+          <div className="mb-3">
             <label className="form-label">Tên Nền tảng</label>
             <input
               type="text"
               className="form-control"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Nhập tên nền tảng"
+              placeholder="Facebook, TikTok, Instagram, ..."
               required
             />
           </div>
           <div className="mb-3">
-            <label className="form-label">Logo (URL)</label>
+            <label className="form-label">Logo (Có thể chọn hoặc tự nhập tùy)</label>
             <input
               type="text"
               className="form-control"
@@ -114,7 +119,7 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
                       }}
                     >
                       <img src={url} alt={platform} style={{ maxWidth: 40, maxHeight: 40, objectFit: 'contain', marginBottom: 4 }} />
-                      <div style={{ fontSize: 13 }}>{platform}</div>
+                      {/* <div style={{ fontSize: 13 }}>{platform}</div> */}
                     </div>
                   </div>
                 ))}

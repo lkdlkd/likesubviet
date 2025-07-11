@@ -67,7 +67,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
               className="form-control"
               value={formData.thutu}
               onChange={(e) => setFormData({ ...formData, thutu: e.target.value })}
-              placeholder="Nhập số thứ tự (tùy chọn)"
+              placeholder="1"
             />
           </div>
           <div className="mb-3">
@@ -97,6 +97,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
               className="form-control"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="LIKE BÀI VIẾT, THEO DÕI FB, ..."
               required
             />
           </div>
@@ -107,6 +108,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
               className="form-control"
               value={formData.path}
               onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+              placeholder="facebook-like ,tiktok-view ,..."
               required
             />
           </div>

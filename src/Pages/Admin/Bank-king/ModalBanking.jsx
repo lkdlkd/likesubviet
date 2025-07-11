@@ -16,7 +16,7 @@ export default function ModalBanking({
     logo: "",
     bank_account: "",
     bank_password: "",
-    min_recharge: 0,
+    min_recharge: "",
     token: "",
     status: false,
   };
@@ -39,6 +39,7 @@ export default function ModalBanking({
                 className="form-control"
                 onChange={handleChange}
                 value={mergedFormData.bank_name}
+                placeholder="ACB, Vietcombank, MBBANK, ..."
                 required
               />
             </div>
@@ -72,7 +73,7 @@ export default function ModalBanking({
                 className="form-control"
                 onChange={handleChange}
                 value={mergedFormData.logo}
-                required
+                placeholder="có thể ghi bừa"
               />
             </div>
             <div className="col-md-6">
@@ -83,7 +84,6 @@ export default function ModalBanking({
                 className="form-control"
                 onChange={handleChange}
                 value={mergedFormData.bank_account}
-                required
               />
             </div>
             <div className="col-md-6">
@@ -94,7 +94,7 @@ export default function ModalBanking({
                 className="form-control"
                 onChange={handleChange}
                 value={mergedFormData.bank_password}
-                required
+                
               />
             </div>
             <div className="col-md-6">
@@ -105,7 +105,6 @@ export default function ModalBanking({
                 className="form-control"
                 onChange={handleChange}
                 value={mergedFormData.token}
-                required
               />
             </div>
             <div className="col-md-6">

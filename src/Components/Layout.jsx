@@ -55,6 +55,8 @@ const Layout = () => {
     const title = configWeb ? configWeb.title : "Hệ thống tăng tương tác MXH";
     const favicon = configWeb ? configWeb.favicon : "https://png.pngtree.com/png-clipart/20190520/original/pngtree-facebook-f-icon-png-image_3550243.jpg"; // Thay thế bằng URL favicon mặc định nếu không có
     const API_DOMAIN = window.location.origin; // Lấy tên miền hiện tại và thêm đường dẫn API
+    const Domain =   API_DOMAIN.replace(/^https?:\/\//, ""); // Bỏ https:// hoặc http://
+
     return (
         <>
             <Header user={user} />
@@ -107,7 +109,7 @@ const Layout = () => {
                         <div className="col-sm-6 my-1">
                             <strong>
                                 <p className="m-0 text-muted">
-                                    Copyright © {new Date().getFullYear()}. <a target="_blank">{API_DOMAIN} - Hệ Thống Dịch Vụ MXH Số 1 Việt Nam</a> - Social Media Marketing.
+                                    Copyright © {new Date().getFullYear()}. <a target="_blank">{Domain} - Hệ Thống Dịch Vụ MXH Số 1 Việt Nam</a> - Social Media Marketing.
                                 </p>
                             </strong>
                         </div>

@@ -6,12 +6,13 @@ import Swal from "sweetalert2";
 import CategoryModal from "@/Pages/Admin/Dich-vu/CategoryModal";
 import Table from "react-bootstrap/Table"; // Import Table từ react-bootstrap
 import { loadingg } from "@/JS/Loading";
-
+import React from "react";
 export default function CategoriesPage() {
     const [categories, setCategories] = useState([]);
     const [platforms, setPlatforms] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [expandedPlatform, setExpandedPlatform] = useState(null);
     const token = localStorage.getItem("token") || "";
     const fetchCategories = async () => {
         try {
@@ -39,8 +40,6 @@ export default function CategoriesPage() {
             loadingg("", false);
         }
     };
-
-
 
     useEffect(() => {
         fetchCategories();
@@ -122,8 +121,18 @@ export default function CategoriesPage() {
         }
     };
 
-    return (
+    // Group categories by platform
+    const categoriesByPlatform = (() => {
+        const map = {};
+        categories.forEach(cat => {
+            const platformName = cat.platforms_id?.name || "Không xác định";
+            if (!map[platformName]) map[platformName] = [];
+            map[platformName].push(cat);
+        });
+        return map;
+    })();
 
+    return (
         <div className="row">
             <div className="col-md-12">
                 <div className=" card">
@@ -135,99 +144,116 @@ export default function CategoriesPage() {
                     </div>
                     <div className="card-body">
                         <div className="">
-                            <Table striped bordered hover responsive>
-                                <thead className="table-primary">
-                                    <tr>
-                                        <th>Thứ tự</th>
-                                        <th>Thao tác</th>
-                                        <th>Nền tảng</th>
-                                        <th>Tên</th>
-                                        <th>Đường dẫn</th>
-                                        <th>Ghi chú</th>
-                                        <th>Hiển thị Modal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {categories.length > 0 ? (
-                                        categories.map((category, index) => (
-                                            <tr key={category._id}>
-                                                <td>{category.thutu}</td>
-                                                <td>
-                                                    <div className="dropdown">
-                                                        <button
-                                                            className="btn btn-primary dropdown-toggle"
-                                                            type="button"
-                                                            data-bs-toggle="dropdown"
-                                                            aria-expanded="false"
-                                                        >
-                                                            Thao tác <i className="las la-angle-right ms-1"></i>
-                                                        </button>
-                                                        <ul className="dropdown-menu">
-                                                            <li>
-                                                                <button
-                                                                    className="dropdown-item text-danger"
-                                                                    onClick={() => {
-                                                                        setSelectedCategory(category);
-                                                                        setIsModalOpen(true);
-                                                                    }}
-                                                                >
-                                                                    Sửa
-                                                                </button>
-                                                            </li>
-
-                                                            <li>
-                                                                <button
-                                                                    className="dropdown-item text-danger"
-                                                                    onClick={() => {
-                                                                        if (category._id) {
-                                                                            handleDeleteCategory(category._id);
-                                                                        } else {
-                                                                            //     console.error("Không thể xóa danh mục: `_id` không tồn tại.");
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    Xóa
-                                                                </button>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </td>
-                                                <td>{category.platforms_id?.name || "Không xác định"}</td>
-                                                <td>{category.name}</td>
-                                                <td>{category.path}</td>
-                                                <td
-                                                    style={{
-                                                        maxWidth: "250px",
-                                                        whiteSpace: "nowrap", // Không cho phép xuống dòng
-                                                        overflow: "hidden", // Ẩn nội dung tràn
-                                                        textOverflow: "ellipsis", // Hiển thị dấu "..."
-                                                    }}
-                                                    title={category.notes || "Không có"} // Hiển thị nội dung đầy đủ khi hover
+                            <div className="accordion accordion-flush" id="platformAccordion">
+                                {Object.keys(categoriesByPlatform).length > 0 ? (
+                                    Object.entries(categoriesByPlatform).map(([platformName, cats], idx) => (
+                                        <div className="accordion-item" key={platformName}>
+                                            <h2 className="accordion-header" id={`flush-heading-${idx}`}>
+                                                <button
+                                                    className={`accordion-button fw-semibold${expandedPlatform === platformName ? '' : ' collapsed'}`}
+                                                    type="button"
+                                                    onClick={() => setExpandedPlatform(expandedPlatform === platformName ? null : platformName)}
+                                                    aria-expanded={expandedPlatform === platformName ? 'true' : 'false'}
+                                                    aria-controls={`flush-collapse-${idx}`}
                                                 >
-                                                    {category.notes || "Không có"}
-                                                </td>
-                                                <td
-                                                    style={{
-                                                        maxWidth: "250px",
-                                                        whiteSpace: "nowrap", // Không cho phép xuống dòng
-                                                        overflow: "hidden", // Ẩn nội dung tràn
-                                                        textOverflow: "ellipsis", // Hiển thị dấu "..."
-                                                    }}
-                                                    title={category.modal_show || "Không có"} // Hiển thị nội dung đầy đủ khi hover
-                                                >
-                                                    {category.modal_show || "Không có"}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={7} className="text-center">
-                                                Không có danh mục nào.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </Table>
+                                                    {platformName}
+                                                </button>
+                                            </h2>
+                                            <div
+                                                id={`flush-collapse-${idx}`}
+                                                className={`accordion-collapse collapse${expandedPlatform === platformName ? ' show' : ''}`}
+                                                aria-labelledby={`flush-heading-${idx}`}
+                                                data-bs-parent="#platformAccordion"
+                                            >
+                                                <div className="accordion-body p-0">
+                                                    <Table striped bordered hover responsive className="mb-0">
+                                                        <thead className="table-light">
+                                                            <tr>
+                                                                <th>Thứ tự</th>
+                                                                <th>Thao tác</th>
+                                                                <th>Tên</th>
+                                                                <th>Đường dẫn</th>
+                                                                <th>Ghi chú</th>
+                                                                <th>Hiển thị Modal</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {cats.map((category) => (
+                                                                <tr key={category._id}>
+                                                                    <td>{category.thutu}</td>
+                                                                    <td>
+                                                                        <div className="dropdown">
+                                                                            <button
+                                                                                className="btn btn-primary dropdown-toggle"
+                                                                                type="button"
+                                                                                data-bs-toggle="dropdown"
+                                                                                aria-expanded="false"
+                                                                            >
+                                                                                Thao tác <i className="las la-angle-right ms-1"></i>
+                                                                            </button>
+                                                                            <ul className="dropdown-menu">
+                                                                                <li>
+                                                                                    <button
+                                                                                        className="dropdown-item text-danger"
+                                                                                        onClick={() => {
+                                                                                            setSelectedCategory(category);
+                                                                                            setIsModalOpen(true);
+                                                                                        }}
+                                                                                    >
+                                                                                        Sửa
+                                                                                    </button>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <button
+                                                                                        className="dropdown-item text-danger"
+                                                                                        onClick={() => {
+                                                                                            if (category._id) {
+                                                                                                handleDeleteCategory(category._id);
+                                                                                            }
+                                                                                        }}
+                                                                                    >
+                                                                                        Xóa
+                                                                                    </button>
+                                                                                </li>
+                                                                            </ul>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>{category.name}</td>
+                                                                    <td>{category.path}</td>
+                                                                    <td
+                                                                        style={{
+                                                                            maxWidth: "250px",
+                                                                            whiteSpace: "nowrap",
+                                                                            overflow: "hidden",
+                                                                            textOverflow: "ellipsis",
+                                                                        }}
+                                                                        title={category.notes || "Không có"}
+                                                                    >
+                                                                        {category.notes || "Không có"}
+                                                                    </td>
+                                                                    <td
+                                                                        style={{
+                                                                            maxWidth: "250px",
+                                                                            whiteSpace: "nowrap",
+                                                                            overflow: "hidden",
+                                                                            textOverflow: "ellipsis",
+                                                                        }}
+                                                                        title={category.modal_show || "Không có"}
+                                                                    >
+                                                                        {category.modal_show || "Không có"}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </Table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-4">Không có nền tảng nào.</div>
+                                )}
+                            </div>
                         </div>
 
                         {isModalOpen && (
