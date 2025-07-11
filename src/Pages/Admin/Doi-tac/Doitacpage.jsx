@@ -129,6 +129,7 @@ export default function Doitacpage() {
                         <th>Tên</th>
                         <th>URL API</th>
                         <th>Số dư</th>
+                        <th>Phí hoàn</th>
                         <th>Giá Cập Nhật</th>
                         <th>Tỉ Giá</th>
                         <th>Trạng Thái</th>
@@ -182,8 +183,10 @@ export default function Doitacpage() {
                           <td>{partner.url_api}</td>
                           <td>{Number(partner.balance).toLocaleString("en-US") !== undefined ? Number(partner.balance).toLocaleString("es-US") : "Đang tải..."}</td>
                           {/* <td>{partner.balance !== undefined ? partner.balance : "Đang tải..."}</td> */}
+                          <td>{partner.phihoan}</td>
                           <td>{partner.price_update}</td>
                           <td>{partner.tigia}</td>
+                          <td>{partner.autohoan === "on" ? "Bật":"Tắt"}</td>
                           <td>{partner.status === "on" ? "Bật" : "Tắt"}</td>
                           <td>{partner.update_price === "on" ? "Bật" : "Tắt"}</td>
                         </tr>

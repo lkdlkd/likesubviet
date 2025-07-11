@@ -19,6 +19,8 @@ export default function Adddoitac({
     api_token: "",
     price_update: "",
     tigia: "",
+    phihoan: 1000, // Mặc định là 1000
+    autohoan: "on",
     status: "on",
     update_price: "on",
   });
@@ -27,7 +29,11 @@ export default function Adddoitac({
   // Đồng bộ hóa formData với editingPartner khi editingPartner thay đổi
   useEffect(() => {
     if (editingPartner) {
-      setFormData(editingPartner);
+      setFormData({
+        ...editingPartner,
+        phihoan: editingPartner.phihoan || 1000, // Mặc định là 1000 nếu không có
+        autohoan: editingPartner.autohoan || "on",
+      });
     } else {
       setFormData({
         name: "",
@@ -35,6 +41,8 @@ export default function Adddoitac({
         api_token: "",
         price_update: "",
         tigia: "",
+        phihoan: 1000, // Mặc định là 1000
+        autohoan: "on",
         status: "on",
         update_price: "on",
       });
@@ -143,6 +151,29 @@ export default function Adddoitac({
           </div>
 
           <div className="mb-3">
+            <label className="form-label">Phí hoàn:</label>
+            <input
+              type="text"
+              name="phihoan"
+              value={formData.phihoan}
+              onChange={handleChange}
+              placeholder="VD: 1000 nếu bỏ trống mặc định là 1000"
+              className="form-control"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Tự động hoàn:</label>
+            <select
+              name="autohoan"
+              value={formData.autohoan}
+              onChange={handleChange}
+              className="form-select"
+            >
+              <option value="on">Bật</option>
+              <option value="off">Tắt</option>
+            </select>
+          </div>
+          <div className="mb-3">
             <label className="form-label">Trạng Thái:</label>
             <select
               name="status"
@@ -167,6 +198,7 @@ export default function Adddoitac({
               <option value="off">Tắt</option>
             </select>
           </div>
+
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={onClose}>
