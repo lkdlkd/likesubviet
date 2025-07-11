@@ -15,7 +15,7 @@ export default function Doitacpage() {
   const token = localStorage.getItem("token") || "";
 
   const fetchBalancesForPartners = async (partners) => {
-    loadingg("Đang tải số dư đối tác...",true , 9999999);
+    loadingg("Đang tải số dư đối tác...", true, 9999999);
     const updatedPartners = await Promise.all(
       partners.map(async (partner) => {
         const balance = await getBalanceFromSmm(partner._id, token); // Sử dụng hàm mới
@@ -130,8 +130,9 @@ export default function Doitacpage() {
                         <th>URL API</th>
                         <th>Số dư</th>
                         <th>Phí hoàn</th>
-                        <th>Giá Cập Nhật</th>
+                        <th>Giá cập nhật</th>
                         <th>Tỉ Giá</th>
+                        <th>Tự động hoàn</th>
                         <th>Trạng Thái</th>
                         <th>Cập Nhật Giá</th>
                       </tr>
@@ -169,7 +170,7 @@ export default function Doitacpage() {
                                       if (partner._id) {
                                         handleDelete(partner._id);
                                       } else {
-                                   //     console.error("Không thể xóa đối tác: `_id` không tồn tại.");
+                                        //     console.error("Không thể xóa đối tác: `_id` không tồn tại.");
                                       }
                                     }}
                                   >
@@ -186,7 +187,7 @@ export default function Doitacpage() {
                           <td>{partner.phihoan}</td>
                           <td>{partner.price_update}</td>
                           <td>{partner.tigia}</td>
-                          <td>{partner.autohoan === "on" ? "Bật":"Tắt"}</td>
+                          <td>{partner.autohoan === "on" ? "Bật" : "Tắt"}</td>
                           <td>{partner.status === "on" ? "Bật" : "Tắt"}</td>
                           <td>{partner.update_price === "on" ? "Bật" : "Tắt"}</td>
                         </tr>
