@@ -70,8 +70,8 @@ export function ThongkeCharts({ chartData }) {
                                 />
                                 <Tooltip content={CustomTooltip} cursor={{ fill: '#f3f4f6' }} />
                                 <Legend iconType="rect" />
-                                <Bar dataKey="orderTotal" fill="#2563eb" name="Tạo đơn" radius={[6, 6, 0, 0]} label={{ position: 'top', formatter: formatCurrency, fill: '#2563eb', fontWeight: 600, fontSize: 13 }} maxBarSize={40} />
-                                <Bar dataKey="deposits" fill="#10b981" name="Nạp tiền" radius={[6, 6, 0, 0]} label={{ position: 'top', formatter: formatCurrency, fill: '#10b981', fontWeight: 600, fontSize: 13 }} maxBarSize={40} />
+                                <Bar dataKey="orderTotal" fill="#2563eb" name="Tạo đơn" radius={[6, 6, 0, 0]}/>
+                                <Bar dataKey="deposits" fill="#10b981" name="Nạp tiền" radius={[6, 6, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -95,7 +95,7 @@ export function ThongkeCharts({ chartData }) {
                                 />
                                 <Tooltip content={CustomTooltip} cursor={{ fill: '#f3f4f6' }} />
                                 <Legend iconType="rect" />
-                                <Bar dataKey="total" fill="#f59e42" name="Tổng tiền partial" radius={[6, 6, 0, 0]} label={{ position: 'top', formatter: formatCurrency, fill: '#f59e42', fontWeight: 600, fontSize: 13 }} maxBarSize={40} />
+                                <Bar dataKey="total" fill="#f59e42" name="Tổng tiền partial" radius={[6, 6, 0, 0]}  />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -119,7 +119,7 @@ export function ThongkeCharts({ chartData }) {
                                 />
                                 <Tooltip content={CustomTooltip} cursor={{ fill: '#f3f4f6' }} />
                                 <Legend iconType="rect" />
-                                <Bar dataKey="total" fill="#fbbf24" name="Tổng tiền canceled" radius={[6, 6, 0, 0]} label={{ position: 'top', formatter: formatCurrency, fill: '#fbbf24', fontWeight: 600, fontSize: 13 }} maxBarSize={40} />
+                                <Bar dataKey="total" fill="#fbbf24" name="Tổng tiền canceled" radius={[6, 6, 0, 0]}  />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
