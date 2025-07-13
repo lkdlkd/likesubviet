@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { ThongkeCharts } from "./ThongkeCharts";
 import { getStatistics } from "@/Utils/api";
 import { loadingg } from "@/JS/Loading";
 
@@ -143,6 +144,8 @@ export default function ThongkePage() {
 
     return (
         <div>
+            {/* Biểu đồ tổng hợp */}
+            {statistics.chartData && <ThongkeCharts chartData={statistics.chartData} />}
             <div className="row mb-4">
                 {/* <div className="col-md-6">
                     <label>Chọn khoảng thời gian nạp tiền:</label>
