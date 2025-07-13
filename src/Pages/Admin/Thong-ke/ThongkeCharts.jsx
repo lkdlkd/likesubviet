@@ -1,35 +1,28 @@
 import React from "react";
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList
 } from "recharts";
 
 export function ThongkeCharts({ chartData }) {
-    if (!chartData) return null;
-    // Chuẩn hóa dữ liệu ngày cho các biểu đồ
-    const dailyOrders = chartData.dailyOrders?.map(item => ({ ...item, date: item._id })) || [];
-    const dailyDeposits = chartData.dailyDeposits?.map(item => ({ ...item, date: item._id })) || [];
-    // Gộp các ngày lại cho biểu đồ tổng hợp
-    const merged = dailyOrders.map(order => {
-        const deposit = dailyDeposits.find(d => d._id === order._id);
-        return {
-            date: order._id,
-            //   orders: order.count,
-            orderTotal: order.total || 0,
-            deposits: deposit ? deposit.total : 0
-        };
-    });
+    const [selectedBars, setSelectedBars] = React.useState(['ordersTotal', 'deposits', 'partialTotal', 'canceledTotal']);
+    const legendItems = [
+        { key: 'ordersTotal', color: '#2563eb', label: 'Tạo đơn' },
+        { key: 'deposits', color: '#10b981', label: 'Nạp tiền' },
+        { key: 'partialTotal', color: '#f59e42', label: 'Hoàn 1 phần' },
+        { key: 'canceledTotal', color: '#f43f5e', label: 'Hoàn 100%' }
+    ];
 
-    const dailyPartial = chartData.dailyPartial?.map(item => ({ ...item, date: item._id, total: item.total || 0 })) || [];
-    const dailyCanceled = chartData.dailyCanceled?.map(item => ({ ...item, date: item._id, total: item.total || 0 })) || [];
+    if (!chartData) return null;
+    // Nếu chartData là mảng mới dạng [{date, orders, ordersTotal, deposits, partial, partialTotal, canceled, canceledTotal}]
+    const data = Array.isArray(chartData) ? chartData : [];
 
     // Hàm format tiền tệ
-    // Làm tròn số tiền về hàng nghìn, hiển thị dạng 1,000,000
     const formatCurrency = (value) => {
         if (!value) return 0;
         return Math.round(Number(value)).toLocaleString("en-US");
     };
 
-    // Custom tooltip cho các biểu đồ có trường total
+    // Custom tooltip
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
@@ -37,7 +30,7 @@ export function ThongkeCharts({ chartData }) {
                     <div><b>{label}</b></div>
                     {payload.map((entry, idx) => (
                         <div key={idx} style={{ color: entry.color }}>
-                            {entry.name}: {typeof entry.value === 'number' && (entry.dataKey === 'total' || entry.dataKey === 'orderTotal' || entry.dataKey === 'deposits')
+                            {entry.name}: {typeof entry.value === 'number'
                                 ? formatCurrency(entry.value)
                                 : entry.value}
                         </div>
@@ -48,78 +41,106 @@ export function ThongkeCharts({ chartData }) {
         return null;
     };
 
+    // Tìm max cho domain Y
+    const maxY = Math.max(
+        ...data.map(d => Math.max(
+            d.ordersTotal || 0,
+            d.deposits || 0,
+            d.partialTotal || 0,
+            d.canceledTotal || 0
+        ))
+    );
+
+    // Lấy tháng/năm hiển thị
+    let monthYearLabel = '';
+    if (data.length > 0) {
+        // Nếu nhiều ngày, lấy tháng/năm đầu và cuối
+        const first = data[0].date;
+        const last = data[data.length - 1].date;
+        const firstDate = new Date(first);
+        const lastDate = new Date(last);
+        if (first.slice(0,7) === last.slice(0,7)) {
+            // Cùng tháng
+            monthYearLabel = `Tháng ${firstDate.getMonth()+1}/${firstDate.getFullYear()}`;
+        } else {
+            monthYearLabel = `Từ ${firstDate.toLocaleDateString()} đến ${lastDate.toLocaleDateString()}`;
+        }
+    }
+
     return (
         <div className="row mb-4">
             <div className="col-md-12">
                 <div className="card mb-3">
-                    <div className="card-header">Biểu đồ cột: Tạo đơn & Nạp tiền</div>
-                    <div className="card-body" style={{ height: 350 }}>
+                    <div className="card-header">Biểu đồ tổng hợp: Tạo đơn, Nạp tiền, Hoàn 1 phần, Hoàn 100%</div>
+                    <div className="px-3 pt-2 pb-1 text-secondary small fw-bold">{monthYearLabel}</div>
+                    <div className="card-body" style={{ height: 400 }}>
+                        <div className="mb-2 d-flex justify-content-center align-items-center gap-3">
+                            {legendItems.map(item => {
+                                const isActive = selectedBars.includes(item.key);
+                                return (
+                                    <span
+                                        key={item.key}
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            cursor: 'pointer',
+                                            fontWeight: isActive ? 'bold' : 'normal',
+                                            opacity: isActive ? 1 : 0.5,
+                                            textDecoration: isActive ? 'none' : 'line-through'
+                                        }}
+                                        onClick={() => {
+                                            setSelectedBars(prev =>
+                                                prev.includes(item.key)
+                                                    ? prev.filter(k => k !== item.key)
+                                                    : [...prev, item.key]
+                                            );
+                                        }}
+                                    >
+                                        <span style={{
+                                            width: 18,
+                                            height: 18,
+                                            background: item.color,
+                                            display: 'inline-block',
+                                            marginRight: 6,
+                                            borderRadius: 3,
+                                            opacity: isActive ? 1 : 0.3
+                                        }} />
+                                        {item.label}
+                                    </span>
+                                );
+                            })}
+                        </div>
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={merged} margin={{ top: 10, right: 30, left: 60, bottom: 0 }}>
+                            <BarChart data={data} margin={{ top: 10, right: 30, left: 60, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="date" />
+                                <XAxis
+                                    dataKey="date"
+                                    tickFormatter={date => {
+                                        // Hiển thị chỉ ngày (dd) từ yyyy-mm-dd
+                                        if (!date) return '';
+                                        const parts = date.split('-');
+                                        return parts.length === 3 ? parts[2] : date;
+                                    }}
+                                    interval={0}
+                                />
                                 <YAxis
-                                    label={{ value: "Số tiền (VNĐ)", angle: -90, position: "insideLeft",offset : -20 }}
+                                    label={{ value: "Số tiền (VNĐ)", angle: -90, position: "insideLeft", offset: -20 }}
                                     tickFormatter={formatCurrency}
-                                    domain={(() => {
-                                        const maxOrder = Math.max(...merged.map(d => d.orderTotal || 0));
-                                        const maxDeposit = Math.max(...merged.map(d => d.deposits || 0));
-                                        const maxY = Math.max(maxOrder, maxDeposit);
-                                        return [0, Math.ceil(maxY * 1.1 / 10000) * 10000];
-                                    })()}
+                                    domain={[0, Math.ceil(maxY * 1.1 / 10000) * 10000]}
                                 />
                                 <Tooltip content={CustomTooltip} cursor={{ fill: '#f3f4f6' }} />
-                                <Legend iconType="rect" />
-                                <Bar dataKey="orderTotal" fill="#2563eb" name="Tạo đơn" radius={[6, 6, 0, 0]}/>
-                                <Bar dataKey="deposits" fill="#10b981" name="Nạp tiền" radius={[6, 6, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-            </div>
-            <div className="col-md-6">
-                <div className="card mb-3">
-                    <div className="card-header">Biểu đồ Đơn hoàn (partial)</div>
-                    <div className="card-body" style={{ height: 350 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={dailyPartial} margin={{ top: 10, right: 30, left: 60, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="date" />
-                                <YAxis
-                                    label={{ value: "Số tiền (VNĐ)", angle: -90, position: "insideLeft",offset : -20 }}
-                                    tickFormatter={formatCurrency}
-                                    domain={(() => {
-                                        const maxY = Math.max(...dailyPartial.map(d => d.total || 0));
-                                        return [0, Math.ceil(maxY * 1.1 / 10000) * 10000];
-                                    })()}
-                                />
-                                <Tooltip content={CustomTooltip} cursor={{ fill: '#f3f4f6' }} />
-                                <Legend iconType="rect" />
-                                <Bar dataKey="total" fill="#f59e42" name="Tổng tiền partial" radius={[6, 6, 0, 0]}  />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-            </div>
-            <div className="col-md-6">
-                <div className="card mb-3">
-                    <div className="card-header">Biểu đồ Đơn hoàn (canceled)</div>
-                    <div className="card-body" style={{ height: 350 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={dailyCanceled} margin={{ top: 10, right: 30, left: 60, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="date" />
-                                <YAxis
-                                    label={{ value: "Số tiền (VNĐ)", angle: -90, position: "insideLeft",offset : -20 }}
-                                    tickFormatter={formatCurrency}
-                                    domain={(() => {
-                                        const maxY = Math.max(...dailyCanceled.map(d => d.total || 0));
-                                        return [0, Math.ceil(maxY * 1.1 / 10000) * 10000];
-                                    })()}
-                                />
-                                <Tooltip content={CustomTooltip} cursor={{ fill: '#f3f4f6' }} />
-                                <Legend iconType="rect" />
-                                <Bar dataKey="total" fill="#fbbf24" name="Tổng tiền canceled" radius={[6, 6, 0, 0]}  />
+                                {selectedBars.includes('ordersTotal') && (
+                                    <Bar dataKey="ordersTotal" fill="#2563eb" name="Tạo đơn" radius={[6, 6, 0, 0]} />
+                                )}
+                                {selectedBars.includes('deposits') && (
+                                    <Bar dataKey="deposits" fill="#10b981" name="Nạp tiền" radius={[6, 6, 0, 0]} />
+                                )}
+                                {selectedBars.includes('partialTotal') && (
+                                    <Bar dataKey="partialTotal" fill="#f59e42" name="Hoàn 1 phần" radius={[6, 6, 0, 0]} />
+                                )}
+                                {selectedBars.includes('canceledTotal') && (
+                                    <Bar dataKey="canceledTotal" fill="#f43f5e" name="Hoàn 100%" radius={[6, 6, 0, 0]} />
+                                )}
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
