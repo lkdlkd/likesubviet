@@ -53,7 +53,7 @@ export default function NotificationModal({ notifications = [] }) {
                     <h5 className="card-title">Thông báo gần đây</h5>
                 </div>
                 <div className="card-body">
-                    <div className="scroll h-350px">
+                    <div style={{ maxHeight: 350, overflowY: 'auto' }}>
                         {notifications.length > 0 ? (
                             notifications.map((notification, idx) => (
                                 <div key={notification._id || idx} className="list-group list-group-flush">

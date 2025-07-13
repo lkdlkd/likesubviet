@@ -247,7 +247,7 @@ const Setting = () => {
                                         </div>
                                         <div className="mb-2">
                                             <label className="form-label">Logo liên hệ</label>
-                                            <div style={{ maxHeight: 120, overflowY: 'auto', border: '1px solid #ddd', borderRadius: 6, padding: 8 }}>
+                                            <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #ddd', borderRadius: 6, padding: 8 }}>
                                               <div className="row g-2">
                                                 {Object.entries(platformLogos).map(([platform, url], idx) => (
                                                   <div className="col-4 col-md-3" key={idx}>
@@ -264,7 +264,7 @@ const Setting = () => {
                                                       }}
                                                     >
                                                       <img src={url} alt={platform} style={{ maxWidth: 32, maxHeight: 32, objectFit: 'contain', marginBottom: 4 }} />
-                                                      <div style={{ fontSize: 12 }}>{platform}</div>
+                                                      {/* <div style={{ fontSize: 12 }}>{platform}</div> */}
                                                     </div>
                                                   </div>
                                                 ))}

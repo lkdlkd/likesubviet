@@ -374,11 +374,11 @@ export const getUsers = async (token, page = 1, limit = 10, search = "") => {
   return handleResponse(response);
 };
 // Thống kê (Admin)
-export const getStatistics = async (token, napRange = "today", doanhthuRange = "today") => {
-  const queryParams = new URLSearchParams({
-    napRange,
-    doanhthuRange,
-  });
+export const getStatistics = async (token, doanhthuRange = "today", customStart, customEnd) => {
+  const queryParams = new URLSearchParams();
+  if (doanhthuRange) queryParams.append("doanhthuRange", doanhthuRange);
+  if (customStart) queryParams.append("customStart", customStart);
+  if (customEnd) queryParams.append("customEnd", customEnd);
 
   const response = await fetch(`${API_BASE}/thongke?${queryParams.toString()}`, {
     method: "GET",
