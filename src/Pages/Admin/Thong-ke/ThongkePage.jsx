@@ -29,7 +29,7 @@ export default function ThongkePage() {
             loadingg("Đang tải...", true, 9999999);
             try {
                 let data;
-                if ( customStart && customEnd) {
+                if (customStart && customEnd) {
                     if (!customApplied) return; // Only fetch if user applied
                     data = await getStatistics(token, doanhthuRange, customStart, customEnd);
                     setDoanhthuRange(`(${customStart} - ${customEnd})`);
@@ -144,8 +144,6 @@ export default function ThongkePage() {
 
     return (
         <div>
-            {/* Biểu đồ tổng hợp */}
-            {statistics.chartData && <ThongkeCharts chartData={statistics.chartData} />}
             <div className="row mb-4">
                 {/* <div className="col-md-6">
                     <label>Chọn khoảng thời gian nạp tiền:</label>
@@ -192,15 +190,16 @@ export default function ThongkePage() {
                             onChange={e => { setCustomEnd(e.target.value); setCustomApplied(false); }}
                             min={customStart || undefined}
                         />
-                        <button
-                            className="btn btn-primary"
-                            type="button"
-                            disabled={!customStart || !customEnd || customApplied}
-                            onClick={() => setCustomApplied(true)}
-                        >
-                            Áp dụng
-                        </button>
+
                     </div>
+                    <button
+                        className="btn btn-primary"
+                        type="button"
+                        disabled={!customStart || !customEnd || customApplied}
+                        onClick={() => setCustomApplied(true)}
+                    >
+                        Áp dụng
+                    </button>
 
                 </div>
             </div>
@@ -225,6 +224,8 @@ export default function ThongkePage() {
                     </div>
                 ))}
             </div>
+            {/* Biểu đồ tổng hợp */}
+            {statistics.chartData && <ThongkeCharts chartData={statistics.chartData} />}
             {/* Luôn hiển thị bảng laiTheoDomain và tổng lãi */}
             {statistics.laiTheoDomain && (
                 <div className="card card-body p-2 mt-3">
