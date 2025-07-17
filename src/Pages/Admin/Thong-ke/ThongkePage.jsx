@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import Table from "react-bootstrap/Table";
 import { ThongkeCharts } from "./ThongkeCharts";
 import { getStatistics } from "@/Utils/api";
 import { loadingg } from "@/JS/Loading";
@@ -128,7 +129,7 @@ export default function ThongkePage() {
             icon: "ti ti-rotate",
             bg: "bg-light-warning",
             extra: (
-                <div className="text-warning small">Tổng tiền: {Number(statistics.partialHoan || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <div className="text-warning small">Tổng tiền: {Number(statistics.partialHoan || 0).toLocaleString('en-US')}</div>
             )
         },
         {
@@ -137,7 +138,7 @@ export default function ThongkePage() {
             icon: "ti ti-ban",
             bg: "bg-light-danger",
             extra: (
-                <div className="text-danger small">Tổng tiền: {Number(statistics.canceledHoan || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <div className="text-danger small">Tổng tiền: {Number(statistics.canceledHoan || 0).toLocaleString('en-US')}</div>
             )
         },
     ];
@@ -234,10 +235,12 @@ export default function ThongkePage() {
                         <span className="badge bg-success fs-6">Tổng lãi: {Number(statistics.tongdoanhthu).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                     <div className="table-responsive" style={{ maxHeight: 400, overflowY: 'auto' }}>
-                        <table className="table table-sm table-bordered mb-0">
+                        <Table striped bordered hover size="sm" className="mb-0">
                             <thead>
                                 <tr>
                                     <th>Nguồn</th>
+                                    <th>Order nguồn</th>
+                                    <th>Order site</th>
                                     <th>Lãi</th>
                                 </tr>
                             </thead>
@@ -245,11 +248,13 @@ export default function ThongkePage() {
                                 {statistics.laiTheoDomain.map((item, idx) => (
                                     <tr key={idx}>
                                         <td>{item._id || <i>Không xác định</i>}</td>
+                                        <td>{Number(item.totalTientieu).toLocaleString('en-US')}</td>
+                                        <td>{Number(item.totalCost).toLocaleString('en-US')}</td>
                                         <td>{Number(item.totalLai).toLocaleString('en-US')}</td>
                                     </tr>
                                 ))}
                             </tbody>
-                        </table>
+                        </Table>
                     </div>
                 </div>
             )}
@@ -260,9 +265,11 @@ export default function ThongkePage() {
                     </div>
                     <div className="card-body p-2">
                         <div className="table-responsive" style={{ maxHeight: 400, overflowY: 'auto' }}>
-                            <table className="table table-bordered table-sm mb-0">
+                            <Table striped bordered hover size="sm" className="mb-0">
                                 <thead>
                                     <tr style={{ fontWeight: 'bold', background: '#f8f9fa' }}>
+                                        <td>#</td>
+
                                         <td colSpan={2}>Tổng</td>
                                         <td>
                                             {statistics.magoiStats.reduce((sum, item) => sum + (item.totalOrders || 0), 0).toLocaleString('en-US')}
@@ -278,6 +285,7 @@ export default function ThongkePage() {
                                         </td>
                                     </tr>
                                     <tr>
+                                        <th>#</th>
                                         <th>Mã gói</th>
                                         <th>Tên dịch vụ</th>
                                         <th>Tổng đơn</th>
@@ -289,6 +297,7 @@ export default function ThongkePage() {
                                 <tbody>
                                     {statistics.magoiStats.map((item, idx) => (
                                         <tr key={item.Magoi || idx}>
+                                            <td>{idx + 1}</td>
                                             <td>{item.Magoi}</td>
                                             <td style={{
                                                 maxWidth: "250px",
@@ -303,8 +312,7 @@ export default function ThongkePage() {
                                         </tr>
                                     ))}
                                 </tbody>
-
-                            </table>
+                            </Table>
                         </div>
                     </div>
                 </div>
