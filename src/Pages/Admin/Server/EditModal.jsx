@@ -19,6 +19,8 @@ export default function EditModal({ show, onClose, initialData, token }) {
     comment: "off",
     reaction: "off",
     matlive: "off",
+    refil: "off",
+    cancel: "off",
     isActive: true,
   });
 
@@ -78,6 +80,8 @@ export default function EditModal({ show, onClose, initialData, token }) {
       comment: formData.comment,
       reaction: formData.reaction,
       matlive: formData.matlive,
+      refil: formData.refil,
+      cancel: formData.cancel,
       isActive: formData.isActive,
     };
 
@@ -240,12 +244,19 @@ export default function EditModal({ show, onClose, initialData, token }) {
             </select>
           </div>
           <h4>Các chức năng</h4>
-          {["getid", "comment", "reaction", "matlive"].map((field) => (
-            <div className="mb-3" key={field}>
-              <label className="form-label">Chức năng {field.toUpperCase()}:</label>
+          { [
+            { key: 'getid', label: 'get UID' },
+            { key: 'comment', label: 'comment' },
+            { key: 'reaction', label: 'reaction' },
+            { key: 'matlive', label: 'mắt live' },
+            { key: 'refil', label: 'bảo hành' },
+            { key: 'cancel', label: 'hủy đơn' }
+          ].map((item) => (
+            <div className="mb-3" key={item.key}>
+              <label className="form-label">Chức năng {item.label}:</label>
               <select
-                name={field}
-                value={formData[field]}
+                name={item.key}
+                value={formData[item.key]}
                 onChange={handleChange}
                 className="form-select"
               >

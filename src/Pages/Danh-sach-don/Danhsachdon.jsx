@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
 import Select from "react-select";
 import { useOutletContext } from "react-router-dom";
-import { getOrders, getServer } from "@/Utils/api";
+import { getOrders, getServer, refillOrder } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 
@@ -127,7 +127,7 @@ const Danhsachdon = () => {
     const handleLimitChange = (e) => {
         setLimit(Number(e.target.value));
         setCurrentPage(1);
-        loadingg("Vui lòng chờ...",true , 9999999); // Hiển thị thông báo đang tìm kiếm
+        loadingg("Vui lòng chờ...", true, 9999999); // Hiển thị thông báo đang tìm kiếm
         setTimeout(() => {
             loadingg("", false); // Ẩn thông báo sau khi tìm kiếm
         }, 1000);
@@ -288,10 +288,59 @@ const Danhsachdon = () => {
                                                 <td>
                                                     <button
                                                         className="btn btn-sm btn-info"
-                                                        onClick={() => handleCopyText(order)} // Truyền toàn bộ đối tượng `order`
+                                                        onClick={() => handleCopyText(order)}
                                                     >
                                                         Copy
                                                     </button>
+                                                    <div className="dropdown-placeholder mt-1">
+                                                        <button
+                                                            className="btn btn-primary btn-sm"
+                                                            type="button"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false"
+                                                        >
+                                                            Thao tác <i className="las la-angle-right ms-1"></i>
+                                                        </button>
+                                                        <ul className="dropdown-menu">
+                                                            <li>
+                                                                {order.refil === "on" && (
+                                                                    <button
+                                                                        className="dropdown-item text-success"
+                                                                        onClick={() => toast.info(`Chưa hoạt động`)}
+
+                                                                    // onClick={async () => {
+                                                                    //     loadingg("Đang thực hiện bảo hành...", true, 9999999);
+                                                                    //     try {
+                                                                    //         const result = await refillOrder(order.Madon, token);
+                                                                    //         if (result.success) {
+                                                                    //             toast.success(`Bảo hành thành công cho đơn ${order.Madon}`);
+                                                                    //         }
+
+                                                                    //     } catch (err) {
+                                                                    //         toast.error(`Bảo hành thất bại: ${err.message}`);
+                                                                    //     } finally {
+                                                                    //         loadingg(false);
+                                                                    //     }
+                                                                    // }}
+                                                                    >
+                                                                        Bảo hành
+                                                                    </button>
+                                                                )}
+                                                            </li>
+                                                            <li>
+                                                                {order.cancel === "on" && (
+                                                                    <button
+                                                                        className="dropdown-item text-danger"
+                                                                        onClick={() => toast.info(`Chưa hoạt động`)}
+                                                                    >
+                                                                        Hủy hoàn
+                                                                    </button>
+                                                                )}
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+
+
                                                 </td>
                                                 <td>{order.username}</td>
                                                 {/* <td
@@ -373,7 +422,7 @@ const Danhsachdon = () => {
                                                             maxWidth: "100px",
                                                         }}
                                                     >
-                                                        { order.comments || "" }
+                                                        {order.comments || ""}
                                                     </textarea>
                                                 </td>
                                                 <td>

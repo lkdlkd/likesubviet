@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
-import { getOrders } from "@/Utils/api";
+import { getOrders, refillOrder } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading";
 
@@ -209,6 +209,53 @@ const Dondamua = ({ category, showcmt }) => {
                                                     >
                                                         Copy
                                                     </button>
+                                                    <div className="dropdown-placeholder mt-1">
+                                                        <button
+                                                            className="btn btn-primary btn-sm"
+                                                            type="button"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false"
+                                                        >
+                                                            Thao tác <i className="las la-angle-right ms-1"></i>
+                                                        </button>
+                                                        <ul className="dropdown-menu">
+                                                            <li>
+                                                                {order.refil === "on" && (
+                                                                    <button
+                                                                        className="dropdown-item text-success"
+                                                                        onClick={() => toast.info(`Chưa hoạt động`)}
+
+                                                                    // onClick={async () => {
+                                                                    //     loadingg("Đang thực hiện bảo hành...", true, 9999999);
+                                                                    //     try {
+                                                                    //         const result = await refillOrder(order.Madon, token);
+                                                                    //         if (result.success) {
+                                                                    //             toast.success(`Bảo hành thành công cho đơn ${order.Madon}`);
+                                                                    //         }
+
+                                                                    //     } catch (err) {
+                                                                    //         toast.error(`Bảo hành thất bại: ${err.message}`);
+                                                                    //     } finally {
+                                                                    //         loadingg(false);
+                                                                    //     }
+                                                                    // }}
+                                                                    >
+                                                                        Bảo hành
+                                                                    </button>
+                                                                )}
+                                                            </li>
+                                                            <li>
+                                                                {order.cancel === "on" && (
+                                                                    <button
+                                                                        className="dropdown-item text-danger"
+                                                                        onClick={() => toast.info(`Chưa hoạt động`)}
+                                                                    >
+                                                                        Hủy hoàn
+                                                                    </button>
+                                                                )}
+                                                            </li>
+                                                        </ul>
+                                                    </div>
                                                 </td>
                                                 <td>{order.username}</td>
                                                 <td style={{

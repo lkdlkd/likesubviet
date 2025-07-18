@@ -1,3 +1,16 @@
+// Refill đơn hàng
+export const refillOrder = async (madon, token) => {
+  const response = await fetch(`${API_BASE}/refill`, {
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify({ madon }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
 const API_BASE = process.env.REACT_APP_API_BASE;
 
 // Helper để thêm header Cache-Control

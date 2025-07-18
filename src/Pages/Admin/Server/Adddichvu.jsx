@@ -34,9 +34,26 @@ export default function Adddichvu({
     comment: "off",
     reaction: "off",
     matlive: "off",
+    refil: "off",
+    cancel: "off",
     isActive: true,
     ...initialData,
   });
+  const refilOptions = [
+    { value: "on", label: "Bật" },
+    { value: "off", label: "Tắt" },
+  ];
+  const cancelOptions = [
+    { value: "on", label: "Bật" },
+    { value: "off", label: "Tắt" },
+  ];
+
+  const selectedRefilOption = refilOptions.find(
+    (opt) => opt.value === formData.refil
+  ) || null;
+  const selectedCancelOption = cancelOptions.find(
+    (opt) => opt.value === formData.cancel
+  ) || null;
   const [smmPartners, setSmmPartners] = useState([]);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -498,6 +515,32 @@ export default function Adddichvu({
                     setFormData({ ...formData, matlive: option ? option.value : "off" })
                   }
                   options={matliveOptions}
+                  placeholder="Chọn trạng thái"
+                  isClearable={false}
+                />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Chức năng Bảo hành:</label>
+                <Select
+                  name="refil"
+                  value={selectedRefilOption}
+                  onChange={(option) =>
+                    setFormData({ ...formData, refil: option ? option.value : "off" })
+                  }
+                  options={refilOptions}
+                  placeholder="Chọn trạng thái"
+                  isClearable={false}
+                />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Chức năng Hủy đơn:</label>
+                <Select
+                  name="cancel"
+                  value={selectedCancelOption}
+                  onChange={(option) =>
+                    setFormData({ ...formData, cancel: option ? option.value : "off" })
+                  }
+                  options={cancelOptions}
                   placeholder="Chọn trạng thái"
                   isClearable={false}
                 />
