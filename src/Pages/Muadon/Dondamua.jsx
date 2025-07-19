@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
-import { getOrders, refillOrder ,cancelOrder } from "@/Utils/api";
+import { getOrders, refillOrder, cancelOrder } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading";
 
@@ -219,13 +219,20 @@ const Dondamua = ({ category, showcmt }) => {
                                                             Thao tác <i className="las la-angle-right ms-1"></i>
                                                         </button>
                                                         <ul className="dropdown-menu">
-                                                            <li>
+<li>
                                                                 {order.refil === "on" && (
                                                                     <button
                                                                         className="dropdown-item text-success"
-                                                                        // onClick={() => toast.info(`Chưa hoạt động`)}
-
                                                                         onClick={async () => {
+                                                                            const confirm = await Swal.fire({
+                                                                                title: `Bạn có chắc chắn muốn bảo hành cho đơn ${order.Madon}?`,
+                                                                                text: `Nếu đơn hàng bị từ chối bảo hành thì hãy kiểm tra xem các vấn đề sau : quá thời gian bảo hành hoặc vi phạm điều khoản lưu ý của dịch vụ.`,
+                                                                                icon: "question",
+                                                                                showCancelButton: true,
+                                                                                confirmButtonText: "Xác nhận",
+                                                                                cancelButtonText: "Hủy"
+                                                                            });
+                                                                            if (!confirm.isConfirmed) return;
                                                                             loadingg("Đang thực hiện bảo hành...", true, 9999999);
                                                                             try {
                                                                                 const result = await refillOrder(order.Madon, token);
@@ -248,6 +255,15 @@ const Dondamua = ({ category, showcmt }) => {
                                                                     <button
                                                                         className="dropdown-item text-danger"
                                                                         onClick={async () => {
+                                                                            const confirm = await Swal.fire({
+                                                                                title: `Bạn có chắc chắn muốn hủy hoàn đơn #${order.Madon}?`,
+                                                                                text: `Hệ thống sẽ hoàn lại SỐ LƯỢNG CHƯA CHẠY và Trừ phí hoàn 1k hoặc 0đ tùy dịch vụ ( Nếu Sv ghi không hỗ trợ hủy , yêu cầu này sẽ bị từ chối )`,
+                                                                                icon: "warning",
+                                                                                showCancelButton: true,
+                                                                                confirmButtonText: "Xác nhận",
+                                                                                cancelButtonText: "Hủy"
+                                                                            });
+                                                                            if (!confirm.isConfirmed) return;
                                                                             loadingg("Đang thực hiện hủy hoàn...", true, 9999999);
                                                                             try {
                                                                                 const result = await cancelOrder(order.Madon, token);
