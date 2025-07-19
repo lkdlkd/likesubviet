@@ -766,6 +766,9 @@ export default function Order() {
                                                         {server.refil === "on" && (
                                                             <span className="badge bg-success ms-1">Bảo hành</span>
                                                         )}
+                                                        {server.cancel === "on" && (
+                                                            <span className="badge bg-warning ms-1">Có thể hủy</span>
+                                                        )}
                                                         {/* <span className="custom-control-label">
                                                         {" "}
                                                         - ID server - {server.Magoi}
