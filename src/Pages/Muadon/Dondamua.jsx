@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
-import { getOrders, refillOrder } from "@/Utils/api";
+import { getOrders, refillOrder ,cancelOrder } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading";
 
@@ -223,22 +223,21 @@ const Dondamua = ({ category, showcmt }) => {
                                                                 {order.refil === "on" && (
                                                                     <button
                                                                         className="dropdown-item text-success"
-                                                                        onClick={() => toast.info(`Chưa hoạt động`)}
+                                                                        // onClick={() => toast.info(`Chưa hoạt động`)}
 
-                                                                    // onClick={async () => {
-                                                                    //     loadingg("Đang thực hiện bảo hành...", true, 9999999);
-                                                                    //     try {
-                                                                    //         const result = await refillOrder(order.Madon, token);
-                                                                    //         if (result.success) {
-                                                                    //             toast.success(`Bảo hành thành công cho đơn ${order.Madon}`);
-                                                                    //         }
-
-                                                                    //     } catch (err) {
-                                                                    //         toast.error(`Bảo hành thất bại: ${err.message}`);
-                                                                    //     } finally {
-                                                                    //         loadingg(false);
-                                                                    //     }
-                                                                    // }}
+                                                                        onClick={async () => {
+                                                                            loadingg("Đang thực hiện bảo hành...", true, 9999999);
+                                                                            try {
+                                                                                const result = await refillOrder(order.Madon, token);
+                                                                                if (result.success) {
+                                                                                    toast.success(`Bảo hành thành công cho đơn ${order.Madon}`);
+                                                                                }
+                                                                            } catch (err) {
+                                                                                toast.error(`Bảo hành thất bại: ${err.message}`);
+                                                                            } finally {
+                                                                                loadingg(false);
+                                                                            }
+                                                                        }}
                                                                     >
                                                                         Bảo hành
                                                                     </button>
@@ -248,7 +247,19 @@ const Dondamua = ({ category, showcmt }) => {
                                                                 {order.cancel === "on" && (
                                                                     <button
                                                                         className="dropdown-item text-danger"
-                                                                        onClick={() => toast.info(`Chưa hoạt động`)}
+                                                                        onClick={async () => {
+                                                                            loadingg("Đang thực hiện hủy hoàn...", true, 9999999);
+                                                                            try {
+                                                                                const result = await cancelOrder(order.Madon, token);
+                                                                                if (result.success) {
+                                                                                    toast.success(`Hủy hoàn thành công cho đơn ${order.Madon}`);
+                                                                                }
+                                                                            } catch (err) {
+                                                                                toast.error(`Hủy hoàn thất bại: ${err.message}`);
+                                                                            } finally {
+                                                                                loadingg(false);
+                                                                            }
+                                                                        }}
                                                                     >
                                                                         Hủy hoàn
                                                                     </button>
@@ -288,7 +299,9 @@ const Dondamua = ({ category, showcmt }) => {
                                                     </ul>
                                                 </td>
                                                 <td>
-                                                    {order.status === "Completed" ? (
+                                                    {order.iscancel === true ? (
+                                                        <span className="badge bg-warning text-dark">Chờ hoàn</span>
+                                                    ) : order.status === "Completed" ? (
                                                         <span className="badge bg-success">Hoàn thành</span>
                                                     ) : order.status === "In progress" || order.status === "Processing" || order.status === "Pending" ? (
                                                         <span className="badge bg-primary">Đang chạy</span>

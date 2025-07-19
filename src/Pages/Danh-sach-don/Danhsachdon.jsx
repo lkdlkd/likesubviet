@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
 import Select from "react-select";
 import { useOutletContext } from "react-router-dom";
-import { getOrders, getServer, refillOrder } from "@/Utils/api";
+import { getOrders, refillOrder , cancelOrder } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 
@@ -306,22 +306,22 @@ const Danhsachdon = () => {
                                                                 {order.refil === "on" && (
                                                                     <button
                                                                         className="dropdown-item text-success"
-                                                                        onClick={() => toast.info(`Chưa hoạt động`)}
+                                                                        // onClick={() => toast.info(`Chưa hoạt động`)}
 
-                                                                    // onClick={async () => {
-                                                                    //     loadingg("Đang thực hiện bảo hành...", true, 9999999);
-                                                                    //     try {
-                                                                    //         const result = await refillOrder(order.Madon, token);
-                                                                    //         if (result.success) {
-                                                                    //             toast.success(`Bảo hành thành công cho đơn ${order.Madon}`);
-                                                                    //         }
+                                                                        onClick={async () => {
+                                                                            loadingg("Đang thực hiện bảo hành...", true, 9999999);
+                                                                            try {
+                                                                                const result = await refillOrder(order.Madon, token);
+                                                                                if (result.success) {
+                                                                                    toast.success(`Bảo hành thành công cho đơn ${order.Madon}`);
+                                                                                }
 
-                                                                    //     } catch (err) {
-                                                                    //         toast.error(`Bảo hành thất bại: ${err.message}`);
-                                                                    //     } finally {
-                                                                    //         loadingg(false);
-                                                                    //     }
-                                                                    // }}
+                                                                            } catch (err) {
+                                                                                toast.error(`Bảo hành thất bại: ${err.message}`);
+                                                                            } finally {
+                                                                                loadingg(false);
+                                                                            }
+                                                                        }}
                                                                     >
                                                                         Bảo hành
                                                                     </button>
@@ -331,7 +331,19 @@ const Danhsachdon = () => {
                                                                 {order.cancel === "on" && (
                                                                     <button
                                                                         className="dropdown-item text-danger"
-                                                                        onClick={() => toast.info(`Chưa hoạt động`)}
+                                                                        onClick={async () => {
+                                                                            loadingg("Đang thực hiện hủy hoàn...", true, 9999999);
+                                                                            try {
+                                                                                const result = await cancelOrder(order.Madon, token);
+                                                                                if (result.success) {
+                                                                                    toast.success(`Hủy hoàn thành công cho đơn ${order.Madon}`);
+                                                                                }
+                                                                            } catch (err) {
+                                                                                toast.error(`Hủy hoàn thất bại: ${err.message}`);
+                                                                            } finally {
+                                                                                loadingg(false);
+                                                                            }
+                                                                        }}
                                                                     >
                                                                         Hủy hoàn
                                                                     </button>
@@ -339,8 +351,6 @@ const Danhsachdon = () => {
                                                             </li>
                                                         </ul>
                                                     </div>
-
-
                                                 </td>
                                                 <td>{order.username}</td>
                                                 {/* <td
@@ -394,7 +404,9 @@ const Danhsachdon = () => {
 
                                                 {/* <td>{Number(order.totalCost).toLocaleString("en-US")}</td> */}
                                                 <td>
-                                                    {order.status === "Completed" ? (
+                                                    {order.iscancel === true ? (
+                                                        <span className="badge bg-warning text-dark">Chờ hoàn</span>
+                                                    ) : order.status === "Completed" ? (
                                                         <span className="badge bg-success">
                                                             Hoàn thành
                                                         </span>
@@ -411,7 +423,6 @@ const Danhsachdon = () => {
                                                     ) : (
                                                         <span>{order.status}</span>
                                                     )}
-
                                                 </td>
 
                                                 <td >

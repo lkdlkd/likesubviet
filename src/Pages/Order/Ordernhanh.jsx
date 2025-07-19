@@ -565,6 +565,9 @@ export default function Ordernhanh() {
                     <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
                         {server.isActive ? "Hoạt động" : "Không hoạt động"}
                     </span>
+                    {server.refil === "on" && (
+                        <span className="badge bg-success ">Bảo hành</span>
+                    )}
                 </div>
             ),
             server

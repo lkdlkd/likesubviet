@@ -760,10 +760,12 @@ export default function Order() {
                                                             {Number(server.rate).toLocaleString("en-US")}đ
                                                             {/* {server.rate}đ */}
                                                         </span>
-
                                                         <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
                                                             {server.isActive ? "Hoạt động" : "Không hoạt động"}
                                                         </span>
+                                                        {server.refil === "on" && (
+                                                            <span className="badge bg-success ms-1">Bảo hành</span>
+                                                        )}
                                                         {/* <span className="custom-control-label">
                                                         {" "}
                                                         - ID server - {server.Magoi}
