@@ -58,9 +58,13 @@ const handleResponse = async (response) => {
 
 // Auth
 export const login = async (data) => {
+  const ip = await fetch("https://api.ipify.org?format=json").then(res => res.json()).then(json => json.ip).catch(() => "");
+
   const response = await fetch(`${API_BASE}/login`, {
     method: "POST",
-    headers: withNoStore({ "Content-Type": "application/json" }),
+    headers: withNoStore({
+      "Content-Type": "application/json", "X-Forwarded-For": ip, // Thêm IP vào header này
+    }),
     body: JSON.stringify(data),
   });
   return handleResponse(response);
