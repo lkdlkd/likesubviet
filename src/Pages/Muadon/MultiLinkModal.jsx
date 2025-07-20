@@ -63,7 +63,10 @@ export default function MultiLinkModal({
 
     const shortenSocialLink = (url) => {
         if (typeof url !== 'string') return url;
-
+        // Nếu là Facebook hoặc fb thì trả về nguyên bản
+        if (/facebook\.com|fb\.com/i.test(url)) {
+            return url;
+        }
         // Loại bỏ query và fragment
         let cleanUrl = url.split('?')[0].split('#')[0];
 
@@ -210,7 +213,7 @@ export default function MultiLinkModal({
                                                 onChange={e => {
                                                     const val = e.target.value;
                                                     setQuantity(val === "" ? "" : Number(val));
-                                                    setMultiLinkList(list => list.map(it => ({ ...it, quantity: val  })));
+                                                    setMultiLinkList(list => list.map(it => ({ ...it, quantity: val })));
 
                                                 }}
 

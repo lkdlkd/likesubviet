@@ -489,7 +489,10 @@ export default function Ordernhanh() {
 
     const shortenSocialLink = (url) => {
         if (typeof url !== 'string') return url;
-
+        // Nếu là Facebook hoặc fb thì trả về nguyên bản
+        if (/facebook\.com|fb\.com/i.test(url)) {
+            return url;
+        }
         // Loại bỏ query và fragment
         let cleanUrl = url.split('?')[0].split('#')[0];
 
