@@ -43,6 +43,8 @@ const Layout = () => {
                     error.status === 401 ||
                     error.message === "Token không hợp lệ hoặc đã hết hạn"
                 ) {
+                    localStorage.clear();
+                    sessionStorage.clear();
                     // Nếu người dùng không tồn tại, trả về 401, hoặc token không hợp lệ/hết hạn thì đăng xuất
                     localStorage.removeItem("token");
                     window.location.href = "/dang-nhap";
@@ -117,7 +119,7 @@ const Layout = () => {
                 </div>
             </footer>
             <Widget configWeb={configWeb} />
-            <ToastContainer />
+            <ToastContainer style={{ maxWidth: '70%' , marginLeft: 'auto', marginRight: '0px' }} />
 
         </>
     );

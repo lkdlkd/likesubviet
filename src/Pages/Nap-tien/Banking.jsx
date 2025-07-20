@@ -9,7 +9,7 @@ export default function Banking({ banking = [], username }) {
     const handleCopy = (text) => {
         navigator.clipboard
             .writeText(text)
-            .then(() => toast.success("Đã sao chép thành công!"))
+            .then(() => toast.success(`Đã sao chép thành công ${text}`))
             .catch(() => toast.error("Lỗi khi sao chép!"));
     };
 
@@ -56,17 +56,21 @@ export default function Banking({ banking = [], username }) {
                                                     style={{
                                                         cursor: "pointer",
                                                         display: "inline-block",
+                                                        maxWidth: "100%",
+                                                        // wordBreak: "break-all",
+                                                        whiteSpace: "pre-line"
                                                     }}
                                                 >
                                                     {bank.account_number}
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-primary btn-sm ms-2 btn-copy"
+                                                        onClick={() => handleCopy(bank.account_number)}
+                                                    >
+                                                        <i className="fas fa-copy"></i>
+                                                    </button>
                                                 </p>
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-outline-primary btn-sm ms-2 btn-copy"
-                                                    onClick={() => handleCopy(bank.account_number)}
-                                                >
-                                                    <i className="fas fa-copy"></i>
-                                                </button>
+
                                             </td>
                                         </tr>
                                         <tr>
@@ -77,17 +81,21 @@ export default function Banking({ banking = [], username }) {
                                                     style={{
                                                         cursor: "pointer",
                                                         display: "inline-block",
+                                                        maxWidth: "100%",
+                                                        // wordBreak: "break-all",
+                                                        whiteSpace: "pre-line"
                                                     }}
                                                 >
                                                     {cuphap} {username}
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-primary btn-sm ms-2 btn-copy"
+                                                        onClick={() => handleCopy(`${cuphap} ${username}`)}
+                                                    >
+                                                        <i className="fas fa-copy"></i>
+                                                    </button>
                                                 </p>
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-outline-primary btn-sm ms-2 btn-copy"
-                                                    onClick={() => handleCopy(`${cuphap} ${username}`)}
-                                                >
-                                                    <i className="fas fa-copy"></i>
-                                                </button>
+
                                             </td>
                                         </tr>
                                         <tr>
