@@ -253,7 +253,7 @@ const Dondamua = ({ category, showcmt }) => {
                                                                     )}
                                                                 </li>
                                                             )}
-                                                            {order.status === "In progress" || order.status === "Processing" || order.status === "Pending" && (
+                                                            {(order.status === "In progress" || order.status === "Processing" || order.status === "Pending") && (
                                                                 <li>
                                                                     {order.cancel === "on" && (
                                                                         <button
