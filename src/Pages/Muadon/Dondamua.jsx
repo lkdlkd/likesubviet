@@ -4,6 +4,7 @@ import Table from "react-bootstrap/Table";
 import { getOrders, refillOrder, cancelOrder } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading";
+import Select from "react-select";
 
 const Dondamua = ({ category, showcmt }) => {
     const token = localStorage.getItem("token");
@@ -37,13 +38,14 @@ const Dondamua = ({ category, showcmt }) => {
                 currentPage,
                 limit,
                 category,
-                searchTerm.trim()
+                searchTerm.trim(),
+                selectedStatus,
             );
             setOrders(response.orders || []);
             setCurrentPage(response.currentPage || 1);
             setTotalPages(response.totalPages || 1);
         } catch (error) {
-            // toast.error("Không có đơn hàng nào!");
+            setOrders([]);
         } finally {
             setLoadingOrders(false);
         }
@@ -52,7 +54,7 @@ const Dondamua = ({ category, showcmt }) => {
     // Load dữ liệu khi thay đổi các tham số (KHÔNG fetch khi searchTerm thay đổi)
     useEffect(() => {
         fetchOrders();
-    }, [username, currentPage, limit, category]);
+    }, [username, currentPage, limit, category, selectedStatus]);
 
     // Khi nhấn nút tìm kiếm, reset trang về 1 và gọi fetchOrders với searchTerm hiện tại
     const handleSearch = (e) => {
@@ -76,15 +78,16 @@ const Dondamua = ({ category, showcmt }) => {
     };
 
     // Lọc theo trạng thái
-    const filteredOrders = useMemo(() => {
-        if (!selectedStatus) return orders;
-        return orders.filter((order) => order.status === selectedStatus);
-    }, [orders, selectedStatus]);
+    // const filteredOrders = useMemo(() => {
+    //     if (!selectedStatus) return orders;
+    //     return orders.filter((order) => order.status === selectedStatus);
+    // }, [orders, selectedStatus]);
 
     const statusOptions = [
         { value: "", label: "Tất cả" },
         { value: "Completed", label: "Hoàn thành" },
         { value: "In progress", label: "Đang chạy" },
+        { value: "Processing", label: "Đang xử lý" },
         { value: "Pending", label: "Chờ xử lý" },
         { value: "Partial", label: "Hoàn một phần" },
         { value: "Canceled", label: "Đã hủy" },
@@ -123,15 +126,13 @@ const Dondamua = ({ category, showcmt }) => {
                             <div className="col-md-6 col-lg-3">
                                 <div className="form-group">
                                     <label>Trạng thái:</label>
-                                    <select
-                                        className="form-select"
-                                        value={selectedStatus}
-                                        onChange={e => setSelectedStatus(e.target.value)}
-                                    >
-                                        {statusOptions.map(option => (
-                                            <option key={option.value} value={option.value}>{option.label}</option>
-                                        ))}
-                                    </select>
+                                    <Select
+                                        value={statusOptions.find((option) => option.value === selectedStatus)}
+                                        onChange={(option) => setSelectedStatus(option ? option.value : "")}
+                                        options={statusOptions}
+                                        placeholder="Chọn trạng thái"
+                                        isClearable
+                                    />
                                 </div>
                             </div>
                             <div className="col-md-6 col-lg-3">
@@ -199,7 +200,7 @@ const Dondamua = ({ category, showcmt }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredOrders.map((order, index) => (
+                                        {orders.map((order, index) => (
                                             <tr key={index}>
                                                 <td>{order.Madon}</td>
                                                 <td>
@@ -219,68 +220,72 @@ const Dondamua = ({ category, showcmt }) => {
                                                             Thao tác <i className="las la-angle-right ms-1"></i>
                                                         </button>
                                                         <ul className="dropdown-menu">
-<li>
-                                                                {order.refil === "on" && (
-                                                                    <button
-                                                                        className="dropdown-item text-success"
-                                                                        onClick={async () => {
-                                                                            const confirm = await Swal.fire({
-                                                                                title: `Bạn có chắc chắn muốn bảo hành cho đơn ${order.Madon}?`,
-                                                                                text: `Nếu đơn hàng bị từ chối bảo hành thì hãy kiểm tra xem các vấn đề sau : quá thời gian bảo hành hoặc vi phạm điều khoản lưu ý của dịch vụ.`,
-                                                                                icon: "question",
-                                                                                showCancelButton: true,
-                                                                                confirmButtonText: "Xác nhận",
-                                                                                cancelButtonText: "Hủy"
-                                                                            });
-                                                                            if (!confirm.isConfirmed) return;
-                                                                            loadingg("Đang thực hiện bảo hành...", true, 9999999);
-                                                                            try {
-                                                                                const result = await refillOrder(order.Madon, token);
-                                                                                if (result.success) {
-                                                                                    toast.success(`Bảo hành thành công cho đơn ${order.Madon}`);
+                                                            {order.status === "Completed" && (
+                                                                <li>
+                                                                    {order.refil === "on" && (
+                                                                        <button
+                                                                            className="dropdown-item text-success"
+                                                                            onClick={async () => {
+                                                                                const confirm = await Swal.fire({
+                                                                                    title: `Bạn có chắc chắn muốn bảo hành cho đơn ${order.Madon}?`,
+                                                                                    text: `Nếu đơn hàng bị từ chối bảo hành thì hãy kiểm tra xem các vấn đề sau : quá thời gian bảo hành hoặc vi phạm điều khoản lưu ý của dịch vụ.`,
+                                                                                    icon: "question",
+                                                                                    showCancelButton: true,
+                                                                                    confirmButtonText: "Xác nhận",
+                                                                                    cancelButtonText: "Hủy"
+                                                                                });
+                                                                                if (!confirm.isConfirmed) return;
+                                                                                loadingg("Đang thực hiện bảo hành...", true, 9999999);
+                                                                                try {
+                                                                                    const result = await refillOrder(order.Madon, token);
+                                                                                    if (result.success) {
+                                                                                        toast.success(`Bảo hành thành công cho đơn ${order.Madon}`);
+                                                                                    }
+                                                                                } catch (err) {
+                                                                                    toast.error(`Bảo hành thất bại: ${err.message}`);
+                                                                                } finally {
+                                                                                    loadingg(false);
                                                                                 }
-                                                                            } catch (err) {
-                                                                                toast.error(`Bảo hành thất bại: ${err.message}`);
-                                                                            } finally {
-                                                                                loadingg(false);
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        Bảo hành
-                                                                    </button>
-                                                                )}
-                                                            </li>
-                                                            <li>
-                                                                {order.cancel === "on" && (
-                                                                    <button
-                                                                        className="dropdown-item text-danger"
-                                                                        onClick={async () => {
-                                                                            const confirm = await Swal.fire({
-                                                                                title: `Bạn có chắc chắn muốn hủy hoàn đơn #${order.Madon}?`,
-                                                                                text: `Hệ thống sẽ hoàn lại SỐ LƯỢNG CHƯA CHẠY và Trừ phí hoàn 1k hoặc 0đ tùy dịch vụ ( Nếu Sv ghi không hỗ trợ hủy , yêu cầu này sẽ bị từ chối )`,
-                                                                                icon: "warning",
-                                                                                showCancelButton: true,
-                                                                                confirmButtonText: "Xác nhận",
-                                                                                cancelButtonText: "Hủy"
-                                                                            });
-                                                                            if (!confirm.isConfirmed) return;
-                                                                            loadingg("Đang thực hiện hủy hoàn...", true, 9999999);
-                                                                            try {
-                                                                                const result = await cancelOrder(order.Madon, token);
-                                                                                if (result.success) {
-                                                                                    toast.success(`Hủy hoàn thành công cho đơn ${order.Madon}`);
+                                                                            }}
+                                                                        >
+                                                                            Bảo hành
+                                                                        </button>
+                                                                    )}
+                                                                </li>
+                                                            )}
+                                                            {order.status === "In progress" || order.status === "Processing" || order.status === "Pending" && (
+                                                                <li>
+                                                                    {order.cancel === "on" && (
+                                                                        <button
+                                                                            className="dropdown-item text-danger"
+                                                                            onClick={async () => {
+                                                                                const confirm = await Swal.fire({
+                                                                                    title: `Bạn có chắc chắn muốn hủy hoàn đơn #${order.Madon}?`,
+                                                                                    text: `Hệ thống sẽ hoàn lại SỐ LƯỢNG CHƯA CHẠY và Trừ phí hoàn 1k hoặc 0đ tùy dịch vụ ( Nếu Sv ghi không hỗ trợ hủy , yêu cầu này sẽ bị từ chối )`,
+                                                                                    icon: "warning",
+                                                                                    showCancelButton: true,
+                                                                                    confirmButtonText: "Xác nhận",
+                                                                                    cancelButtonText: "Hủy"
+                                                                                });
+                                                                                if (!confirm.isConfirmed) return;
+                                                                                loadingg("Đang thực hiện hủy hoàn...", true, 9999999);
+                                                                                try {
+                                                                                    const result = await cancelOrder(order.Madon, token);
+                                                                                    if (result.success) {
+                                                                                        toast.success(`Hủy hoàn thành công cho đơn ${order.Madon}`);
+                                                                                    }
+                                                                                } catch (err) {
+                                                                                    toast.error(`Hủy hoàn thất bại: ${err.message}`);
+                                                                                } finally {
+                                                                                    loadingg(false);
                                                                                 }
-                                                                            } catch (err) {
-                                                                                toast.error(`Hủy hoàn thất bại: ${err.message}`);
-                                                                            } finally {
-                                                                                loadingg(false);
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        Hủy hoàn
-                                                                    </button>
-                                                                )}
-                                                            </li>
+                                                                            }}
+                                                                        >
+                                                                            Hủy hoàn
+                                                                        </button>
+                                                                    )}
+                                                                </li>
+                                                            )}
                                                         </ul>
                                                     </div>
                                                 </td>
@@ -319,8 +324,12 @@ const Dondamua = ({ category, showcmt }) => {
                                                         <span className="badge bg-warning text-dark">Chờ hoàn</span>
                                                     ) : order.status === "Completed" ? (
                                                         <span className="badge bg-success">Hoàn thành</span>
-                                                    ) : order.status === "In progress" || order.status === "Processing" || order.status === "Pending" ? (
+                                                    ) : order.status === "In progress" ? (
                                                         <span className="badge bg-primary">Đang chạy</span>
+                                                    ) : order.status === "Processing" ? (
+                                                        <span className="badge bg-purple" style={{ backgroundColor: '#6610f2', color: '#fff' }}>Đang xử lý</span>
+                                                    ) : order.status === "Pending" ? (
+                                                        <span className="badge" style={{ backgroundColor: '#ec8237ff', color: '#fff' }}>Chờ xử lý</span>
                                                     ) : order.status === "Partial" ? (
                                                         <span className="badge bg-warning text-dark">Đã hoàn 1 phần</span>
                                                     ) : order.status === "Canceled" ? (
@@ -329,6 +338,7 @@ const Dondamua = ({ category, showcmt }) => {
                                                         <span>{order.status}</span>
                                                     )}
                                                 </td>
+
                                                 {showcmt && (
                                                     <td>
                                                         {order.comments ? (
