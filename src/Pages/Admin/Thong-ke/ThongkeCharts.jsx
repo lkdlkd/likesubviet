@@ -111,7 +111,7 @@ export function ThongkeCharts({ chartData }) {
                             })}
                         </div>
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data} margin={{ top: 10, right: 30, left: 60, bottom: 0 }}>
+                            <BarChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis
                                     dataKey="date"
@@ -124,7 +124,7 @@ export function ThongkeCharts({ chartData }) {
                                     interval={0}
                                 />
                                 <YAxis
-                                    label={{ value: "Số tiền (VNĐ)", angle: -90, position: "insideLeft", offset: -20 }}
+                                    // label={{ value: "Số tiền (VNĐ)", angle: -90, position: "insideLeft", offset: -20 }}
                                     tickFormatter={formatCurrency}
                                     domain={[0, Math.ceil(maxY * 1.1 / 10000) * 10000]}
                                 />

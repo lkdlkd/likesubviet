@@ -242,6 +242,7 @@ export default function ThongkePage() {
                                     <th>Order nguồn</th>
                                     <th>Order site</th>
                                     <th>Lãi</th>
+                                    <th>Hoàn</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -251,6 +252,22 @@ export default function ThongkePage() {
                                         <td>{Number(item.totalTientieu).toLocaleString('en-US')}</td>
                                         <td>{Number(item.totalCost).toLocaleString('en-US')}</td>
                                         <td>{Number(item.totalLai).toLocaleString('en-US')}</td>
+                                        <td>
+                                            {Number(item.totalRefund).toLocaleString('en-US')}
+                                            <button
+                                                className="btn btn-sm btn-outline-info ms-2"
+                                                type="button"
+                                                onClick={() => setShowLaiTheoDomain(showLaiTheoDomain === idx ? null : idx)}
+                                            >
+                                                Chi tiết
+                                            </button>
+                                            {showLaiTheoDomain === idx && (
+                                                <div className="mt-2 p-2 bg-light border rounded">
+                                                    <div><b>Hoàn Partial:</b> {Number(item.totalRefundPartial).toLocaleString('en-US')}</div>
+                                                    <div><b>Hoàn Canceled:</b> {Number(item.totalRefundCanceled).toLocaleString('en-US')}</div>
+                                                </div>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
