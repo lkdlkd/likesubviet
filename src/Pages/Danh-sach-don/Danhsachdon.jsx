@@ -392,7 +392,15 @@ const Danhsachdon = () => {
                                                     wordWrap: "break-word",
                                                     overflowWrap: "break-word",
                                                 }}>
-                                                    <p><a href={order.ObjectLink} target="_blank">{order.link}</a></p>
+                                                    <p>
+                                                        <a 
+                                                            href={order.ObjectLink && order.ObjectLink.startsWith('http') ? order.ObjectLink : `https://${order.ObjectLink}`} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            {order.link}
+                                                        </a>
+                                                    </p>
                                                 </td>
                                                 <td style={{
                                                     maxWidth: "250px",
