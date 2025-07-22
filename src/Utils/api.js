@@ -58,12 +58,29 @@ const handleResponse = async (response) => {
 
 // Auth
 export const login = async (data) => {
-  const ip = await fetch("https://api.ipify.org?format=json").then(res => res.json()).then(json => json.ip).catch(() => "");
+  // Lấy IP của người dùng (hỗ trợ cả IPv4 và IPv6)
+  let userIP = "";
+  try {
+    // Thử lấy IPv6 trước
+    const ipv6Response = await fetch("https://api64.ipify.org?format=json");
+    const ipv6Data = await ipv6Response.json();
+    userIP = ipv6Data.ip;
+  } catch (error) {
+    try {
+      // Nếu IPv6 thất bại, thử IPv4
+      const ipv4Response = await fetch("https://api.ipify.org?format=json");
+      const ipv4Data = await ipv4Response.json();
+      userIP = ipv4Data.ip;
+    } catch (fallbackError) {
+      userIP = "Unknown";
+    }
+  }
 
   const response = await fetch(`${API_BASE}/login`, {
     method: "POST",
     headers: withNoStore({
-      "Content-Type": "application/json", "X-Forwarded-For": ip, // Thêm IP vào header này
+      "Content-Type": "application/json",
+      "X-User-IP": userIP // Gửi IP thật của người dùng
     }),
     body: JSON.stringify(data),
   });
