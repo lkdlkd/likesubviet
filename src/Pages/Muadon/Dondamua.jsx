@@ -24,6 +24,7 @@ const Dondamua = ({ category, showcmt }) => {
     const [totalPages, setTotalPages] = useState(1);
     const [limit, setLimit] = useState(10);
     const [selectedStatus, setSelectedStatus] = useState("");
+    const [selectedDomain, setSelectedDomain] = useState("");
 
     // Lấy đơn hàng theo category (path), tìm kiếm, phân trang
     const fetchOrders = async () => {
@@ -93,6 +94,12 @@ const Dondamua = ({ category, showcmt }) => {
         { value: "Canceled", label: "Đã hủy" },
     ];
 
+    // Tạo options cho domain selector
+    const domainOptions = useMemo(() => {
+        const domains = [...new Set(orders.map(order => order.DomainSmm).filter(Boolean))];
+        return domains.map(domain => ({ value: domain, label: domain }));
+    }, [orders]);
+
     const handleCopyText = (order) => {
         const textToCopy = `Username : ${order.username} \nMã đơn : ${order.Madon} \nJob id : ${order.link} \nTên Sv : ${order.maychu || ""}${order.namesv || ""}\nNgày tạo : ${new Date(order.createdAt).toLocaleString("vi-VN", {
             day: "2-digit",
@@ -108,6 +115,46 @@ const Dondamua = ({ category, showcmt }) => {
                     icon: "success",
                     title: "Sao chép thành công!",
                     text: textToCopy,
+                    confirmButtonText: "OK",
+                });
+            })
+            .catch(() => {
+                toast.error("Không thể sao chép!");
+            });
+    };
+
+    const handleCopyAllOrdersByDomain = () => {
+        if (!selectedDomain) {
+            toast.error("Vui lòng chọn nguồn trước khi copy!");
+            return;
+        }
+
+        // Lọc đơn hàng theo domain đã chọn
+        const filteredOrders = orders.filter(order => order.DomainSmm === selectedDomain);
+        
+        if (filteredOrders.length === 0) {
+            toast.error("Không có đơn hàng nào từ nguồn này!");
+            return;
+        }
+
+        // Lấy tất cả OrderID từ nguồn đã chọn
+        const orderIds = filteredOrders
+            .filter(order => order.orderId)
+            .map(order => order.orderId);
+
+        if (orderIds.length === 0) {
+            toast.error("Không có OrderID nào để sao chép!");
+            return;
+        }
+
+        const copyText = orderIds.join(",");
+
+        navigator.clipboard.writeText(copyText)
+            .then(() => {
+                Swal.fire({
+                    icon: "success",
+                    title: "Sao chép thành công!",
+                    text: `Đã sao chép ${orderIds.length} OrderID từ nguồn: ${selectedDomain}`,
                     confirmButtonText: "OK",
                 });
             })
@@ -174,7 +221,38 @@ const Dondamua = ({ category, showcmt }) => {
                                     </select>
                                 </div>
                             </div>
+
                         </div>
+                        {userRole === "admin" && (
+                            <div className="row mb-3">
+                                <div className="col-md-6 col-lg-4">
+                                    <div className="form-group">
+                                        <label>Chọn nguồn để copy:</label>
+                                        <Select
+                                            value={domainOptions.find(option => option.value === selectedDomain)}
+                                            onChange={(option) => setSelectedDomain(option ? option.value : "")}
+                                            options={domainOptions}
+                                            placeholder="Chọn nguồn"
+                                            isClearable
+                                        />
+                                    </div>
+                                </div>
+                                <div className="col-md-6 col-lg-4">
+                                    <div className="form-group">
+                                        <label>&nbsp;</label>
+                                        <div>
+                                            <button 
+                                                className="btn btn-sm btn-info"
+                                                onClick={handleCopyAllOrdersByDomain}
+                                                disabled={!selectedDomain}
+                                            >
+                                                Copy OrderID từ nguồn: {selectedDomain || "Chưa chọn"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         <div className="table-responsive table-bordered">
                             {loadingOrders ? (
                                 <div style={{ minHeight: "200px" }} className="d-flex justify-content-center align-items-center">
