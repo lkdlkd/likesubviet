@@ -27,7 +27,7 @@ export default function Dichvupage() {
   const [selectedServer, setSelectedServer] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false); // Trạng thái hiển thị modal chỉnh sửa
   const [selectedService, setSelectedService] = useState(null); // Dịch vụ được chọn để chỉnh sửa
-  const [quickAddMode, setQuickAddMode] = useState(false); // <--- ADD THIS
+  const [quickAddMode, setQuickAddMode] = useState(true); // <--- ADD THIS
   const [showAddModal, setShowAddModal] = useState(false); // Trạng thái hiển thị modal thêm dịch vụ
   // Lấy danh sách nền tảng duy nhất
   const platforms = Array.from(new Set(servers.map((s) => s.type)));
@@ -239,7 +239,7 @@ export default function Dichvupage() {
                   }
 
                   const result = await Swal.fire({
-                    title: "Bạn có chắc chắn muốn xóa?",
+                    title: `Bạn có chắc chắn muốn xóa ${selectedServers.length} server đã chọn?`,
                     text: "Hành động này không thể hoàn tác!",
                     icon: "warning",
                     showCancelButton: true,
@@ -342,14 +342,16 @@ export default function Dichvupage() {
                                         <input
                                           type="checkbox"
                                           onChange={(e) => {
+                                            const visibleServerIds = filteredServers.filter(s => s.type === selectedType && s.category === category).map(s => s._id);
                                             if (e.target.checked) {
-                                              setSelectedServers(servers.map((server) => server._id)); // Chọn tất cả
+                                              setSelectedServers(prev => Array.from(new Set([...prev, ...visibleServerIds])));
                                             } else {
-                                              setSelectedServers([]); // Bỏ chọn tất cả
+                                              setSelectedServers(prev => prev.filter(id => !visibleServerIds.includes(id)));
                                             }
                                           }}
                                           checked={
-                                            selectedServers.length === servers.length && servers.length > 0
+                                            filteredServers.filter(s => s.type === selectedType && s.category === category).every(s => selectedServers.includes(s._id)) &&
+                                            filteredServers.filter(s => s.type === selectedType && s.category === category).length > 0
                                           }
                                         />
                                       </th>

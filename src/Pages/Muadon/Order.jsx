@@ -921,9 +921,10 @@ export default function Order() {
                                             <button
                                                 type="submit"
                                                 className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                                                disabled={isSubmitting || isConverting}
                                             >
                                                 <i className="fas fa-shopping-cart"></i>
-                                                {isSubmitting ? "Đang xử lý..." : "Tạo đơn hàng"}
+                                                {isSubmitting ? "Đang xử lý..." : isConverting ? "Đang lấy uid..." : "Tạo đơn hàng"}
                                             </button>
                                         </div>
 
