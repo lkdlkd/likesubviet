@@ -6,12 +6,13 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
 import { loadingg } from "@/JS/Loading";
-
+import ConfigCard from "../ConfigCard/ConfigCard";
 export default function BankingAdmin() {
   const [bankList, setBankList] = useState([]);
   const [editingBank, setEditingBank] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("banking");
 
   // Lấy token từ localStorage
   const token = localStorage.getItem("token") || "";
@@ -123,6 +124,30 @@ export default function BankingAdmin() {
 
   return (
     <div className="container mt-5">
+      {/* Nút chuyển đổi hiển thị ConfigCard */}
+      <div className="col-md-12 mb-4">
+        <div className="row">
+          <div className="col-6 d-grid gap-2">
+            <button
+              className={`btn rounded-pill shadow-sm fw-bold ${activeTab === "banking" ? "btn-primary" : "btn-outline-primary"
+                }`}
+              onClick={() => setActiveTab("banking")}
+            >
+              <i className="fa fa-history"></i> Cấu hình ngân hàng
+            </button>
+          </div>
+          <div className="col-6 d-grid gap-2">
+            <button
+              className={`btn rounded-pill shadow-sm fw-bold ${activeTab === "configcard" ? "btn-primary" : "btn-outline-primary"
+                }`}
+              onClick={() => setActiveTab("configcard")}
+            >
+              <i className="fa fa-shopping-cart"></i> Cấu hình thẻ nạp
+            </button>
+          </div>
+
+        </div>
+      </div>
       {showModal && (
         <ModalBanking
           editing={!!editingBank}
@@ -144,93 +169,98 @@ export default function BankingAdmin() {
         />
       )}
 
-      <div className="card shadow-sm">
-        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h4 className="mb-0">Danh sách ngân hàng</h4>
-          <button className="btn btn-light btn-sm" onClick={handleAddClick}>
-            Thêm ngân hàng
-          </button>
-        </div>
-        <div className="card-body">
-          {loading ? (
-            <p className="text-center">Đang tải dữ liệu...</p>
-          ) : bankList.length === 0 ? (
-            <p className="text-center">Không có ngân hàng nào trong danh sách.</p>
-          ) : (
-            <div className="table-responsive">
-              <Table striped bordered hover>
-                <thead className="table-primary">
-                  <tr>
-                    <th>Thao tác</th>
-                    <th>Ngân Hàng</th>
-                    <th>Tên chủ tài khoản</th>
-                    <th>Số tài khoản</th>
-                    <th>Logo</th>
-                    <th>Tài khoản ngân hàng</th>
-                    <th>Số tiền nạp tối thiểu</th>
-                    <th>Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bankList.map((bank) => (
-                    <tr key={bank._id}>
-                      <td>
-                        <div className="dropdown">
-                          <button
-                            className="btn btn-primary dropdown-toggle"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                          >
-                            Thao tác <i className="las la-angle-right ms-1"></i>
-                          </button>
-                          <ul className="dropdown-menu">
-                            <li>
-                              <button
-                                className="dropdown-item text-primary "
-                                onClick={() => handleEditClick(bank)}
-                              >
-                                Sửa
-                              </button>
-                            </li>
-                            <li>
-                              <button
-                                className="dropdown-item text-danger"
-                                onClick={() => handleDelete(bank._id)}
-                              >
-                                Xóa
-                              </button>
-                            </li>
-                          </ul>
-                        </div>
-                      </td>
-                      <td>{bank.bank_name}</td>
-                      <td>{bank.account_name}</td>
-                      <td>{bank.account_number}</td>
-                      <td>
-                        {bank.logo ? (
-                          <img
-                            src={bank.logo}
-                            alt="Logo"
-                            width={50}
-                            height={50}
-                            style={{ objectFit: "contain" }}
-                          />
-                        ) : (
-                          <span>Không có logo</span>
-                        )}
-                      </td>
-                      <td>{bank.bank_account}</td>
-                      <td>{bank.min_recharge.toLocaleString("en-US")}</td>
-                      <td>{bank.status ? "Hoạt động" : "Ngưng hoạt động"}</td>
+      {activeTab === "banking" && (
+        <div className="card shadow-sm">
+          <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 className="mb-0">Danh sách ngân hàng</h4>
+            <button className="btn btn-light btn-sm" onClick={handleAddClick}>
+              Thêm ngân hàng
+            </button>
+          </div>
+          <div className="card-body">
+            {loading ? (
+              <p className="text-center">Đang tải dữ liệu...</p>
+            ) : bankList.length === 0 ? (
+              <p className="text-center">Không có ngân hàng nào trong danh sách.</p>
+            ) : (
+              <div className="table-responsive">
+                <Table striped bordered hover>
+                  <thead className="table-primary">
+                    <tr>
+                      <th>Thao tác</th>
+                      <th>Ngân Hàng</th>
+                      <th>Tên chủ tài khoản</th>
+                      <th>Số tài khoản</th>
+                      <th>Logo</th>
+                      <th>Tài khoản ngân hàng</th>
+                      <th>Số tiền nạp tối thiểu</th>
+                      <th>Trạng thái</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
-          )}
+                  </thead>
+                  <tbody>
+                    {bankList.map((bank) => (
+                      <tr key={bank._id}>
+                        <td>
+                          <div className="dropdown">
+                            <button
+                              className="btn btn-primary dropdown-toggle"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                              aria-expanded="false"
+                            >
+                              Thao tác <i className="las la-angle-right ms-1"></i>
+                            </button>
+                            <ul className="dropdown-menu">
+                              <li>
+                                <button
+                                  className="dropdown-item text-primary "
+                                  onClick={() => handleEditClick(bank)}
+                                >
+                                  Sửa
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  className="dropdown-item text-danger"
+                                  onClick={() => handleDelete(bank._id)}
+                                >
+                                  Xóa
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                        </td>
+                        <td>{bank.bank_name}</td>
+                        <td>{bank.account_name}</td>
+                        <td>{bank.account_number}</td>
+                        <td>
+                          {bank.logo ? (
+                            <img
+                              src={bank.logo}
+                              alt="Logo"
+                              width={50}
+                              height={50}
+                              style={{ objectFit: "contain" }}
+                            />
+                          ) : (
+                            <span>Không có logo</span>
+                          )}
+                        </td>
+                        <td>{bank.bank_account}</td>
+                        <td>{bank.min_recharge.toLocaleString("en-US")}</td>
+                        <td>{bank.status ? "Hoạt động" : "Ngưng hoạt động"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
+      {activeTab === "configcard" && (
+        <ConfigCard />
+      )}
     </div>
   );
 }

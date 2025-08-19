@@ -114,11 +114,11 @@ function MenuUser({ user, categories, configWeb }) {
                                                     <span className="pc-mtext">Cài đặt khuyễn mãi</span>
                                                 </Link>
                                             </li>
-                                            <li className="pc-item">
+                                            {/* <li className="pc-item">
                                                 <Link to="/admin/setting-thecao" className="pc-link">
                                                     <span className="pc-mtext">Cấu hình nạp thẻ</span>
                                                 </Link>
-                                            </li>
+                                            </li> */}
                                             <li className="pc-item">
                                                 <Link to="/admin/config-tele" className="pc-link">
                                                     <span className="pc-mtext">Cấu hình Telegram</span>

@@ -656,15 +656,15 @@ export const updateConfigCard = async (data, token) => {
   });
   return handleResponse(response); // Xử lý phản hồi từ API
 };
-// Lấy số dư từ SMM
-export const getBalanceFromSmm = async (id, token) => {
-  const response = await fetch(`${API_BASE}/getbalance/${id}`, {
-    method: "GET",
-    headers: withNoStore({ Authorization: `Bearer ${token}` }),
-    cache: "no-store",
-  });
-  return handleResponse(response);
-};
+// // Lấy số dư từ SMM
+// export const getBalanceFromSmm = async (id, token) => {
+//   const response = await fetch(`${API_BASE}/getbalance/${id}`, {
+//     method: "GET",
+//     headers: withNoStore({ Authorization: `Bearer ${token}` }),
+//     cache: "no-store",
+//   });
+//   return handleResponse(response);
+// };
 
 // Lấy danh sách dịch vụ từ SMM
 export const getServicesFromSmm = async (id, token) => {

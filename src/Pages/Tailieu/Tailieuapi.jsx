@@ -47,6 +47,8 @@ export default function Tailieuapi() {
                                 { id: "add", label: "Add order" },
                                 { id: "status", label: "Order status" },
                                 { id: "multistatus", label: "Multiple orders status" },
+                                { id: "cancel", label: "Cancel order" },
+                                { id: "refill", label: "Refill order" },
                                 { id: "balance", label: "Balance" },
                             ].map((tab, index) => (
                                 <li className="nav-item w-md-200px me-0" role="presentation" key={index}>
@@ -237,7 +239,7 @@ export default function Tailieuapi() {
                                                     </tr>
                                                     <tr>
                                                         <td>orders</td>
-                                                        <td  style={{
+                                                        <td style={{
                                                             maxWidth: "570px",
                                                             whiteSpace: "normal",
                                                             wordWrap: "break-word",
@@ -299,10 +301,92 @@ export default function Tailieuapi() {
                                             <h6 data-lang="Example response">Example response</h6>
                                             <div className="bg-light p-3">
                                                 <pre className="language-html mb-0">
-                                                    {`
+                                                    {`  
 {
     "balance": "343423",
-    "currency": "VND"
+    "currency": "USD"
+}`}
+                                                </pre>
+                                            </div>
+                                        </>
+                                    ),
+                                },
+                                {
+                                    id: "cancel",
+                                    content: (
+                                        <>
+                                            <Table striped bordered hover>
+                                                <tbody>
+                                                    <tr className="bg-light">
+                                                        <td className="fw-bolder" data-lang="Parameters">
+                                                            Parameters
+                                                        </td>
+                                                        <td className="fw-bolder" data-lang="Description">
+                                                            Description
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>key</td>
+                                                        <td>API Key</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>action</td>
+                                                        <td>"cancel"</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>order</td>
+                                                        <td>Order ID</td>
+                                                    </tr>
+                                                </tbody>
+                                            </Table>
+                                            <h6 data-lang="Example response">Example response</h6>
+                                            <div className="bg-light p-3">
+                                                <pre className="language-html mb-0">
+                                                    {`
+{
+    "order": 2,
+    "cancel": 1
+}
+`}
+                                                </pre>
+                                            </div>
+                                        </>
+                                    ),
+                                },
+                                {
+                                    id: "refill",
+                                    content: (
+                                        <>
+                                            <Table striped bordered hover>
+                                                <tbody>
+                                                    <tr className="bg-light">
+                                                        <td className="fw-bolder" data-lang="Parameters">
+                                                            Parameters
+                                                        </td>
+                                                        <td className="fw-bolder" data-lang="Description">
+                                                            Description
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>key</td>
+                                                        <td>API Key</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>action</td>
+                                                        <td>"refill"</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>order</td>
+                                                        <td>Order ID</td>
+                                                    </tr>
+                                                </tbody>
+                                            </Table>
+                                            <h6 data-lang="Example response">Example response</h6>
+                                            <div className="bg-light p-3">
+                                                <pre className="language-html mb-0">
+                                                    {`
+{
+    "refill": "1"
 }`}
                                                 </pre>
                                             </div>

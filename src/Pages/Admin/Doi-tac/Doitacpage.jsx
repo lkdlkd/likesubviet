@@ -1,8 +1,7 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import Adddoitac from "@/Pages/Admin/Doi-tac/Adddoitac";
-import { deleteSmmPartner, getAllSmmPartners, getBalanceFromSmm } from "@/Utils/api";
+import { deleteSmmPartner, getAllSmmPartners } from "@/Utils/api";
 import Table from "react-bootstrap/Table";
 import { loadingg } from "@/JS/Loading";
 
@@ -14,18 +13,18 @@ export default function Doitacpage() {
 
   const token = localStorage.getItem("token") || "";
 
-  const fetchBalancesForPartners = async (partners) => {
-    loadingg("Đang tải số dư đối tác...", true, 9999999);
-    const updatedPartners = await Promise.all(
-      partners.map(async (partner) => {
-        const balance = await getBalanceFromSmm(partner._id, token); // Sử dụng hàm mới
-        const convertedBalance = balance.data.balance * (partner.tigia || 1); // Nhân balance với tigia (mặc định là 1 nếu không có)
-        return { ...partner, balance: convertedBalance };
-      })
-    );
-    setSmmPartners(updatedPartners);
-    loadingg("", false);
-  };
+  // const fetchBalancesForPartners = async (partners) => {
+  //   loadingg("Đang tải số dư đối tác...", true, 9999999);
+  //   const updatedPartners = await Promise.all(
+  //     partners.map(async (partner) => {
+  //       const balance = await getBalanceFromSmm(partner._id, token); // Sử dụng hàm mới
+  //       const convertedBalance = balance.data.balance * (partner.tigia || 1); // Nhân balance với tigia (mặc định là 1 nếu không có)
+  //       return { ...partner, balance: convertedBalance };
+  //     })
+  //   );
+  //   setSmmPartners(updatedPartners);
+  //   loadingg("", false);
+  // };
 
   useEffect(() => {
     const fetchSmmPartners = async () => {
@@ -33,7 +32,7 @@ export default function Doitacpage() {
         loadingg("Đang tải danh sách đối tác...", true, 9999999);
         const partners = await getAllSmmPartners(token);
         setSmmPartners(partners);
-        await fetchBalancesForPartners(partners);
+        // await fetchBalancesForPartners(partners);
       } catch (error) {
         Swal.fire("Lỗi!", "Không thể tải danh sách đối tác. Vui lòng thử lại.", "error");
       } finally {
@@ -182,7 +181,7 @@ export default function Doitacpage() {
                           </td>
                           <td>{partner.name}</td>
                           <td>{partner.url_api}</td>
-                          <td>{Number(partner.balance).toLocaleString("en-US") !== undefined ? Number(partner.balance).toLocaleString("es-US") : "Đang tải..."}</td>
+                          <td>{Number(partner.balance).toLocaleString("en-US") || "Đang tải..."}</td>
                           {/* <td>{partner.balance !== undefined ? partner.balance : "Đang tải..."}</td> */}
                           <td>{partner.phihoan}</td>
                           <td>{partner.price_update}</td>

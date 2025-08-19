@@ -20,7 +20,7 @@ import PlatformsPage from "./Pages/Admin/Nen-tang/PlatformsPage";
 import CategoriesPage from "./Pages/Admin/Dich-vu/CategoriesPage";
 import Dichvupage from "./Pages/Admin/Server/Dichvupage";
 import Setting from "./Pages/Admin/ConfigWeb/Setting";
-import ConfigCard from "./Pages/Admin/ConfigCard/ConfigCard";
+// import ConfigCard from "./Pages/Admin/ConfigCard/ConfigCard";
 import Tailieuapi from "./Pages/Tailieu/Tailieuapi";
 import NotFoundPage from "./Pages/404";
 import Khuyenmai from "./Pages/Admin/Khuyenmai/khuyenmai";
@@ -92,7 +92,7 @@ function App() {
             <Route path="/admin/dich-vu" element={<CategoriesPage />} />
             <Route path="/admin/server" element={<Dichvupage />} />
             <Route path="/admin/setting" element={<Setting />} />
-            <Route path="/admin/setting-thecao" element={<ConfigCard />} />
+            {/* <Route path="/admin/setting-thecao" element={<ConfigCard />} /> */}
             <Route path="/admin/khuyen-mai" element={<Khuyenmai />} />
             <Route path="/admin/nap-tien-tu-dong" element={<Naptientudong />} />
             <Route path="/admin/config-tele" element={<ConfigTelePage />} />
