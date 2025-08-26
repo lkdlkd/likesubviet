@@ -221,10 +221,16 @@ export default function History() {
                                         </thead>
                                         <tbody>
                                             {loading ? (
-                                                <div style={{ minHeight: "200px" }} className="d-flex justify-content-center align-items-center">
-                                                    {/* <div className="spinner-border text-primary" role="status" />
-                                                    <span className="ms-2">Đang tải dữ liệu...</span> */}
-                                                </div>
+                                                <tr>
+                                                    <td colSpan={12} className="text-center py-5">
+                                                        <div className="d-flex flex-column align-items-center justify-content-center">
+                                                            <div className="spinner-border text-primary mb-2" role="status">
+                                                                <span className="visually-hidden">Loading...</span>
+                                                            </div>
+                                                            <span className="mt-2">Đang tải dữ liệu...</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                             ) : historyData && historyData.length === 0 ? (
                                                 <tr>
                                                     <td colSpan={12} className="text-center">
@@ -276,7 +282,8 @@ export default function History() {
                                                                     className="badge bg-info"
                                                                     style={{ backgroundColor: "#43bfe5", display: "block", marginBottom: 2 }}
                                                                 >
-                                                                    {Number(item.tienhientai).toLocaleString("en-US")}
+                                                                    {Math.floor(Number(item.tienhientai)).toLocaleString("en-US")}
+                                                                    {/* {Number(item.tienhientai).toLocaleString("en-US")} */}
                                                                 </span>
                                                                 {isPlusAction || isRefundAction ? (
                                                                     <>
@@ -285,7 +292,8 @@ export default function History() {
                                                                             className="badge"
                                                                             style={{ backgroundColor: "#e53935", display: "block", marginBottom: 2 }}
                                                                         >
-                                                                            {Number(item.tongtien).toLocaleString("en-US")}
+                                                                            {Math.floor(Number(item.tongtien)).toLocaleString("en-US")}
+                                                                            {/* {Number(item.tongtien).toLocaleString("en-US")} */}
                                                                         </span>
                                                                     </>
                                                                 ) : (
@@ -295,13 +303,15 @@ export default function History() {
                                                                             className="badge"
                                                                             style={{ backgroundColor: "#e53935", display: "block", marginBottom: 2 }}
                                                                         >
-                                                                            {Number(item.tongtien).toLocaleString("en-US")}
+                                                                            {Math.floor(Number(item.tongtien)).toLocaleString("en-US")}
+                                                                            {/* {Number(item.tongtien).toLocaleString("en-US")} */}
                                                                         </span>
                                                                     </>
                                                                 )}
                                                                 =
                                                                 <span className="badge bg-success" style={{ display: "block" }}>
-                                                                    {Number(item.tienconlai).toLocaleString("en-US")}
+                                                                    {Math.floor(Number(item.tienconlai)).toLocaleString("en-US")}
+                                                                    {/* {Number(item.tienconlai).toLocaleString("en-US")} */}
                                                                 </span>
                                                             </td>
                                                             <td>

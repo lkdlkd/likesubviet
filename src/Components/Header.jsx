@@ -169,7 +169,8 @@ export default function Header({ user }) {
                                                         <span className="pc-mtext">
                                                             <label>Số dư :</label>{" "}
                                                             {user
-                                                                ? Number(user.balance).toLocaleString("en-US")
+                                                                ? Math.floor(Number(user.balance)).toLocaleString("en-US")
+                                                                // Number(user.balance).toLocaleString("en-US")
                                                                 : "Đang tải..."}{" "}
                                                             đ
                                                         </span>

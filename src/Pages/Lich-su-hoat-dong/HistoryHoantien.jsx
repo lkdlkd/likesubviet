@@ -48,10 +48,16 @@ export default function HistoryHoantien() {
                     </thead>
                     <tbody>
                         {loading ? (
-                            <div style={{ minHeight: "200px" }} className="d-flex justify-content-center align-items-center">
-                                {/* <div className="spinner-border text-primary" role="status" />
-                                <span className="ms-2">Đang tải dữ liệu...</span> */}
-                            </div>
+                            <tr>
+                                <td colSpan={12} className="text-center py-5">
+                                    <div className="d-flex flex-column align-items-center justify-content-center">
+                                        <div className="spinner-border text-primary mb-2" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span className="mt-2">Đang tải dữ liệu...</span>
+                                    </div>
+                                </td>
+                            </tr>
                         ) : data && data.length === 0 ? (
                             <tr>
                                 <td colSpan={7} className="text-center">
@@ -67,7 +73,7 @@ export default function HistoryHoantien() {
                                     <td>{(page - 1) * limit + idx + 1}</td>
                                     <td>{item.username}</td>
                                     <td>{item.madon}</td>
-                                    <td>{Number(Math.round(item.tongtien)).toLocaleString("en-US")}</td>
+                                    <td>{Math.floor(Number(item.tongtien)).toLocaleString("en-US")}</td>
                                     <td style={{
                                         maxWidth: "250px",
                                         whiteSpace: "normal",

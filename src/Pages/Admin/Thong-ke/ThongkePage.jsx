@@ -129,7 +129,9 @@ export default function ThongkePage() {
             icon: "ti ti-rotate",
             bg: "bg-light-warning",
             extra: (
-                <div className="text-warning small">Tổng tiền: {Number(statistics.partialHoan || 0).toLocaleString('en-US')}</div>
+                <div className="text-warning small">Tổng tiền: {Math.floor(Number(statistics.partialHoan || 0)).toLocaleString("en-US")}
+                {/* {Number(statistics.partialHoan || 0).toLocaleString('en-US')} */}
+                </div>
             )
         },
         {
@@ -138,7 +140,9 @@ export default function ThongkePage() {
             icon: "ti ti-ban",
             bg: "bg-light-danger",
             extra: (
-                <div className="text-danger small">Tổng tiền: {Number(statistics.canceledHoan || 0).toLocaleString('en-US')}</div>
+                <div className="text-danger small">Tổng tiền: {Math.floor(Number(statistics.canceledHoan || 0)).toLocaleString("en-US")}
+                {/* {Number(statistics.canceledHoan || 0).toLocaleString('en-US')} */}
+                </div>
             )
         },
     ];
@@ -215,7 +219,9 @@ export default function ThongkePage() {
                                         <i className={`${stat.icon} fs-2`}></i>
                                     </div>
                                     <div>
-                                        <h4 className="mb-0">{Number(stat.value).toLocaleString("en-US")}</h4>
+                                        <h4 className="mb-0"> {Math.floor(Number(stat.value)).toLocaleString("en-US")}
+                                            {/* {Number(stat.value).toLocaleString("en-US")} */}
+                                            </h4>
                                         <p className="mb-0 text-opacity-75 capitalize">{stat.label}</p>
                                         {stat.extra}
                                     </div>
@@ -232,7 +238,9 @@ export default function ThongkePage() {
                 <div className="card card-body p-2 mt-3">
                     <div className="d-flex flex-wrap align-items-center justify-content-between mb-2">
                         <h5 className="mb-0">Chi tiết lãi theo nguồn</h5>
-                        <span className="badge bg-success fs-6">Tổng lãi: {Number(statistics.tongdoanhthu).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="badge bg-success fs-6">Tổng lãi: {Math.floor(Number(statistics.tongdoanhthu)).toLocaleString("en-US")}
+                            {/* {Number(statistics.tongdoanhthu).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} */}
+                            </span>
                     </div>
                     <div className="table-responsive" style={{ maxHeight: 400, overflowY: 'auto' }}>
                         <Table striped bordered hover size="sm" className="mb-0">
@@ -249,11 +257,11 @@ export default function ThongkePage() {
                                 {statistics.laiTheoDomain.map((item, idx) => (
                                     <tr key={idx}>
                                         <td>{item._id || <i>Không xác định</i>}</td>
-                                        <td>{Number(item.totalTientieu).toLocaleString('en-US')}</td>
-                                        <td>{Number(item.totalCost).toLocaleString('en-US')}</td>
-                                        <td>{Number(item.totalLai).toLocaleString('en-US')}</td>
+                                        <td>{Math.floor(Number(item.totalTientieu)).toLocaleString("en-US")}</td>
+                                        <td>{Math.floor(Number(item.totalCost)).toLocaleString("en-US")}</td>
+                                        <td>{Math.floor(Number(item.totalLai)).toLocaleString("en-US")}</td>
                                         <td>
-                                            {Number(item.totalRefund).toLocaleString('en-US')}
+                                            {Math.floor(Number(item.totalRefund)).toLocaleString("en-US")}
                                             <button
                                                 className="btn btn-sm btn-outline-info ms-2"
                                                 type="button"
@@ -263,8 +271,8 @@ export default function ThongkePage() {
                                             </button>
                                             {showLaiTheoDomain === idx && (
                                                 <div className="mt-2 p-2 bg-light border rounded">
-                                                    <div><b>Hoàn Partial:</b> {Number(item.totalRefundPartial).toLocaleString('en-US')}</div>
-                                                    <div><b>Hoàn Canceled:</b> {Number(item.totalRefundCanceled).toLocaleString('en-US')}</div>
+                                                    <div><b>Hoàn Partial:</b> {Math.floor(Number(item.totalRefundPartial)).toLocaleString("en-US")}</div>
+                                                    <div><b>Hoàn Canceled:</b> {Math.floor(Number(item.totalRefundCanceled)).toLocaleString("en-US")}</div>
                                                 </div>
                                             )}
                                         </td>
@@ -289,10 +297,10 @@ export default function ThongkePage() {
 
                                         <td colSpan={2}>Tổng</td>
                                         <td>
-                                            {statistics.magoiStats.reduce((sum, item) => sum + (item.totalOrders || 0), 0).toLocaleString('en-US')}
+                                            {statistics.magoiStats.reduce((sum, item) => sum + Math.floor(Number(item.totalOrders || 0)), 0).toLocaleString('en-US')}
                                         </td>
                                         <td>
-                                            {statistics.magoiStats.reduce((sum, item) => sum + (item.totalAmount || 0), 0).toLocaleString('en-US')}
+                                            {statistics.magoiStats.reduce((sum, item) => sum + Math.floor(Number(item.totalAmount || 0)), 0).toLocaleString('en-US')}
                                         </td>
                                         <td>
                                             {statistics.magoiStats.reduce((sum, item) => sum + (item.partialCount || 0), 0).toLocaleString('en-US')}
@@ -323,7 +331,7 @@ export default function ThongkePage() {
                                                 overflowWrap: "break-word",
                                             }}>{item.namesv}</td>
                                             <td>{item.totalOrders}</td>
-                                            <td>{Number(item.totalAmount).toLocaleString('en-US')}</td>
+                                            <td>{Math.floor(Number(item.totalAmount)).toLocaleString('en-US')}</td>
                                             <td>{item.partialCount}</td>
                                             <td>{item.canceledCount}</td>
                                         </tr>

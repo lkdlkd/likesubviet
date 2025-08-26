@@ -359,10 +359,16 @@ const Danhsachdon = () => {
                                 </thead>
                                 <tbody >
                                     {loadingOrders ? (
-                                        <div style={{ minHeight: "200px" }} className="d-flex justify-content-center align-items-center">
-                                            {/* <div className="spinner-border text-primary" role="status" /> */}
-                                            {/* <span className="ms-2">Đang tải dữ liệu...</span> */}
-                                        </div>
+                                         <tr>
+                                            <td colSpan={12} className="text-center py-5">
+                                                <div className="d-flex flex-column align-items-center justify-content-center">
+                                                    <div className="spinner-border text-primary mb-2" role="status">
+                                                        <span className="visually-hidden">Loading...</span>
+                                                    </div>
+                                                    <span className="mt-2">Đang tải dữ liệu...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     ) : orders.length === 0 ? (
                                         <tr>
                                             <td colSpan={12} className="text-center">
@@ -504,9 +510,11 @@ const Danhsachdon = () => {
                                                         <li><b>Đã chạy</b> : {order.dachay}</li>
                                                         <li><b>Số lượng mua</b> : {order.quantity}</li>
                                                         <li><b>Giá</b> : {Number(order.rate).toLocaleString("en-US")}</li>
-                                                        <li><b>Tổng tiền</b> : {Number(order.totalCost).toLocaleString("en-US")}</li>
+                                                        <li><b>Tổng tiền</b> : {Math.floor(Number(order.totalCost)).toLocaleString("en-US")}
+                                                         {/* {Number(order.totalCost).toLocaleString("en-US")} */}
+                                                         </li>
                                                         {userRole === "admin" && (
-                                                            <li><b>Lãi</b> : {Number(order.lai || 0).toLocaleString("en-US")} - {order.DomainSmm || ""} - {order.orderId}</li>
+                                                            <li><b>Lãi</b> : {Math.floor(Number(order.lai || 0)).toLocaleString("en-US")} - {order.DomainSmm || ""} - {order.orderId}</li>
                                                         )}
 
                                                     </ul>

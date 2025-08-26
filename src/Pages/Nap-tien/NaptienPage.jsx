@@ -99,10 +99,13 @@ export default function NaptienPage() {
             {activeTab === "banking" && (
                 <>
                     <div className="col-md-12">
+                        {/* Hiển thị thông tin banking trước */}
                         <Banking banking={banking} username={username} />
+                    </div>
+                    {/* Sau đó mới hiển thị các trường khác */}
+                    <div className="col-md-12">
                         <HistoryBank token={token} />
                     </div>
-
                     <div className="col-md-12">
                         <div className="card shadow-sm">
                             <div className="card-header">

@@ -1,8 +1,8 @@
 const API_BASE = `${process.env.REACT_APP_API_BASE}/api`;
 
 // Refund APIs
-export const getRefunds = async (token) => {
-  const response = await fetch(`${API_BASE}/refund`, {
+export const getRefunds = async (token,status) => {
+  const response = await fetch(`${API_BASE}/refund?status=${status}`, {
     method: "GET",
     headers: withNoStore({ Authorization: `Bearer ${token}` }),
     cache: "no-store",
