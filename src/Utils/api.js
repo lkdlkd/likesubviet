@@ -1,3 +1,27 @@
+const API_BASE = `${process.env.REACT_APP_API_BASE}/api`;
+
+// Refund APIs
+export const getRefunds = async (token) => {
+  const response = await fetch(`${API_BASE}/refund`, {
+    method: "GET",
+    headers: withNoStore({ Authorization: `Bearer ${token}` }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+export const adminApproveRefund = async (data, token) => {
+  const response = await fetch(`${API_BASE}/refund/approve`, {
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
 // Refill đơn hàng
 export const refillOrder = async (madon, token) => {
   const response = await fetch(`${API_BASE}/refill`, {
@@ -23,7 +47,6 @@ export const cancelOrder = async (madon, token) => {
   });
   return handleResponse(response);
 };
-const API_BASE = process.env.REACT_APP_API_BASE;
 
 // Helper để thêm header Cache-Control
 const withNoStore = (headers = {}) => ({

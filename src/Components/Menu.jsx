@@ -129,7 +129,11 @@ function MenuUser({ user, categories, configWeb }) {
                                                     <span className="pc-mtext">Khách hàng</span>
                                                 </Link>
                                             </li>
-
+                                            <li className="pc-item">
+                                                <Link to="/admin/refund" className="pc-link">
+                                                    <span className="pc-mtext">Hoàn tiền</span>
+                                                </Link>
+                                            </li>
                                             <li className="pc-item">
                                                 <Link to="/admin/thongke" className="pc-link">
                                                     <span className="pc-mtext">Thống kê</span>

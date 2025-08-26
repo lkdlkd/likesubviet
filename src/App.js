@@ -27,6 +27,7 @@ import Khuyenmai from "./Pages/Admin/Khuyenmai/khuyenmai";
 import Naptientudong from "./Pages/Admin/Naptientudong/Naptientudong";
 import Banggia from "./Pages/Banggia/Banggia";
 import ConfigTelePage from "./Pages/Admin/Config-tele/ConfigTelePage";
+import Refund from "./Pages/Admin/Hoantien/Refund";
 function App() {
   return (
     <AuthProvider>
@@ -96,10 +97,12 @@ function App() {
             <Route path="/admin/khuyen-mai" element={<Khuyenmai />} />
             <Route path="/admin/nap-tien-tu-dong" element={<Naptientudong />} />
             <Route path="/admin/config-tele" element={<ConfigTelePage />} />
+            <Route path="/admin/refund" element={<Refund />} />
+
           </Route>
 
           {/* 404 Not Found */}
-          <Route path="/404" element={<NotFoundPage/>} />
+          <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
       </Router>

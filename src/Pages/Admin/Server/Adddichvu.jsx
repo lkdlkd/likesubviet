@@ -183,12 +183,11 @@ export default function Adddichvu({
             const ptgia = partner?.price_update || 0;
             const baseRate = service.rate * tigia;
             const finalRate = Math.ceil(baseRate * 10000 + (baseRate * ptgia) / 100 * 10000) / 10000;
-
             const payload = {
               ...formData,
               serviceId: service.service,
               serviceName: service.name,
-              name: service.name,
+              name: `Gói mới vui lòng không mua`,
               min: service.min || 0,
               max: service.max || 0,
               rate: finalRate,

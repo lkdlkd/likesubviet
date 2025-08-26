@@ -205,11 +205,11 @@ const Banggia = () => {
                                     </div>
                                 );
                             })}
-                            {!loading &&(
+                            {/* {!loading &&(
                                 <div className="text-center mt-5">
                                     <p>Không có dữ liệu bảng giá.</p>
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </div>
