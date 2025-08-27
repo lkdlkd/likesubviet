@@ -49,7 +49,7 @@ export default function HistoryHoantien() {
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan={12} className="text-center py-5">
+                                <td colSpan={7} className="text-center py-5">
                                     <div className="d-flex flex-column align-items-center justify-content-center">
                                         <div className="spinner-border text-primary mb-2" role="status">
                                             <span className="visually-hidden">Loading...</span>
