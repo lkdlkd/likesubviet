@@ -418,8 +418,7 @@ const Dondamua = ({ category, showcmt }) => {
                                                         {/* {Number(order.totalCost).toLocaleString("en-US")} */}
                                                         </li>
                                                         {userRole === "admin" && (
-                                                            <li><b>Lãi</b> : {Math.floor(Number(order.lai || 0)).toLocaleString("en-US")}
-                                                             - {order.DomainSmm || ""} - {order.orderId}</li>
+                                                            <li><b>Lãi</b> : {Math.floor(Number(order.lai || 0)).toLocaleString("en-US")} - {order.DomainSmm || ""} - {order.orderId}</li>
                                                         )}
                                                     </ul>
                                                 </td>

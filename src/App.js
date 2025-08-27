@@ -28,6 +28,7 @@ import Naptientudong from "./Pages/Admin/Naptientudong/Naptientudong";
 import Banggia from "./Pages/Banggia/Banggia";
 import ConfigTelePage from "./Pages/Admin/Config-tele/ConfigTelePage";
 import Refund from "./Pages/Admin/Hoantien/Refund";
+import OrderAdmin from "./Pages/Admin/Donhang/OrderAdmin";
 function App() {
   return (
     <AuthProvider>
@@ -98,7 +99,7 @@ function App() {
             <Route path="/admin/nap-tien-tu-dong" element={<Naptientudong />} />
             <Route path="/admin/config-tele" element={<ConfigTelePage />} />
             <Route path="/admin/refund" element={<Refund />} />
-
+            <Route path="/admin/orders" element={<OrderAdmin />} />
           </Route>
 
           {/* 404 Not Found */}

@@ -381,6 +381,20 @@ export const deleteOrder = async (orderId, token) => {
   return handleResponse(response);
 };
 
+// Cập nhật trạng thái đơn hàng (admin)
+export const updateOrderStatus = async (Madon, data, token) => {
+  const response = await fetch(`${API_BASE}/order/update/${Madon}`, {
+    method: "PUT",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
 // User (Admin)
 export const updateUser = async (id, data, token) => {
   const response = await fetch(`${API_BASE}/user/update/${id}`, {

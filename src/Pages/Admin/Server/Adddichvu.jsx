@@ -187,7 +187,7 @@ export default function Adddichvu({
               ...formData,
               serviceId: service.service,
               serviceName: service.name,
-              name: `Gói mới vui lòng không mua`,
+              name: service.name,
               min: service.min || 0,
               max: service.max || 0,
               rate: finalRate,
