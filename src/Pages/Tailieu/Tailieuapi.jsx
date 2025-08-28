@@ -2,7 +2,7 @@ import React from "react";
 import Table from "react-bootstrap/Table";
 
 export default function Tailieuapi() {
-    const API_DOMAIN = `${process.env.REACT_APP_API_BASE}/v2`; // Lấy tên miền hiện tại và thêm đường dẫn API
+    const API_DOMAIN = `${process.env.REACT_APP_API_BASE}/api/v2`; // Lấy tên miền hiện tại và thêm đường dẫn API
 
     return (
         <div className="page-content">
