@@ -276,7 +276,7 @@ const OrderAdmin = () => {
                             <li><b>Số lượng mua</b> : {order.quantity}</li>
                             <li><b>Giá</b> : {Number(order.rate).toLocaleString("en-US")}</li>
                             <li><b>Tổng tiền</b> : {Math.floor(Number(order.totalCost)).toLocaleString("en-US")}</li>
-                            <li><b>Lãi</b> : {Math.floor(Number(order.lai || 0)).toLocaleString("en-US")}</li>
+                            <li><b>Lãi</b> : {Math.floor(Number(order.lai || 0)).toLocaleString("en-US")} - {order.DomainSmm || ""} - {order.orderId}</li>
                           </ul>
                         </td>
                         <td>
