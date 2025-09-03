@@ -97,10 +97,13 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
           <div className="mb-3">
             <label className="form-label">Số dư</label>
             <input
-              type="number"
+              type="text"
               className="form-control"
-              value={balance}
-              onChange={(e) => setBalance(e.target.value === "" ? "" : Number(e.target.value))}
+              value={balance === "" ? "" : Math.floor(Number(balance) || 0).toLocaleString("en-US")}
+              onChange={(e) => {
+                const val = e.target.value.replace(/,/g, "");
+                setBalance(val === "" ? "" : Number(val));
+              }}
               placeholder="Nhập số dư"
             />
           </div>
@@ -117,20 +120,26 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
           <div className="mb-3">
             <label className="form-label">Tổng nạp</label>
             <input
-              type="number"
+              type="text"
               className="form-control"
-              value={tongnap}
-              onChange={(e) => setTongnap(e.target.value === "" ? "" : Number(e.target.value))}
+              value={tongnap === "" ? "" : Math.floor(Number(tongnap) || 0).toLocaleString("en-US")}
+              onChange={(e) => {
+                const val = e.target.value.replace(/,/g, "");
+                setTongnap(val === "" ? "" : Number(val));
+              }}
               placeholder="Nhập tổng nạp"
             />
           </div>
           <div className="mb-3">
             <label className="form-label">Tổng nạp tháng</label>
             <input
-              type="number"
+              type="text"
               className="form-control"
-              value={tongnapthang}
-              onChange={(e) => setTongnapthang(e.target.value === "" ? "" : Number(e.target.value))}
+              value={tongnapthang === "" ? "" : Math.floor(Number(tongnapthang) || 0).toLocaleString("en-US")}
+              onChange={(e) => {
+                const val = e.target.value.replace(/,/g, "");
+                setTongnapthang(val === "" ? "" : Number(val));
+              }}
               placeholder="Nhập tổng nạp tháng"
             />
           </div>

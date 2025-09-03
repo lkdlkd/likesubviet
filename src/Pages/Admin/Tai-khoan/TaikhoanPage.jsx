@@ -226,8 +226,8 @@ export default function TaikhoanPage() {
                         </div>
                       </td>
                       <td>{user.username}</td>
-                      <td>{Number(user.balance).toLocaleString("en-US")} VNĐ</td>
-                      <td>{Number(user.tongnap).toLocaleString("en-US")} VNĐ</td>
+                      <td>{Math.floor(Number(user.balance) || 0).toLocaleString("en-US")} VNĐ</td>
+                      <td>{Math.floor(Number(user.tongnap) || 0).toLocaleString("en-US")} VNĐ</td>
                       <td>{user.capbac}</td>
                       {/* <td>
                       {user.role === "admin" ? (

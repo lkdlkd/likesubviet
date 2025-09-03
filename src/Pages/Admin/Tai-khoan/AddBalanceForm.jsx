@@ -56,7 +56,7 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
                         <input
                             type="text"
                             className="form-control"
-                            value={Number(user.balance).toLocaleString("en-US")}
+                            value={Math.floor(Number(user.balance) || 0).toLocaleString("en-US")}
                             disabled
                         />
                     </div>
