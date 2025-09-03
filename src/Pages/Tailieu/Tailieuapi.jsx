@@ -47,8 +47,8 @@ export default function Tailieuapi() {
                                 { id: "add", label: "Add order" },
                                 { id: "status", label: "Order status" },
                                 { id: "multistatus", label: "Multiple orders status" },
-                                { id: "cancel", label: "Cancel order" },
-                                { id: "refill", label: "Refill order" },
+                                { id: "cancel", label: "Create Cancel" },
+                                // { id: "refill", label: "Refill order" },
                                 { id: "balance", label: "Balance" },
                             ].map((tab, index) => (
                                 <li className="nav-item w-md-200px me-0" role="presentation" key={index}>
@@ -94,28 +94,34 @@ export default function Tailieuapi() {
                                             <h6 data-lang="Example response">Example response</h6>
                                             <div className="bg-light p-3">
                                                 <pre className="language-html mb-0">
-                                                    {`[
-  {
-    "service": 1,
-    "name": "Facebook views",
-    "type": "Default",
-    "category": "Facebook",
-    "rate": "2.5",
-    "min": "200",
-    "max": "10000",
-    "refill": true
-  },
-  {
-    "service": 2,
-    "name": "Tiktok views",
-    "type": "Default",
-    "category": "Tiktok",
-    "rate": "4",
-    "min": "10",
-    "max": "1500",
-    "refill": false
-  }
-]`}
+                                                    {`
+[
+    {
+        "service": 1,
+        "name": "Sv5 ( Sub Việt ) ( Tài nguyên clone + via )",
+        "type": "Default",
+        "platform": "Facebook",
+        "category": "Follow Facebook",
+        "rate": "0.90",
+        "min": "50",
+        "max": "10000",
+        "refill": true,
+        "cancel": true
+    },
+    {
+        "service": 2,
+        "name": "Sv2 ( CMT TIKTOK VN )",
+        "type": "Custom Comments",
+        "platform": "Tiktok",
+        "category": "Comments Tiktok",
+        "rate": "8",
+        "min": "10",
+        "max": "1500",
+        "refill": false,
+        "cancel": true
+    }
+]
+`}
                                                 </pre>
                                             </div>
                                         </>
@@ -154,6 +160,10 @@ export default function Tailieuapi() {
                                                     <tr>
                                                         <td>quantity</td>
                                                         <td>Needed quantity</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>comments</td>
+                                                        <td>Comments (Only for Custom Comments service)</td>
                                                     </tr>
                                                 </tbody>
                                             </Table>
@@ -205,7 +215,8 @@ export default function Tailieuapi() {
     "charge": "2.5",
     "start_count": "168",
     "status": "Completed",
-    "remains": "-2"
+    "remains": "-2",
+    "currency": "USD"
 }`}
                                                 </pre>
 
@@ -257,7 +268,8 @@ export default function Tailieuapi() {
         "charge": "0.27819",
         "start_count": "3572",
         "status": "Partial",
-        "remains": "157"
+        "remains": "157",
+        "currency": "USD"
     },
     "456": {
         "error": "Incorrect order ID"
@@ -266,7 +278,8 @@ export default function Tailieuapi() {
         "charge": "1.44219",
         "start_count": "234",
         "status": "In progress",
-        "remains": "10"
+        "remains": "10",
+        "currency": "USD"
     }
 }`}
                                                 </pre>
@@ -334,8 +347,8 @@ export default function Tailieuapi() {
                                                         <td>"cancel"</td>
                                                     </tr>
                                                     <tr>
-                                                        <td>order</td>
-                                                        <td>Order ID</td>
+                                                        <td>orders hoặc order</td>
+                                                        <td>Order IDs (separated by a comma, up to 100 IDs)</td>
                                                     </tr>
                                                 </tbody>
                                             </Table>
@@ -343,56 +356,64 @@ export default function Tailieuapi() {
                                             <div className="bg-light p-3">
                                                 <pre className="language-html mb-0">
                                                     {`
-{
-    "order": 2,
-    "cancel": 1
-}
+[
+    {
+        "order": 9,
+        "cancel": {
+            "error": "Incorrect order ID"
+        }
+    },
+    {
+        "order": 2,
+        "cancel": 1
+    }
+]
 `}
                                                 </pre>
                                             </div>
                                         </>
                                     ),
                                 },
-                                {
-                                    id: "refill",
-                                    content: (
-                                        <>
-                                            <Table striped bordered hover>
-                                                <tbody>
-                                                    <tr className="bg-light">
-                                                        <td className="fw-bolder" data-lang="Parameters">
-                                                            Parameters
-                                                        </td>
-                                                        <td className="fw-bolder" data-lang="Description">
-                                                            Description
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>key</td>
-                                                        <td>API Key</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>action</td>
-                                                        <td>"refill"</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>order</td>
-                                                        <td>Order ID</td>
-                                                    </tr>
-                                                </tbody>
-                                            </Table>
-                                            <h6 data-lang="Example response">Example response</h6>
-                                            <div className="bg-light p-3">
-                                                <pre className="language-html mb-0">
-                                                    {`
-{
-    "refill": "1"
-}`}
-                                                </pre>
-                                            </div>
-                                        </>
-                                    ),
-                                },
+//                                 {
+//                                     id: "refill",
+//                                     content: (
+//                                         <>
+//                                             <Table striped bordered hover>
+//                                                 <tbody>
+//                                                     <tr className="bg-light">
+//                                                         <td className="fw-bolder" data-lang="Parameters">
+//                                                             Parameters
+//                                                         </td>
+//                                                         <td className="fw-bolder" data-lang="Description">
+//                                                             Description
+//                                                         </td>
+//                                                     </tr>
+//                                                     <tr>
+//                                                         <td>key</td>
+//                                                         <td>API Key</td>
+//                                                     </tr>
+//                                                     <tr>
+//                                                         <td>action</td>
+//                                                         <td>"refill"</td>
+//                                                     </tr>
+//                                                     <tr>
+//                                                         <td>order</td>
+//                                                         <td>Order ID</td>
+//                                                     </tr>
+//                                                 </tbody>
+//                                             </Table>
+//                                             <h6 data-lang="Example response">Example response</h6>
+//                                             <div className="bg-light p-3">
+//                                                 <pre className="language-html mb-0">
+//                                                     {`
+// {
+//     "refill": "1"
+// }`}
+//                                                 </pre>
+//                                             </div>
+//                                         </>
+//                                     ),
+//                                 },
                                 // Add other tabs similarly...
                             ].map((tab, index) => (
                                 <div
