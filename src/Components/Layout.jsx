@@ -7,6 +7,7 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import Logout from "./Logout";
 import { getCategories, getMe, getNotifications, getConfigWeb } from "@/Utils/api";
 import Widget from "./Widget";
+// import MobileBottom from "./MobileBottom";
 
 const Layout = () => {
     const [categories, setCategories] = useState([]);
@@ -57,7 +58,7 @@ const Layout = () => {
     const title = configWeb ? configWeb.title : "Hệ thống tăng tương tác MXH";
     const favicon = configWeb ? configWeb.favicon : "https://png.pngtree.com/png-clipart/20190520/original/pngtree-facebook-f-icon-png-image_3550243.jpg"; // Thay thế bằng URL favicon mặc định nếu không có
     const API_DOMAIN = window.location.origin; // Lấy tên miền hiện tại và thêm đường dẫn API
-    const Domain =   API_DOMAIN.replace(/^https?:\/\//, ""); // Bỏ https:// hoặc http://
+    const Domain = API_DOMAIN.replace(/^https?:\/\//, ""); // Bỏ https:// hoặc http://
 
     return (
         <>
@@ -119,8 +120,8 @@ const Layout = () => {
                 </div>
             </footer>
             <Widget configWeb={configWeb} />
-            <ToastContainer style={{ maxWidth: '70%' , marginLeft: 'auto', marginRight: '0px' }} />
-
+            <ToastContainer style={{ maxWidth: '70%', marginLeft: 'auto', marginRight: '0px' }} />
+            {/* <MobileBottom /> */}
         </>
     );
 };
