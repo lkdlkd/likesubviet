@@ -29,6 +29,8 @@ const OrderAdmin = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [limit, setLimit] = useState(10);
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedDomain, setSelectedDomain] = useState("");
+
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({});
@@ -110,7 +112,50 @@ const OrderAdmin = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+  const domainOptions = useMemo(() => {
+    const domains = [...new Set(orders.map(order => order.DomainSmm).filter(Boolean))];
+    return domains.map(domain => ({ value: domain, label: domain }));
+  }, [orders]);
 
+  const handleCopyAllOrdersByDomain = () => {
+    if (!selectedDomain) {
+      toast.error("Vui lòng chọn nguồn trước khi copy!");
+      return;
+    }
+
+    // Lọc đơn hàng theo domain đã chọn
+    const filteredOrders = orders.filter(order => order.DomainSmm === selectedDomain);
+
+    if (filteredOrders.length === 0) {
+      toast.error("Không có đơn hàng nào từ nguồn này!");
+      return;
+    }
+
+    // Lấy tất cả OrderID từ nguồn đã chọn
+    const orderIds = filteredOrders
+      .filter(order => order.orderId)
+      .map(order => order.orderId);
+
+    if (orderIds.length === 0) {
+      toast.error("Không có OrderID nào để sao chép!");
+      return;
+    }
+
+    const copyText = orderIds.join(",");
+
+    navigator.clipboard.writeText(copyText)
+      .then(() => {
+        Swal.fire({
+          icon: "success",
+          title: "Sao chép thành công!",
+          text: `Đã sao chép ${orderIds.length} OrderID từ nguồn: ${selectedDomain}`,
+          confirmButtonText: "OK",
+        });
+      })
+      .catch(() => {
+        toast.error("Không thể sao chép!");
+      });
+  };
   const handleUpdate = async () => {
     if (!selectedOrder) return;
     try {
@@ -122,6 +167,15 @@ const OrderAdmin = () => {
       toast.error(`Lỗi khi cập nhật trạng thái! ${err.message}`);
     }
   };
+  let decoded = {};
+  if (token) {
+    try {
+      decoded = JSON.parse(atob(token.split(".")[1]));
+    } catch (error) {
+      // Có thể log lỗi nếu cần
+    }
+  }
+  const userRole = decoded?.role || "user";
 
   return (
     <div className="row">
@@ -158,7 +212,7 @@ const OrderAdmin = () => {
               </div>
               <div className="col-md-6 col-lg-3">
                 <div className="form">
-                  <label htmlFor="order_code" className="form-label">
+                  <label >
                     Mã đơn hàng hoặc link
                   </label>
                   <div className="input-group">
@@ -208,6 +262,36 @@ const OrderAdmin = () => {
                 />
               </div>
             </div>
+            {userRole === "admin" && (
+              <div className="row mb-3">
+                <div className="col-md-6 col-lg-4">
+                  <div className="form-group">
+                    <label>Chọn nguồn để copy:</label>
+                    <Select
+                      value={domainOptions.find(option => option.value === selectedDomain)}
+                      onChange={(option) => setSelectedDomain(option ? option.value : "")}
+                      options={domainOptions}
+                      placeholder="Chọn nguồn"
+                      isClearable
+                    />
+                  </div>
+                </div>
+                <div className="col-md-6 col-lg-4">
+                  <div className="form-group">
+                    <label>&nbsp;</label>
+                    <div>
+                      <button
+                        className="btn btn-sm btn-info"
+                        onClick={handleCopyAllOrdersByDomain}
+                        disabled={!selectedDomain}
+                      >
+                        Copy OrderID từ nguồn: {selectedDomain || "Chưa chọn"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="table-responsive table-bordered">
               <Table striped bordered hover responsive>
                 <thead>

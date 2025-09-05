@@ -150,53 +150,53 @@ const Danhsachdon = () => {
         { value: "Canceled", label: "Đã hủy" },
     ];
     // Tạo options cho domain selector
-    const domainOptions = useMemo(() => {
-        const domains = [...new Set(orders.map(order => order.DomainSmm).filter(Boolean))];
-        return domains.map(domain => ({ value: domain, label: domain }));
-    }, [orders]);
+    // const domainOptions = useMemo(() => {
+    //     const domains = [...new Set(orders.map(order => order.DomainSmm).filter(Boolean))];
+    //     return domains.map(domain => ({ value: domain, label: domain }));
+    // }, [orders]);
 
-    const handleCopyAllOrdersByDomain = () => {
-        if (!selectedDomain) {
-            toast.error("Vui lòng chọn nguồn trước khi copy!");
-            return;
-        }
+    // const handleCopyAllOrdersByDomain = () => {
+    //     if (!selectedDomain) {
+    //         toast.error("Vui lòng chọn nguồn trước khi copy!");
+    //         return;
+    //     }
 
-        // Lọc đơn hàng theo domain đã chọn
-        const filteredOrders = orders.filter(order => order.DomainSmm === selectedDomain);
+    //     // Lọc đơn hàng theo domain đã chọn
+    //     const filteredOrders = orders.filter(order => order.DomainSmm === selectedDomain);
 
-        if (filteredOrders.length === 0) {
-            toast.error("Không có đơn hàng nào từ nguồn này!");
-            return;
-        }
+    //     if (filteredOrders.length === 0) {
+    //         toast.error("Không có đơn hàng nào từ nguồn này!");
+    //         return;
+    //     }
 
-        // Lấy tất cả OrderID từ nguồn đã chọn
-        const orderIds = filteredOrders
-            .filter(order => order.orderId)
-            .map(order => order.orderId);
+    //     // Lấy tất cả OrderID từ nguồn đã chọn
+    //     const orderIds = filteredOrders
+    //         .filter(order => order.orderId)
+    //         .map(order => order.orderId);
 
-        if (orderIds.length === 0) {
-            toast.error("Không có OrderID nào để sao chép!");
-            return;
-        }
+    //     if (orderIds.length === 0) {
+    //         toast.error("Không có OrderID nào để sao chép!");
+    //         return;
+    //     }
 
-        const copyText = orderIds.join(",");
+    //     const copyText = orderIds.join(",");
 
-        navigator.clipboard.writeText(copyText)
-            .then(() => {
-                Swal.fire({
-                    icon: "success",
-                    title: "Sao chép thành công!",
-                    text: `Đã sao chép ${orderIds.length} OrderID từ nguồn: ${selectedDomain}`,
-                    confirmButtonText: "OK",
-                });
-            })
-            .catch(() => {
-                toast.error("Không thể sao chép!");
-            });
-    };
+    //     navigator.clipboard.writeText(copyText)
+    //         .then(() => {
+    //             Swal.fire({
+    //                 icon: "success",
+    //                 title: "Sao chép thành công!",
+    //                 text: `Đã sao chép ${orderIds.length} OrderID từ nguồn: ${selectedDomain}`,
+    //                 confirmButtonText: "OK",
+    //             });
+    //         })
+    //         .catch(() => {
+    //             toast.error("Không thể sao chép!");
+    //         });
+    // };
 
     const handleCopyText = (order) => {
-        const textToCopy = `Username : ${order.username} \nMã đơn : ${order.Madon} \nJob id : ${order.link} \nTên Sv : ${order.maychu || ""}${order.namesv || ""}\nNgày tạo : ${new Date(order.createdAt).toLocaleString("vi-VN", {
+        const textToCopy = `Mã đơn : ${order.Madon} \nJob id : ${order.link} \nTên sv : ${order.maychu || ""}${order.namesv || ""}\nThời gian : ${new Date(order.createdAt).toLocaleString("vi-VN", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
@@ -257,8 +257,8 @@ const Danhsachdon = () => {
                                 {/* )} */}
                             </div>
                             <div className="col-md-6 col-lg-3">
-                                <div className="form">
-                                    <label htmlFor="order_code" className="form-label">
+                                <div className="form-group">
+                                    <label >
                                         Mã đơn hàng hoặc link
                                     </label>
                                     <div className="input-group">
@@ -281,6 +281,18 @@ const Danhsachdon = () => {
                             </div>
                             <div className="col-md-6 col-lg-3">
                                 <div className="form-group">
+                                    <label>Trạng thái:</label>
+                                    <Select
+                                        value={statusOptions.find((option) => option.value === selectedStatus)}
+                                        onChange={(option) => setSelectedStatus(option ? option.value : "")}
+                                        options={statusOptions}
+                                        placeholder="Chọn trạng thái"
+                                        isClearable
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-6 col-lg-3">
+                                <div className="form-group">
                                     <label>Số đơn hàng/trang:</label>
                                     <select
                                         className="form-select"
@@ -296,50 +308,8 @@ const Danhsachdon = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-6 col-lg-3">
-                            <div className="form-group">
-                                <label>Trạng thái:</label>
-                                <Select
-                                    value={statusOptions.find((option) => option.value === selectedStatus)}
-                                    onChange={(option) => setSelectedStatus(option ? option.value : "")}
-                                    options={statusOptions}
-                                    placeholder="Chọn trạng thái"
-                                    isClearable
-                                />
-                            </div>
-                        </div>
-                        {userRole === "admin" && (
-                            <div className="row mb-3">
-                                <div className="col-md-6 col-lg-4">
-                                    <div className="form-group">
-                                        <label>Chọn nguồn để copy:</label>
-                                        <Select
-                                            value={domainOptions.find(option => option.value === selectedDomain)}
-                                            onChange={(option) => setSelectedDomain(option ? option.value : "")}
-                                            options={domainOptions}
-                                            placeholder="Chọn nguồn"
-                                            isClearable
-                                        />
-                                    </div>
-                                </div>
-                                <div className="col-md-6 col-lg-4">
-                                    <div className="form-group">
-                                        <label>&nbsp;</label>
-                                        <div>
-                                            <button
-                                                className="btn btn-sm btn-info"
-                                                onClick={handleCopyAllOrdersByDomain}
-                                                disabled={!selectedDomain}
-                                            >
-                                                Copy OrderID từ nguồn: {selectedDomain || "Chưa chọn"}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        <div className="table-responsive table-bordered">
 
+                        <div className="table-responsive table-bordered">
                             {/* // <Table striped bordered hover responsive> */}
                             <Table striped bordered hover responsive>
                                 <thead>
@@ -359,7 +329,7 @@ const Danhsachdon = () => {
                                 </thead>
                                 <tbody >
                                     {loadingOrders ? (
-                                         <tr>
+                                        <tr>
                                             <td colSpan={11} className="text-center py-5">
                                                 <div className="d-flex flex-column align-items-center justify-content-center">
                                                     <div className="spinner-border text-primary mb-2" role="status">
@@ -511,12 +481,8 @@ const Danhsachdon = () => {
                                                         <li><b>Số lượng mua</b> : {order.quantity}</li>
                                                         <li><b>Giá</b> : {Number(order.rate).toLocaleString("en-US")}</li>
                                                         <li><b>Tổng tiền</b> : {Math.floor(Number(order.totalCost)).toLocaleString("en-US")}
-                                                         {/* {Number(order.totalCost).toLocaleString("en-US")} */}
-                                                         </li>
-                                                        {userRole === "admin" && (
-                                                            <li><b>Lãi</b> : {Math.floor(Number(order.lai || 0)).toLocaleString("en-US")} - {order.DomainSmm || ""} - {order.orderId}</li>
-                                                        )}
-
+                                                            {/* {Number(order.totalCost).toLocaleString("en-US")} */}
+                                                        </li>
                                                     </ul>
                                                     {/* <td>{order.start}</td>
                                                     <td></td>
