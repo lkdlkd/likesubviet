@@ -8,8 +8,8 @@ export default function Tailieuapi() {
         <div className="page-content">
             <div className="container-fluid">
                 <div className="card-body">
-                    <div className="table-responsive mb-5">
-                        <Table striped bordered hover>
+                    <div className=" mb-5">
+                        <Table responsive striped bordered hover>
                             <tbody>
                                 <tr>
                                     <td className="text-gray-700">API URL</td>
@@ -163,7 +163,12 @@ export default function Tailieuapi() {
                                                     </tr>
                                                     <tr>
                                                         <td>comments</td>
-                                                        <td>Comments (Only for Custom Comments service)</td>
+                                                        <td style={{
+                                                            maxWidth: "570px",
+                                                            whiteSpace: "normal",
+                                                            wordWrap: "break-word",
+                                                            overflowWrap: "break-word",
+                                                        }}>Comments (Only for Custom Comments service)</td>
                                                     </tr>
                                                 </tbody>
                                             </Table>
@@ -347,8 +352,13 @@ export default function Tailieuapi() {
                                                         <td>"cancel"</td>
                                                     </tr>
                                                     <tr>
-                                                        <td>orders hoặc order</td>
-                                                        <td>Order IDs (separated by a comma, up to 100 IDs)</td>
+                                                        <td>orders or order</td>
+                                                        <td style={{
+                                                            maxWidth: "570px",
+                                                            whiteSpace: "normal",
+                                                            wordWrap: "break-word",
+                                                            overflowWrap: "break-word",
+                                                        }} >Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
                                                     </tr>
                                                 </tbody>
                                             </Table>
