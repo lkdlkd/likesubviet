@@ -1,6 +1,6 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
-
+import { Link } from "react-router-dom";
 export default function Tailieuapi() {
     const API_DOMAIN = `${process.env.REACT_APP_API_BASE}/api/v2`; // Lấy tên miền hiện tại và thêm đường dẫn API
 
@@ -18,7 +18,7 @@ export default function Tailieuapi() {
                                 <tr>
                                     <td className="text-gray-700">API Key</td>
                                     <td className="fw-bolder">
-                                        <a href="/profile">Lấy tại đây</a>
+                                        <Link to="/profile">Lấy tại đây</Link>
                                     </td>
                                 </tr>
                                 <tr>
