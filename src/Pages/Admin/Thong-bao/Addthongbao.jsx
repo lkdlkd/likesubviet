@@ -34,7 +34,7 @@ export default function Addthongbao({ token, onAdd, show, onClose }) {
       toast.error("Lỗi khi thêm thông báo. Vui lòng thử lại!");
     } finally {
       setLoading(false);
-      loadingg(false);
+      loadingg("Đang tải...",false);
     }
   };
 

@@ -49,7 +49,7 @@ export default function Taothongbaopage() {
       toast.error("Lỗi khi xóa thông báo. Vui lòng thử lại!");
     } finally {
       setLoading(false);
-      loadingg(false);
+      loadingg("Đang tải...",false);
     }
   };
 

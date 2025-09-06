@@ -264,7 +264,7 @@ const Dondamua = ({ category, showcmt }) => {
                                                                                 } catch (err) {
                                                                                     toast.error(`Bảo hành thất bại: ${err.message}`);
                                                                                 } finally {
-                                                                                    loadingg(false);
+                                                                                    loadingg("Đang tải...", false);
                                                                                 }
                                                                             }}
                                                                         >
@@ -297,8 +297,7 @@ const Dondamua = ({ category, showcmt }) => {
                                                                                 } catch (err) {
                                                                                     toast.error(`Hủy hoàn thất bại: ${err.message}`);
                                                                                 } finally {
-                                                                                    loadingg(false);
-                                                                                }
+                                                                                    loadingg("Đang tải...", false);}
                                                                             }}
                                                                         >
                                                                             Hủy hoàn

@@ -50,7 +50,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
       toast.error("Cập nhật thông tin thất bại. Vui lòng thử lại.");
     } finally {
       setSaving(false);
-      loadingg(false);
+      loadingg("Đang tải...",false);
     }
   };
 
@@ -61,7 +61,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
     }
 
     setSaving(true);
-    loadingg(true, 9999999);
+    loadingg("Đang tải...", true, 9999999);
     try {
       // Gọi API để đổi mật khẩu
       await changePassword(user._id, { newPassword }, token);
@@ -72,7 +72,7 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
       toast.error("Đổi mật khẩu thất bại. Vui lòng thử lại.");
     } finally {
       setSaving(false);
-      loadingg(false);
+      loadingg("Đang tải...",false);
     }
   };
 

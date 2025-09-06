@@ -26,7 +26,7 @@ const Banggia = () => {
                 setError("Không thể tải bảng giá.");
             } finally {
                 setLoading(false);
-                loadingg(false);
+                loadingg("Đang tải...", false);
             }
         };
         fetchServers();

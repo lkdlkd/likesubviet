@@ -19,7 +19,7 @@ export default function Editthongbao({ notification, token, onClose, onUpdate })
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    loadingg(true, 9999999);
+    loadingg("Đang tải...", true, 9999999);
     try {
       const updatedNotification = await editNotification(editData._id, editData, token);
       toast.success("Thông báo đã được cập nhật thành công!");
@@ -29,7 +29,7 @@ export default function Editthongbao({ notification, token, onClose, onUpdate })
       toast.error("Lỗi khi cập nhật thông báo. Vui lòng thử lại!");
     } finally {
       setLoading(false);
-      loadingg(false);
+      loadingg("Đang tải...",false);
     }
   };
 

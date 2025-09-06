@@ -37,7 +37,7 @@ export default function Dichvupage() {
 
   const fetchServers = async () => {
     try {
-      loadingg("Đang tải danh sách server...", true, 9999999);
+      loadingg("Đang tải...", true, 9999999);
       if (!quickAddMode) {
         const response = await getServer(token, currentPage, limit, debouncedSearch);
         setServers(response.data || []);
@@ -59,7 +59,7 @@ export default function Dichvupage() {
         confirmButtonText: "Xác nhận",
       });
     } finally {
-      loadingg(false);
+      loadingg("Đang tải...",false);
     }
   };
 
@@ -148,7 +148,7 @@ export default function Dichvupage() {
       } catch (error) {
         Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
       } finally {
-        loadingg(false);
+        loadingg("Đang tải...",false);
       }
     }
   };
@@ -261,7 +261,7 @@ export default function Dichvupage() {
                     } catch (error) {
                       Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
                     } finally {
-                      loadingg(false);
+                      loadingg("Đang tải...",false);
                     }
                   }
                 }}

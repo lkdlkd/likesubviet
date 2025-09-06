@@ -52,7 +52,7 @@ export default function TaikhoanPage() {
         setErrorMessage("Không thể tải danh sách người dùng. Vui lòng thử lại.");
       } finally {
         setLoading(false);
-        loadingg(false);
+        loadingg("Đang tải...", false);
       }
     };
 
@@ -106,7 +106,7 @@ export default function TaikhoanPage() {
         } catch (error) {
           Swal.fire("Lỗi!", "Không thể xóa người dùng. Vui lòng thử lại.", "error");
         } finally {
-          loadingg(false);
+          loadingg("Đang tải...", false);
         }
       }
     });

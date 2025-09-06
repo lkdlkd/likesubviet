@@ -73,7 +73,7 @@ export default function Adddichvu({
       toast.error("Không thể tải danh sách đối tác. Vui lòng thử lại!");
     } finally {
       setLoading(false);
-      loadingg(false);
+      loadingg("Đang tải...",false);
     }
   }, [token]);
 
@@ -120,7 +120,7 @@ export default function Adddichvu({
       toast.error("Không thể lấy danh sách dịch vụ từ đối tác. Vui lòng thử lại!");
     } finally {
       setLoadingServices(false);
-      loadingg(false);
+      loadingg("Đang tải...",false);
     }
   };
 
@@ -230,7 +230,7 @@ export default function Adddichvu({
       toast.error("Lỗi khi thêm dịch vụ. Vui lòng thử lại!");
     } finally {
       setLoading(false);
-      loadingg(false);
+      loadingg("Đang tải...",false);
     }
   };
 

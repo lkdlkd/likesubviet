@@ -31,7 +31,7 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
             toast.error("Thêm số dư thất bại. Vui lòng thử lại.");
         } finally {
             setLoading(false);
-            loadingg(false);
+            loadingg("Đang tải...", false);
         }
     };
 

@@ -96,7 +96,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
     } catch (error) {
       toast.error("Lỗi khi cập nhật dịch vụ. Vui lòng thử lại!");
     } finally {
-      loadingg(false);
+      loadingg("Đang tải...",false);
     }
   };
 

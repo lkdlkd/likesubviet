@@ -3,7 +3,7 @@ import { getRefunds, adminApproveRefund } from "@/Utils/api";
 import { toast } from "react-toastify";
 import Table from "react-bootstrap/Table";
 import Swal from "sweetalert2";
-
+import { loadingg } from "@/JS/Loading";
 export default function Refund() {
     const [refunds, setRefunds] = useState([]);
     const [selected, setSelected] = useState([]);
@@ -13,6 +13,7 @@ export default function Refund() {
 
     const fetchRefunds = async (status) => {
         setLoading(true);
+        loadingg("Đang tải...", true);
         try {
             // Gọi API với status nếu có
             let res;
@@ -24,8 +25,10 @@ export default function Refund() {
             setRefunds(res.data || []);
         } catch (err) {
             toast.error("Không thể tải danh sách hoàn!");
+            loadingg("Đang tải...", false);
         } finally {
             setLoading(false);
+            loadingg("Đang tải...", false);
         }
     };
 
@@ -53,6 +56,8 @@ export default function Refund() {
         });
         if (!confirm.isConfirmed) return;
         setLoading(true);
+        loadingg("Đang duyệt hoàn tiền...", true);
+
         try {
             for (const madon of selected) {
                 await adminApproveRefund({ madon }, token);
@@ -64,6 +69,7 @@ export default function Refund() {
             toast.error("Lỗi khi duyệt hoàn!");
         } finally {
             setLoading(false);
+            loadingg("Đang duyệt hoàn tiền...", false);
         }
     };
 
@@ -91,12 +97,12 @@ export default function Refund() {
 
             )}
             {activeTab === "pending" && (
-                    <h4 style={{ color: "red" }}>
-                        <b>
-                            Hãy kiểm tra thông số hoàn thật kỹ trước khi hoàn tiền tránh sai sót . xin cảm ơn .
-                        </b>
-                    </h4>
-                )
+                <h4 style={{ color: "red" }}>
+                    <b>
+                        Hãy kiểm tra thông số hoàn thật kỹ trước khi hoàn tiền tránh sai sót . xin cảm ơn .
+                    </b>
+                </h4>
+            )
             }
             <div className="table-responsive">
                 <Table striped bordered hover responsive>

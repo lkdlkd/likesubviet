@@ -43,7 +43,7 @@ export default function ThongkePage() {
                 setErrorMessage(error.message || "Có lỗi xảy ra khi tải dữ liệu.");
             } finally {
                 setLoading(false);
-                loadingg(false);
+                loadingg("Đang tải...", false);
             }
         };
         fetchStatistics();
