@@ -22,6 +22,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
     refil: "off",
     cancel: "off",
     isActive: true,
+    thutu: "",
   });
 
   const [form, setForm] = useState({
@@ -32,6 +33,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
     serviceName: "",
     serviceId: "",
     isActive: true,
+    thutu: "",
   });
 
   useEffect(() => {
@@ -83,6 +85,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
       refil: formData.refil,
       cancel: formData.cancel,
       isActive: formData.isActive,
+      thutu: formData.thutu,
     };
 
     loadingg("Đang cập nhật dịch vụ...", true, 99999999);
@@ -244,7 +247,17 @@ export default function EditModal({ show, onClose, initialData, token }) {
             </select>
           </div>
           <h4>Các chức năng</h4>
-          { [
+          <div className="mb-3">
+            <label className="form-label">Thứ tự:</label>
+            <input
+              type="text"
+              name="thutu"
+              value={formData.thutu}
+              onChange={handleChange}
+              className="form-control"
+            />
+          </div>
+          {[
             { key: 'getid', label: 'get UID' },
             { key: 'comment', label: 'comment' },
             { key: 'reaction', label: 'reaction' },
