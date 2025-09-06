@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { getConfigTele, updateConfigTele } from "../../../Utils/api"; // Đường dẫn tới file chứa các hàm API
-
+import { loadingg } from "../../../JS/Loading"; // Giả sử bạn có hàm loadingg để hiển thị loading
 const token = localStorage.getItem("token");
 
 export default function ConfigTelePage() {
@@ -12,6 +12,7 @@ export default function ConfigTelePage() {
   useEffect(() => {
     const fetchConfig = async () => {
       setLoading(true);
+      loadingg("Đang tải cấu hình...", true, 9999999);
       try {
         const data = await getConfigTele(token);
         setConfig(data.data);
@@ -19,6 +20,7 @@ export default function ConfigTelePage() {
         Swal.fire("Lỗi", err.message || "Không lấy được cấu hình Telegram", "error");
       } finally {
         setLoading(false);
+        loadingg("Đang tải cấu hình...", false);
       }
     };
     fetchConfig();
@@ -31,6 +33,8 @@ export default function ConfigTelePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+    loadingg("Đang lưu cấu hình...", true, 9999999);
+
     try {
       await updateConfigTele(config, token);
       Swal.fire("Thành công", "Đã cập nhật cấu hình Telegram", "success");
@@ -38,6 +42,7 @@ export default function ConfigTelePage() {
       Swal.fire("Lỗi", err.message || "Cập nhật thất bại", "error");
     } finally {
       setSaving(false);
+      loadingg("Đang lưu cấu hình...", false);
     }
   };
 

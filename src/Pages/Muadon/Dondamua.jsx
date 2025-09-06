@@ -33,6 +33,7 @@ const Dondamua = ({ category, showcmt }) => {
             return;
         }
         setLoadingOrders(true);
+        loadingg("Vui lòng chờ...", true, 9999999);
         try {
             const response = await getOrders(
                 token,
@@ -49,6 +50,7 @@ const Dondamua = ({ category, showcmt }) => {
             setOrders([]);
         } finally {
             setLoadingOrders(false);
+            loadingg("Vui lòng chờ...", false);
         }
     };
 

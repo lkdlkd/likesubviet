@@ -87,6 +87,7 @@ const Danhsachdon = () => {
             return;
         }
         setLoadingOrders(true);
+        loadingg("Vui lòng chờ...", true, 9999999);
         try {
             // Gọi hàm getOrders, truyền thêm selectedStatus
             const response = await getOrders(
@@ -107,6 +108,7 @@ const Danhsachdon = () => {
             // toast.error("Không có đơn hàng nào!");
         } finally {
             setLoadingOrders(false);
+            loadingg("Vui lòng chờ...", false);
         }
     };
 

@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { useOutletContext } from "react-router-dom";
-
+import { loadingg } from "@/JS/Loading";
 const statusOptions = [
   { value: "Completed", label: "Hoàn thành" },
   { value: "In progress", label: "Đang chạy" },
@@ -59,6 +59,7 @@ const OrderAdmin = () => {
 
   const fetchOrders = async () => {
     setLoadingOrders(true);
+    loadingg("Vui lòng chờ...", true, 9999999);
     try {
       const response = await getOrders(
         token,
@@ -76,6 +77,7 @@ const OrderAdmin = () => {
       // toast.error("Không có đơn hàng nào!");
     } finally {
       setLoadingOrders(false);
+      loadingg("Vui lòng chờ...", false);
     }
   };
 
