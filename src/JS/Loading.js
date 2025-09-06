@@ -6,8 +6,11 @@ export const loadingg = (title = "Vui lòng chờ...", isLoading = true, duratio
             preloaderDiv = document.createElement("div");
             preloaderDiv.className = "preloader";
             preloaderDiv.innerHTML = `
-                <div class="loader">
-                    <div class="loader__figure"></div>
+                <div id="preloader">
+                    <div class="lds-ripple"> 
+                        <div></div>
+                        <div></div>
+                    </div>
                     <p class="loader__label">${title}</p>
                 </div>
             `;
