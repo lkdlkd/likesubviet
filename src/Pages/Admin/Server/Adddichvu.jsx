@@ -73,7 +73,7 @@ export default function Adddichvu({
       toast.error("Không thể tải danh sách đối tác. Vui lòng thử lại!");
     } finally {
       setLoading(false);
-      loadingg("Đang tải...",false);
+      loadingg("Đang tải...", false);
     }
   }, [token]);
 
@@ -120,7 +120,7 @@ export default function Adddichvu({
       toast.error("Không thể lấy danh sách dịch vụ từ đối tác. Vui lòng thử lại!");
     } finally {
       setLoadingServices(false);
-      loadingg("Đang tải...",false);
+      loadingg("Đang tải...", false);
     }
   };
 
@@ -230,7 +230,7 @@ export default function Adddichvu({
       toast.error("Lỗi khi thêm dịch vụ. Vui lòng thử lại!");
     } finally {
       setLoading(false);
-      loadingg("Đang tải...",false);
+      loadingg("Đang tải...", false);
     }
   };
 
@@ -467,7 +467,7 @@ export default function Adddichvu({
             <div className="row mb-4">
               <h3 className="text-primary">Các chức năng</h3>
               <div className="col-md-6 mb-3">
-                <label className="form-label">Chức năng Get ID:</label>
+                <label className="form-label">Chức năng Get uid:</label>
                 <Select
                   name="getid"
                   value={selectedGetidOption}
@@ -492,7 +492,7 @@ export default function Adddichvu({
                   isClearable={false}
                 />
               </div>
-              <div className="col-md-6 mb-3">
+              {/* <div className="col-md-6 mb-3">
                 <label className="form-label">Chức năng Reaction:</label>
                 <Select
                   name="reaction"
@@ -504,8 +504,8 @@ export default function Adddichvu({
                   placeholder="Chọn trạng thái"
                   isClearable={false}
                 />
-              </div>
-              <div className="col-md-6 mb-3">
+              </div> */}
+              {/* <div className="col-md-6 mb-3">
                 <label className="form-label">Chức năng Matlive:</label>
                 <Select
                   name="matlive"
@@ -517,7 +517,7 @@ export default function Adddichvu({
                   placeholder="Chọn trạng thái"
                   isClearable={false}
                 />
-              </div>
+              </div> */}
               <div className="col-md-6 mb-3">
                 <label className="form-label">Chức năng Bảo hành:</label>
                 <Select
@@ -631,6 +631,10 @@ export default function Adddichvu({
                         const svc = services.find((s) => String(s.service) === String(option.value));
                         const partner = smmPartners.find((p) => p.name === formData.DomainSmm);
                         const tigia = partner?.tigia || 1;
+                        const ptgia = partner?.price_update || 0;
+                        const baseRate = svc.rate * tigia;
+                        const finalRate = Math.ceil(baseRate * 10000 + (baseRate * ptgia) / 100 * 10000) / 10000;
+                        // const tigia = partner?.tigia || 1;
                         if (svc) {
                           setFormData({
                             ...formData,
@@ -638,7 +642,7 @@ export default function Adddichvu({
                             serviceName: svc.name,
                             min: svc.min || "",
                             max: svc.max || "",
-                            rate: svc.rate * tigia || "",
+                            rate: finalRate || "",
                             originalRate: svc.rate * tigia || "",
                             category: svc.category || "",
                           });

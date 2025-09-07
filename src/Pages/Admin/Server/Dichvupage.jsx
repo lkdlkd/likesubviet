@@ -59,7 +59,7 @@ export default function Dichvupage() {
         confirmButtonText: "Xác nhận",
       });
     } finally {
-      loadingg("Đang tải...",false);
+      loadingg("Đang tải...", false);
     }
   };
 
@@ -148,7 +148,7 @@ export default function Dichvupage() {
       } catch (error) {
         Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
       } finally {
-        loadingg("Đang tải...",false);
+        loadingg("Đang tải...", false);
       }
     }
   };
@@ -261,7 +261,7 @@ export default function Dichvupage() {
                     } catch (error) {
                       Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
                     } finally {
-                      loadingg("Đang tải...",false);
+                      loadingg("Đang tải...", false);
                     }
                   }
                 }}
@@ -355,12 +355,13 @@ export default function Dichvupage() {
                                           }
                                         />
                                       </th>
-                                      <th>#</th>
+                                      <th>THỨ TỰ</th>
                                       <th>THAO TÁC</th>
                                       <th>TÊN</th>
                                       <th>GIÁ</th>
+                                      <th>CHỨC NĂNG</th>
                                       <th>NGUỒN</th>
-                                      <th>Thời gian thêm</th>
+                                      <th>THỜI GIAN THÊM</th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -382,7 +383,8 @@ export default function Dichvupage() {
                                               }}
                                             />
                                           </td>
-                                          <td>{(pagination.currentPage - 1) * limit + idx2 + 1}</td>
+                                          {/* <td>{(pagination.currentPage - 1) * limit + idx2 + 1}</td> */}
+                                          <td>{serverItem.thutu}</td>
                                           <td>
                                             <div className="dropdown">
                                               <button
@@ -455,6 +457,38 @@ export default function Dichvupage() {
                                               </li>
                                             </ul>
                                           </td>
+                                          <td >
+                                            <ul>
+                                              <li>
+                                                <b>Get uid (Dành cho FB )</b>: {serverItem.getid === 'on' ? (
+                                                  <span className="badge bg-success ms-1">ON</span>
+                                                ) : (
+                                                  <span className="badge bg-secondary ms-1">OFF</span>
+                                                )}
+                                              </li>
+                                              <li>
+                                                <b>Bình luận</b>: {serverItem.comment === 'on' ? (
+                                                  <span className="badge bg-success ms-1">ON</span>
+                                                ) : (
+                                                  <span className="badge bg-secondary ms-1">OFF</span>
+                                                )}
+                                              </li>
+                                              <li>
+                                                <b>Hủy đơn</b>: {serverItem.cancel === 'on' ? (
+                                                  <span className="badge bg-success ms-1">ON</span>
+                                                ) : (
+                                                  <span className="badge bg-secondary ms-1">OFF</span>
+                                                )}
+                                              </li>
+                                              <li>
+                                                <b>Bảo hành</b>: {serverItem.refil === 'on' ? (
+                                                  <span className="badge bg-success ms-1">ON</span>
+                                                ) : (
+                                                  <span className="badge bg-secondary ms-1">OFF</span>
+                                                )}
+                                              </li>
+                                            </ul>
+                                          </td>
                                           <td style={{
                                             maxWidth: "350px",
                                             whiteSpace: "normal",
@@ -471,10 +505,10 @@ export default function Dichvupage() {
                                               <li>
                                                 <b>Tên server</b>: {serverItem.serviceName}
                                               </li>
-                                              <li>
+                                              {/* <li>
                                                 <b>Trạng thái</b>:{" "}
                                                 <span className="badge bg-success">Hoạt động</span>
-                                              </li>
+                                              </li> */}
                                             </ul>
                                           </td>
                                           <td>{new Date(serverItem.createdAt).toLocaleString()}</td>
@@ -523,8 +557,9 @@ export default function Dichvupage() {
                       <th>THAO TÁC</th>
                       <th>TÊN</th>
                       <th>GIÁ</th>
+                      <th>CHỨC NĂNG</th>
                       <th>NGUỒN</th>
-                      <th>Thời gian thêm</th>
+                      <th>THỜI GIAN THÊM</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -622,6 +657,38 @@ export default function Dichvupage() {
                               </li>
                             </ul>
                           </td>
+                          <td >
+                            <ul>
+                              <li>
+                                <b>Get uid (Dành cho FB )</b>: {serverItem.getid === 'on' ? (
+                                  <span className="badge bg-success ms-1">ON</span>
+                                ) : (
+                                  <span className="badge bg-secondary ms-1">OFF</span>
+                                )}
+                              </li>
+                              <li>
+                                <b>Bình luận</b>: {serverItem.comment === 'on' ? (
+                                  <span className="badge bg-success ms-1">ON</span>
+                                ) : (
+                                  <span className="badge bg-secondary ms-1">OFF</span>
+                                )}
+                              </li>
+                              <li>
+                                <b>Hủy đơn</b>: {serverItem.cancel === 'on' ? (
+                                  <span className="badge bg-success ms-1">ON</span>
+                                ) : (
+                                  <span className="badge bg-secondary ms-1">OFF</span>
+                                )}
+                              </li>
+                              <li>
+                                <b>Bảo hành</b>: {serverItem.refil === 'on' ? (
+                                  <span className="badge bg-success ms-1">ON</span>
+                                ) : (
+                                  <span className="badge bg-secondary ms-1">OFF</span>
+                                )}
+                              </li>
+                            </ul>
+                          </td>
                           <td style={{
                             maxWidth: "350px",
                             whiteSpace: "normal",
@@ -639,10 +706,10 @@ export default function Dichvupage() {
                               <li>
                                 <b>Tên server</b>: {serverItem.serviceName}
                               </li>
-                              <li>
+                              {/* <li>
                                 <b>Trạng thái</b>:{" "}
                                 <span className="badge bg-success">Hoạt động</span>
-                              </li>
+                              </li> */}
                             </ul>
                           </td>
                           <td>{new Date(serverItem.createdAt).toLocaleString()}</td>

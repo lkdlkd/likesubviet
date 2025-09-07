@@ -258,10 +258,8 @@ export default function EditModal({ show, onClose, initialData, token }) {
             />
           </div>
           {[
-            { key: 'getid', label: 'get UID' },
+            { key: 'getid', label: 'get uid' },
             { key: 'comment', label: 'comment' },
-            { key: 'reaction', label: 'reaction' },
-            { key: 'matlive', label: 'mắt live' },
             { key: 'refil', label: 'bảo hành' },
             { key: 'cancel', label: 'hủy đơn' }
           ].map((item) => (
