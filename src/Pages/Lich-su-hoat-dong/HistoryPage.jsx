@@ -33,6 +33,7 @@ export default function History() {
     useEffect(() => {
         const fetchHistory = async () => {
             setLoading(true);
+            loadingg("Vui lòng chờ...",true,999999); // Hiển thị thông báo đang tải
             try {
                 const response = await getUserHistory(
                     token,
@@ -49,6 +50,7 @@ export default function History() {
                 //     error.response?.data?.message || "Không thể tải dữ liệu lịch sử hoạt động."
                 // );
             } finally {
+                loadingg("",false); // Ẩn thông báo sau khi tải xong
                 setLoading(false);
             }
         };

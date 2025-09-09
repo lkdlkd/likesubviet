@@ -251,8 +251,8 @@ function MenuUser({ user, categories, configWeb }) {
                                         </a>
                                     </li>
                                     <li className="pc-item">
-                                        <a
-                                            onClick={() => handleNavigation("/lich-su-hoat-dong")}
+                                        <Link to="/lich-su-hoat-dong"
+                                            // onClick={() => handleNavigation("/lich-su-hoat-dong")}
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
@@ -260,7 +260,7 @@ function MenuUser({ user, categories, configWeb }) {
                                                 <img src="/transactions.png" className="wid-35" alt="" width={35} height={35} />
                                             </span> */}
                                             <span className="pc-mtext">Lịch Sử Hoạt Động</span>
-                                        </a>
+                                        </Link>
                                     </li>
                                     <li className="pc-item">
                                         <a
@@ -314,15 +314,15 @@ function MenuUser({ user, categories, configWeb }) {
                             </a> */}
                         </li>
                         <li className="pc-item">
-                            <a
+                            <Link
+                                to="/danh-sach-don"
                                 style={{ cursor: "pointer" }}
-                                onClick={() => handleNavigation("/danh-sach-don")}
                                 className="pc-link">
                                 <span className="pc-micon">
                                     <img src="/img/transactions.png" className="wid-35" alt="Service Platform 1" />
                                 </span>
                                 <span className="pc-mtext">Danh sách đơn</span>
-                            </a>
+                            </Link>
                         </li>
                         <li className="pc-item pc-caption">
                             <label>Danh Sách Dịch Vụ</label>
