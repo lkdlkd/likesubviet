@@ -17,6 +17,7 @@ export default function CardHistory({ historycard = [] }) {
                             <thead>
                                 <tr>
                                     <th>ID</th>
+                                    <th>Username</th>
                                     <th>Thời gian</th>
                                     <th>Loại thẻ</th>
                                     <th>Mệnh giá</th>
@@ -31,6 +32,7 @@ export default function CardHistory({ historycard = [] }) {
                                     historycard.map((thecao, index) => (
                                         <tr key={index}>
                                             <td>{index + 1}</td>
+                                            <td>{thecao.username}</td>
                                             <td>
                                                 {new Date(thecao.createdAt).toLocaleString("vi-VN", {
                                                     day: "2-digit",
