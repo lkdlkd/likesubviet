@@ -12,6 +12,7 @@ export default function ModalBanking({
 }) {
 
   const defaultFormData = {
+    code : "",
     bank_name: "",
     account_name: "",
     account_number: "",
@@ -75,10 +76,48 @@ export default function ModalBanking({
                 </>
               ) : (
                 <select
-                  name="bank_name"
+                  name="bank_code_select"
                   className="form-select"
-                  onChange={handleChange}
-                  value={mergedFormData.bank_name}
+                  onChange={e => {
+                    const selectedCode = e.target.value;
+                    const selectedBank = bankList.find(b => b.code === selectedCode);
+                    if (selectedBank) {
+                      handleChange({
+                        ...e,
+                        target: {
+                          ...e.target,
+                          value: selectedBank.shortName,
+                          name: 'bank_name',
+                        }
+                      });
+                      handleChange({
+                        ...e,
+                        target: {
+                          ...e.target,
+                          value: selectedBank.code,
+                          name: 'code',
+                        }
+                      });
+                    } else {
+                      handleChange({
+                        ...e,
+                        target: {
+                          ...e.target,
+                          value: '',
+                          name: 'bank_name',
+                        }
+                      });
+                      handleChange({
+                        ...e,
+                        target: {
+                          ...e.target,
+                          value: '',
+                          name: 'code',
+                        }
+                      });
+                    }
+                  }}
+                  value={mergedFormData.code}
                   required
                 >
                   <option value="">-- Chọn ngân hàng --</option>

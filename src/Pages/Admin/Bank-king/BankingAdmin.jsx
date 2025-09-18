@@ -155,6 +155,7 @@ export default function BankingAdmin() {
             bank_name: editingBank?.bank_name || "",
             account_name: editingBank?.account_name || "",
             account_number: editingBank?.account_number || "",
+            code : editingBank?.code || "",
             url_api: editingBank?.url_api || "",
             bank_account: editingBank?.bank_account || "",
             bank_password: editingBank?.bank_password || "",
