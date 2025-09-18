@@ -25,11 +25,11 @@ export default function Login() {
         token: data.token,
         role: data.role, // Đảm bảo API trả về role
       });
-      loadingg("vui lòng chờ"); // Gọi hàm loading để hiển thị spinner
+      // loadingg("vui lòng chờ"); // Gọi hàm loading để hiển thị spinner
       setError("Đăng nhập thành công!");
       setTimeout(() => {
         navigate("/home"); // Chuyển hướng về trang home sau khi đăng nhập thành công
-        loadingg("", false);
+        // loadingg("", false);
       }, 1000); // Thời gian chờ 1 giây để hiển thị thông báo
     } catch (err) {
       console.error("Lỗi đăng nhập:", err);
