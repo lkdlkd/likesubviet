@@ -155,7 +155,7 @@ export default function BankingAdmin() {
             bank_name: editingBank?.bank_name || "",
             account_name: editingBank?.account_name || "",
             account_number: editingBank?.account_number || "",
-            logo: editingBank?.logo || "",
+            url_api: editingBank?.url_api || "",
             bank_account: editingBank?.bank_account || "",
             bank_password: editingBank?.bank_password || "",
             min_recharge: editingBank?.min_recharge || "",
@@ -188,7 +188,7 @@ export default function BankingAdmin() {
                     <th>Ngân Hàng</th>
                     <th>Tên chủ tài khoản</th>
                     <th>Số tài khoản</th>
-                    <th>Logo</th>
+                    <th>URL API</th>
                     <th>Tài khoản ngân hàng</th>
                     <th>Số tiền nạp tối thiểu</th>
                     <th>Trạng thái</th>
@@ -214,7 +214,7 @@ export default function BankingAdmin() {
                       <th>Ngân Hàng</th>
                       <th>Tên chủ tài khoản</th>
                       <th>Số tài khoản</th>
-                      <th>Logo</th>
+                      <th>url_api</th>
                       <th>Tài khoản ngân hàng</th>
                       <th>Số tiền nạp tối thiểu</th>
                       <th>Trạng thái</th>
@@ -256,20 +256,8 @@ export default function BankingAdmin() {
                         <td>{bank.bank_name}</td>
                         <td>{bank.account_name}</td>
                         <td>{bank.account_number}</td>
-                        <td>
-                          {bank.logo ? (
-                            <img
-                              src={bank.logo}
-                              alt="Logo"
-                              width={50}
-                              height={50}
-                              style={{ objectFit: "contain" }}
-                            />
-                          ) : (
-                            <span>Không có logo</span>
-                          )}
-                        </td>
-                        <td>{bank.bank_account}</td>
+                        <td>{bank.url_api || "không có"}</td>
+                        <td>{bank.bank_account || "không có"}</td>
                         <td>{bank.min_recharge.toLocaleString("en-US")}</td>
                         <td>{bank.status ? "Hoạt động" : "Ngưng hoạt động"}</td>
                       </tr>

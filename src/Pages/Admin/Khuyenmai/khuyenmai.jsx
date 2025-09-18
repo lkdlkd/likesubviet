@@ -86,7 +86,7 @@ export default function Khuyenmai() {
         });
         setIsEditing(true);
         setShowModal(true);
-        fetchPromotions();
+        // fetchPromotions();
     };
 
     function toLocalDatetimeInputValue(dateString) {
@@ -133,7 +133,7 @@ export default function Khuyenmai() {
             <div className="col-md-12">
                 <div className=" card">
                     <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h2 className="card-title">{isEditing ? "Sửa Chương Trình Khuyến Mãi" : "Thêm Chương Trình Khuyến Mãi"}</h2>
+                        <h2 className="card-title">Chương Trình Khuyến Mãi</h2>
                         <button className="btn btn-info mb-3" onClick={() => { setShowModal(true); setIsEditing(false); setFormData({ id: "", name: "", description: "", percentBonus: "", minAmount: 0, startDate: "", endDate: "" }); }}>
                             Thêm mới chương trình khuyến mãi
                         </button>

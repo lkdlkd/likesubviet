@@ -69,7 +69,7 @@ function MenuUser({ user, categories, configWeb }) {
                                         src={config.logo}
                                         className="img-fluid logo-lg"
                                         alt="logo"
-                                        style={{ maxWidth: "230px", maxHeight: "110px", objectFit: "contain" }}
+                                        style={{ maxHeight: "110px", objectFit: "contain" }}
                                         onError={(e) => (e.target.style.display = "none")} // Ẩn ảnh nếu không tải được
                                     />
                                 ) : (

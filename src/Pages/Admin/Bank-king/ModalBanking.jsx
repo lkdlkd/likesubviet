@@ -1,6 +1,7 @@
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-
+import React, {useState } from "react";
+import { getBankList } from "../../../Utils/api";
 export default function ModalBanking({
   editing,
   formData,
@@ -9,11 +10,12 @@ export default function ModalBanking({
   show,
   onHide,
 }) {
+
   const defaultFormData = {
     bank_name: "",
     account_name: "",
     account_number: "",
-    logo: "",
+    url_api: "",
     bank_account: "",
     bank_password: "",
     min_recharge: "",
@@ -23,8 +25,31 @@ export default function ModalBanking({
 
   const mergedFormData = { ...defaultFormData, ...formData };
 
+  // Bank list state
+  const [bankList, setBankList] = React.useState([]);
+  const [bankLoading, setBankLoading] = React.useState(true);
+  const [bankError, setBankError] = React.useState(false);
+
+  React.useEffect(() => {
+    setBankLoading(true);
+    setBankError(false);
+    getBankList()
+      .then((data) => {
+        if (data && data.data) {
+          setBankList(data.data);
+        } else {
+          setBankError(true);
+        }
+        setBankLoading(false);
+      })
+      .catch(() => {
+        setBankError(true);
+        setBankLoading(false);
+      });
+  }, []);
+
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal show={show} onHide={onHide} backdrop="static" keyboard={false}>
       <Modal.Header closeButton>
         <Modal.Title>{editing ? "Chỉnh sửa ngân hàng" : "Thêm ngân hàng"}</Modal.Title>
       </Modal.Header>
@@ -33,15 +58,37 @@ export default function ModalBanking({
           <div className="row g-3">
             <div className="col-md-6">
               <label className="form-label">Ngân Hàng</label>
-              <input
-                type="text"
-                name="bank_name"
-                className="form-control"
-                onChange={handleChange}
-                value={mergedFormData.bank_name}
-                placeholder="ACB, Vietcombank, MBBANK, ..."
-                required
-              />
+              {bankLoading ? (
+                <div className="form-text">Đang tải danh sách ngân hàng...</div>
+              ) : bankError ? (
+                <>
+                  <input
+                    type="text"
+                    name="bank_name"
+                    className="form-control"
+                    onChange={handleChange}
+                    value={mergedFormData.bank_name}
+                    placeholder="ACB, Vietcombank, MBBANK, ..."
+                    required
+                  />
+                  <div className="form-text text-danger">Không tải được danh sách ngân hàng, hãy nhập tay.</div>
+                </>
+              ) : (
+                <select
+                  name="bank_name"
+                  className="form-select"
+                  onChange={handleChange}
+                  value={mergedFormData.bank_name}
+                  required
+                >
+                  <option value="">-- Chọn ngân hàng --</option>
+                  {bankList.map((bank) => (
+                    <option key={bank.code} value={bank.code}>
+                       {bank.code} - {bank.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
             <div className="col-md-6">
               <label className="form-label">Tên chủ tài khoản</label>
@@ -66,14 +113,25 @@ export default function ModalBanking({
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Logo</label>
+              <label className="form-label">URL API</label>
+              <select
+                name="url_api"
+                className="form-select mb-2"
+                onChange={handleChange}
+                value={mergedFormData.url_api}
+              >
+                <option value="">-- Chọn hoặc tự điền --</option>
+                <option value="https://api.web2m.com">https://api.web2m.com</option>
+                <option value="https://api.sieuthicode.net">https://api.sieuthicode.net</option>
+              </select>
               <input
                 type="text"
-                name="logo"
+                name="url_api"
                 className="form-control"
                 onChange={handleChange}
-                value={mergedFormData.logo}
-                placeholder="có thể ghi bừa"
+                value={mergedFormData.url_api}
+                placeholder="Hoặc tự điền url api khác"
+                style={{ marginTop: '4px' }}
               />
             </div>
             <div className="col-md-6">

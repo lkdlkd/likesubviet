@@ -4,7 +4,7 @@ import Button from "react-bootstrap/Button";
 
 export default function PromotionModal({ show, handleClose, handleSubmit, formData, setFormData, isEditing }) {
     return (
-        <Modal show={show} onHide={handleClose} centered>
+        <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false}>
             <Modal.Header closeButton>
                 <Modal.Title>{isEditing ? "Sửa Chương Trình Khuyến Mãi" : "Thêm Chương Trình Khuyến Mãi"}</Modal.Title>
             </Modal.Header>

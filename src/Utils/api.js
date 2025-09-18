@@ -1,4 +1,11 @@
-const API_BASE = `${process.env.REACT_APP_API_BASE}/api`;
+// ...existing code...
+
+// Get bank list from vietqr API
+export async function getBankList() {
+  const res = await fetch("https://api.vietqr.io/v2/banks");
+  if (!res.ok) throw new Error("Failed to fetch bank list");
+  return await res.json();
+}const API_BASE = `${process.env.REACT_APP_API_BASE}/api`;
 
 // Refund APIs
 export const getRefunds = async (token,status) => {
