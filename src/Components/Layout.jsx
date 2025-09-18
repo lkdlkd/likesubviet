@@ -8,7 +8,7 @@ import Logout from "./Logout";
 import { getCategories, getMe, getNotifications, getConfigWeb } from "@/Utils/api";
 import Widget from "./Widget";
 // import MobileBottom from "./MobileBottom";
-
+import { loadingg } from "@/JS/Loading";
 const Layout = () => {
     const [categories, setCategories] = useState([]);
     const [notifications, setNotifications] = useState([]);
@@ -19,6 +19,7 @@ const Layout = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            loadingg("Vui lòng chờ...", true, 9999999); // Hiển thị loading khi bắt đầu fetch
             try {
                 const [categoriesData, userData, notificationData, configwebdata] = await Promise.all([
                     getCategories(token),
@@ -51,8 +52,10 @@ const Layout = () => {
                     window.location.href = "/dang-nhap";
                 }
             }
+            finally {
+                loadingg("", false, 0); // Ẩn loading sau khi fetch xong
+            }
         };
-
         fetchData();
     }, [token]);
     const title = configWeb ? configWeb.title : "Hệ thống tăng tương tác MXH";

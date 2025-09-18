@@ -4,7 +4,8 @@ import Swal from "sweetalert2";
 import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
-
+import { SlArrowRight } from "react-icons/sl";
+import { SlArrowDown } from "react-icons/sl";
 function MenuUser({ user, categories, configWeb }) {
     const navigate = useNavigate(); // Khởi tạo useNavigate
     const [activeMenu, setActiveMenu] = useState(null);
@@ -91,15 +92,17 @@ function MenuUser({ user, categories, configWeb }) {
                                 <li className="pc-item pc-hasmenu">
                                     <a
                                         onClick={() => toggleMenu("Menu")}
-                                        className="pc-link"
+                                        className="pc-link d-flex align-items-center justify-content-between"
                                         style={{ cursor: "pointer" }}
                                     >
-                                        <span className="pc-micon">
-                                            <img src="/img/dashboard.png" className="wid-35" alt="" />
+                                        <span>
+                                            <span className="pc-micon">
+                                                <img src="/img/dashboard.png" className="wid-35" alt="" />
+                                            </span>
+                                            <span className="pc-mtext">QUẢN LÝ HỆ THỐNG</span>
                                         </span>
-                                        <span className="pc-mtext">QUẢN LÝ HỆ THỐNG</span>
-                                        <span className="pc-arrow">
-                                            <i data-feather="chevron-right"></i>
+                                        <span className="pc-arrow ms-2">
+                                            {activeMenu === "Menu" ? <SlArrowDown /> : <SlArrowRight />}
                                         </span>
                                     </a>
                                     {activeMenu === "Menu" && (
@@ -166,15 +169,17 @@ function MenuUser({ user, categories, configWeb }) {
                                 <li className="pc-item pc-hasmenu">
                                     <a
                                         onClick={() => toggleMenu("dichvu")}
-                                        className="pc-link"
+                                        className="pc-link d-flex align-items-center justify-content-between"
                                         style={{ cursor: "pointer" }}
                                     >
-                                        <span className="pc-micon">
-                                            <img src="/img/dashboard.png" className="wid-35" alt="" width={35} height={35} />
+                                        <span>
+                                            <span className="pc-micon">
+                                                <img src="/img/dashboard.png" className="wid-35" alt="" width={35} height={35} />
+                                            </span>
+                                            <span className="pc-mtext">MENU DỊCH VỤ</span>
                                         </span>
-                                        <span className="pc-mtext">MENU DỊCH VỤ</span>
-                                        <span className="pc-arrow">
-                                            <i data-feather="chevron-right"></i>
+                                        <span className="pc-arrow ms-2">
+                                            {activeMenu === "dichvu" ? <SlArrowDown /> : <SlArrowRight />}
                                         </span>
                                     </a>
                                     {activeMenu === "dichvu" && (
@@ -219,8 +224,8 @@ function MenuUser({ user, categories, configWeb }) {
                                     <img src="/img/dashboard.png" className="wid-35" alt="" />
                                 </span>
                                 <span className="pc-mtext">MENU HỆ THỐNG</span>
-                                <span className="pc-arrow">
-                                    <i data-feather="chevron-right"></i>
+                                <span className="pc-arrow ms-2">
+                                    {activeMenu === "Menuhethonghethong" ? <SlArrowDown /> : <SlArrowRight />}
                                 </span>
                             </a>
                             {activeMenu === "Menuhethonghethong" && (
@@ -302,7 +307,8 @@ function MenuUser({ user, categories, configWeb }) {
                                 <span className="pc-micon">
                                     <img src="https://i.imgur.com/LtJfhAt.gif" className="wid-35" alt="" width={35} height={35} />
                                 </span>
-                                <span className="pc-mtext">Mua dịch vụ</span>                            </Link>
+                                <span className="pc-mtext">Mua dịch vụ</span>
+                            </Link>
                             {/* <a
                                 style={{ cursor: "pointer" }}
                                 onClick={() => handleNavigation("/order")}
@@ -332,19 +338,21 @@ function MenuUser({ user, categories, configWeb }) {
                                 <li key={group.platform._id} className="pc-item pc-hasmenu">
                                     <a
                                         onClick={() => toggleMenu(group.platform._id)}
-                                        className="pc-link"
+                                        className="pc-link d-flex align-items-center justify-content-between"
                                         style={{ cursor: "pointer" }}
                                     >
-                                        <span className="pc-micon">
-                                            <img
-                                                src={group.platform.logo}
-                                                className="wid-35"
-                                                alt={group.platform.name}
-                                            />
+                                        <span>
+                                            <span className="pc-micon">
+                                                <img
+                                                    src={group.platform.logo}
+                                                    className="wid-35"
+                                                    alt={group.platform.name}
+                                                />
+                                            </span>
+                                            <span className="pc-mtext">{group.platform.name}</span>
                                         </span>
-                                        <span className="pc-mtext">{group.platform.name}</span>
-                                        <span className="pc-arrow">
-                                            <i data-feather="chevron-right"></i>
+                                        <span className="pc-arrow ms-2">
+                                            {activeMenu === group.platform._id ? <SlArrowDown /> : <SlArrowRight />}
                                         </span>
                                     </a>
                                     {activeMenu === group.platform._id && (
@@ -355,13 +363,6 @@ function MenuUser({ user, categories, configWeb }) {
                                                         <Link to={`/order/${service.path.toLowerCase()}`} className="pc-link">
                                                             <span className="pc-mtext">{service.name}</span>
                                                         </Link>
-                                                        {/* <a
-                                                            style={{ cursor: "pointer" }}
-                                                            onClick={() => handleNavigation(`/order/${service.path.toLowerCase()}`)}
-                                                            className="pc-link"
-                                                        >
-                                                            <span className="pc-mtext">{service.name}</span>
-                                                        </a> */}
                                                     </li>
                                                 ) : null
                                             )}

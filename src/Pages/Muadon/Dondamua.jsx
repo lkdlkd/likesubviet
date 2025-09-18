@@ -33,7 +33,7 @@ const Dondamua = ({ category, showcmt }) => {
             return;
         }
         setLoadingOrders(true);
-        loadingg("Vui lòng chờ...", true, 9999999);
+        // loadingg("Vui lòng chờ...", true, 9999999);
         try {
             const response = await getOrders(
                 token,
@@ -50,7 +50,7 @@ const Dondamua = ({ category, showcmt }) => {
             setOrders([]);
         } finally {
             setLoadingOrders(false);
-            loadingg("Vui lòng chờ...", false);
+            // loadingg("Vui lòng chờ...", false);
         }
     };
 
@@ -63,21 +63,21 @@ const Dondamua = ({ category, showcmt }) => {
     const handleSearch = (e) => {
         e.preventDefault();
         setCurrentPage(1);
-        loadingg("Đang tìm kiếm...");
-        setTimeout(() => {
-            fetchOrders();
-            loadingg("", false);
-        }, 0);
+        // loadingg("Đang tìm kiếm...");
+        // setTimeout(() => {
+        fetchOrders();
+        // loadingg("", false);
+        // }, 0);
     };
 
     // Xử lý thay đổi số đơn hàng hiển thị mỗi trang
     const handleLimitChange = (e) => {
         setLimit(Number(e.target.value));
         setCurrentPage(1);
-        loadingg("Vui lòng chờ");
-        setTimeout(() => {
-            loadingg("", false);
-        }, 1000);
+        // loadingg("Vui lòng chờ");
+        // setTimeout(() => {
+        //     loadingg("", false);
+        // }, 1000);
     };
 
     // Lọc theo trạng thái
@@ -124,10 +124,9 @@ const Dondamua = ({ category, showcmt }) => {
     return (
         <div className="row">
             <div className="col-md-12">
-                <div className="card">
-                    <div className="card-body">
+                <div className="">
+                    <div className="">
                         <div className="row md-3">
-
                             <div className="col-md-6 col-lg-3">
                                 <div className="form-group">
                                     <label  >
@@ -299,7 +298,8 @@ const Dondamua = ({ category, showcmt }) => {
                                                                                 } catch (err) {
                                                                                     toast.error(`Hủy hoàn thất bại: ${err.message}`);
                                                                                 } finally {
-                                                                                    loadingg("Đang tải...", false);}
+                                                                                    loadingg("Đang tải...", false);
+                                                                                }
                                                                             }}
                                                                         >
                                                                             Hủy hoàn
