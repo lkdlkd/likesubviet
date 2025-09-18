@@ -123,7 +123,7 @@ export default function ModalBanking({
                   <option value="">-- Chọn ngân hàng --</option>
                   {bankList.map((bank) => (
                     <option key={bank.code} value={bank.code}>
-                       {bank.code} - {bank.name}
+                       {bank.shortName} - {bank.name}
                     </option>
                   ))}
                 </select>
