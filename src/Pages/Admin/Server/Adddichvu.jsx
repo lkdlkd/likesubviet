@@ -108,7 +108,7 @@ export default function Adddichvu({
       rate: "",
     });
     setServices([]);
-    const partner = smmPartners.find((p) => p.name === domain);
+    const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
     if (!partner) return;
 
     try {
@@ -127,7 +127,7 @@ export default function Adddichvu({
   const handleServiceChange = (e) => {
     const id = e.target.value;
     const svc = services.find((s) => String(s.service) === id);
-    const partner = smmPartners.find((p) => p.name === formData.DomainSmm);
+    const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
     const tigia = partner?.tigia || 1;
 
     if (svc) {
@@ -178,7 +178,7 @@ export default function Adddichvu({
       if (selectedServices.length > 0) {
         await Promise.all(
           selectedServices.map(async (service) => {
-            const partner = smmPartners.find((p) => p.name === formData.DomainSmm);
+            const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
             const tigia = partner?.tigia || 1;
             const ptgia = partner?.price_update || 0;
             const baseRate = service.rate * tigia;
@@ -293,7 +293,7 @@ export default function Adddichvu({
   ];
 
   const domainOptions = smmPartners.map((partner) => ({
-    value: partner.name,
+    value: partner._id,
     label: partner.name,
     partner,
   }));
@@ -339,7 +339,7 @@ export default function Adddichvu({
   ) || null;
 
   const selectedDomainOption = domainOptions.find(
-    (opt) => opt.value === formData.DomainSmm
+    (opt) => String(opt.value) === String(formData.DomainSmm)
   ) || null;
 
   const selectedDoanhmucOption = doanhmucOptions.find(
@@ -554,10 +554,10 @@ export default function Adddichvu({
                   name="DomainSmm"
                   value={selectedDomainOption}
                   onChange={async (option) => {
-                    const domain = option ? option.value : "";
+                    const domainId = option ? option.value : "";
                     setFormData({
                       ...formData,
-                      DomainSmm: domain,
+                      DomainSmm: domainId,
                       serviceId: "",
                       serviceName: "",
                       originalRate: "",
@@ -568,14 +568,13 @@ export default function Adddichvu({
                     setServices([]);
                     setSelectedCategory("");
                     if (!option) return;
-                    const partner = smmPartners.find((p) => p.name === domain);
+                    const partner = smmPartners.find((p) => String(p._id) === String(domainId));
                     if (!partner) return;
                     try {
                       setLoadingServices(true);
                       const servicesData = await getServicesFromSmm(partner._id, token);
                       setServices(servicesData.data);
                     } catch (error) {
-                      //   console.error("Lỗi khi lấy dữ liệu từ backend:", error);
                       toast.error("Không thể lấy danh sách dịch vụ từ đối tác. Vui lòng thử lại!");
                     } finally {
                       setLoadingServices(false);
@@ -604,7 +603,6 @@ export default function Adddichvu({
                 )}
               </div>
               {!quickAddMode && (
-
                 <div className="col-md-6 mb-3">
                   <label className="form-label">Tên dịch vụ bên SMM ( thêm server nhanh bỏ trống ):</label>
                   {loadingServices ? (
@@ -629,7 +627,7 @@ export default function Adddichvu({
                           return;
                         }
                         const svc = services.find((s) => String(s.service) === String(option.value));
-                        const partner = smmPartners.find((p) => p.name === formData.DomainSmm);
+                        const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
                         const tigia = partner?.tigia || 1;
                         const ptgia = partner?.price_update || 0;
                         const baseRate = svc.rate * tigia;
@@ -749,31 +747,88 @@ export default function Adddichvu({
                 </div>
               )}
             </div>
-            <div className="row mb-4">
-              <div className="col-md-12 mb-3">
-                <label className="form-label">Chọn nhanh dịch vụ theo danh mục:</label>
-                {loadingServices ? (
-                  <p>Đang tải danh sách dịch vụ...</p>
-                ) : (
+            {quickAddMode && (
+
+              <div className="row mb-4">
+                <div className="col-md-12 mb-3">
+                  <label className="form-label">Chọn nhanh dịch vụ theo danh mục:</label>
+                  {loadingServices ? (
+                    <p>Đang tải danh sách dịch vụ...</p>
+                  ) : (
+                    <Table bordered hover responsive>
+                      <thead>
+                        <tr>
+                          <th>
+                            <input
+                              type="checkbox"
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedServices(filteredServices); // Chọn tất cả
+                                } else {
+                                  setSelectedServices([]); // Bỏ chọn tất cả
+                                }
+                              }}
+                              checked={
+                                selectedServices.length === filteredServices.length &&
+                                filteredServices.length > 0
+                              }
+                            />
+                          </th>
+                          <th>MÃ</th>
+                          <th>Tên dịch vụ</th>
+                          <th>Giá</th>
+                          <th>Min</th>
+                          <th>Max</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredServices.map((service) => {
+                          const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm)); // Tìm đối tác hiện tại
+                          const tigia = partner?.tigia || 1; // Lấy tỷ giá, mặc định là 1 nếu không có
+                          const ptgia = partner?.price_update || 0;
+                          return (
+                            <tr key={service.service}>
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedServices.some(
+                                    (selected) => selected.service === service.service
+                                  )}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedServices((prev) => [...prev, service]); // Thêm vào danh sách đã chọn
+                                    } else {
+                                      setSelectedServices((prev) =>
+                                        prev.filter(
+                                          (selected) => selected.service !== service.service
+                                        )
+                                      ); // Loại bỏ khỏi danh sách đã chọn
+                                    }
+                                  }}
+                                />
+                              </td>
+                              <td>{service.service}</td>
+                              <td style={{
+                                maxWidth: "450px",
+                                whiteSpace: "normal",
+                                wordWrap: "break-word",
+                                overflowWrap: "break-word",
+                              }}>{service.name}</td>
+                              <td>{service.rate * tigia}</td>
+                              <td>{service.min}</td>
+                              <td>{service.max}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </Table>
+                  )}
+                </div>
+                <div className="col-md-12 mb-3">
+                  <label className="form-label">Danh sách dịch vụ đã chọn:</label>
                   <Table bordered hover responsive>
                     <thead>
                       <tr>
-                        <th>
-                          <input
-                            type="checkbox"
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedServices(filteredServices); // Chọn tất cả
-                              } else {
-                                setSelectedServices([]); // Bỏ chọn tất cả
-                              }
-                            }}
-                            checked={
-                              selectedServices.length === filteredServices.length &&
-                              filteredServices.length > 0
-                            }
-                          />
-                        </th>
                         <th>MÃ</th>
                         <th>Tên dịch vụ</th>
                         <th>Giá</th>
@@ -782,38 +837,22 @@ export default function Adddichvu({
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredServices.map((service) => {
-                        const partner = smmPartners.find((p) => p.name === formData.DomainSmm); // Tìm đối tác hiện tại
+                      {selectedServices.map((service, index) => {
+                        const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm)); // Tìm đối tác hiện tại
                         const tigia = partner?.tigia || 1; // Lấy tỷ giá, mặc định là 1 nếu không có
+                        const ptgia = partner?.price_update || 0; // Tính giá đã quy đổi
+
                         return (
-                          <tr key={service.service}>
-                            <td>
-                              <input
-                                type="checkbox"
-                                checked={selectedServices.some(
-                                  (selected) => selected.service === service.service
-                                )}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedServices((prev) => [...prev, service]); // Thêm vào danh sách đã chọn
-                                  } else {
-                                    setSelectedServices((prev) =>
-                                      prev.filter(
-                                        (selected) => selected.service !== service.service
-                                      )
-                                    ); // Loại bỏ khỏi danh sách đã chọn
-                                  }
-                                }}
-                              />
-                            </td>
+                          <tr key={index}>
                             <td>{service.service}</td>
                             <td style={{
                               maxWidth: "450px",
                               whiteSpace: "normal",
                               wordWrap: "break-word",
                               overflowWrap: "break-word",
-                            }}>{service.name}</td>
-                            <td>{service.rate * tigia}</td>
+                            }}>{service.name}
+                            </td>
+                            <td>{(service.rate * tigia).toFixed(4)} + {ptgia} % = {Math.ceil((service.rate * tigia).toFixed(4) * 10000 + ((service.rate * tigia).toFixed(4) * ptgia) / 100 * 10000) / 10000}</td>
                             <td>{service.min}</td>
                             <td>{service.max}</td>
                           </tr>
@@ -821,46 +860,9 @@ export default function Adddichvu({
                       })}
                     </tbody>
                   </Table>
-                )}
+                </div>
               </div>
-              <div className="col-md-12 mb-3">
-                <label className="form-label">Danh sách dịch vụ đã chọn:</label>
-                <Table bordered hover responsive>
-                  <thead>
-                    <tr>
-                      <th>MÃ</th>
-                      <th>Tên dịch vụ</th>
-                      <th>Giá</th>
-                      <th>Min</th>
-                      <th>Max</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedServices.map((service, index) => {
-                      const partner = smmPartners.find((p) => p.name === formData.DomainSmm); // Tìm đối tác hiện tại
-                      const tigia = partner?.tigia || 1; // Lấy tỷ giá, mặc định là 1 nếu không có
-                      const ptgia = partner.price_update; // Tính giá đã quy đổi
-
-                      return (
-                        <tr key={index}>
-                          <td>{service.service}</td>
-                          <td style={{
-                            maxWidth: "450px",
-                            whiteSpace: "normal",
-                            wordWrap: "break-word",
-                            overflowWrap: "break-word",
-                          }}>{service.name}
-                          </td>
-                          <td>{(service.rate * tigia).toFixed(4)} + {ptgia} % = {Math.ceil((service.rate * tigia).toFixed(4) * 10000 + ((service.rate * tigia).toFixed(4) * ptgia) / 100 * 10000) / 10000}</td>
-                          <td>{service.min}</td>
-                          <td>{service.max}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </Table>
-              </div>
-            </div>
+            )}
             <div className="text-center">
               <Button type="submit" variant="primary" disabled={loading}>
                 {loading ? "Đang xử lý..." : editMode ? "Sửa Dịch Vụ" : "Thêm Dịch Vụ"}

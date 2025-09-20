@@ -256,7 +256,7 @@ export default function ThongkePage() {
                             <tbody>
                                 {statistics.laiTheoDomain.map((item, idx) => (
                                     <tr key={idx}>
-                                        <td>{item._id || <i>Không xác định</i>}</td>
+                                        <td>{item.DomainSmm || <i>Không xác định</i>}</td>
                                         <td>{Math.floor(Number(item.totalTientieu)).toLocaleString("en-US")}</td>
                                         <td>{Math.floor(Number(item.totalCost)).toLocaleString("en-US")}</td>
                                         <td>{Math.floor(Number(item.totalLai)).toLocaleString("en-US")}</td>
