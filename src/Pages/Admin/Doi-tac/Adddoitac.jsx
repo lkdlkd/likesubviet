@@ -14,9 +14,12 @@ export default function Adddoitac({
   onUpdate,
   onClose,
 }) {
+  // Lấy URL API cố định từ biến môi trường (ưu tiên REACT_APP_, fallback NEXT_PUBLIC_)
+  const ENV_ALLOWED = (process.env.REACT_APP_ALLOWED_API_URL || process.env.NEXT_PUBLIC_ALLOWED_API_URL || "").trim();
+  const ALLOWED_API_URL = ENV_ALLOWED || null; // nếu không thiết lập biến môi trường thì bỏ giới hạn
   const [formData, setFormData] = useState({
     name: "",
-    url_api: "",
+    url_api: ALLOWED_API_URL || "",
     api_token: "",
     price_update: "",
     tigia: "",
@@ -32,13 +35,15 @@ export default function Adddoitac({
     if (editingPartner) {
       setFormData({
         ...editingPartner,
+        // Nếu có ALLOWED_API_URL thì luôn ép URL về giá trị được phép để tránh bị chặn khi submit
+        url_api: ALLOWED_API_URL || editingPartner.url_api,
         phihoan: editingPartner.phihoan || 1000, // Mặc định là 1000 nếu không có
         autohoan: editingPartner.autohoan || "on",
       });
     } else {
       setFormData({
         name: "",
-        url_api: "",
+        url_api: ALLOWED_API_URL || "",
         api_token: "",
         price_update: "",
         tigia: "",
@@ -52,6 +57,8 @@ export default function Adddoitac({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Khi đã cấu hình ALLOWED_API_URL thì không cho phép thay đổi url_api
+    if (ALLOWED_API_URL && name === "url_api") return;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -60,6 +67,12 @@ export default function Adddoitac({
     setLoading(true);
     loadingg(editingPartner ? "Đang cập nhật đối tác..." : "Đang thêm đối tác...");
     try {
+      // Nếu cấu hình biến môi trường, chỉ cho phép 1 URL API cụ thể
+      const normalize = (u) => (u || "").trim().replace(/\/+$/, "");
+      if (ALLOWED_API_URL && normalize(formData.url_api) !== normalize(ALLOWED_API_URL)) {
+        toast.error(`Chỉ được phép sử dụng URL API: ${ALLOWED_API_URL}`);
+        return;
+      }
       if (editingPartner) {
         // Cập nhật đối tác
         const updatedPartner = await updateSmmPartner(editingPartner._id, formData, token);
@@ -110,10 +123,14 @@ export default function Adddoitac({
               name="url_api"
               value={formData.url_api}
               onChange={handleChange}
-              placeholder="https://tenmien.com/api/v2"
+              placeholder={ALLOWED_API_URL || "https://tenmien.com/api/v2"}
               className="form-control"
+              readOnly={Boolean(ALLOWED_API_URL)}
               required
             />
+            {ALLOWED_API_URL && (
+              <small className="text-muted">Chỉ hỗ trợ URL: {ALLOWED_API_URL}</small>
+            )}
           </div>
 
           <div className="mb-3">
