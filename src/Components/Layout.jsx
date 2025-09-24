@@ -6,7 +6,9 @@ import { ToastContainer } from "react-toastify";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import Logout from "./Logout";
 import { getCategories, getMe, getNotifications, getConfigWeb } from "@/Utils/api";
-import Widget from "./Widget";
+// import Widget from "./Widget";
+import Widget from "./Wingets";
+
 // import MobileBottom from "./MobileBottom";
 import { loadingg } from "@/JS/Loading";
 const Layout = () => {

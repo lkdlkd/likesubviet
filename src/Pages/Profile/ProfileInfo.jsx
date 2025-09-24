@@ -15,6 +15,14 @@ export default function ProfileInfo({ user }) {
     );
   };
 
+  // Hiển thị token dạng ẩn: lấy trước 12 ký tự, sau đó thêm ********
+  const maskedToken = React.useMemo(() => {
+    if (!user?.token) return "Bạn chưa tạo Api Token!";
+    const t = String(user.token);
+    const prefixLen = Math.min(12, t.length);
+    return t.slice(0, prefixLen) + "********";
+  }, [user?.token]);
+
   return (
     <div className="col-md-6">
       <div className="card">
@@ -105,7 +113,7 @@ export default function ProfileInfo({ user }) {
               </div>
               <div className="col-md-12 form-group">
                 <label htmlFor="api_token" className="form-label">
-                  Api Key:
+                  Api Key: <span className="text-danger">Nếu bị lộ hãy đổi mật khẩu</span>
                 </label>
                 <div className="input-group">
                   <input
@@ -118,9 +126,7 @@ export default function ProfileInfo({ user }) {
                         user?.token ? user.token : "Bạn chưa tạo Api Token!"
                       )
                     }
-                    value={
-                      user?.token ? user.token : "Bạn chưa tạo Api Token!"
-                    }
+                    value={maskedToken}
                     placeholder="Bạn cần ấn thay đổi Token"
                   />
                   <button
@@ -133,7 +139,7 @@ export default function ProfileInfo({ user }) {
                     type="button"
                     id="btn-reload-token"
                   >
-                    <i className="ti ti-refresh"></i>
+                    <i className="ti ti-copy"></i>
                     COPY
                   </button>
                 </div>

@@ -45,18 +45,18 @@ function MenuUser({ user, categories, configWeb }) {
         }
     };
 
-    const handleNavigation = (path) => {
-        loadingg("Vui lòng chờ...");
-        setTimeout(() => {
-            navigate(path); // Chuyển trang
-            // Đóng sidebar nếu đang mở (giống Header)
-            const sidebar = document.querySelector(".pc-sidebar");
-            if (sidebar && sidebar.classList.contains("open")) {
-                sidebar.classList.remove("open");
-                document.body.classList.remove("pc-sidebar-collapse");
-            }
-            Swal.close(); // Đóng thông báo tải
-        }, 1000);
+    const handleNavigation = () => {
+        // loadingg("Vui lòng chờ...");
+        // setTimeout(() => {
+        //     navigate(path); // Chuyển trang
+        //     // Đóng sidebar nếu đang mở (giống Header)
+        const sidebar = document.querySelector(".pc-sidebar");
+        if (sidebar && sidebar.classList.contains("open")) {
+            sidebar.classList.remove("open");
+            document.body.classList.remove("pc-sidebar-collapse");
+        }
+        //     Swal.close(); // Đóng thông báo tải
+        // }, 1000);
     };
     return (
         <nav className="pc-sidebar">
@@ -108,12 +108,12 @@ function MenuUser({ user, categories, configWeb }) {
                                     {activeMenu === "Menu" && (
                                         <ul className="pc-submenu" style={{ listStyleType: "none" }}>
                                             <li className="pc-item">
-                                                <Link to="/admin/setting" className="pc-link">
+                                                <Link to="/admin/setting" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Cài đặt trang</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
-                                                <Link to="/admin/khuyen-mai" className="pc-link">
+                                                <Link to="/admin/khuyen-mai" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Cài đặt khuyễn mãi</span>
                                                 </Link>
                                             </li>
@@ -123,42 +123,42 @@ function MenuUser({ user, categories, configWeb }) {
                                                 </Link>
                                             </li> */}
                                             <li className="pc-item">
-                                                <Link to="/admin/config-tele" className="pc-link">
+                                                <Link to="/admin/config-tele" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Cấu hình Telegram</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
-                                                <Link to="/admin/tai-khoan" className="pc-link">
+                                                <Link to="/admin/tai-khoan" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Khách hàng</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
-                                                <Link to="/admin/orders" className="pc-link">
+                                                <Link to="/admin/orders" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Đơn hàng</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
-                                                <Link to="/admin/refund" className="pc-link">
+                                                <Link to="/admin/refund" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Hoàn tiền</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
-                                                <Link to="/admin/thongke" className="pc-link">
+                                                <Link to="/admin/thongke" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Thống kê</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
-                                                <Link to="/admin/bank-king" className="pc-link">
+                                                <Link to="/admin/bank-king" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Nạp tiền</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
-                                                <Link to="/admin/nap-tien-tu-dong" className="pc-link">
+                                                <Link to="/admin/nap-tien-tu-dong" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Quản lý nạp tiền tự động</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
-                                                <Link to="/admin/taothongbao" className="pc-link">
+                                                <Link to="/admin/taothongbao" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Thông báo</span>
                                                 </Link>
                                             </li>
@@ -185,23 +185,23 @@ function MenuUser({ user, categories, configWeb }) {
                                     {activeMenu === "dichvu" && (
                                         <ul className="pc-submenu" style={{ listStyleType: "none" }}>
                                             <li className="pc-item">
-                                                <Link to="/admin/doitac" className="pc-link">
+                                                <Link to="/admin/doitac" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Thêm đối tác</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
-                                                <Link to="/admin/nen-tang" className="pc-link">
+                                                <Link to="/admin/nen-tang" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Thêm nền tảng</span>
                                                 </Link>
                                             </li>
                                             <li className="pc-item">
-                                                <Link to="/admin/dich-vu" className="pc-link">
+                                                <Link to="/admin/dich-vu" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Thêm dịch vụ</span>
                                                 </Link>
                                             </li>
 
                                             <li className="pc-item">
-                                                <Link to="/admin/server" className="pc-link">
+                                                <Link to="/admin/server" onClick={() => handleNavigation()} className="pc-link">
                                                     <span className="pc-mtext">Thêm server</span>
                                                 </Link>
                                             </li>
@@ -232,8 +232,9 @@ function MenuUser({ user, categories, configWeb }) {
 
                                 <ul className="pc-submenu" style={{ listStyleType: "none" }}>
                                     <li className="pc-item">
-                                        <a
-                                            onClick={() => handleNavigation("/profile")}
+                                        <Link to="/profile"
+                                            onClick={() => handleNavigation()}
+                                            // onClick={() => handleNavigation("/profile")}
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
@@ -241,11 +242,13 @@ function MenuUser({ user, categories, configWeb }) {
                                                 <img src="/home.png" className="wid-35" alt="" width={35} height={35} />
                                             </span> */}
                                             <span className="pc-mtext">Thông Tin Cá Nhân</span>
-                                        </a>
+                                        </Link>
                                     </li>
                                     <li className="pc-item">
-                                        <a
-                                            onClick={() => handleNavigation("/nap-tien")}
+                                        <Link to="/nap-tien"
+                                            onClick={() => handleNavigation()}
+
+                                            // onClick={() => handleNavigation("/nap-tien")}
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
@@ -253,10 +256,12 @@ function MenuUser({ user, categories, configWeb }) {
                                                 <img src="/payment-method.png" className="wid-35" alt="" width={35} height={35} />
                                             </span> */}
                                             <span className="pc-mtext">Nạp Tiền</span>
-                                        </a>
+                                        </Link>
                                     </li>
                                     <li className="pc-item">
                                         <Link to="/lich-su-hoat-dong"
+                                            onClick={() => handleNavigation()}
+
                                             // onClick={() => handleNavigation("/lich-su-hoat-dong")}
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
@@ -268,8 +273,10 @@ function MenuUser({ user, categories, configWeb }) {
                                         </Link>
                                     </li>
                                     <li className="pc-item">
-                                        <a
-                                            onClick={() => handleNavigation("/tai-lieu-api")}
+                                        <Link to="/tai-lieu-api"
+                                            onClick={() => handleNavigation()}
+
+                                            // onClick={() => handleNavigation("/tai-lieu-api")}
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
@@ -277,10 +284,11 @@ function MenuUser({ user, categories, configWeb }) {
                                                 <img src="/suitcase.png" className="wid-35" alt="" width={35} height={35} />
                                             </span> */}
                                             <span className="pc-mtext">Tài liệu API V2</span>
-                                        </a>
+                                        </Link>
                                     </li>
                                     <li className="pc-item">
                                         <Link to="/bang-gia" className="pc-link"
+                                            onClick={() => handleNavigation()}
                                             style={{ cursor: "pointer" }}
                                         >
                                             <span className="pc-mtext">Bảng giá</span>
@@ -302,6 +310,7 @@ function MenuUser({ user, categories, configWeb }) {
                         </li>
                         <li className="pc-item pc-hasmenu">
                             <Link to="/order" className="pc-link"
+                                onClick={() => handleNavigation()}
                                 style={{ cursor: "pointer" }}
                             >
                                 <span className="pc-micon">
@@ -321,6 +330,7 @@ function MenuUser({ user, categories, configWeb }) {
                         </li>
                         <li className="pc-item">
                             <Link
+                                onClick={() => handleNavigation()}
                                 to="/danh-sach-don"
                                 style={{ cursor: "pointer" }}
                                 className="pc-link">
@@ -360,7 +370,9 @@ function MenuUser({ user, categories, configWeb }) {
                                             {group.services.map((service) =>
                                                 service._id ? (
                                                     <li key={service._id} className="pc-item">
-                                                        <Link to={`/order/${service.path.toLowerCase()}`} className="pc-link">
+                                                        <Link to={`/order/${service.path.toLowerCase()}`}
+                                                            onClick={() => handleNavigation()}
+                                                            className="pc-link">
                                                             <span className="pc-mtext">{service.name}</span>
                                                         </Link>
                                                     </li>

@@ -1,3 +1,20 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+
+Disallow: /dang-nhap
+Disallow: /dang-ky
+Disallow: /profile
+Disallow: /nap-tien
+Disallow: /lich-su-hoat-dong
+Disallow: /danh-sach-don
+Disallow: /order
+Disallow: /order/*
+Disallow: /404
+
+# Không cho index trang quản trị (admin)
+Disallow: /admin
+Disallow: /admin/*
+
+# Cho phép index các trang chính
+Allow: /home
+Allow: /bang-gia
+Allow: /tai-lieu-api

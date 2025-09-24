@@ -230,7 +230,7 @@ const Setting = () => {
                                                 className="form-control"
                                                 value={contact.value}
                                                 onChange={(e) => updateContact(index, "value", e.target.value)}
-                                                placeholder="Nhập giá trị liên hệ (ví dụ: địa chỉ email, số điện thoại)"
+                                                placeholder="Ví dụ: https://www.facebook.com/username"
                                             />
                                         </div>
                                         <div className="mb-2">
