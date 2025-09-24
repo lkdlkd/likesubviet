@@ -559,18 +559,11 @@ export default function Ordernhanh() {
             value: server.Magoi,
             label: (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {server.logo && (
+                    <span className="font-semibold"> {server.logo && (
                         <img src={server.logo} alt={server.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
-                    )}
-                    <strong className="badge bg-info">[{server.Magoi}]</strong>
-                    <span className="font-semibold"> - {server.maychu} {server.name} </span>
-                    <span className="badge bg-primary">{Number(server.rate).toLocaleString("en-US")}đ</span>
-                    <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
-                        {server.isActive ? "Hoạt động" : "Không hoạt động"}
+                    )} <strong className="badge bg-info">[{server.Magoi}]</strong> - {server.maychu} {server.name} <span className="badge bg-primary">{Number(server.rate).toLocaleString("en-US")}đ</span><span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>{server.isActive ? " Hoạt động" : " Không hoạt động"}</span>{server.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}{server.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
                     </span>
-                    {server.refil === "on" && (
-                        <span className="badge bg-success ">Bảo hành</span>
-                    )}
+
                 </div>
             ),
             server
