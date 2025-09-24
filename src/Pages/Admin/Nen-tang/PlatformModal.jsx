@@ -54,6 +54,8 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
         return;
       }
       await onSave(formData); // Gửi dữ liệu lên component cha (có thể là async)
+      // Reset form data về rỗng sau khi lưu thành công
+      setFormData({ name: "", logo: "", thutu: "" });
     } finally {
       loadingg("", false);
     }

@@ -19,10 +19,10 @@ import { loadingg } from "@/JS/Loading";
 const images = require.context('@/assets/img/', false, /\.(png|jpe?g|gif)$/); // false: không lấy thư mục con
 const platformLogos = {};
 images.keys().forEach((key) => {
-  const name = key.replace('./', '').replace(/\.[^/.]+$/, '');
-  if (!name.includes('/')) {
-    platformLogos[name.charAt(0).toUpperCase() + name.slice(1)] = images(key);
-  }
+    const name = key.replace('./', '').replace(/\.[^/.]+$/, '');
+    if (!name.includes('/')) {
+        platformLogos[name.charAt(0).toUpperCase() + name.slice(1)] = images(key);
+    }
 });
 // Danh sách favicon có sẵn
 const faviconList = [
@@ -44,25 +44,23 @@ const Setting = () => {
         cuphap: "", // Thêm trường cuphap
     });
     const [loading, setLoading] = useState(false);
-
+    const fetchConfig = async () => {
+        try {
+            loadingg("Đang tải cấu hình website...");
+            const token = localStorage.getItem("token");
+            const config = await getConfigWeb(token);
+            setFormData({
+                ...config.data,
+                lienhe: Array.isArray(config.data.lienhe) ? config.data.lienhe : [],
+                cuphap: config.data.cuphap || "", // Lấy giá trị cuphap từ API
+            });
+        } catch (error) {
+            toast.error("Không thể tải cấu hình website!");
+        } finally {
+            loadingg("", false);
+        }
+    };
     useEffect(() => {
-        const fetchConfig = async () => {
-            try {
-                loadingg("Đang tải cấu hình website...");
-                const token = localStorage.getItem("token");
-                const config = await getConfigWeb(token);
-                setFormData({
-                    ...config.data,
-                    lienhe: Array.isArray(config.data.lienhe) ? config.data.lienhe : [],
-                    cuphap: config.data.cuphap || "", // Lấy giá trị cuphap từ API
-                });
-            } catch (error) {
-                toast.error("Không thể tải cấu hình website!");
-            } finally {
-                loadingg("", false);
-            }
-        };
-
         fetchConfig();
     }, []);
 
@@ -82,8 +80,8 @@ const Setting = () => {
                 ),
                 cuphap: formData.cuphap, // Gửi trường cuphap lên API
             };
-
             await updateConfigWeb(sanitizedData, token);
+            fetchConfig(); // Tải lại cấu hình sau khi cập nhật
             toast.success("Cập nhật cấu hình thành công!");
         } catch (error) {
             toast.error("Cập nhật cấu hình thất bại!");
@@ -248,27 +246,27 @@ const Setting = () => {
                                         <div className="mb-2">
                                             <label className="form-label">Logo liên hệ</label>
                                             <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #ddd', borderRadius: 6, padding: 8 }}>
-                                              <div className="row g-2">
-                                                {Object.entries(platformLogos).map(([platform, url], idx) => (
-                                                  <div className="col-4 col-md-3" key={idx}>
-                                                    <div
-                                                      onClick={() => updateContact(index, "logolienhe", url)}
-                                                      style={{
-                                                        border: contact.logolienhe === url ? '2px solid #007bff' : '1px solid #ccc',
-                                                        borderRadius: 8,
-                                                        padding: 6,
-                                                        cursor: 'pointer',
-                                                        textAlign: 'center',
-                                                        background: contact.logolienhe === url ? '#eaf4ff' : '#fff',
-                                                        boxShadow: contact.logolienhe === url ? '0 0 4px #007bff55' : 'none',
-                                                      }}
-                                                    >
-                                                      <img src={url} alt={platform} style={{ maxWidth: 32, maxHeight: 32, objectFit: 'contain', marginBottom: 4 }} />
-                                                      {/* <div style={{ fontSize: 12 }}>{platform}</div> */}
-                                                    </div>
-                                                  </div>
-                                                ))}
-                                              </div>
+                                                <div className="row g-2">
+                                                    {Object.entries(platformLogos).map(([platform, url], idx) => (
+                                                        <div className="col-4 col-md-3" key={idx}>
+                                                            <div
+                                                                onClick={() => updateContact(index, "logolienhe", url)}
+                                                                style={{
+                                                                    border: contact.logolienhe === url ? '2px solid #007bff' : '1px solid #ccc',
+                                                                    borderRadius: 8,
+                                                                    padding: 6,
+                                                                    cursor: 'pointer',
+                                                                    textAlign: 'center',
+                                                                    background: contact.logolienhe === url ? '#eaf4ff' : '#fff',
+                                                                    boxShadow: contact.logolienhe === url ? '0 0 4px #007bff55' : 'none',
+                                                                }}
+                                                            >
+                                                                <img src={url} alt={platform} style={{ maxWidth: 32, maxHeight: 32, objectFit: 'contain', marginBottom: 4 }} />
+                                                                {/* <div style={{ fontSize: 12 }}>{platform}</div> */}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                             {contact.logolienhe && (
                                                 <div className="mt-2">

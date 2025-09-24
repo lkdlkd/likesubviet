@@ -25,22 +25,20 @@ export default function Doitacpage() {
   //   setSmmPartners(updatedPartners);
   //   loadingg("", false);
   // };
-
+  const fetchSmmPartners = async () => {
+    try {
+      loadingg("Đang tải danh sách đối tác...", true, 9999999);
+      const partners = await getAllSmmPartners(token);
+      setSmmPartners(partners);
+      // await fetchBalancesForPartners(partners);
+    } catch (error) {
+      Swal.fire("Lỗi!", "Không thể tải danh sách đối tác. Vui lòng thử lại.", "error");
+    } finally {
+      loadingg("", false);
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchSmmPartners = async () => {
-      try {
-        loadingg("Đang tải danh sách đối tác...", true, 9999999);
-        const partners = await getAllSmmPartners(token);
-        setSmmPartners(partners);
-        // await fetchBalancesForPartners(partners);
-      } catch (error) {
-        Swal.fire("Lỗi!", "Không thể tải danh sách đối tác. Vui lòng thử lại.", "error");
-      } finally {
-        loadingg("", false);
-        setLoading(false);
-      }
-    };
-
     fetchSmmPartners();
   }, [token]);
 
@@ -61,6 +59,7 @@ export default function Doitacpage() {
         loadingg("Đang xóa đối tác...");
         await deleteSmmPartner(id, token);
         setSmmPartners((prev) => prev.filter((partner) => partner._id !== id));
+        fetchSmmPartners(); // Tải lại danh sách đối tác sau khi xóa
         Swal.fire("Đã xóa!", "Đối tác đã được xóa thành công.", "success");
       } catch (error) {
         Swal.fire("Lỗi!", "Không thể xóa đối tác. Vui lòng thử lại.", "error");
@@ -101,6 +100,7 @@ export default function Doitacpage() {
           </div>
           {(isAdding || editingPartner !== null) && (
             <Adddoitac
+              fetchSmmPartners={fetchSmmPartners}
               token={token}
               onAdd={handleAdd}
               editingPartner={editingPartner}

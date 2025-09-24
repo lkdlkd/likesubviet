@@ -47,6 +47,9 @@ export default function PlatformsPage() {
         icon: "success",
         confirmButtonText: "Xác nhận",
       });
+      fetchPlatforms();
+      // Reset form state after add
+      setSelectedPlatform(null);
       setIsModalOpen(false);
     } catch (error) {
       Swal.fire({
@@ -77,6 +80,9 @@ export default function PlatformsPage() {
         icon: "success",
         confirmButtonText: "Xác nhận",
       });
+      fetchPlatforms();
+      // Reset form state after update
+      setSelectedPlatform(null);
       setIsModalOpen(false);
     } catch (error) {
       Swal.fire({
@@ -112,8 +118,18 @@ export default function PlatformsPage() {
         await deletePlatform(platformId, token);
         Swal.fire("Đã xóa!", "Nền tảng đã được xóa.", "success");
         setPlatforms((prev) => prev.filter((platform) => platform._id !== platformId));
+        // If deleting the currently selected platform, reset and close modal
+        if (selectedPlatform && selectedPlatform._id === platformId) {
+          setSelectedPlatform(null);
+          setIsModalOpen(false);
+        }
       } catch (error) {
-        Swal.fire("Lỗi", "Không thể xóa nền tảng!", "error");
+        Swal.fire({
+          title: "Lỗi",
+          text: `${error.message || "Không thể xóa nền tảng."}`,
+          icon: "error",
+          confirmButtonText: "Xác nhận",
+        });
       } finally {
         loadingg("", false);
       }
@@ -126,7 +142,14 @@ export default function PlatformsPage() {
         <div className="card">
           <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h2 className="card-title">Quản lý nền tảng</h2>
-            <button className="btn btn-info mb-3" onClick={() => setIsModalOpen(true)}>
+            <button
+              className="btn btn-info mb-3"
+              onClick={() => {
+                // Ensure opening a fresh, empty form for adding
+                setSelectedPlatform(null);
+                setIsModalOpen(true);
+              }}
+            >
               Thêm Nền tảng
             </button>
           </div>
@@ -165,7 +188,7 @@ export default function PlatformsPage() {
                                       setSelectedPlatform(platform);
                                       setIsModalOpen(true);
                                     } else {
-                                    //   console.error("Không thể sửa nền tảng: `_id` không tồn tại.");
+                                      //   console.error("Không thể sửa nền tảng: `_id` không tồn tại.");
                                     }
                                   }}
                                 >
@@ -179,7 +202,7 @@ export default function PlatformsPage() {
                                     if (platform && platform._id) {
                                       handleDeletePlatform(platform._id);
                                     } else {
-                                    //    console.error("Không thể xóa nền tảng: `_id` không tồn tại.");
+                                      //    console.error("Không thể xóa nền tảng: `_id` không tồn tại.");
                                     }
                                   }}
                                 >
@@ -214,6 +237,7 @@ export default function PlatformsPage() {
 
             {isModalOpen && (
               <PlatformModal
+                key={selectedPlatform?._id || 'new'}
                 platform={selectedPlatform || undefined}
                 onClose={() => {
                   setIsModalOpen(false);

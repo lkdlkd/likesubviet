@@ -479,7 +479,15 @@ export default function Ordernhanh() {
         });
         return sorted.map((s) => ({
             value: s.Magoi,
-            label: `${s.Magoi} - ${s.maychu} ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
+            label: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="font-semibold"> {s.logo && (
+                        <img src={s.logo} alt={s.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                    )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} {s.name} <span className="badge bg-primary">{Number(s.rate).toLocaleString("en-US")}đ</span><span className={`badge ms-1 ${s.isActive ? 'bg-success' : 'bg-danger'}`}>{s.isActive ? " Hoạt động" : " Không hoạt động"}</span>{s.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}{s.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
+                    </span>
+
+                </div>
+            ),
             server: s
         }));
     }, [servers]);

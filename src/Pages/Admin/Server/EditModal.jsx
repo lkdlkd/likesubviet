@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { updateServer } from "@/Utils/api";
 import { loadingg } from "@/JS/Loading";
 
-export default function EditModal({ show, onClose, initialData, token }) {
+export default function EditModal({ show, fetchServers, onClose, initialData, token }) {
   const [formData, setFormData] = useState({
     _id: "",
     name: "",
@@ -92,6 +92,7 @@ export default function EditModal({ show, onClose, initialData, token }) {
     try {
       await updateServer(formData._id, updatedData, token);
       toast.success("Dịch vụ đã được cập nhật thành công!");
+      fetchServers(); // Tải lại danh sách dịch vụ sau khi cập nhật
       onClose();
     } catch (error) {
       toast.error("Lỗi khi cập nhật dịch vụ. Vui lòng thử lại!");

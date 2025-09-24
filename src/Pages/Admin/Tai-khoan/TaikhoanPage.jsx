@@ -37,25 +37,23 @@ export default function TaikhoanPage() {
       clearTimeout(handler); // Xóa timeout nếu `searchQuery` thay đổi trước khi hết 3 giây
     };
   }, [searchQuery]);
-
+  const fetchUsers = async () => {
+    setLoading(true);
+    loadingg("Đang tải...", true, 9999999);
+    try {
+      const userRes = await getUsers(token, page, limit, debouncedSearchQuery);
+      setUsers(userRes.users || []);
+      setTotalPages(userRes.totalPages || 1);
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage("Không thể tải danh sách người dùng. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+      loadingg("Đang tải...", false);
+    }
+  };
   // Gọi API để lấy danh sách người dùng
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      loadingg("Đang tải...", true, 9999999);
-      try {
-        const userRes = await getUsers(token, page, limit, debouncedSearchQuery);
-        setUsers(userRes.users || []);
-        setTotalPages(userRes.totalPages || 1);
-        setErrorMessage(null);
-      } catch (error) {
-        setErrorMessage("Không thể tải danh sách người dùng. Vui lòng thử lại.");
-      } finally {
-        setLoading(false);
-        loadingg("Đang tải...", false);
-      }
-    };
-
     fetchUsers();
   }, [token, page, limit, debouncedSearchQuery]);
 
@@ -102,6 +100,7 @@ export default function TaikhoanPage() {
         try {
           await deleteUser(userId, token);
           Swal.fire("Đã xóa!", "Người dùng đã được xóa thành công.", "success");
+          fetchUsers();
           setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
         } catch (error) {
           Swal.fire("Lỗi!", "Không thể xóa người dùng. Vui lòng thử lại.", "error");
@@ -299,6 +298,7 @@ export default function TaikhoanPage() {
         {/* Các modal chỉnh sửa */}
         {editingUser && (
           <UserEdit
+            fetchUsers={fetchUsers}
             user={editingUser}
             token={token}
             onClose={() => setEditingUser(null)}
@@ -307,6 +307,7 @@ export default function TaikhoanPage() {
         )}
         {deductUser && (
           <DeductBalanceForm
+            fetchUsers={fetchUsers}
             token={token}
             user={deductUser}
             onClose={() => setDeductUser(null)}
@@ -315,6 +316,7 @@ export default function TaikhoanPage() {
         )}
         {balanceUser && (
           <AddBalanceForm
+            fetchUsers={fetchUsers}
             token={token}
             user={balanceUser}
             onClose={() => setBalanceUser(null)}

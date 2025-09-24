@@ -199,6 +199,7 @@ export default function Dichvupage() {
               )}
             </div>
             <Adddichvu
+              fetchServers={fetchServers}
               show={showAddModal}
               onClose={() => setShowAddModal(false)}
               categories={categories}
@@ -754,6 +755,7 @@ export default function Dichvupage() {
         </div>
       </div>
       <EditModal
+        fetchServers={fetchServers}
         show={showEditModal} // Hiển thị modal khi true
         onClose={() => setShowEditModal(false)} // Đóng modal
         initialData={selectedService} // Dữ liệu ban đầu của dịch vụ

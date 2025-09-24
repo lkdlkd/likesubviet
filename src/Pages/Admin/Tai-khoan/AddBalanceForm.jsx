@@ -5,7 +5,7 @@ import { addBalance } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading";
 
-function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
+function AddBalanceForm({ user, token, fetchUsers, onClose, onUserUpdated }) {
     const [additionAmount, setAdditionAmount] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -23,6 +23,7 @@ function AddBalanceForm({ user, token, onClose, onUserUpdated }) {
 
             // Gửi dữ liệu đã cập nhật về component cha
             onUserUpdated(updatedUser);
+            fetchUsers();
 
             toast.success("Thêm số dư thành công!");
             onClose(); // Đóng modal

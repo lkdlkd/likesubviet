@@ -69,6 +69,7 @@ export default function CategoriesPage() {
                     confirmButtonText: "Xác nhận",
                 });
             }
+            fetchCategories(); // Tải lại danh sách danh mục sau khi lưu
             setIsModalOpen(false);
             setSelectedCategory(null);
         } catch (error) {
@@ -107,11 +108,12 @@ export default function CategoriesPage() {
                 await deleteCategory(categoryId, token);
                 setCategories((prev) => prev.filter((cat) => cat._id !== categoryId));
                 Swal.fire("Đã xóa!", "Danh mục đã được xóa.", "success");
+                fetchCategories(); // Tải lại danh sách danh mục sau khi xóa
             } catch (error) {
                 //  console.error("Lỗi khi xóa danh mục:", error);
                 Swal.fire({
                     title: "Lỗi",
-                    text: "Không thể xóa danh mục.",
+                    text: `${error.message || "Không thể xóa danh mục."}`,
                     icon: "error",
                     confirmButtonText: "Xác nhận",
                 });
@@ -258,10 +260,20 @@ export default function CategoriesPage() {
 
                         {isModalOpen && (
                             <CategoryModal
-                                category={selectedCategory}
+                                key={selectedCategory?._id || 'new'}
+                                category={selectedCategory || null}
                                 platforms={platforms}
-                                onSave={handleSaveCategory}
-                                onClose={() => setIsModalOpen(false)}
+                                onSave={async (data) => {
+                                    await handleSaveCategory(data);
+                                    // Reset form to empty and close modal after save
+                                    setSelectedCategory(null);
+                                    setIsModalOpen(false);
+                                }}
+                                onClose={() => {
+                                    // Ensure clearing state when closing without saving
+                                    setIsModalOpen(false);
+                                    setSelectedCategory(null);
+                                }}
                             />
                         )}
                     </div>

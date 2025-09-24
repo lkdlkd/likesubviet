@@ -34,7 +34,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
         path: "",
         notes: "",
         modal_show: "",
-        thutu: "",
+        thutu: 2,
       });
     }
   }, [category]);
@@ -50,7 +50,16 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
       });
       return;
     }
+    // Pass up and then reset to empty so when modal reopens it's blank
     onSave(formData);
+    setFormData({
+      platforms_id: "",
+      name: "",
+      path: "",
+      notes: "",
+      modal_show: "",
+      thutu: "",
+    });
   };
 
   return (
@@ -67,7 +76,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
               className="form-control"
               value={formData.thutu}
               onChange={(e) => setFormData({ ...formData, thutu: e.target.value })}
-              placeholder="1"
+              placeholder="2"
             />
           </div>
           <div className="mb-3">

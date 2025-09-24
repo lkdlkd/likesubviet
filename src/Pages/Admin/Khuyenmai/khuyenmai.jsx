@@ -86,7 +86,7 @@ export default function Khuyenmai() {
         });
         setIsEditing(true);
         setShowModal(true);
-        // fetchPromotions();
+        fetchPromotions();
     };
 
     function toLocalDatetimeInputValue(dateString) {

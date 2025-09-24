@@ -5,7 +5,7 @@ import { updateUser, changePassword } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading";
 
-function UserEdit({ user, token, onClose, onUserUpdated }) {
+function UserEdit({ user, token, onClose, fetchUsers, onUserUpdated }) {
   const [username, setUsername] = useState(user?.username || "");
   const [balance, setBalance] = useState(user?.balance || "");
   const [capbac, setCapbac] = useState(user?.capbac || "");
@@ -42,15 +42,15 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
 
       // Gửi dữ liệu đã cập nhật về component cha
       onUserUpdated(updatedUser);
-
+      fetchUsers(); // Tải lại danh sách người dùng
       toast.success("Cập nhật thông tin thành công!");
       onClose(); // Đóng modal
     } catch (error) {
-     // console.error("Lỗi khi cập nhật thông tin:", error);
+      // console.error("Lỗi khi cập nhật thông tin:", error);
       toast.error("Cập nhật thông tin thất bại. Vui lòng thử lại.");
     } finally {
       setSaving(false);
-      loadingg("Đang tải...",false);
+      loadingg("Đang tải...", false);
     }
   };
 
@@ -65,14 +65,15 @@ function UserEdit({ user, token, onClose, onUserUpdated }) {
     try {
       // Gọi API để đổi mật khẩu
       await changePassword(user._id, { newPassword }, token);
+      fetchUsers(); // Tải lại danh sách người dùng
       toast.success("Mật khẩu đã được đặt lại thành công!");
       setNewPassword(""); // Xóa mật khẩu sau khi đổi thành công
     } catch (error) {
-     // console.error("Lỗi khi đổi mật khẩu:", error);
+      // console.error("Lỗi khi đổi mật khẩu:", error);
       toast.error("Đổi mật khẩu thất bại. Vui lòng thử lại.");
     } finally {
       setSaving(false);
-      loadingg("Đang tải...",false);
+      loadingg("Đang tải...", false);
     }
   };
 

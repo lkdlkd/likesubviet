@@ -10,22 +10,20 @@ const ConfigCard = () => {
     PARTNER_KEY: "",
   });
   const [loading, setLoading] = useState(false);
-
+  const fetchConfigCard = async () => {
+    try {
+      loadingg("Đang tải cấu hình thẻ nạp...");
+      const token = localStorage.getItem("token");
+      const config = await getConfigCard(token);
+      setFormData(config.data); // Gán dữ liệu từ API vào form
+    } catch (error) {
+      toast.error("Không thể tải cấu hình thẻ nạp!");
+    } finally {
+      loadingg("", false);
+    }
+  };
   // Lấy cấu hình thẻ nạp từ API
   useEffect(() => {
-    const fetchConfigCard = async () => {
-      try {
-        loadingg("Đang tải cấu hình thẻ nạp...");
-        const token = localStorage.getItem("token");
-        const config = await getConfigCard(token);
-        setFormData(config.data); // Gán dữ liệu từ API vào form
-      } catch (error) {
-        toast.error("Không thể tải cấu hình thẻ nạp!");
-      } finally {
-        loadingg("", false);
-      }
-    };
-
     fetchConfigCard();
   }, []);
 
@@ -37,6 +35,7 @@ const ConfigCard = () => {
     try {
       const token = localStorage.getItem("token");
       await updateConfigCard(formData, token);
+      fetchConfigCard(); // Tải lại cấu hình sau khi cập nhật
       toast.success("Cập nhật cấu hình thẻ nạp thành công!");
     } catch (error) {
       toast.error("Cập nhật cấu hình thẻ nạp thất bại!");
@@ -81,7 +80,7 @@ const ConfigCard = () => {
                     setFormData({ ...formData, PARTNER_ID: e.target.value })
                   }
                   placeholder="Nhập ID đối tác"
-                  
+
                 />
               </div>
 
@@ -96,7 +95,7 @@ const ConfigCard = () => {
                     setFormData({ ...formData, PARTNER_KEY: e.target.value })
                   }
                   placeholder="Nhập khóa đối tác"
-                  
+
                 />
               </div>
 

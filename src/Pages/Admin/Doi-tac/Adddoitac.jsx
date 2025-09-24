@@ -8,6 +8,7 @@ import { loadingg } from "@/JS/Loading";
 
 export default function Adddoitac({
   token,
+  fetchSmmPartners,
   onAdd,
   editingPartner,
   onUpdate,
@@ -70,6 +71,7 @@ export default function Adddoitac({
         toast.success("Đối tác mới đã được thêm thành công!");
         onAdd(newPartner); // Cập nhật danh sách đối tác
       }
+      fetchSmmPartners(); // Tải lại danh sách đối tác sau khi thêm/cập nhật
       onClose(); // Đóng modal
     } catch (error) {
       toast.error("Lỗi khi thêm/cập nhật đối tác. Vui lòng thử lại!");

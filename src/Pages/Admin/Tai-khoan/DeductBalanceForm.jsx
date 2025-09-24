@@ -5,7 +5,7 @@ import { deductBalance } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading";
 
-function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
+function DeductBalanceForm({ user, token, onClose, fetchUsers, onUserUpdated }) {
   const [deductionAmount, setDeductionAmount] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -26,6 +26,7 @@ function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
       // Gọi API để cập nhật số dư
       const updatedUser = await deductBalance(user._id, { amount: deductionAmount }, token);
       onUserUpdated(updatedUser);
+      fetchUsers();
       toast.success("Trừ số dư thành công!");
       onClose(); // Đóng modal
     } catch (error) {
@@ -33,7 +34,7 @@ function DeductBalanceForm({ user, token, onClose, onUserUpdated }) {
       toast.error("Trừ số dư thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
-      loadingg("Đang tải...",false);
+      loadingg("Đang tải...", false);
     }
   };
 

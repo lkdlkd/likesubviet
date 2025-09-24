@@ -11,6 +11,7 @@ import { loadingg } from "@/JS/Loading";
 export default function Adddichvu({
   token,
   categories,
+  fetchServers,
   editMode = false,
   initialData = {},
   onSuccess,
@@ -199,7 +200,7 @@ export default function Adddichvu({
       } else {
         await createServer(formData, token);
       }
-
+      fetchServers(); // Tải lại danh sách dịch vụ sau khi thêm
       toast.success("Dịch vụ đã được thêm thành công!");
       setFormData({
         type: "",

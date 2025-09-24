@@ -16,22 +16,20 @@ export default function BankingAdmin() {
 
   // Lấy token từ localStorage
   const token = localStorage.getItem("token") || "";
-
+  const fetchBanking = async () => {
+    try {
+      loadingg("Đang tải dữ liệu ngân hàng...");
+      const banks = await getBanking(token);
+      setBankList(banks);
+    } catch (error) {
+      // toast.error("Vui lòng thêm ngân hàng!");
+    } finally {
+      setLoading(false);
+      loadingg("", false); // Chỉ gọi loadingg một lần ở đây
+    }
+  };
   // Gọi API để lấy danh sách ngân hàng
   useEffect(() => {
-    const fetchBanking = async () => {
-      try {
-        loadingg("Đang tải dữ liệu ngân hàng...");
-        const banks = await getBanking(token);
-        setBankList(banks);
-      } catch (error) {
-        // toast.error("Vui lòng thêm ngân hàng!");
-      } finally {
-        setLoading(false);
-        loadingg("", false); // Chỉ gọi loadingg một lần ở đây
-      }
-    };
-
     fetchBanking();
   }, [token]);
 
@@ -40,6 +38,7 @@ export default function BankingAdmin() {
       loadingg("Đang tạo ngân hàng...");
       const newBank = await createBanking(data, token);
       setBankList((prev) => [...prev, newBank]);
+      fetchBanking(); // Tải lại danh sách ngân hàng sau khi tạo
       toast.success("Ngân hàng mới được tạo thành công!");
       setShowModal(false);
     } catch (error) {
@@ -56,6 +55,7 @@ export default function BankingAdmin() {
       setBankList((prev) =>
         prev.map((bank) => (bank._id === id ? updatedBank : bank))
       );
+      fetchBanking(); // Tải lại danh sách ngân hàng sau khi cập nhật
       toast.success("Ngân hàng đã được cập nhật thành công!");
       setShowModal(false);
     } catch (error) {
@@ -82,6 +82,7 @@ export default function BankingAdmin() {
         loadingg("Đang xóa ngân hàng...");
         await deleteBanking(id, token);
         setBankList((prev) => prev.filter((bank) => bank._id !== id));
+        fetchBanking(); // Tải lại danh sách ngân hàng sau khi xóa
         toast.success("Ngân hàng đã bị xóa thành công!");
       }
     } catch (error) {
@@ -155,7 +156,7 @@ export default function BankingAdmin() {
             bank_name: editingBank?.bank_name || "",
             account_name: editingBank?.account_name || "",
             account_number: editingBank?.account_number || "",
-            code : editingBank?.code || "",
+            code: editingBank?.code || "",
             url_api: editingBank?.url_api || "",
             bank_account: editingBank?.bank_account || "",
             bank_password: editingBank?.bank_password || "",
