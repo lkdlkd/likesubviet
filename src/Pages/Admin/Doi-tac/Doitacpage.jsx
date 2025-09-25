@@ -181,7 +181,7 @@ export default function Doitacpage() {
                           </td>
                           <td>{partner.name}</td>
                           <td>{partner.url_api}</td>
-                          <td>{Number(partner.balance).toLocaleString("en-US") || "Đang tải..."}</td>
+                          <td>{Math.floor(Number(partner.balance)).toLocaleString("en-US") || "Đang tải..."}</td>
                           {/* <td>{partner.balance !== undefined ? partner.balance : "Đang tải..."}</td> */}
                           <td>{partner.phihoan}</td>
                           <td>{partner.price_update}</td>
