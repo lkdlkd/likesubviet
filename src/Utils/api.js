@@ -226,6 +226,50 @@ export const changePassword = async (id, data, token) => {
   return handleResponse(response);
 };
 
+// 2FA (Two-Factor Authentication)
+// Step 1: Setup - backend should return { otpauthUrl, qrImageDataUrl?, tempSecret }
+export const setup2FA = async (token) => {
+  const response = await fetch(`${API_BASE}/2fa/setup`, {
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify({}),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Step 2: Verify - send the code user enters (and optionally the tempSecret if backend requires)
+// Expected backend body fields example: { code }
+export const verify2FA = async (data, token) => {
+  const response = await fetch(`${API_BASE}/2fa/verify`, {
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Disable 2FA
+export const disable2FA = async (data = {}, token) => {
+  const response = await fetch(`${API_BASE}/2fa/disable`, {
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
 export const getUserHistory = async (token, page = 1, limit = 10, orderId, search, action) => {
   // Xây dựng query string thủ công
   let queryString = `?page=${page}&limit=${limit}`;

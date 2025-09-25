@@ -1,6 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import ProfileInfo from "./ProfileInfo";
 import ChangePasswordForm from "./ChangePasswordForm";
+import TwoFASettings from "./TwoFASettings";
 
 export default function ProfilePage() {
     const { user, token } = useOutletContext();
@@ -27,7 +28,7 @@ export default function ProfilePage() {
                                         <div className="row">
                                             <ProfileInfo user={user} />
                                             <div className="col-md-6">
-                                                <div className="card">
+                                                <div className="card mb-3">
                                                     <div className="card-header">
                                                         <h5 className="card-title">Đổi mật khẩu</h5>
                                                     </div>
@@ -35,6 +36,15 @@ export default function ProfilePage() {
                                                         <ChangePasswordForm token={token} user={user} />
                                                     </div>
                                                 </div>
+                                                <TwoFASettings
+                                                    user={user}
+                                                    isEnabled={!!user.twoFAEnabled}
+                                                    onStatusChange={(enabled) => {
+                                                        // Optionally trigger a refetch here if parent provides a method
+                                                        // For now we just mutate the object for immediate UI feedback
+                                                        user.twoFAEnabled = enabled;
+                                                    }}
+                                                />
                                             </div>
                                         </div>
                                     </div>

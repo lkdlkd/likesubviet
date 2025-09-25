@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { updateUser, changePassword } from "@/Utils/api";
@@ -13,7 +13,14 @@ function UserEdit({ user, token, onClose, fetchUsers, onUserUpdated }) {
   const [tongnapthang, setTongnapthang] = useState(user?.tongnapthang || "");
   const [newPassword, setNewPassword] = useState(""); // Thêm state cho mật khẩu mới
   const [saving, setSaving] = useState(false); // Trạng thái lưu dữ liệu
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(
+    user?.twoFactorEnabled === true
+  );
 
+  // Đồng bộ khi prop user thay đổi (tránh giữ state cũ khi mở user khác)
+  useEffect(() => {
+    setTwoFactorEnabled(user?.twoFactorEnabled === true);
+  }, [user?.twoFactorEnabled]);
   const handleSave = async () => {
     if (!username.trim()) {
       toast.error("Tên người dùng không được để trống!");
@@ -36,6 +43,7 @@ function UserEdit({ user, token, onClose, fetchUsers, onUserUpdated }) {
           capbac,
           tongnap: Number(tongnap) || 0,
           tongnapthang: Number(tongnapthang) || 0,
+          twoFactorEnabled
         },
         token
       );
@@ -155,6 +163,23 @@ function UserEdit({ user, token, onClose, fetchUsers, onUserUpdated }) {
             />
           </div>
         </form>
+        <div className="form-check form-switch mb-3">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            id="twoFactorEnabledSwitch"
+            checked={twoFactorEnabled}
+            onChange={(e) => setTwoFactorEnabled(e.target.checked)}
+          />
+          <label className="form-check-label" htmlFor="twoFactorEnabledSwitch">
+            Bật xác thực 2FA (TOTP)
+          </label>
+          <div className="form-text">
+            {twoFactorEnabled
+              ? "Đang bật: Người dùng sẽ cần mã OTP khi đăng nhập."
+              : "Đang tắt: Người dùng đăng nhập không cần mã OTP."}
+          </div>
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onClose} disabled={saving}>
