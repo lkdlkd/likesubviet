@@ -57,6 +57,7 @@ export default function Adddichvu({
   ) || null;
   const [smmPartners, setSmmPartners] = useState([]);
   const [services, setServices] = useState([]);
+  const [serviceError, setServiceError] = useState(""); // Lỗi khi lấy dịch vụ SMM (ví dụ Invalid key)
   const [loading, setLoading] = useState(false);
   const [loadingServices, setLoadingServices] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState("");
@@ -109,14 +110,26 @@ export default function Adddichvu({
       rate: "",
     });
     setServices([]);
-    const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
+    setServiceError("");
+    const partner = smmPartners.find((p) => String(p._id) === String(domain));
     if (!partner) return;
 
     try {
       setLoadingServices(true);
       loadingg("Đang tải danh sách dịch vụ...", true, 9999999);
       const servicesData = await getServicesFromSmm(partner._id, token);
-      setServices(servicesData.data);
+      // Trường hợp API trả về { success: true, data: { error: "Invalid key" } }
+      if (servicesData && servicesData.data) {
+        if (Array.isArray(servicesData.data)) {
+          setServices(servicesData.data);
+          setServiceError("");
+        } else if (servicesData.data.error) {
+          setServices([]);
+            setServiceError(servicesData.data.error);
+        }
+      } else {
+        setServices([]);
+      }
     } catch (error) {
       toast.error("Không thể lấy danh sách dịch vụ từ đối tác. Vui lòng thử lại!");
     } finally {
@@ -573,8 +586,19 @@ export default function Adddichvu({
                     if (!partner) return;
                     try {
                       setLoadingServices(true);
+                      setServiceError("");
                       const servicesData = await getServicesFromSmm(partner._id, token);
-                      setServices(servicesData.data);
+                      if (servicesData && servicesData.data) {
+                        if (Array.isArray(servicesData.data)) {
+                          setServices(servicesData.data);
+                          setServiceError("");
+                        } else if (servicesData.data.error) {
+                          setServices([]);
+                          setServiceError(servicesData.data.error);
+                        }
+                      } else {
+                        setServices([]);
+                      }
                     } catch (error) {
                       toast.error("Không thể lấy danh sách dịch vụ từ đối tác. Vui lòng thử lại!");
                     } finally {
@@ -601,6 +625,9 @@ export default function Adddichvu({
                     isClearable
                     required
                   />
+                )}
+                {serviceError && !loadingServices && (
+                  <div className="text-danger mt-1 small">Lỗi SMM: {serviceError}</div>
                 )}
               </div>
               {!quickAddMode && (
