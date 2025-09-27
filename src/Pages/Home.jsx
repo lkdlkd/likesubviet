@@ -13,12 +13,12 @@ const Home = () => {
 
     const needsTelegramLink = !user?.telegramChat && !dismissedTelegram;
 
-    // Set default info message only once when user chưa liên kết telegram
-    useEffect(() => {
-        if (needsTelegramLink && !info) {
-            setInfo("Chưa liên kết Telegram. Liên kết để bảo mật hơn.");
-        }
-    }, [needsTelegramLink, info]);
+    // // Set default info message only once when user chưa liên kết telegram
+    // useEffect(() => {
+    //     if (needsTelegramLink && !info) {
+    //         setInfo("Chưa liên kết Telegram. Liên kết để bảo mật hơn.");
+    //     }
+    // }, [needsTelegramLink, info]);
 
     const showAlert = error || info || needsTelegramLink;
 
@@ -38,9 +38,9 @@ const Home = () => {
                                 {' '}<Link to="/profile">tại đây</Link> để tài khoản bảo mật hơn.
                             </span>
                         )}
-                        {!error && !needsTelegramLink && info && (
+                        {/* {!error && !needsTelegramLink && info && (
                             <span className="text-muted">{info}</span>
-                        )}
+                        )} */}
                     </div>
                     <button
                         type="button"
