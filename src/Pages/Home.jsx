@@ -1,21 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import NotificationModal from '@/Components/NotificationModal';
 import { useOutletContext } from "react-router-dom";
-
+import { Link } from 'react-router-dom';
 const Home = () => {
     const { configWeb, user, notifications } = useOutletContext();
     const config = configWeb || {};
+
+    // Local alert states
+    const [error, setError] = useState("");
+    const [info, setInfo] = useState("");
+    const [dismissedTelegram, setDismissedTelegram] = useState(false);
+
+    const needsTelegramLink = !user?.telegramChat && !dismissedTelegram;
+
+    // Set default info message only once when user chưa liên kết telegram
+    useEffect(() => {
+        if (needsTelegramLink && !info) {
+            setInfo("Chưa liên kết Telegram. Liên kết để bảo mật hơn.");
+        }
+    }, [needsTelegramLink, info]);
+
+    const showAlert = error || info || needsTelegramLink;
+
     return (
         <div className="row">
-            <div className='col-12 mb-3'>
-                {user?.telegramChat ? (
-                    <span className="badge bg-success"></span>
-                ) : (
-                    <div className="bg-danger-subtle p-2 border-dashed border-danger rounded mb-3">
-                        <span className="text-danger fw-semibold">Người dùng</span><span className="text-danger fw-normal"> Chưa liên kết telegram . Vui lòng liên kết <a href="/profile">telegram</a> để tài khoản bảo mật hơn</span>
+           <div className="col-12 mb-1">
+             {showAlert && (
+                <div
+                    className={`alert ${error ? 'alert-danger' : 'alert-warning'} alert-dismissible fade show`}
+                    role="alert"
+                >
+                    <div className='mb-1'>
+                        {error && <span className="text-danger fw-semibold">{error}</span>}
+                        {!error && needsTelegramLink && (
+                            <span className="text-danger fw-normal">
+                                Người dùng <strong>chưa liên kết Telegram</strong>. Vui lòng liên kết
+                                {' '}<Link to="/profile">tại đây</Link> để tài khoản bảo mật hơn.
+                            </span>
+                        )}
+                        {!error && !needsTelegramLink && info && (
+                            <span className="text-muted">{info}</span>
+                        )}
                     </div>
-                )}
-            </div>
+                    <button
+                        type="button"
+                        className="btn-close"
+                        aria-label="Close"
+                        onClick={() => { setError(''); setInfo(''); setDismissedTelegram(true); }}
+                    ></button>
+                </div>
+            )}
+           </div>
+
             {/* Card số dư hiện tại */}
             <div className="col-md-6 col-xxl-3">
                 <div className="card">
