@@ -72,6 +72,16 @@ export default function ConfigTelePage() {
             onChange={handleChange}
           />
         </div>
+        <div className="mb-3">
+          <label className="form-label">Bot token cho bot thông báo của người dùng</label>
+          <input
+            type="text"
+            className="form-control"
+            name="bot_notify"
+            value={config.bot_notify || ""}
+            onChange={handleChange}
+          />
+        </div>
         {/* Thêm các trường khác nếu cần */}
         <button type="submit" className="btn btn-primary" disabled={saving}>
           {saving ? "Đang lưu..." : "Lưu cấu hình"}

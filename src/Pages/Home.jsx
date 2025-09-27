@@ -7,6 +7,15 @@ const Home = () => {
     const config = configWeb || {};
     return (
         <div className="row">
+            <div className='col-12 mb-3'>
+                {user?.telegramChat ? (
+                    <span className="badge bg-success"></span>
+                ) : (
+                    <div className="bg-danger-subtle p-2 border-dashed border-danger rounded mb-3">
+                        <span className="text-danger fw-semibold">Người dùng</span><span className="text-danger fw-normal"> Chưa liên kết telegram . Vui lòng liên kết <a href="/profile">telegram</a> để tài khoản bảo mật hơn</span>
+                    </div>
+                )}
+            </div>
             {/* Card số dư hiện tại */}
             <div className="col-md-6 col-xxl-3">
                 <div className="card">

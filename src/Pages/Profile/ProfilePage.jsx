@@ -4,7 +4,7 @@ import ChangePasswordForm from "./ChangePasswordForm";
 import TwoFASettings from "./TwoFASettings";
 
 export default function ProfilePage() {
-    const { user, token } = useOutletContext();
+    const { user, token, configWeb } = useOutletContext();
 
     if (!user) {
         return <div>Loading...</div>; // Hiển thị trạng thái loading nếu user chưa có giá trị
@@ -45,6 +45,30 @@ export default function ProfilePage() {
                                                         user.twoFAEnabled = enabled;
                                                     }}
                                                 />
+                                                <div className="card mt-3">
+                                                    <div className="card-header ">
+                                                        <h5 className="mb-3">Liên kết Telegram Bot</h5>
+                                                        {user.telegramChat ? (<span className="badge bg-success">Đã liên kết</span>) : (
+                                                            <span className="badge bg-danger">Chưa liên kết</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="card-body">
+                                                        <div>
+                                                            <p className="mb-2 small text-muted">
+                                                                Nhấn để mở bot hỗ trợ trên Telegram:
+                                                            </p>
+                                                            <a
+                                                                href={configWeb.linktele}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="fw-semibold"
+                                                            >
+                                                                {configWeb.linktele}
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </div>
                                     </div>

@@ -153,22 +153,20 @@ const Wingets = ({ configWeb }) => {
                 {/* Support label under the main button */}
 
             </div>
-            {/* <div
-                className="lsv-support-label"
+            <div
+                className="b24-widget-support-label"
                 style={{
                     // marginTop: 10,
                     marginBottom: 30,
-                    textAlign: "center",
+                    marginRight: 20,
                     fontSize: 15,
                     color: "#008eecff",
                     lineHeight: 1.2,
-                    textTransform: "none",
-                    textShadow: "0 1px 2px rgba(0,0,0,0.6)",
                     userSelect: "none",
                 }}
             >
-                Liên hệ hỗ trợ
-            </div> */}
+                Hỗ trợ
+            </div>
         </div >
     );
 };

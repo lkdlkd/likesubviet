@@ -38,6 +38,7 @@ const Setting = () => {
         title: "",
         logo: "",
         favicon: "",
+        linktele : "",
         lienhe: [
             { type: "", value: "", logolienhe: "" },
         ],
@@ -53,6 +54,7 @@ const Setting = () => {
                 ...config.data,
                 lienhe: Array.isArray(config.data.lienhe) ? config.data.lienhe : [],
                 cuphap: config.data.cuphap || "", // Lấy giá trị cuphap từ API
+                linktele : config.data.linktele || "",
             });
         } catch (error) {
             toast.error("Không thể tải cấu hình website!");
@@ -79,6 +81,7 @@ const Setting = () => {
                     (contact) => contact.type || contact.value || contact.logolienhe
                 ),
                 cuphap: formData.cuphap, // Gửi trường cuphap lên API
+                linktele: formData.linktele, // Gửi trường linktele lên API
             };
             await updateConfigWeb(sanitizedData, token);
             fetchConfig(); // Tải lại cấu hình sau khi cập nhật
@@ -204,6 +207,20 @@ const Setting = () => {
                                         value={formData.cuphap}
                                         onChange={(e) => setFormData({ ...formData, cuphap: e.target.value })}
                                         placeholder="Nhập cú pháp"
+                                    />
+                                </div>
+                            </fieldset>
+                            {/* Link telegram */}
+                            <fieldset className="mb-4">
+                                <legend className="text-primary">Link bot Telegram</legend>
+                                <div className="mb-3">
+                                    <label className="form-label">Link bot Telegram</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={formData.linktele}
+                                        onChange={(e) => setFormData({ ...formData, linktele: e.target.value })}
+                                        placeholder="https://t.me/noti_web_245_bot"
                                     />
                                 </div>
                             </fieldset>
