@@ -167,6 +167,7 @@ const Banggia = () => {
                                                                                 <th>Id</th>
                                                                                 <th>Tên máy chủ</th>
                                                                                 <th>Giá</th>
+                                                                                <th>Tốc dự kiến</th>
                                                                                 <th>Mua</th>
                                                                             </tr>
                                                                         </thead>
@@ -181,6 +182,7 @@ const Banggia = () => {
                                                                                         overflowWrap: "break-word",
                                                                                     }}>{server.maychu} {server.name}</td>
                                                                                     <td>{Number(server.rate).toLocaleString("en-US")}</td>
+                                                                                    <td >{server.tocdodukien}</td>
                                                                                     <td>
                                                                                         <button
                                                                                             className="btn btn-sm btn-success"

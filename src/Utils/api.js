@@ -5,10 +5,19 @@ export async function getBankList() {
   const res = await fetch("https://api.vietqr.io/v2/banks");
   if (!res.ok) throw new Error("Failed to fetch bank list");
   return await res.json();
-}const API_BASE = `${process.env.REACT_APP_API_BASE}/api`;
+}
+const API_BASE = `${process.env.REACT_APP_API_BASE}/api`;
+export const Home = async (token) => {
+  const response = await fetch(`${API_BASE}/home`, {
+    method: "GET",
+    headers: withNoStore({ Authorization: `Bearer ${token}` }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
 
 // Refund APIs
-export const getRefunds = async (token,status) => {
+export const getRefunds = async (token, status) => {
   const response = await fetch(`${API_BASE}/refund?status=${status}`, {
     method: "GET",
     headers: withNoStore({ Authorization: `Bearer ${token}` }),
