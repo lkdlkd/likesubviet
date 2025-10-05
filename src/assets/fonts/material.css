@@ -1,9 +1,10 @@
-/* fallback */
+/* Use hosted Material Icons Two Tone to avoid local missing file */
 @font-face {
   font-family: 'Material Icons Two Tone';
   font-style: normal;
   font-weight: 400;
-  src: url(material/material.woff2) format('woff2');
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/materialiconstwotone/v159/2sDcZG9ShPJFbgIYuVJ3kltN3ysusbilr9r2IF97JPVvmes.woff2') format('woff2');
 }
 
 .material-icons-two-tone {
@@ -18,6 +19,7 @@
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
+  font-feature-settings: 'liga';
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }

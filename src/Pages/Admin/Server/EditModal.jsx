@@ -97,7 +97,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     } catch (error) {
       toast.error("Lỗi khi cập nhật dịch vụ. Vui lòng thử lại!");
     } finally {
-      loadingg("Đang tải...",false);
+      loadingg("Đang tải...", false);
     }
   };
 
@@ -106,177 +106,196 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       <Modal.Header closeButton>
         <Modal.Title>Chỉnh sửa dịch vụ</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body style={{ maxWidth: '100%' }}>
         <form onSubmit={handleSubmit}>
-          <h4>Nền tảng và dịch vụ</h4>
-          <div className="mb-3">
-            <label className="form-label">Nền tảng:</label>
-            <input
-              type="text"
-              value={form.type}
-              className="form-control"
-              disabled
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Dịch vụ:</label>
-            <input
-              type="text"
-              value={form.category}
-              className="form-control"
-              disabled
-            />
-          </div>
-          <h4>Nguồn</h4>
-          <div className="mb-3">
-            <label className="form-label">Nguồn:</label>
-            <input
-              type="text"
-              value={form.DomainSmm}
-              className="form-control"
-              disabled
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Id nguồn:</label>
-            <input
-              type="text"
-              value={form.serviceId}
-              className="form-control"
-              disabled
-            />
-          </div>
-          <h4>Thông tin dịch vụ</h4>
-          <div className="mb-3">
-            <label className="form-label">Tên dịch vụ:</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Mô tả:</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="form-control"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Máy chủ:</label>
-            <input
-              type="text"
-              name="maychu"
-              value={formData.maychu}
-              onChange={handleChange}
-              className="form-control"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Service ID:</label>
-            <input
-              type="text"
-              name="serviceId"
-              value={formData.serviceId}
-              onChange={handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Giới hạn Min:</label>
-            <input
-              type="number"
-              name="min"
-              value={formData.min}
-              onChange={handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Giới hạn Max:</label>
-            <input
-              type="number"
-              name="max"
-              value={formData.max}
-              onChange={handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Giá:</label>
-            <input
-              type="number"
-              name="rate"
-              value={formData.rate}
-              onChange={handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Giá gốc:</label>
-            <input
-              type="number"
-              value={form.originalRate}
-              className="form-control"
-              disabled
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Trạng thái:</label>
-            <select
-              name="isActive"
-              value={formData.isActive ? "true" : "false"}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  isActive: e.target.value === "true",
-                })
-              }
-              className="form-select"
-            >
-              <option value="true">Hoạt động</option>
-              <option value="false">Đóng</option>
-            </select>
-          </div>
-          <h4>Các chức năng</h4>
-          <div className="mb-3">
-            <label className="form-label">Thứ tự:</label>
-            <input
-              type="text"
-              name="thutu"
-              value={formData.thutu}
-              onChange={handleChange}
-              className="form-control"
-            />
-          </div>
-          {[
-            { key: 'getid', label: 'get uid' },
-            { key: 'comment', label: 'comment' },
-            { key: 'refil', label: 'bảo hành' },
-            { key: 'cancel', label: 'hủy đơn' }
-          ].map((item) => (
-            <div className="mb-3" key={item.key}>
-              <label className="form-label">Chức năng {item.label}:</label>
-              <select
-                name={item.key}
-                value={formData[item.key]}
-                onChange={handleChange}
-                className="form-select"
-              >
-                <option value="on">Bật</option>
-                <option value="off">Tắt</option>
-              </select>
+          <div className="container-fluid">
+            <h4 className="mb-3">Nền tảng và dịch vụ</h4>
+            <div className="row g-3">
+              <div className="col-md-6">
+                <label className="form-label">Nền tảng:</label>
+                <input
+                  type="text"
+                  value={form.type}
+                  className="form-control"
+                  disabled
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Dịch vụ:</label>
+                <input
+                  type="text"
+                  value={form.category}
+                  className="form-control"
+                  disabled
+                />
+              </div>
             </div>
-          ))}
+
+            <h4 className="mb-3 mt-4">Nguồn</h4>
+            <div className="row g-3">
+              <div className="col-md-6">
+                <label className="form-label">Nguồn:</label>
+                <input
+                  type="text"
+                  value={form.DomainSmm}
+                  className="form-control"
+                  disabled
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Service ID:</label>
+                <input
+                  type="text"
+                  value={form.serviceId}
+                  className="form-control"
+                  disabled
+                />
+              </div>
+            </div>
+
+            <h4 className="mb-3 mt-4">Thông tin dịch vụ</h4>
+            <div className="row g-3">
+              <div className="col-md-6">
+                <label className="form-label">Thứ tự:</label>
+                <input
+                  type="text"
+                  name="thutu"
+                  value={formData.thutu}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label">Trạng thái:</label>
+                <select
+                  name="isActive"
+                  value={formData.isActive ? "true" : "false"}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      isActive: e.target.value === "true",
+                    })
+                  }
+                  className="form-select"
+                >
+                  <option value="true">Hoạt động</option>
+                  <option value="false">Đóng</option>
+                </select>
+              </div>
+            </div>
+            <div className="row g-3">
+              <div className="col-md-12">
+                <label className="form-label">Tên dịch vụ:</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Service ID:</label>
+                <input
+                  type="text"
+                  name="serviceId"
+                  value={formData.serviceId}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Máy chủ:</label>
+                <input
+                  type="text"
+                  name="maychu"
+                  value={formData.maychu}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+              <div className="col-12">
+                <label className="form-label">Mô tả:</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Giới hạn Min:</label>
+                <input
+                  type="number"
+                  name="min"
+                  value={formData.min}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Giới hạn Max:</label>
+                <input
+                  type="number"
+                  name="max"
+                  value={formData.max}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Giá:</label>
+                <input
+                  type="number"
+                  name="rate"
+                  value={formData.rate}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Giá gốc:</label>
+                <input
+                  type="number"
+                  value={form.originalRate}
+                  className="form-control"
+                  disabled
+                />
+              </div>
+
+
+            </div>
+
+            <h4 className="mb-3 mt-4">Các chức năng</h4>
+
+            <div className="row g-3 mt-1">
+              {[
+                { key: 'getid', label: 'get uid' },
+                { key: 'comment', label: 'comment' },
+                { key: 'refil', label: 'bảo hành' },
+                { key: 'cancel', label: 'hủy đơn' }
+              ].map((item) => (
+                <div className="col-6 col-md-3" key={item.key}>
+                  <label className="form-label">{item.label}:</label>
+                  <select
+                    name={item.key}
+                    value={formData[item.key]}
+                    onChange={handleChange}
+                    className="form-select"
+                  >
+                    <option value="on">Bật</option>
+                    <option value="off">Tắt</option>
+                  </select>
+                </div>
+              ))}
+            </div>
+          </div>
         </form>
       </Modal.Body>
       <Modal.Footer>

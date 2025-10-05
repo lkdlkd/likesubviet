@@ -136,22 +136,18 @@
   }
 }
 .fa-rotate-90 {
-  -ms-filter: 'progid:DXImageTransform.Microsoft.BasicImage(rotation=1)';
   transform: rotate(90deg);
 }
 
 .fa-rotate-180 {
-  -ms-filter: 'progid:DXImageTransform.Microsoft.BasicImage(rotation=2)';
   transform: rotate(180deg);
 }
 
 .fa-rotate-270 {
-  -ms-filter: 'progid:DXImageTransform.Microsoft.BasicImage(rotation=3)';
   transform: rotate(270deg);
 }
 
 .fa-flip-horizontal {
-  -ms-filter: 'progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1)';
   transform: scaleX(-1);
 }
 
@@ -159,10 +155,7 @@
   transform: scaleY(-1);
 }
 
-.fa-flip-horizontal.fa-flip-vertical,
-.fa-flip-vertical {
-  -ms-filter: 'progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1)';
-}
+
 
 .fa-flip-horizontal.fa-flip-vertical {
   transform: scale(-1);
@@ -5766,10 +5759,8 @@
   font-family: 'Font Awesome 5 Free';
   font-style: normal;
   font-weight: 400;
-  src: url('fontawesome/fa-regular-400.eot');
-  src: url('fontawesome/fa-regular-400.eot?#iefix') format('embedded-opentype'), url('fontawesome/fa-regular-400.woff2') format('woff2'),
-    url('fontawesome/fa-regular-400.woff') format('woff'), url('fontawesome/fa-regular-400.ttf') format('truetype'),
-    url('fontawesome/fa-regular-400.svg#fontawesome') format('svg');
+  src: url('fontawesome/fa-regular-400.woff2') format('woff2'),
+    url('fontawesome/fa-regular-400.woff') format('woff'), url('fontawesome/fa-regular-400.ttf') format('truetype');
 }
 .far {
   font-family: 'Font Awesome 5 Free';
@@ -5779,10 +5770,8 @@
   font-family: 'Font Awesome 5 Free';
   font-style: normal;
   font-weight: 900;
-  src: url('fontawesome/fa-solid-900.eot');
-  src: url('fontawesome/fa-solid-900.eot?#iefix') format('embedded-opentype'), url('fontawesome/fa-solid-900.woff2') format('woff2'),
-    url('fontawesome/fa-solid-900.woff') format('woff'), url('fontawesome/fa-solid-900.ttf') format('truetype'),
-    url('fontawesome/fa-solid-900.svg#fontawesome') format('svg');
+  src: url('fontawesome/fa-solid-900.woff2') format('woff2'),
+    url('fontawesome/fa-solid-900.woff') format('woff'), url('fontawesome/fa-solid-900.ttf') format('truetype');
 }
 .fa,
 .fas {
@@ -5793,10 +5782,8 @@
   font-family: 'Font Awesome 5 Brands';
   font-style: normal;
   font-weight: normal;
-  src: url('fontawesome/fa-brands-400.eot');
-  src: url('fontawesome/fa-brands-400.eot?#iefix') format('embedded-opentype'), url('fontawesome/fa-brands-400.woff2') format('woff2'),
-    url('fontawesome/fa-brands-400.woff') format('woff'), url('fontawesome/fa-brands-400.ttf') format('truetype'),
-    url('fontawesome/fa-brands-400.svg#fontawesome') format('svg');
+  src: url('fontawesome/fa-brands-400.woff2') format('woff2'),
+    url('fontawesome/fa-brands-400.woff') format('woff'), url('fontawesome/fa-brands-400.ttf') format('truetype');
 }
 .fab {
   font-family: 'Font Awesome 5 Brands';
