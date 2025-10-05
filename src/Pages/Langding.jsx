@@ -1720,7 +1720,6 @@ export default function Langding() {
                                                                 placeholder="Nhập tên tài khoản"
                                                                 required
                                                             />
-                                                            <small className="text-muted">Tối đa 100 ký tự</small>
                                                         </div>
                                                         <div className="mb-3">
                                                             <label className="form-label fw-semibold">
@@ -3540,7 +3539,6 @@ export default function Langding() {
                                                 placeholder="Nhập tên tài khoản"
                                                 required
                                             />
-                                            <small className="text-muted">Tối đa 100 ký tự</small>
                                         </div>
                                         <div className="mb-3">
                                             <label className="form-label fw-semibold">
