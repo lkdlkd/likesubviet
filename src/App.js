@@ -3,6 +3,7 @@ import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-d
 import { AuthProvider, AuthContext } from "@/Context/AuthContext";
 import Login from "@/Pages/Dang-nhap/Login";
 import Register from "@/Pages/Dang-Ky/Register";
+import Langding from "@/Pages/Langding";
 import Home from "@/Pages/Home";
 import Layout from "@/Components/Layout";
 import ProfilePage from "@/Pages/Profile/ProfilePage";
@@ -34,24 +35,48 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          {/* Landing Page - hiển thị khi chưa có token */}
+          <Route 
+            path="/" 
+            element={
+              <AuthContext.Consumer>
+                {({ auth }) =>
+                  auth.token ? <Navigate to="/home" replace /> : <Langding />
+                }
+              </AuthContext.Consumer>
+            } 
+          />
+          <Route path="/landing" element={<Langding />} />
+          
           {/* Routes không có Layout */}
           <Route path="/dang-nhap" element={<Login />} />
           <Route path="/dang-ky" element={<Register />} />
 
           {/* Routes cho User Layout */}
           <Route
-            path="/"
+            path="/home"
             element={
               <AuthContext.Consumer>
                 {({ auth }) =>
-                  auth.token ? <Layout /> : <Navigate to="/dang-nhap" />
+                  auth.token ? <Layout /> : <Navigate to="/" />
                 }
               </AuthContext.Consumer>
             }
           >
-            <Route path="/home" element={<Home />} />
-            <Route index element={<Navigate to="/home" replace />} />
-            {/* <Route index element={<Home />} /> */}
+            <Route index element={<Home />} />
+          </Route>
+
+          {/* User routes with Layout */}
+          <Route
+            path="/"
+            element={
+              <AuthContext.Consumer>
+                {({ auth }) =>
+                  auth.token ? <Layout /> : <Navigate to="/" />
+                }
+              </AuthContext.Consumer>
+            }
+          >
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/nap-tien" element={<NaptienPage />} />
             <Route path="/lich-su-hoat-dong" element={<HistoryPage />} />
@@ -60,13 +85,6 @@ function App() {
             <Route path="/order/:path" element={<Order />} />
             <Route path="/tai-lieu-api" element={<Tailieuapi />} />
             <Route path="/bang-gia" element={<Banggia />} />
-            {/* Tạo router động từ groupedCategories */}
-            {/* <Route
-              path="*"
-              element={
-                <DynamicRoutes />
-              }
-            /> */}
           </Route>
 
           {/* Routes cho Admin Layout */}
