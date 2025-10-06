@@ -153,7 +153,7 @@ const Wingets = ({ configWeb }) => {
                 {/* Support label under the main button */}
 
             </div>
-            <div
+            {/* <div
                 className="b24-widget-support-label"
                 style={{
                     // marginTop: 10,
@@ -166,7 +166,7 @@ const Wingets = ({ configWeb }) => {
                 }}
             >
                 Hỗ trợ
-            </div>
+            </div> */}
         </div >
     );
 };
