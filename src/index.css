@@ -5,15 +5,15 @@
 */
 
 /* Profile Page Enhancements */
-.g-4 {
+/* .g-4 {
     gap: 1.5rem;
-}
+} */
 
-.card {
+/* .card {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 12px;
     overflow: hidden;
-}
+} */
 
 .card:hover {
     transform: translateY(-5px);
