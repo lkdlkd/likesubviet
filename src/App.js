@@ -3,7 +3,7 @@ import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-d
 import { AuthProvider, AuthContext } from "@/Context/AuthContext";
 import Login from "@/Pages/Dang-nhap/Login";
 import Register from "@/Pages/Dang-Ky/Register";
-import Langding from "@/Pages/Langding";
+import Langding from "@/Pages/Landing";
 import Home from "@/Pages/Home";
 import Layout from "@/Components/Layout";
 import ProfilePage from "@/Pages/Profile/ProfilePage";
