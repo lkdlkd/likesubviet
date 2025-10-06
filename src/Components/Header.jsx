@@ -3,67 +3,7 @@ import { Link } from "react-router-dom";
 import Logout from "./Logout";
 
 // ================= Theme Handling (ported & adapted from themes.js) =================
-let rtl_flag = false; // (Giữ nếu sau dùng RTL)
-let dark_flag = false;
 
-function layout_change(layout) {
-    const body = document.body;
-    if (!body) return;
-    body.setAttribute("data-pc-theme", layout);
-
-    // Logo swap (optional; adjust paths if needed)
-    const darkLogoSelectors = [
-        ".pc-sidebar .m-header .logo-lg",
-        ".navbar-brand .logo-lg",
-        ".landing-logo",
-        ".auth-main.v1 .auth-sidefooter img",
-        ".footer-top .footer-logo"
-    ];
-    if (layout === "dark") {
-        dark_flag = true;
-        darkLogoSelectors.forEach(sel => {
-            const el = document.querySelector(sel);
-            if (el) {
-                const src = el.getAttribute("data-logo-dark-src") || el.getAttribute("src");
-                // Store original once
-                if (!el.getAttribute("data-logo-light-src")) el.setAttribute("data-logo-light-src", src || "");
-                // If you have a dedicated white version, set attribute data-logo-white-src on markup
-                const whiteSrc = el.getAttribute("data-logo-white-src");
-                if (whiteSrc) el.setAttribute("src", whiteSrc);
-            }
-        });
-    } else {
-        dark_flag = false;
-        darkLogoSelectors.forEach(sel => {
-            const el = document.querySelector(sel);
-            if (el) {
-                const lightSrc = el.getAttribute("data-logo-light-src");
-                if (lightSrc) el.setAttribute("src", lightSrc);
-            }
-        });
-    }
-}
-
-function layout_change_default() {
-    try {
-        const mq = window.matchMedia("(prefers-color-scheme: dark)");
-        const setFromMatch = () => layout_change(mq.matches ? "dark" : "light");
-        setFromMatch();
-        // Listen for system change
-        if (mq.addEventListener) {
-            mq.addEventListener("change", setFromMatch);
-        } else if (mq.addListener) {
-            mq.addListener(setFromMatch); // Safari legacy
-        }
-    } catch (e) {
-        layout_change("light");
-    }
-}
-
-function dark_mode(toggleChecked) {
-    layout_change(toggleChecked ? "dark" : "light");
-}
-// ===============================================================================
 
 export default function Header({ user }) {
     const [showSearch, setShowSearch] = useState(false);
@@ -120,10 +60,7 @@ export default function Header({ user }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Init theme (system default once)
-    useEffect(() => {
-        layout_change_default();
-    }, []);
+
 
     return (
         <header className="pc-header">
@@ -185,9 +122,9 @@ export default function Header({ user }) {
                                 <i className="ph-duotone ph-sun-dim"></i>
                             </button>
                             <div className="dropdown-menu dropdown-menu-end pc-h-dropdown">
-                                <button className="dropdown-item" type="button" onClick={() => layout_change("dark")}> <i className="ph-duotone ph-moon"></i> <span>Dark</span></button>
-                                <button className="dropdown-item" type="button" onClick={() => layout_change("light")}> <i className="ph-duotone ph-sun-dim"></i> <span>Light</span></button>
-                                <button className="dropdown-item" type="button" onClick={() => layout_change_default()}> <i className="ph-duotone ph-cpu"></i> <span>Default</span></button>
+                                <button className="dropdown-item" type="button" > <i className="ph-duotone ph-moon"></i> <span>Dark</span></button>
+                                <button className="dropdown-item" type="button" > <i className="ph-duotone ph-sun-dim"></i> <span>Light</span></button>
+                                <button className="dropdown-item" type="button" > <i className="ph-duotone ph-cpu"></i> <span>Default</span></button>
                             </div>
                         </li>
                         <li

@@ -59,30 +59,276 @@ function MenuUser({ user, categories, configWeb }) {
         // }, 1000);
     };
     return (
-        <nav className="pc-sidebar">
-            <div className="navbar-wrapper">
-                <div className="m-header">
-                    <div className="b-brand text-primary">
-                        <div className="m-header">
-                            <Link to="/home" className="b-brand text-primary">
-                                {isValidUrl(config.logo) ? (
-                                    <img
-                                        src={config.logo}
-                                        className="img-fluid logo-lg"
-                                        alt="logo"
-                                        style={{ maxHeight: "110px", objectFit: "contain" }}
-                                        onError={(e) => (e.target.style.display = "none")} // Ẩn ảnh nếu không tải được
-                                    />
-                                ) : (
-                                    <span className="text-dark" style={{ fontSize: "30px", fontWeight: "bold" }}>
-                                        {config.logo || "Logo"}
-                                    </span>
-                                )}
-                            </Link>
+        <>
+            {/* Enhanced Menu Styles */}
+            <style>{`
+                @keyframes slideInLeft {
+                    from { opacity: 0; transform: translateX(-20px); }
+                    to { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes fadeInDown {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); opacity: 1; }
+                    50% { transform: scale(1.02); opacity: 0.8; }
+                }
+                @keyframes shimmer {
+                    0% { background-position: -200px 0; }
+                    100% { background-position: calc(200px + 100%) 0; }
+                }
+                @keyframes iconBounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-1px); }
+                }
+                
+                .pc-sidebar {
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    box-shadow: 2px 0 20px rgba(0,0,0,0.08);
+                    border-right: 1px solid rgba(0,0,0,0.06);
+                }
+                
+                .pc-navbar .pc-item {
+                    animation: slideInLeft 0.4s ease both;
+                    // margin-bottom: 2px;
+                }
+                .pc-navbar .pc-item:nth-child(1) { animation-delay: 0s; }
+                .pc-navbar .pc-item:nth-child(2) { animation-delay: 0.1s; }
+                .pc-navbar .pc-item:nth-child(3) { animation-delay: 0.2s; }
+                .pc-navbar .pc-item:nth-child(4) { animation-delay: 0.3s; }
+                .pc-navbar .pc-item:nth-child(5) { animation-delay: 0.4s; }
+                .pc-navbar .pc-item:nth-child(6) { animation-delay: 0.5s; }
+                .pc-navbar .pc-item:nth-child(7) { animation-delay: 0.6s; }
+                .pc-navbar .pc-item:nth-child(8) { animation-delay: 0.7s; }
+                
+                // .pc-caption label {
+                //     background: linear-gradient(135deg, #007bff, #0056b3);
+                //     background-clip: text;
+                //     -webkit-background-clip: text;
+                //     -webkit-text-fill-color: transparent;
+                //     font-weight: 600;
+                //     font-size: 0.75rem;
+                //     text-transform: uppercase;
+                //     letter-spacing: 0.5px;
+                //     position: relative;
+                // }
+                // .pc-caption label::after {
+                //     content: '';
+                //     position: absolute;
+                //     bottom: -2px;
+                //     left: 0;
+                //     width: 30px;
+                //     height: 2px;
+                //     background: linear-gradient(90deg, #007bff, #28a745);
+                //     border-radius: 1px;
+                // }
+                
+                .pc-link {
+                    border-radius: 8px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                    margin: 2px 8px;
+                }
+                // .pc-link::before {
+                //     content: '';
+                //     position: absolute;
+                //     top: 0;
+                //     left: -100%;
+                //     width: 100%;
+                //     height: 100%;
+                //     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                //     transition: left 0.5s ease;
+                // }
+                // .pc-link:hover::before {
+                //     left: 100%;
+                // }
+                // .pc-link:hover {
+                //     background: linear-gradient(135deg, rgba(0,123,255,0.1), rgba(40,167,69,0.05));
+                //     transform: translateX(2px);
+                //     box-shadow: 0 2px 8px rgba(0,123,255,0.12);
+                //     border-left: 3px solid #007bff;
+                // }
+                
+                .pc-micon img {
+                    transition: all 0.3s ease;
+                    border-radius: 6px;
+                    filter: brightness(1.1);
+                }
+                .pc-link:hover .pc-micon img {
+                    transform: scale(1.05);
+                    filter: brightness(1.15) saturate(1.05);
+                }
+                
+                .pc-mtext {
+                    transition: all 0.25s ease;
+                    font-weight: 500;
+                }
+                .pc-link:hover .pc-mtext {
+                    color: #007bff;
+                    font-weight: 600;
+                }
+                
+                .pc-arrow {
+                    transition: all 0.3s ease;
+                    color: #6c757d;
+                }
+                .pc-link:hover .pc-arrow {
+                    color: #007bff;
+                    transform: scale(1.1);
+                }
+                
+                // .pc-submenu {
+                //     animation: fadeInDown 0.3s ease both;
+                //     background: rgba(255,255,255,0.7);
+                //     border-radius: 8px;
+                //     margin: 4px 0;
+                //     padding: 4px 0;
+                //     box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+                // }
+                // .pc-submenu .pc-item {
+                //     animation: slideInLeft 0.3s ease both;
+                // }
+                // .pc-submenu .pc-item:nth-child(1) { animation-delay: 0s; }
+                // .pc-submenu .pc-item:nth-child(2) { animation-delay: 0.05s; }
+                // .pc-submenu .pc-item:nth-child(3) { animation-delay: 0.1s; }
+                // .pc-submenu .pc-item:nth-child(4) { animation-delay: 0.15s; }
+                // .pc-submenu .pc-item:nth-child(5) { animation-delay: 0.2s; }
+                
+                // .pc-submenu .pc-link {
+                //     margin: 1px 12px;
+                //     padding: 8px 12px;
+                //     font-size: 0.875rem;
+                // }
+                // .pc-submenu .pc-link:hover {
+                //     background: linear-gradient(135deg, rgba(0,123,255,0.08), rgba(40,167,69,0.03));
+                //     transform: translateX(3px);
+                //     border-left: 2px solid #28a745;
+                // }
+                
+                .b-brand {
+                    transition: all 0.3s ease;
+                    padding: 15px;
+                    border-radius: 12px;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .b-brand::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(135deg, rgba(0,123,255,0.03), rgba(40,167,69,0.02));
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    border-radius: 12px;
+                }
+                .b-brand:hover::before {
+                    opacity: 1;
+                }
+                .b-brand:hover {
+                    transform: scale(1.01);
+                }
+                
+                .logo-lg {
+                    transition: all 0.3s ease;
+                    filter: brightness(1.1);
+                }
+                .b-brand:hover .logo-lg {
+                    filter: brightness(1.1) saturate(1.05);
+                    transform: scale(1.02);
+                }
+                
+                .navbar-content {
+                    position: relative;
+                }
+                .navbar-content::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    width: 1px;
+                    height: 100%;
+                    background: linear-gradient(180deg, transparent, rgba(0,123,255,0.2), transparent);
+                    opacity: 0.5;
+                }
+                
+                /* Custom scrollbar for SimpleBar */
+                .simplebar-scrollbar:before {
+                    background: linear-gradient(180deg, #007bff, #28a745);
+                    border-radius: 3px;
+                    opacity: 0.7;
+                }
+                .simplebar-track {
+                    background: rgba(0,0,0,0.03);
+                }
+                
+                /* Special effects for service items */
+                .service-item {
+                    position: relative;
+                }
+                .service-item::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    right: 10px;
+                    width: 4px;
+                    height: 4px;
+                    background: #28a745;
+                    border-radius: 50%;
+                    transform: translateY(-50%);
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                }
+                .service-item:hover::after {
+                    opacity: 1;
+                }
+                
+                /* Pulse effect for special items */
+                // .pulse-item {
+                //     position: relative;
+                // }
+                // .pulse-item::before {
+                //     content: '';
+                //     position: absolute;
+                //     top: 50%;
+                //     left: 8px;
+                //     width: 6px;
+                //     height: 6px;
+                //     background: #dc3545;
+                //     border-radius: 50%;
+                //     transform: translateY(-50%);
+                //     animation: pulse 2s infinite;
+                // }
+            `}</style>
+            
+            <nav className="pc-sidebar">
+                <div className="navbar-wrapper">
+                    <div className="m-header">
+                        <div className="b-brand text-primary">
+                            <div className="m-header">
+                                <Link to="/home" className="b-brand text-primary">
+                                    {isValidUrl(config.logo) ? (
+                                        <img
+                                            src={config.logo}
+                                            className="img-fluid logo-lg"
+                                            alt="logo"
+                                            style={{ maxHeight: "110px", objectFit: "contain" }}
+                                            onError={(e) => (e.target.style.display = "none")} // Ẩn ảnh nếu không tải được
+                                        />
+                                    ) : (
+                                        <span className="text-dark" style={{ fontSize: "30px", fontWeight: "bold" }}>
+                                            {config.logo || "Logo"}
+                                        </span>
+                                    )}
+                                </Link>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <SimpleBar style={{ maxHeight: '90dvh', minHeight: 0 }} className="navbar-content mb-3">
+                    <SimpleBar style={{ maxHeight: '90dvh', minHeight: 0 }} className="navbar-content mb-3">
                     <ul className="pc-navbar">
                         {userRole === "admin" && (
                             <>
@@ -234,12 +480,11 @@ function MenuUser({ user, categories, configWeb }) {
                                     <li className="pc-item">
                                         <Link to="/profile"
                                             onClick={() => handleNavigation()}
-                                            // onClick={() => handleNavigation("/profile")}
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
                                             {/* <span className="pc-micon">
-                                                <img src="/home.png" className="wid-35" alt="" width={35} height={35} />
+                                                <i className="ti ti-user-circle fs-4 text-primary"></i>
                                             </span> */}
                                             <span className="pc-mtext">Thông Tin Cá Nhân</span>
                                         </Link>
@@ -247,13 +492,11 @@ function MenuUser({ user, categories, configWeb }) {
                                     <li className="pc-item">
                                         <Link to="/nap-tien"
                                             onClick={() => handleNavigation()}
-
-                                            // onClick={() => handleNavigation("/nap-tien")}
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
                                             {/* <span className="pc-micon">
-                                                <img src="/payment-method.png" className="wid-35" alt="" width={35} height={35} />
+                                                <i className="ti ti-credit-card fs-4 text-success"></i>
                                             </span> */}
                                             <span className="pc-mtext">Nạp Tiền</span>
                                         </Link>
@@ -261,13 +504,11 @@ function MenuUser({ user, categories, configWeb }) {
                                     <li className="pc-item">
                                         <Link to="/lich-su-hoat-dong"
                                             onClick={() => handleNavigation()}
-
-                                            // onClick={() => handleNavigation("/lich-su-hoat-dong")}
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
                                             {/* <span className="pc-micon">
-                                                <img src="/transactions.png" className="wid-35" alt="" width={35} height={35} />
+                                                <i className="ti ti-history fs-4 text-info"></i>
                                             </span> */}
                                             <span className="pc-mtext">Lịch Sử Hoạt Động</span>
                                         </Link>
@@ -275,13 +516,11 @@ function MenuUser({ user, categories, configWeb }) {
                                     <li className="pc-item">
                                         <Link to="/tai-lieu-api"
                                             onClick={() => handleNavigation()}
-
-                                            // onClick={() => handleNavigation("/tai-lieu-api")}
                                             className="pc-link"
                                             style={{ cursor: "pointer" }}
                                         >
                                             {/* <span className="pc-micon">
-                                                <img src="/suitcase.png" className="wid-35" alt="" width={35} height={35} />
+                                                <i className="ti ti-api fs-4 text-warning"></i>
                                             </span> */}
                                             <span className="pc-mtext">Tài liệu API V2</span>
                                         </Link>
@@ -291,16 +530,11 @@ function MenuUser({ user, categories, configWeb }) {
                                             onClick={() => handleNavigation()}
                                             style={{ cursor: "pointer" }}
                                         >
+                                            {/* <span className="pc-micon">
+                                                <i className="ti ti-currency-dollar fs-4 text-secondary"></i>
+                                            </span> */}
                                             <span className="pc-mtext">Bảng giá</span>
                                         </Link>
-                                        {/* <a
-                                            onClick={() => handleNavigation("/bang-gia")}
-                                            className="pc-link"
-                                            style={{ cursor: "pointer" }}
-                                        >
-                                          
-                                            <span className="pc-mtext">Bảng giá</span>
-                                        </a> */}
                                     </li>
                                 </ul>
                             )}
@@ -309,7 +543,7 @@ function MenuUser({ user, categories, configWeb }) {
                             <label>Danh Sách Dịch Vụ</label>
                         </li>
                         <li className="pc-item pc-hasmenu">
-                            <Link to="/order" className="pc-link"
+                            <Link to="/order" className="pc-link pulse-item"
                                 onClick={() => handleNavigation()}
                                 style={{ cursor: "pointer" }}
                             >
@@ -372,7 +606,7 @@ function MenuUser({ user, categories, configWeb }) {
                                                     <li key={service._id} className="pc-item">
                                                         <Link to={`/order/${service.path.toLowerCase()}`}
                                                             onClick={() => handleNavigation()}
-                                                            className="pc-link">
+                                                            className="pc-link service-item">
                                                             <span className="pc-mtext">{service.name}</span>
                                                         </Link>
                                                     </li>
@@ -387,6 +621,7 @@ function MenuUser({ user, categories, configWeb }) {
                 </SimpleBar>
             </div>
         </nav>
+        </>
     );
 }
 

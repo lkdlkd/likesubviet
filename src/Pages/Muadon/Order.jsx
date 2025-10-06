@@ -836,6 +836,7 @@ export default function Order() {
                                                                         hour: "2-digit",
                                                                         minute: "2-digit",
                                                                         second: "2-digit",
+                                                                        disabled: true
                                                                     })}</small>
                                                                     <input type="text" value={server.tocdodukien} className="form-control form-control-solid" disabled="" />
                                                                     <small className="form-text text-muted fst-italic"><span data-lang="">Thời gian trung bình hoàn thành số lượng 1000 của 10 đơn hàng gần nhất</span></small>

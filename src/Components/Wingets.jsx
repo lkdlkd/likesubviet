@@ -125,16 +125,16 @@ const Wingets = ({ configWeb }) => {
                         <div className="b24-widget-button-pulse b24-widget-button-pulse-animate" style={{ display: "none" }} />
                         <div className="b24-widget-button-inner-block">
                             <div className="b24-widget-button-icon-container">
-                                {logoContacts.length > 0 && (
+                                {/* {logoContacts.length > 0 && ( */}
                                     <div className="b24-widget-button-inner-item b24-widget-button-icon-animation" style={{ position: "relative" }}>
                                         <span className="b24-pulse-from-img" />
                                         <img
-                                            src={logoContacts[currentLogoIndex]?.logolienhe}
-                                            alt={logoContacts[currentLogoIndex]?.label || logoContacts[currentLogoIndex]?.type || "Liên hệ"}
+                                            src="/img/5.svg"
+                                            alt={"Liên hệ"}
                                             style={{ height: "50px", width: "50px", objectFit: "contain", position: "relative", zIndex: 1 }}
                                         />
                                     </div>
-                                )}
+                                {/* )} */}
                             </div>
                             {/* Close button */}
                             <div className="b24-widget-button-inner-item1 b24-widget-button-close" onClick={close} role="button">

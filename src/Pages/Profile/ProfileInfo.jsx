@@ -24,16 +24,19 @@ export default function ProfileInfo({ user }) {
   }, [user?.token]);
 
   return (
-    <div className="col-md-6">
-      <div className="card">
-        <div className="card-header">
-          <h5 className="card-title">Thông tin cá nhân</h5>
-        </div>
+    <div className="card h-100 shadow-sm border-0">
+      <div className="card-header bg-gradient-primary text-white">
+        <h5 className="card-title mb-0 d-flex align-items-center">
+          <i className="fas fa-user-circle me-2"></i>
+          Thông tin cá nhân
+        </h5>
+      </div>
         <div className="card-body">
           <form>
             <div className="row">
-              <div className="col-md-6 form-group">
-                <label htmlFor="username" className="form-label">
+              <div className="col-md-6 form-group mb-3">
+                <label htmlFor="username" className="form-label fw-semibold">
+                  <i className="fas fa-user text-primary me-2"></i>
                   Tài khoản:
                 </label>
                 <input
@@ -44,8 +47,9 @@ export default function ProfileInfo({ user }) {
                   value={user?.username || ""}
                 />
               </div>
-              <div className="col-md-6 form-group">
-                <label htmlFor="balance" className="form-label">
+              <div className="col-md-6 form-group mb-3">
+                <label htmlFor="balance" className="form-label fw-semibold">
+                  <i className="fas fa-wallet text-success me-2"></i>
                   Số dư:
                 </label>
                 <input
@@ -56,8 +60,9 @@ export default function ProfileInfo({ user }) {
                   value={Number(Math.round(user?.balance || 0)).toLocaleString("en-US")}
                 />
               </div>
-              <div className="col-md-6 form-group">
-                <label htmlFor="capbac" className="form-label">
+              <div className="col-md-6 form-group mb-3">
+                <label htmlFor="capbac" className="form-label fw-semibold">
+                  <i className="fas fa-medal text-warning me-2"></i>
                   Cấp bậc:
                 </label>
                 <input
@@ -68,8 +73,9 @@ export default function ProfileInfo({ user }) {
                   value={user?.capbac || ""}
                 />
               </div>
-              <div className="col-md-6 form-group">
-                <label htmlFor="tongnapthang" className="form-label">
+              <div className="col-md-6 form-group mb-3">
+                <label htmlFor="tongnapthang" className="form-label fw-semibold">
+                  <i className="fas fa-calendar-alt text-info me-2"></i>
                   Tổng nạp tháng:
                 </label>
                 <input
@@ -80,8 +86,9 @@ export default function ProfileInfo({ user }) {
                   value={Number(user?.tongnapthang || 0).toLocaleString("en-US")}
                 />
               </div>
-              <div className="col-md-6 form-group">
-                <label htmlFor="tongnap" className="form-label">
+              <div className="col-md-6 form-group mb-3">
+                <label htmlFor="tongnap" className="form-label fw-semibold">
+                  <i className="fas fa-chart-line text-secondary me-2"></i>
                   Tổng nạp:
                 </label>
                 <input
@@ -92,8 +99,9 @@ export default function ProfileInfo({ user }) {
                   value={Number(user?.tongnap || 0).toLocaleString("en-US")}
                 />
               </div>
-              <div className="col-md-6 form-group">
-                <label htmlFor="created_at" className="form-label">
+              <div className="col-md-6 form-group mb-3">
+                <label htmlFor="created_at" className="form-label fw-semibold">
+                  <i className="fas fa-clock text-dark me-2"></i>
                   Thời gian đăng ký:
                 </label>
                 <input
@@ -111,14 +119,22 @@ export default function ProfileInfo({ user }) {
                   })}
                 />
               </div>
-              <div className="col-md-12 form-group">
-                <label htmlFor="api_token" className="form-label">
-                  Api Key: <span className="text-danger">Nếu bị lộ hãy đổi mật khẩu</span>
+              <div className="col-md-12 form-group mb-3">
+                <label htmlFor="api_token" className="form-label fw-semibold">
+                  <i className="fas fa-key text-danger me-2"></i>
+                  Api Key: 
+                  <span className="badge bg-danger ms-2">
+                    <i className="fas fa-exclamation-triangle me-1"></i>
+                    Nếu bị lộ hãy đổi mật khẩu
+                  </span>
                 </label>
                 <div className="input-group">
+                  <span className="input-group-text bg-light">
+                    <i className="fas fa-lock"></i>
+                  </span>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-control border-start-0"
                     id="api_token"
                     readOnly
                     onClick={() =>
@@ -128,6 +144,7 @@ export default function ProfileInfo({ user }) {
                     }
                     value={maskedToken}
                     placeholder="Bạn cần ấn thay đổi Token"
+                    style={{cursor: 'pointer'}}
                   />
                   <button
                     onClick={() =>
@@ -135,11 +152,11 @@ export default function ProfileInfo({ user }) {
                         user?.token ? user.token : "Bạn chưa tạo Api Token!"
                       )
                     }
-                    className="btn btn-primary"
+                    className="btn btn-outline-primary"
                     type="button"
                     id="btn-reload-token"
                   >
-                    <i className="ti ti-copy"></i>
+                    <i className="fas fa-copy me-1"></i>
                     COPY
                   </button>
                 </div>
@@ -148,6 +165,5 @@ export default function ProfileInfo({ user }) {
           </form>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+    }
