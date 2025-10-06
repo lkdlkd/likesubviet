@@ -19,6 +19,8 @@ export default function NaptienPage() {
     const [page, setPage] = useState(1); // Trang hiện tại
     const [limit, setLimit] = useState(10); // Số lượng giao dịch mỗi trang
     const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
+    // Responsive number of visible page buttons (desktop: 10, mobile: 4)
+    const [maxVisible, setMaxVisible] = useState(4);
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -35,6 +37,27 @@ export default function NaptienPage() {
 
         fetchTransactions();
     }, [page, limit, token]); // Gọi lại API khi `page`, `limit`, hoặc `token` thay đổi
+
+    // Update maxVisible based on screen width (>=1200: 20, 700-1199: 15, <700: 5)
+    useEffect(() => {
+        const updateMaxVisible = () => {
+            try {
+                const width = window.innerWidth || 0;
+                if (width >= 1200) {
+                    setMaxVisible(20);
+                } else if (width >= 700) {
+                    setMaxVisible(15);
+                } else {
+                    setMaxVisible(5);
+                }
+            } catch {
+                // no-op
+            }
+        };
+        updateMaxVisible();
+        window.addEventListener('resize', updateMaxVisible);
+        return () => window.removeEventListener('resize', updateMaxVisible);
+    }, []);
     // Hàm gọi API lấy dữ liệu thẻ cào
     const fetchCardData = async () => {
         try {
@@ -215,23 +238,69 @@ export default function NaptienPage() {
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div className="d-flex justify-content-between align-items-center mt-3">
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                                            disabled={page === 1}
-                                        >
-                                            Previous
-                                        </button>
+                                    <div className="mt-3">
                                         <span>Trang {page}</span>
+                                        <div className="pagination d-flex justify-content-between align-items-center mt-2 gap-2">
+                                            {/* Arrow + numbers + arrow grouped together */}
+                                            <div
+                                                className="d-flex align-items-center gap-2 flex-nowrap overflow-auto text-nowrap flex-grow-1"
+                                                style={{ maxWidth: '100%' }}
+                                            >
+                                                <button
+                                                    className="btn btn-secondary"
+                                                    onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                                                    disabled={page === 1}
+                                                    aria-label="Trang trước"
+                                                    title="Trang trước"
+                                                >
+                                                    <i className="fas fa-angle-left"></i>
+                                                </button>
 
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={() => setPage((prev) => prev + 1)}
-                                            disabled={history.length < limit}
-                                        >
-                                            Next
-                                        </button>
+                                                {(() => {
+                                                    const pages = [];
+                                                    const start = Math.max(1, page - Math.floor(maxVisible / 2));
+                                                    let end = start + maxVisible - 1;
+                                                    // If this looks like the last page (fewer items than limit), avoid showing pages beyond current
+                                                    if (history.length < limit) {
+                                                        end = Math.min(end, page);
+                                                    }
+
+                                                    // Leading first page and ellipsis
+                                                    if (start > 1) {
+                                                        pages.push(
+                                                            <button key={1} className={`btn btn-sm ${page === 1 ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setPage(1)}>1</button>
+                                                        );
+                                                        if (start > 2) {
+                                                            pages.push(<span key="start-ellipsis">...</span>);
+                                                        }
+                                                    }
+
+                                                    for (let p = start; p <= end; p++) {
+                                                        pages.push(
+                                                            <button
+                                                                key={p}
+                                                                className={`btn btn-sm ${page === p ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                                onClick={() => setPage(p)}
+                                                            >
+                                                                {p}
+                                                            </button>
+                                                        );
+                                                    }
+
+                                                    return pages;
+                                                })()}
+
+                                                <button
+                                                    className="btn btn-secondary"
+                                                    onClick={() => setPage((prev) => prev + 1)}
+                                                    disabled={history.length < limit}
+                                                    aria-label="Trang sau"
+                                                    title="Trang sau"
+                                                >
+                                                    <i className="fas fa-angle-right"></i>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

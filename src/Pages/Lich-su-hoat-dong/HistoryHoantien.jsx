@@ -10,6 +10,8 @@ export default function HistoryHoantien() {
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(20);
     const [totalPages, setTotalPages] = useState(1);
+    // Responsive number of visible page buttons (desktop: 10, mobile: 4)
+    const [maxVisible, setMaxVisible] = useState(4);
 
     useEffect(() => {
         const fetchRefundHistory = async () => {
@@ -26,6 +28,27 @@ export default function HistoryHoantien() {
         };
         fetchRefundHistory();
     }, [token, page, limit]);
+
+    // Update maxVisible based on screen width (>=1200: 20, 700-1199: 15, <700: 5)
+    useEffect(() => {
+        const updateMaxVisible = () => {
+            try {
+                const width = window.innerWidth || 0;
+                if (width >= 1200) {
+                    setMaxVisible(20);
+                } else if (width >= 700) {
+                    setMaxVisible(15);
+                } else {
+                    setMaxVisible(5);
+                }
+            } catch {
+                // no-op
+            }
+        };
+        updateMaxVisible();
+        window.addEventListener('resize', updateMaxVisible);
+        return () => window.removeEventListener('resize', updateMaxVisible);
+    }, []);
 
     // if (loading) return <div>Đang tải danh sách hoàn tiền...</div>;
 
@@ -91,25 +114,80 @@ export default function HistoryHoantien() {
             </div>
             {/* Phân trang */}
             {data && data.length > 0 && (
-                <div className="pagination d-flex justify-content-between align-items-center mt-3">
-                    <button
-                        className="btn btn-secondary"
-                        onClick={() => setPage(page - 1)}
-                        disabled={page === 1}
-                    >
-                        Trước
-                    </button>
+                <>
                     <span>
                         Trang {page} / {totalPages}
                     </span>
-                    <button
-                        className="btn btn-secondary"
-                        onClick={() => setPage(page + 1)}
-                        disabled={page === totalPages}
-                    >
-                        Sau
-                    </button>
-                </div>
+                    <div className="pagination d-flex justify-content-between align-items-center mt-3 gap-2">
+                        {/* Arrow + numbers + arrow grouped together */}
+                        <div
+                            className="d-flex align-items-center gap-2 flex-nowrap overflow-auto text-nowrap flex-grow-1"
+                            style={{ maxWidth: '100%' }}
+                        >
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                                disabled={page === 1}
+                                aria-label="Trang trước"
+                                title="Trang trước"
+                            >
+                                <i className="fas fa-angle-left"></i>
+                            </button>
+
+                            {(() => {
+                                const pages = [];
+                                const start = Math.max(1, page - Math.floor(maxVisible / 2));
+                                const end = Math.min(totalPages, start + maxVisible - 1);
+                                const adjustedStart = Math.max(1, Math.min(start, end - maxVisible + 1));
+
+                                // Leading first page and ellipsis
+                                if (adjustedStart > 1) {
+                                    pages.push(
+                                        <button key={1} className={`btn btn-sm ${page === 1 ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setPage(1)}>1</button>
+                                    );
+                                    if (adjustedStart > 2) {
+                                        pages.push(<span key="start-ellipsis">...</span>);
+                                    }
+                                }
+
+                                // Main window
+                                for (let p = adjustedStart; p <= end; p++) {
+                                    pages.push(
+                                        <button
+                                            key={p}
+                                            className={`btn btn-sm ${page === p ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                            onClick={() => setPage(p)}
+                                        >
+                                            {p}
+                                        </button>
+                                    );
+                                }
+
+                                // Trailing ellipsis and last page
+                                if (end < totalPages) {
+                                    if (end < totalPages - 1) {
+                                        pages.push(<span key="end-ellipsis">...</span>);
+                                    }
+                                    pages.push(
+                                        <button key={totalPages} className={`btn btn-sm ${page === totalPages ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setPage(totalPages)}>{totalPages}</button>
+                                    );
+                                }
+
+                                return pages;
+                            })()}
+
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                                disabled={page === totalPages}
+                                aria-label="Trang sau"
+                                title="Trang sau"
+                            >
+                                <i className="fas fa-angle-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     );

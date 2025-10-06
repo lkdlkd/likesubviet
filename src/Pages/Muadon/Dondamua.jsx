@@ -59,6 +59,27 @@ const Dondamua = ({ category, showcmt }) => {
         fetchOrders();
     }, [username, currentPage, limit, category, selectedStatus]);
 
+    // Responsive number of visible page buttons (desktop: 10, mobile: 4)
+    const [maxVisible, setMaxVisible] = useState(4);
+    // Update maxVisible based on screen width (>=1000: 20, 600-999: 15, <600: 4)
+    useEffect(() => {
+        const updateMaxVisible = () => {
+            try {
+                const width = window.innerWidth || 0;
+                if (width >= 1200) {
+                    setMaxVisible(20);
+                } else if (width >= 700) {
+                    setMaxVisible(15);
+                } else {
+                    setMaxVisible(5);
+                }
+            } catch { /* no-op for non-browser envs */ }
+        };
+        updateMaxVisible();
+        window.addEventListener('resize', updateMaxVisible);
+        return () => window.removeEventListener('resize', updateMaxVisible);
+    }, []);
+
     // Khi nhấn nút tìm kiếm, reset trang về 1 và gọi fetchOrders với searchTerm hiện tại
     const handleSearch = (e) => {
         e.preventDefault();
@@ -418,25 +439,81 @@ const Dondamua = ({ category, showcmt }) => {
 
                         </div>
                         {orders.length > 0 && (
-                            <div className="pagination d-flex justify-content-between align-items-center mt-3">
-                                <button
-                                    className="btn btn-secondary"
-                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                    disabled={currentPage === 1}
-                                >
-                                    Trước
-                                </button>
+                            <>
+
                                 <span>
                                     Trang {currentPage} / {totalPages}
                                 </span>
-                                <button
-                                    className="btn btn-secondary"
-                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                    disabled={currentPage === totalPages}
-                                >
-                                    Sau
-                                </button>
-                            </div>
+                                <div className="pagination d-flex justify-content-between align-items-center mt-3 gap-2">
+                                    {/* Arrow + numbers + arrow grouped together */}
+                                    <div
+                                        className="d-flex align-items-center gap-2 flex-nowrap overflow-auto text-nowrap flex-grow-1"
+                                        style={{ maxWidth: '100%' }}
+                                    >
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                            disabled={currentPage === 1}
+                                            aria-label="Trang trước"
+                                            title="Trang trước"
+                                        >
+                                            <i className="fas fa-angle-left"></i>
+                                        </button>
+
+                                        {(() => {
+                                            const pages = [];
+                                            const start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                                            const end = Math.min(totalPages, start + maxVisible - 1);
+                                            const adjustedStart = Math.max(1, Math.min(start, end - maxVisible + 1));
+
+                                            // Leading first page and ellipsis
+                                            if (adjustedStart > 1) {
+                                                pages.push(
+                                                    <button key={1} className={`btn btn-sm ${currentPage === 1 ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setCurrentPage(1)}>1</button>
+                                                );
+                                                if (adjustedStart > 2) {
+                                                    pages.push(<span key="start-ellipsis">...</span>);
+                                                }
+                                            }
+
+                                            // Main window
+                                            for (let p = adjustedStart; p <= end; p++) {
+                                                pages.push(
+                                                    <button
+                                                        key={p}
+                                                        className={`btn btn-sm ${currentPage === p ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                        onClick={() => setCurrentPage(p)}
+                                                    >
+                                                        {p}
+                                                    </button>
+                                                );
+                                            }
+
+                                            // Trailing ellipsis and last page
+                                            if (end < totalPages) {
+                                                if (end < totalPages - 1) {
+                                                    pages.push(<span key="end-ellipsis">...</span>);
+                                                }
+                                                pages.push(
+                                                    <button key={totalPages} className={`btn btn-sm ${currentPage === totalPages ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setCurrentPage(totalPages)}>{totalPages}</button>
+                                                );
+                                            }
+
+                                            return pages;
+                                        })()}
+
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                            disabled={currentPage === totalPages}
+                                            aria-label="Trang sau"
+                                            title="Trang sau"
+                                        >
+                                            <i className="fas fa-angle-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
                         )}
                     </div>
 

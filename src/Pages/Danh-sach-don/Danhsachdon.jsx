@@ -59,6 +59,26 @@ const Danhsachdon = () => {
         value: type,
         label: type,
     }));
+    // Responsive number of visible page buttons (desktop: 10, mobile: 4)
+    const [maxVisible, setMaxVisible] = useState(4);
+    // Update maxVisible based on screen width (>=1000: 20, 600-999: 15, <600: 4)
+    useEffect(() => {
+        const updateMaxVisible = () => {
+            try {
+                const width = window.innerWidth || 0;
+                if (width >= 1200) {
+                    setMaxVisible(20);
+                } else if (width >= 700) {
+                    setMaxVisible(15);
+                } else {
+                    setMaxVisible(5);
+                }
+            } catch { /* no-op for non-browser envs */ }
+        };
+        updateMaxVisible();
+        window.addEventListener('resize', updateMaxVisible);
+        return () => window.removeEventListener('resize', updateMaxVisible);
+    }, []);
 
     // Nếu đã chọn một Type, tạo danh sách options cho Category dựa theo Type đóW
     const categoryOptions = useMemo(() => {
@@ -451,42 +471,42 @@ const Danhsachdon = () => {
                                                 >
                                                     <a href={order.ObjectLink || ""}>{order.link}</a>
                                                 </td> */}
-                                            < td style = {{
-                                            maxWidth: "250px",
-                                            whiteSpace: "normal",
-                                            wordWrap: "break-word",
-                                            overflowWrap: "break-word",
-                                        }}>
-                                    <p>
-                                        <a
-                                            href={order.ObjectLink && order.ObjectLink.startsWith('http') ? order.ObjectLink : `https://${order.ObjectLink}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            {order.link}
-                                        </a>
-                                    </p>
-                                </td>
-                                <td style={{
-                                    maxWidth: "250px",
-                                    whiteSpace: "normal",
-                                    wordWrap: "break-word",
-                                    overflowWrap: "break-word",
-                                }}>
-                                    {order.maychu}
-                                    {order.namesv}
-                                </td>
-                                <td>
-                                    <ul>
-                                        <li><b>Bắt đầu</b> : {order.start}</li>
-                                        <li><b>Đã chạy</b> : {order.dachay}</li>
-                                        <li><b>Số lượng mua</b> : {order.quantity}</li>
-                                        <li><b>Giá</b> : {Number(order.rate).toLocaleString("en-US")}</li>
-                                        <li><b>Tổng tiền</b> : {Math.floor(Number(order.totalCost)).toLocaleString("en-US")}
-                                            {/* {Number(order.totalCost).toLocaleString("en-US")} */}
-                                        </li>
-                                    </ul>
-                                    {/* <td>{order.start}</td>
+                                                < td style={{
+                                                    maxWidth: "250px",
+                                                    whiteSpace: "normal",
+                                                    wordWrap: "break-word",
+                                                    overflowWrap: "break-word",
+                                                }}>
+                                                    <p>
+                                                        <a
+                                                            href={order.ObjectLink && order.ObjectLink.startsWith('http') ? order.ObjectLink : `https://${order.ObjectLink}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            {order.link}
+                                                        </a>
+                                                    </p>
+                                                </td>
+                                                <td style={{
+                                                    maxWidth: "250px",
+                                                    whiteSpace: "normal",
+                                                    wordWrap: "break-word",
+                                                    overflowWrap: "break-word",
+                                                }}>
+                                                    {order.maychu}
+                                                    {order.namesv}
+                                                </td>
+                                                <td>
+                                                    <ul>
+                                                        <li><b>Bắt đầu</b> : {order.start}</li>
+                                                        <li><b>Đã chạy</b> : {order.dachay}</li>
+                                                        <li><b>Số lượng mua</b> : {order.quantity}</li>
+                                                        <li><b>Giá</b> : {Number(order.rate).toLocaleString("en-US")}</li>
+                                                        <li><b>Tổng tiền</b> : {Math.floor(Number(order.totalCost)).toLocaleString("en-US")}
+                                                            {/* {Number(order.totalCost).toLocaleString("en-US")} */}
+                                                        </li>
+                                                    </ul>
+                                                    {/* <td>{order.start}</td>
                                                     <td></td>
                                                     <td></td>
                                                     <td></td>
@@ -494,104 +514,154 @@ const Danhsachdon = () => {
                                                     <span>Đã chạy</span>
                                                     <span>Số lượng mua</span>
                                                     <span>Giá</span> */}
-                                </td>
+                                                </td>
 
-                                {/* <td>{Number(order.totalCost).toLocaleString("en-US")}</td> */}
-                                <td>
-                                    {order.iscancel === true ? (
-                                        <span className="badge bg-warning text-dark">Chờ hoàn</span>
-                                    ) : order.status === "Completed" ? (
-                                        <span className="badge bg-success">Hoàn thành</span>
-                                    ) : order.status === "In progress" ? (
-                                        <span className="badge bg-primary">Đang chạy</span>
-                                    ) : order.status === "Processing" ? (
-                                        <span className="badge bg-purple" style={{ backgroundColor: '#6610f2', color: '#fff' }}>Đang xử lý</span>
-                                    ) : order.status === "Pending" ? (
-                                        <span className="badge" style={{ backgroundColor: '#ec8237ff', color: '#fff' }}>Chờ xử lý</span>
-                                    ) : order.status === "Partial" ? (
-                                        <span className="badge bg-warning text-dark">Đã hoàn 1 phần</span>
-                                    ) : order.status === "Canceled" ? (
-                                        <span className="badge bg-danger">Đã hủy</span>
-                                    ) : (
-                                        <span>{order.status}</span>
+                                                {/* <td>{Number(order.totalCost).toLocaleString("en-US")}</td> */}
+                                                <td>
+                                                    {order.iscancel === true ? (
+                                                        <span className="badge bg-warning text-dark">Chờ hoàn</span>
+                                                    ) : order.status === "Completed" ? (
+                                                        <span className="badge bg-success">Hoàn thành</span>
+                                                    ) : order.status === "In progress" ? (
+                                                        <span className="badge bg-primary">Đang chạy</span>
+                                                    ) : order.status === "Processing" ? (
+                                                        <span className="badge bg-purple" style={{ backgroundColor: '#6610f2', color: '#fff' }}>Đang xử lý</span>
+                                                    ) : order.status === "Pending" ? (
+                                                        <span className="badge" style={{ backgroundColor: '#ec8237ff', color: '#fff' }}>Chờ xử lý</span>
+                                                    ) : order.status === "Partial" ? (
+                                                        <span className="badge bg-warning text-dark">Đã hoàn 1 phần</span>
+                                                    ) : order.status === "Canceled" ? (
+                                                        <span className="badge bg-danger">Đã hủy</span>
+                                                    ) : (
+                                                        <span>{order.status}</span>
+                                                    )}
+                                                </td>
+
+                                                <td >
+                                                    <textarea
+                                                        readOnly
+                                                        rows={2}
+                                                        style={{
+                                                            maxWidth: "100px",
+                                                        }}
+                                                    >
+                                                        {order.comments || ""}
+                                                    </textarea>
+                                                </td>
+                                                <td>
+                                                    {new Date(order.createdAt).toLocaleString("vi-VN", {
+                                                        day: "2-digit",
+                                                        month: "2-digit",
+                                                        year: "numeric",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                        second: "2-digit",
+                                                    })}
+                                                </td>
+                                                <td>
+                                                    {new Date(order.updatedAt).toLocaleString("vi-VN", {
+                                                        day: "2-digit",
+                                                        month: "2-digit",
+                                                        year: "numeric",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                        second: "2-digit",
+                                                    })}
+                                                </td>
+                                                <td style={{
+                                                    maxWidth: "250px",
+                                                    whiteSpace: "normal",
+                                                    wordWrap: "break-word",
+                                                    overflowWrap: "break-word",
+                                                }}>{order.note}</td>
+                                            </tr>
+                                        ))
+
                                     )}
-                                </td>
+                                </tbody>
+                            </Table>
 
-                                <td >
-                                    <textarea
-                                        readOnly
-                                        rows={2}
-                                        style={{
-                                            maxWidth: "100px",
-                                        }}
+                        </div>
+
+                        {orders.length > 0 && (
+                            <>
+
+                                <span>
+                                    Trang {currentPage} / {totalPages}
+                                </span>
+                                <div className="pagination d-flex justify-content-between align-items-center mt-3 gap-2">
+                                    {/* Arrow + numbers + arrow grouped together */}
+                                    <div
+                                        className="d-flex align-items-center gap-2 flex-nowrap overflow-auto text-nowrap flex-grow-1"
+                                        style={{ maxWidth: '100%' }}
                                     >
-                                        {order.comments || ""}
-                                    </textarea>
-                                </td>
-                                <td>
-                                    {new Date(order.createdAt).toLocaleString("vi-VN", {
-                                        day: "2-digit",
-                                        month: "2-digit",
-                                        year: "numeric",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                        second: "2-digit",
-                                    })}
-                                </td>
-                                <td>
-                                    {new Date(order.updatedAt).toLocaleString("vi-VN", {
-                                        day: "2-digit",
-                                        month: "2-digit",
-                                        year: "numeric",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                        second: "2-digit",
-                                    })}
-                                </td>
-                                <td style={{
-                                    maxWidth: "250px",
-                                    whiteSpace: "normal",
-                                    wordWrap: "break-word",
-                                    overflowWrap: "break-word",
-                                }}>{order.note}</td>
-                            </tr>
-                            ))
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                            disabled={currentPage === 1}
+                                            aria-label="Trang trước"
+                                            title="Trang trước"
+                                        >
+                                            <i className="fas fa-angle-left"></i>
+                                        </button>
 
-                                    )}
-                        </tbody>
-                    </Table>
+                                        {(() => {
+                                            const pages = [];
+                                            const start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                                            const end = Math.min(totalPages, start + maxVisible - 1);
+                                            const adjustedStart = Math.max(1, Math.min(start, end - maxVisible + 1));
 
-                </div>
+                                            // Leading first page and ellipsis
+                                            if (adjustedStart > 1) {
+                                                pages.push(
+                                                    <button key={1} className={`btn btn-sm ${currentPage === 1 ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setCurrentPage(1)}>1</button>
+                                                );
+                                                if (adjustedStart > 2) {
+                                                    pages.push(<span key="start-ellipsis">...</span>);
+                                                }
+                                            }
 
-                {orders.length > 0 && (
-                    <div className="pagination d-flex justify-content-between align-items-center mt-3">
-                        <button
-                            className="btn btn-secondary"
-                            onClick={() =>
-                                setCurrentPage((prev) => Math.max(prev - 1, 1))
-                            }
-                            disabled={currentPage === 1}
-                        >
-                            Trước
-                        </button>
-                        <span>
-                            Trang {currentPage} / {totalPages}
-                        </span>
-                        <button
-                            className="btn btn-secondary"
-                            onClick={() =>
-                                setCurrentPage((prev) =>
-                                    Math.min(prev + 1, totalPages)
-                                )
-                            }
-                            disabled={currentPage === totalPages}
-                        >
-                            Sau
-                        </button>
+                                            // Main window
+                                            for (let p = adjustedStart; p <= end; p++) {
+                                                pages.push(
+                                                    <button
+                                                        key={p}
+                                                        className={`btn btn-sm ${currentPage === p ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                        onClick={() => setCurrentPage(p)}
+                                                    >
+                                                        {p}
+                                                    </button>
+                                                );
+                                            }
+
+                                            // Trailing ellipsis and last page
+                                            if (end < totalPages) {
+                                                if (end < totalPages - 1) {
+                                                    pages.push(<span key="end-ellipsis">...</span>);
+                                                }
+                                                pages.push(
+                                                    <button key={totalPages} className={`btn btn-sm ${currentPage === totalPages ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setCurrentPage(totalPages)}>{totalPages}</button>
+                                                );
+                                            }
+
+                                            return pages;
+                                        })()}
+
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                            disabled={currentPage === totalPages}
+                                            aria-label="Trang sau"
+                                            title="Trang sau"
+                                        >
+                                            <i className="fas fa-angle-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
-                )}
-            </div>
-        </div>
+                </div>
             </div >
         </div >
     );
