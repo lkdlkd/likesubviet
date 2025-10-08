@@ -483,7 +483,15 @@ export default function Ordernhanh() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span className="font-semibold"> {s.logo && (
                         <img src={s.logo} alt={s.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
-                    )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} {s.name} <span className="badge bg-primary">{Number(s.rate).toLocaleString("en-US")}đ</span><span className={`badge ms-1 ${s.isActive ? 'bg-success' : 'bg-danger'}`}>{s.isActive ? " Hoạt động" : " Không hoạt động"}</span>{s.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}{s.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
+                    )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} {s.name} <span className="badge bg-primary">{(() => {
+                            const rate = String(s.rate);
+                            if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
+                            if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
+                            return rate; // giữ nguyên nếu chỉ là số thường
+                        })()}đ</span>
+                        <span className={`badge ms-1 ${s.isActive ? 'bg-success' : 'bg-danger'}`}>{s.isActive ? " Hoạt động" : " Không hoạt động"}</span>
+                        {s.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}
+                        {s.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
                     </span>
 
                 </div>
@@ -569,7 +577,17 @@ export default function Ordernhanh() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span className="font-semibold"> {server.logo && (
                         <img src={server.logo} alt={server.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
-                    )} <strong className="badge bg-info">[{server.Magoi}]</strong> - {server.maychu} {server.name} <span className="badge bg-primary">{Number(server.rate).toLocaleString("en-US")}đ</span><span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>{server.isActive ? " Hoạt động" : " Không hoạt động"}</span>{server.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}{server.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
+                    )}
+                        <strong className="badge bg-info">[{server.Magoi}]</strong> - {server.maychu} {server.name} <span className="badge bg-primary">{(() => {
+                            const rate = String(server.rate);
+                            if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
+                            if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
+                            return rate; // giữ nguyên nếu chỉ là số thường
+                        })()}đ
+                        </span>
+                        <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>{server.isActive ? " Hoạt động" : " Không hoạt động"}</span>
+                        {server.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}
+                        {server.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
                     </span>
 
                 </div>

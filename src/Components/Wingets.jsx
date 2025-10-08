@@ -35,45 +35,9 @@ const Wingets = ({ configWeb }) => {
     if (!logoContacts || logoContacts.length === 0) return null;
 
     return (
-        <div style={{ position: "fixed", right: 16, bottom: 16, zIndex: 9999 }}>
-            <style>{`
-                /* Blue glow that emits from the center of the main logo image */
-                .b24-pulse-from-img {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 50%;
-                    pointer-events: none;
-                    /* Start with no visible shadow; animation will create the glow */
-                    box-shadow: 0 0 0 0 rgba(0, 174, 239, 0);
-                    animation: b24ImgPulse 2s ease-out infinite;
-                }
-                @keyframes b24ImgPulse {
-                    0% {
-                        width: 12px;
-                        height: 12px;
-                        opacity: 0.6;
-                        box-shadow: 0 0 0 0 rgba(0, 174, 239, 0);
-                    }
-                    40% {
-                        /* Bright blue glow close to the image */
-                        box-shadow: 0 0 14px 6px rgba(0, 174, 239, 0.7);
-                        opacity: 0.95;
-                    }
-                    100% {
-                        width: 60px;
-                        height: 60px;
-                        opacity: 0;
-                        box-shadow: 0 0 0 0 rgba(0, 174, 239, 0);
-                    }
-                }
-            `}</style>
+        <div >
             <div className={`b24-widget-button-shadow ${open ? "b24-widget-button-show" : ""}`} onClick={close} />
             <div className={`b24-widget-button-wrapper b24-widget-button-position-bottom-right b24-widget-button-visible ${open ? "b24-widget-button-bottom" : ""}`}>
-                {/* Socials list */}
                 <div className={`b24-widget-button-social ${open ? "b24-widget-button-show" : "b24-widget-button-hide"}`}>
                     {logoContacts.map((contact, index) => (
                         <a
@@ -105,10 +69,9 @@ const Wingets = ({ configWeb }) => {
                 </div>
 
                 {/* Floating button */}
-                <div style={{ width: 70, height: 70 }} className="b24-widget-button-inner-container">
-                    <div className="b24-widget-button-inner-mask" />
-                    <div
-                        className="b24-widget-button-block"
+                <div className="b24-widget-button-inner-container">
+                    <div className="b24-widget-button-inner-mask"></div>
+                    <div className="b24-widget-button-block"
                         onClick={toggleOpen}
                         role="button"
                         aria-expanded={open}
@@ -120,23 +83,20 @@ const Wingets = ({ configWeb }) => {
                             }
 
                         }}
-                        style={{ cursor: "pointer" }}
-                    >
-                        <div className="b24-widget-button-pulse b24-widget-button-pulse-animate" style={{ display: "none" }} />
-                        <div className="b24-widget-button-inner-block">
-                            <div className="b24-widget-button-icon-container">
-                                {/* {logoContacts.length > 0 && ( */}
-                                    <div className="b24-widget-button-inner-item b24-widget-button-icon-animation" style={{ position: "relative" }}>
-                                        <span className="b24-pulse-from-img" />
-                                        <img
-                                            src="/img/5.svg"
-                                            alt={"Liên hệ"}
-                                            style={{ height: "50px", width: "50px", objectFit: "contain", position: "relative", zIndex: 1 }}
-                                        />
-                                    </div>
-                                {/* )} */}
+                        style={{ cursor: "pointer" }} >
+
+                        <div class="b24-widget-button-pulse b24-widget-button-pulse-animate"></div>
+                        <div class="b24-widget-button-inner-block">
+                            <div class="b24-widget-button-icon-container">
+                                <div className="b24-widget-button-inner-item b24-widget-button-icon-animation" style={{ position: "relative" }}>
+                                    <span className="b24-pulse-from-img" />
+                                    <img
+                                        src="/img/5.svg"
+                                        alt={"Liên hệ"}
+                                        style={{ height: "66px", width: "66px", objectFit: "contain", position: "relative", zIndex: 1 }}
+                                    />
+                                </div>
                             </div>
-                            {/* Close button */}
                             <div className="b24-widget-button-inner-item1 b24-widget-button-close" onClick={close} role="button">
                                 <svg height="29" viewBox="0 0 29 29" width="29" xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -146,7 +106,6 @@ const Wingets = ({ configWeb }) => {
                                     />
                                 </svg>
                             </div>
-
                         </div>
                     </div>
                 </div>

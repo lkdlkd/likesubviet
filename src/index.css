@@ -17,12 +17,12 @@
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
     font-weight: 600;
-    border-bottom: 2px solid rgba(255,255,255,0.1);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Tab Styling */
@@ -45,13 +45,13 @@
 
 .nav-tabs .nav-link:hover {
     color: #007bff;
-    background: rgba(0,123,255,0.05);
-    border-bottom-color: rgba(0,123,255,0.3);
+    background: rgba(0, 123, 255, 0.05);
+    border-bottom-color: rgba(0, 123, 255, 0.3);
 }
 
 .nav-tabs .nav-link.active {
     color: #007bff;
-    background: rgba(0,123,255,0.1);
+    background: rgba(0, 123, 255, 0.1);
     border-bottom-color: #007bff;
     position: relative;
 }
@@ -116,7 +116,7 @@
 
 .form-control:focus {
     border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     transform: translateY(-1px);
 }
 
@@ -141,7 +141,7 @@
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .btn-outline-primary {
@@ -176,6 +176,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -187,6 +188,7 @@
         opacity: 0;
         transform: translateX(30px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -207,7 +209,8 @@
 }
 
 /* Icon styling */
-.fas, .fab {
+.fas,
+.fab {
     width: 20px;
     text-align: center;
 }
@@ -217,17 +220,17 @@
     .card {
         margin-bottom: 20px;
     }
-    
+
     .form-control {
         padding: 10px 14px;
         font-size: 0.9rem;
     }
-    
+
     .btn {
         padding: 8px 16px;
         font-size: 0.9rem;
     }
-    
+
     .nav-tabs .nav-link {
         padding: 12px 15px;
         font-size: 0.9rem;
@@ -315,8 +318,9 @@
     margin: 0 0 0 -33px
 }
 
+/* vị trí widget */
 .b24-widget-button-position-bottom-right {
-    right: 25px;
+    right: 35px;
     bottom: 60px
 }
 
@@ -327,7 +331,7 @@
     display: flex;
     height: 66px;
     border-radius: 100px;
-    /* background: #00aeef; */
+    background: #00aeef;
     box-sizing: border-box
 }
 
@@ -353,8 +357,8 @@
 
 .b24-widget-button-inner-item {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: -10px;
+    left: -15px;
     padding: 10px 15px;
     -webkit-transition: opacity .6s ease-out;
     transition: opacity .6s ease-out;
@@ -376,7 +380,7 @@
     -webkit-width: calc(100% + 16px);
     width: calc(100% + 16px);
     border-radius: 100px;
-    /* background: #00aeef; */
+    background: #00aeef;
     opacity: .2
 }
 
@@ -1377,10 +1381,10 @@
 .b24-widget-button-pulse {
     position: absolute;
     top: 0;
-    left: 10px;
+    left: 0px;
     bottom: 0;
     right: 0;
-    border: 1px solid #ffffff;
+    border: 1px solid #00aeef;
     border-radius: 50%
 }
 
