@@ -791,8 +791,14 @@ export default function Order() {
                                                                 {/* <span className="badge bg-success ">{server.maychu}</span> */}
                                                                 <span className="font-semibold"> - {server.maychu} {server.name} </span>
                                                                 <span className="badge bg-primary ">
-                                                                    {Number(server.rate).toLocaleString("en-US")}đ
+                                                                    {/* {Number(server.rate).toLocaleString("en-US")}đ */}
                                                                     {/* {server.rate}đ */}
+                                                                    {(() => {
+                                                                        const rate = String(server.rate);
+                                                                        if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
+                                                                        if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
+                                                                        return rate; // giữ nguyên nếu chỉ là số thường
+                                                                    })()}đ
                                                                 </span>
                                                                 <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
                                                                     {server.isActive ? "Hoạt động" : "Không hoạt động"}

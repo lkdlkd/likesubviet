@@ -265,11 +265,11 @@ export default function Napthecao({ cardData = [], token }) {
           background: linear-gradient(135deg, rgba(0,123,255,0.02), rgba(255,255,255,1));
         }
         
-        .value-option {
-          transition: all 0.25s ease;
-          color: #28a745;
-          font-weight: 600;
-        }
+        // .value-option {
+        //   transition: all 0.25s ease;
+        //   color: #28a745;
+        //   font-weight: 600;
+        // }
         
         /* Form validation states */
         .form-control-enhanced.is-valid {
@@ -330,7 +330,7 @@ export default function Napthecao({ cardData = [], token }) {
                       {telcoOptions.map(([telco, fees], index) => (
                         <option key={index} value={telco} className="telco-option">
                           {telco}
-                          <span className="discount-badge">Chiết khấu {fees}%</span>
+                          <span className="discount-badge"> Chiết khấu {fees}%</span>
                         </option>
                       ))}
                     </select>
@@ -355,7 +355,7 @@ export default function Napthecao({ cardData = [], token }) {
                       <option value="">Chọn mệnh giá</option>
                       {valueOptions.map((value, index) => (
                         <option key={index} value={value} className="value-option">
-                          {value.toLocaleString("en-US")} VNĐ
+                          {value.toLocaleString("en-US")} đ - thực nhận {(value * (1 - telcoOptions.find(([telco]) => telco === cardInfo.card_type)[1] / 100)).toLocaleString("en-US")} đ
                         </option>
                       ))}
                     </select>
