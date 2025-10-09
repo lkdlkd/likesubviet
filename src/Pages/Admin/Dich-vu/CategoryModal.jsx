@@ -63,101 +63,184 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
   };
 
   return (
-    <Modal show={true} onHide={onClose} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>{category ? "Sửa Danh mục" : "Thêm Danh mục"}</Modal.Title>
+    <Modal show={true} onHide={onClose} centered size="xl" className="modern-modal">
+      <Modal.Header closeButton className="bg-gradient-primary text-white border-0">
+        <Modal.Title className="d-flex align-items-center">
+          <i className={`fas ${category ? 'fa-edit' : 'fa-plus-circle'} me-2`}></i>
+          {category ? "Sửa Danh mục" : "Thêm Danh mục"}
+        </Modal.Title>
       </Modal.Header>
       <form onSubmit={handleSubmit}>
-        <Modal.Body>
-          <div className="mb-3">
-            <label className="form-label">Thứ tự hiển thị</label>
-            <input
-              type="number"
-              className="form-control"
-              value={formData.thutu}
-              onChange={(e) => setFormData({ ...formData, thutu: e.target.value })}
-              placeholder="2"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Nền tảng</label>
-            {platforms.length > 0 ? (
-              <select
-                className="form-select"
-                value={formData.platforms_id}
-                onChange={(e) => setFormData({ ...formData, platforms_id: e.target.value })}
-                required
-              >
-                <option value="">Chọn nền tảng</option>
-                {platforms.map((platform) => (
-                  <option key={platform._id} value={platform._id}>
-                    {platform.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p className="text-danger">Không có nền tảng nào để chọn.</p>
-            )}
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Tên Danh mục</label>
-            <input
-              type="text"
-              className="form-control"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="LIKE BÀI VIẾT, THEO DÕI FB, ..."
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Đường dẫn</label>
-            <input
-              type="text"
-              className="form-control"
-              value={formData.path}
-              onChange={(e) => setFormData({ ...formData, path: e.target.value })}
-              placeholder="facebook-like ,tiktok-view ,..."
-              required
-            />
+        <Modal.Body className="p-4 bg-light">
+          <div className="row">
+            {/* Cột trái - Thông tin cơ bản */}
+            <div className="col-md-6">
+              <div className="card border-0 shadow-sm mb-3">
+                <div className="card-header bg-primary text-white">
+                  <h6 className="mb-0">
+                    <i className="fas fa-info-circle me-2"></i>
+                    Thông tin cơ bản
+                  </h6>
+                </div>
+                <div className="card-body">
+                  <div className="mb-3">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-sort-numeric-up me-1 text-primary"></i>
+                      Thứ tự hiển thị
+                    </label>
+                    <input
+                      type="number"
+                      className="form-control form-control-lg border-2"
+                      value={formData.thutu}
+                      onChange={(e) => setFormData({ ...formData, thutu: e.target.value })}
+                      placeholder="2"
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-layer-group me-1 text-primary"></i>
+                      Nền tảng <span className="text-danger">*</span>
+                    </label>
+                    {platforms.length > 0 ? (
+                      <select
+                        className="form-select form-select-lg border-2"
+                        value={formData.platforms_id}
+                        onChange={(e) => setFormData({ ...formData, platforms_id: e.target.value })}
+                        required
+                      >
+                        <option value="">
+                          <i className="fas fa-hand-pointer"></i> Chọn nền tảng
+                        </option>
+                        {platforms.map((platform) => (
+                          <option key={platform._id} value={platform._id}>
+                           {platform.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="alert alert-danger">
+                        <i className="fas fa-exclamation-triangle me-2"></i>
+                        Không có nền tảng nào để chọn.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-tag me-1 text-primary"></i>
+                      Tên Danh mục <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control form-control-lg border-2"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="LIKE BÀI VIẾT, THEO DÕI FB, ..."
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-link me-1 text-primary"></i>
+                      Đường dẫn <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control form-control-lg border-2"
+                      value={formData.path}
+                      onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+                      placeholder="facebook-like ,tiktok-view ,..."
+                      required
+                    />
+                    <small className="text-muted">
+                      <i className="fas fa-info-circle me-1"></i>
+                      Sử dụng dấu gạch ngang (-) thay vì khoảng trắng
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Cột phải - Nội dung chi tiết */}
+            <div className="col-md-6">
+              <div className="card border-0 shadow-sm mb-3">
+                <div className="card-header bg-success text-white">
+                  <h6 className="mb-0">
+                    <i className="fas fa-file-alt me-2"></i>
+                    Nội dung chi tiết
+                  </h6>
+                </div>
+                <div className="card-body">
+                  <div className="mb-4">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-window-maximize me-1 text-success"></i>
+                      Hiển thị Modal
+                    </label>
+                    <div className="editor-wrapper border-2 border rounded">
+                      <CKEditor
+                        editor={ClassicEditor}
+                        data={formData.modal_show || ""}
+                        onReady={(editor) => {
+                          editor.ui.view.editable.element.style.height = "250px";
+                          editor.ui.view.editable.element.style.borderRadius = "8px";
+                        }}
+                        onChange={(event, editor) => {
+                          const data = editor.getData();
+                          setFormData((prev) => ({ ...prev, modal_show: data }));
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-sticky-note me-1 text-warning"></i>
+                      Ghi chú
+                    </label>
+                    <div className="editor-wrapper border-2 border rounded">
+                      <CKEditor
+                        editor={ClassicEditor}
+                        data={formData.notes || ""}
+                        onReady={(editor) => {
+                          editor.ui.view.editable.element.style.height = "250px";
+                          editor.ui.view.editable.element.style.borderRadius = "8px";
+                        }}
+                        onChange={(event, editor) => {
+                          const data = editor.getData();
+                          setFormData((prev) => ({ ...prev, notes: data }));
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="mb-3">
-            <label className="form-label">Hiển thị Modal</label>
-            <CKEditor
-              editor={ClassicEditor}
-              data={formData.modal_show || ""}
-              onReady={(editor) => {
-                editor.ui.view.editable.element.style.height = "300px";
-              }}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-                setFormData((prev) => ({ ...prev, modal_show: data }));
-              }}
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Ghi chú</label>
-            <CKEditor
-              editor={ClassicEditor}
-              data={formData.notes || ""}
-              onReady={(editor) => {
-                editor.ui.view.editable.element.style.height = "300px";
-              }}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-                setFormData((prev) => ({ ...prev, notes: data }));
-              }}
-            />
-          </div>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onClose}>
-            Hủy
-          </Button>
-          <Button type="submit" variant="primary">
-            Lưu
-          </Button>
+        <Modal.Footer className="bg-white border-0 px-4 py-3">
+          <div className="d-flex justify-content-between w-100">
+            <Button 
+              variant="outline-secondary" 
+              onClick={onClose}
+              className="px-4 py-2 fw-bold"
+              style={{ minWidth: '120px' }}
+            >
+              <i className="fas fa-times me-2"></i>
+              Hủy
+            </Button>
+            <Button 
+              type="submit" 
+              variant={category ? "warning" : "success"}
+              className="px-4 py-2 fw-bold shadow-sm"
+              style={{ minWidth: '160px' }}
+            >
+              <i className={`fas ${category ? 'fa-save' : 'fa-plus'} me-2`}></i>
+              {category ? "Cập nhật" : "Thêm mới"}
+            </Button>
+          </div>
         </Modal.Footer>
       </form>
     </Modal>

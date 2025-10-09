@@ -102,209 +102,319 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
   };
 
   return (
-    <Modal show={show} onHide={onClose} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Chỉnh sửa dịch vụ</Modal.Title>
+    <Modal show={show} onHide={onClose}  backdrop="static" keyboard={false} centered size="xl" className="modern-modal">
+      <Modal.Header closeButton className="bg-gradient-warning text-white border-0">
+        <Modal.Title className="d-flex align-items-center">
+          <i className="fas fa-edit me-2"></i>
+          Chỉnh sửa dịch vụ
+        </Modal.Title>
       </Modal.Header>
-      <Modal.Body style={{ maxWidth: '100%' }}>
+      <Modal.Body className="p-4 bg-light">
         <form onSubmit={handleSubmit}>
           <div className="container-fluid">
-            <h4 className="mb-3">Nền tảng và dịch vụ</h4>
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label className="form-label">Nền tảng:</label>
-                <input
-                  type="text"
-                  value={form.type}
-                  className="form-control"
-                  disabled
-                />
+            {/* Platform and Service Information */}
+            <div className="card border-0 shadow-sm mb-4">
+              <div className="card-header bg-info text-white">
+                <h6 className="mb-0">
+                  <i className="fas fa-layer-group me-2"></i>
+                  Nền tảng và dịch vụ
+                </h6>
               </div>
-              <div className="col-md-6">
-                <label className="form-label">Dịch vụ:</label>
-                <input
-                  type="text"
-                  value={form.category}
-                  className="form-control"
-                  disabled
-                />
-              </div>
-            </div>
-
-            <h4 className="mb-3 mt-4">Nguồn</h4>
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label className="form-label">Nguồn:</label>
-                <input
-                  type="text"
-                  value={form.DomainSmm}
-                  className="form-control"
-                  disabled
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Service ID:</label>
-                <input
-                  type="text"
-                  value={form.serviceId}
-                  className="form-control"
-                  disabled
-                />
-              </div>
-            </div>
-
-            <h4 className="mb-3 mt-4">Thông tin dịch vụ</h4>
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label className="form-label">Thứ tự:</label>
-                <input
-                  type="text"
-                  name="thutu"
-                  value={formData.thutu}
-                  onChange={handleChange}
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6">
-                <label className="form-label">Trạng thái:</label>
-                <select
-                  name="isActive"
-                  value={formData.isActive ? "true" : "false"}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      isActive: e.target.value === "true",
-                    })
-                  }
-                  className="form-select"
-                >
-                  <option value="true">Hoạt động</option>
-                  <option value="false">Đóng</option>
-                </select>
-              </div>
-            </div>
-            <div className="row g-3">
-              <div className="col-md-12">
-                <label className="form-label">Tên dịch vụ:</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Service ID:</label>
-                <input
-                  type="text"
-                  name="serviceId"
-                  value={formData.serviceId}
-                  onChange={handleChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Máy chủ:</label>
-                <input
-                  type="text"
-                  name="maychu"
-                  value={formData.maychu}
-                  onChange={handleChange}
-                  className="form-control"
-                />
-              </div>
-              <div className="col-12">
-                <label className="form-label">Mô tả:</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  className="form-control"
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Giới hạn Min:</label>
-                <input
-                  type="number"
-                  name="min"
-                  value={formData.min}
-                  onChange={handleChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Giới hạn Max:</label>
-                <input
-                  type="number"
-                  name="max"
-                  value={formData.max}
-                  onChange={handleChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Giá:</label>
-                <input
-                  type="number"
-                  name="rate"
-                  value={formData.rate}
-                  onChange={handleChange}
-                  className="form-control"
-                  required
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Giá gốc:</label>
-                <input
-                  type="number"
-                  value={form.originalRate}
-                  className="form-control"
-                  disabled
-                />
-              </div>
-
-
-            </div>
-
-            <h4 className="mb-3 mt-4">Các chức năng</h4>
-
-            <div className="row g-3 mt-1">
-              {[
-                { key: 'getid', label: 'get uid' },
-                { key: 'comment', label: 'comment' },
-                { key: 'refil', label: 'bảo hành' },
-                { key: 'cancel', label: 'hủy đơn' }
-              ].map((item) => (
-                <div className="col-6 col-md-3" key={item.key}>
-                  <label className="form-label">{item.label}:</label>
-                  <select
-                    name={item.key}
-                    value={formData[item.key]}
-                    onChange={handleChange}
-                    className="form-select"
-                  >
-                    <option value="on">Bật</option>
-                    <option value="off">Tắt</option>
-                  </select>
+              <div className="card-body">
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-layer-group me-1 text-primary"></i>
+                      Nền tảng
+                    </label>
+                    <input
+                      type="text"
+                      value={form.type}
+                      className="form-control form-control-lg bg-light"
+                      disabled
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-tags me-1 text-primary"></i>
+                      Dịch vụ
+                    </label>
+                    <input
+                      type="text"
+                      value={form.category}
+                      className="form-control form-control-lg bg-light"
+                      disabled
+                    />
+                  </div>
                 </div>
-              ))}
+              </div>
+            </div>
+
+            {/* Source Information */}
+            <div className="card border-0 shadow-sm mb-4">
+              <div className="card-header bg-success text-white">
+                <h6 className="mb-0">
+                  <i className="fas fa-network-wired me-2"></i>
+                  Nguồn
+                </h6>
+              </div>
+              <div className="card-body">
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-globe me-1 text-success"></i>
+                      Nguồn
+                    </label>
+                    <input
+                      type="text"
+                      value={form.DomainSmm}
+                      className="form-control form-control-lg bg-light"
+                      disabled
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-hashtag me-1 text-success"></i>
+                      Service ID
+                    </label>
+                    <input
+                      type="text"
+                      value={form.serviceId}
+                      className="form-control form-control-lg bg-light"
+                      disabled
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Service Information */}
+            <div className="card border-0 shadow-sm mb-4">
+              <div className="card-header bg-primary text-white">
+                <h6 className="mb-0">
+                  <i className="fas fa-cog me-2"></i>
+                  Thông tin dịch vụ
+                </h6>
+              </div>
+              <div className="card-body">
+                <div className="row g-3 mb-3">
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-sort-numeric-up me-1 text-warning"></i>
+                      Thứ tự
+                    </label>
+                    <input
+                      type="text"
+                      name="thutu"
+                      value={formData.thutu}
+                      onChange={handleChange}
+                      className="form-control form-control-lg"
+                      placeholder="Nhập thứ tự hiển thị"
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-toggle-on me-1 text-primary"></i>
+                      Trạng thái
+                    </label>
+                    <select
+                      name="isActive"
+                      value={formData.isActive ? "true" : "false"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          isActive: e.target.value === "true",
+                        })
+                      }
+                      className="form-select form-select-lg"
+                    >
+                      <option value="true">🟢 Hoạt động</option>
+                      <option value="false">🔴 Đóng</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="row g-3 mb-3">
+                  <div className="col-md-12">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-tag me-1 text-info"></i>
+                      Tên dịch vụ <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="form-control form-control-lg"
+                      placeholder="Nhập tên dịch vụ"
+                      required
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-hashtag me-1 text-info"></i>
+                      Service ID <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="serviceId"
+                      value={formData.serviceId}
+                      onChange={handleChange}
+                      className="form-control form-control-lg"
+                      placeholder="Nhập Service ID"
+                      required
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-server me-1 text-info"></i>
+                      Máy chủ
+                    </label>
+                    <input
+                      type="text"
+                      name="maychu"
+                      value={formData.maychu}
+                      onChange={handleChange}
+                      className="form-control form-control-lg"
+                      placeholder="Sv1, Sv2,..."
+                    />
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-align-left me-1 text-info"></i>
+                      Mô tả
+                    </label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      className="form-control"
+                      rows="3"
+                      placeholder="Nhập mô tả dịch vụ..."
+                    />
+                  </div>
+                </div>
+                
+                {/* Limits and Pricing */}
+                <div className="row g-3">
+                  <div className="col-md-3">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-arrow-down me-1 text-warning"></i>
+                      Min <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="min"
+                      value={formData.min}
+                      onChange={handleChange}
+                      className="form-control form-control-lg"
+                      placeholder="0"
+                      required
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-arrow-up me-1 text-warning"></i>
+                      Max <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="max"
+                      value={formData.max}
+                      onChange={handleChange}
+                      className="form-control form-control-lg"
+                      placeholder="0"
+                      required
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-dollar-sign me-1 text-success"></i>
+                      Giá <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="rate"
+                      value={formData.rate}
+                      onChange={handleChange}
+                      className="form-control form-control-lg"
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-coins me-1 text-muted"></i>
+                      Giá gốc
+                    </label>
+                    <input
+                      type="number"
+                      value={form.originalRate}
+                      className="form-control form-control-lg bg-light"
+                      placeholder="Tự động"
+                      disabled
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Functions */}
+            <div className="card border-0 shadow-sm mb-4">
+              <div className="card-header bg-secondary text-white">
+                <h6 className="mb-0">
+                  <i className="fas fa-tools me-2"></i>
+                  Các chức năng
+                </h6>
+              </div>
+              <div className="card-body">
+                <div className="row g-3">
+                  {[
+                    { key: 'getid', label: 'Get UID', icon: 'fas fa-user-tag', color: 'text-primary' },
+                    { key: 'comment', label: 'Comment', icon: 'fas fa-comment', color: 'text-info' },
+                    { key: 'refil', label: 'Bảo hành', icon: 'fas fa-shield-alt', color: 'text-success' },
+                    { key: 'cancel', label: 'Hủy đơn', icon: 'fas fa-times-circle', color: 'text-danger' }
+                  ].map((item) => (
+                    <div className="col-6 col-md-3" key={item.key}>
+                      <label className="form-label fw-bold">
+                        <i className={`${item.icon} me-1 ${item.color}`}></i>
+                        {item.label}
+                      </label>
+                      <select
+                        name={item.key}
+                        value={formData[item.key]}
+                        onChange={handleChange}
+                        className="form-select form-select-lg"
+                      >
+                        <option value="on">🟢 Bật</option>
+                        <option value="off">🔴 Tắt</option>
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>
-          Hủy
-        </Button>
-        <Button variant="primary" onClick={handleSubmit}>
-          Lưu
-        </Button>
+      <Modal.Footer className="border-0 bg-light px-4 py-3">
+        <div className="d-flex gap-2 w-100 justify-content-end">
+          <Button 
+            variant="outline-secondary" 
+            onClick={onClose}
+            className="px-4 fw-bold"
+          >
+            <i className="fas fa-times me-2"></i>
+            Hủy
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={handleSubmit}
+            className="px-4 fw-bold"
+          >
+            <i className="fas fa-save me-2"></i>
+            Lưu thay đổi
+          </Button>
+        </div>
       </Modal.Footer>
     </Modal>
   );

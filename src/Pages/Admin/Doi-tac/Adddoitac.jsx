@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { loadingg } from "@/JS/Loading";
+import { min } from "moment";
 
 export default function Adddoitac({
   token,
@@ -24,6 +25,7 @@ export default function Adddoitac({
     price_update: "",
     tigia: "",
     phihoan: 1000, // Mặc định là 1000
+    minbalance: 100000,
     autohoan: "on",
     status: "on",
     update_price: "on",
@@ -39,6 +41,7 @@ export default function Adddoitac({
         url_api: ALLOWED_API_URL || editingPartner.url_api,
         phihoan: editingPartner.phihoan || 1000, // Mặc định là 1000 nếu không có
         autohoan: editingPartner.autohoan || "on",
+        minbalance: editingPartner.minbalance || 100000,
       });
     } else {
       setFormData({
@@ -51,6 +54,7 @@ export default function Adddoitac({
         autohoan: "on",
         status: "on",
         update_price: "on",
+        minbalance: 100000,
       });
     }
   }, [editingPartner]);
@@ -95,137 +99,239 @@ export default function Adddoitac({
   };
 
   return (
-    <Modal show={true} onHide={onClose} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>
+    <Modal show={true} onHide={onClose} centered size="lg" className="modern-modal">
+      <Modal.Header closeButton className="bg-gradient-primary text-white border-0">
+        <Modal.Title className="d-flex align-items-center">
+          <i className={`fas ${editingPartner ? 'fa-edit' : 'fa-plus-circle'} me-2`}></i>
           {editingPartner ? "Cập Nhật Đối Tác" : "Thêm Đối Tác"}
         </Modal.Title>
       </Modal.Header>
       <form onSubmit={handleSubmit}>
-        <Modal.Body>
-          <div className="mb-3">
-            <label className="form-label">Tên Đối Tác:</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="form-control"
-              placeholder="doitac1, doitac2, ..."
-              required
-            />
-          </div>
+        <Modal.Body className="p-4 bg-light">
+          <div className="row">
+            {/* Cột trái - Thông tin cơ bản */}
+            <div className="col-md-6">
+              <div className="card border-0 shadow-sm mb-3">
+                <div className="card-header bg-primary text-white">
+                  <h6 className="mb-0">
+                    <i className="fas fa-info-circle me-2"></i>
+                    Thông tin cơ bản
+                  </h6>
+                </div>
+                <div className="card-body">
+                  <div className="mb-3">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-tag me-1 text-primary"></i>
+                      Tên Đối Tác:
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="form-control form-control-lg border-2"
+                      placeholder="doitac1, doitac2, ..."
+                      required
+                    />
+                  </div>
 
-          <div className="mb-3">
-            <label className="form-label">URL API:</label>
-            <input
-              type="text"
-              name="url_api"
-              value={formData.url_api}
-              onChange={handleChange}
-              placeholder={ALLOWED_API_URL || "https://tenmien.com/api/v2"}
-              className="form-control"
-              readOnly={Boolean(ALLOWED_API_URL)}
-              required
-            />
-            {ALLOWED_API_URL && (
-              <small className="text-muted">Chỉ hỗ trợ URL: {ALLOWED_API_URL}</small>
-            )}
-          </div>
+                  <div className="mb-3">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-link me-1 text-primary"></i>
+                      URL API:
+                    </label>
+                    <input
+                      type="text"
+                      name="url_api"
+                      value={formData.url_api}
+                      onChange={handleChange}
+                      placeholder={ALLOWED_API_URL || "https://tenmien.com/api/v2"}
+                      className="form-control form-control-lg border-2"
+                      readOnly={Boolean(ALLOWED_API_URL)}
+                      required
+                    />
+                    {ALLOWED_API_URL && (
+                      <div className="alert alert-info mt-2 py-2">
+                        <i className="fas fa-info-circle me-1"></i>
+                        <small>Chỉ hỗ trợ URL: {ALLOWED_API_URL}</small>
+                      </div>
+                    )}
+                  </div>
 
-          <div className="mb-3">
-            <label className="form-label">API Token:</label>
-            <input
-              type="text"
-              name="api_token"
-              value={formData.api_token}
-              onChange={handleChange}
-              placeholder="token hoặc api key"
-              className="form-control"
-            />
-          </div>
+                  <div className="mb-3">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-key me-1 text-primary"></i>
+                      API Token:
+                    </label>
+                    <input
+                      type="text"
+                      name="api_token"
+                      value={formData.api_token}
+                      onChange={handleChange}
+                      placeholder="token hoặc api key"
+                      className="form-control form-control-lg border-2"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <div className="mb-3">
-            <label className="form-label">Cập Nhật Giá:</label>
-            <input
-              type="text"
-              name="price_update"
-              value={formData.price_update}
-              onChange={handleChange}
-              placeholder="10"
-              className="form-control"
-            />
-          </div>
+            {/* Cột phải - Cấu hình nâng cao */}
+            <div className="col-md-6">
+              <div className="card border-0 shadow-sm mb-3">
+                <div className="card-header bg-success text-white">
+                  <h6 className="mb-0">
+                    <i className="fas fa-cogs me-2"></i>
+                    Cấu hình nâng cao
+                  </h6>
+                </div>
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-6 mb-3">
+                      <label className="form-label fw-bold text-dark">
+                        <i className="fas fa-dollar-sign me-1 text-success"></i>
+                        Cập Nhật Giá:
+                      </label>
+                      <input
+                        type="text"
+                        name="price_update"
+                        value={formData.price_update}
+                        onChange={handleChange}
+                        placeholder="10"
+                        className="form-control border-2"
+                      />
+                    </div>
+                    <div className="col-6 mb-3">
+                      <label className="form-label fw-bold text-dark">
+                        <i className="fas fa-exchange-alt me-1 text-warning"></i>
+                        Tỉ Giá:
+                      </label>
+                      <input
+                        type="text"
+                        name="tigia"
+                        value={formData.tigia}
+                        onChange={handleChange}
+                        placeholder="VD: 25"
+                        className="form-control border-2"
+                      />
+                    </div>
+                  </div>
 
-          <div className="mb-3">
-            <label className="form-label">Tỉ Giá:</label>
-            <input
-              type="text"
-              name="tigia"
-              value={formData.tigia}
-              onChange={handleChange}
-              placeholder="VD: 25"
-              className="form-control"
-            />
-          </div>
+                  <div className="row">
+                    <div className="col-6 mb-3">
+                      <label className="form-label fw-bold text-dark">
+                        <i className="fas fa-coins me-1 text-info"></i>
+                        Phí hoàn:
+                      </label>
+                      <input
+                        type="text"
+                        name="phihoan"
+                        value={formData.phihoan}
+                        onChange={handleChange}
+                        placeholder="VD: 1000"
+                        className="form-control border-2"
+                      />
+                    </div>
+                    <div className="col-6 mb-3">
+                      <label className="form-label fw-bold text-dark">
+                        <i className="fas fa-wallet me-1 text-danger"></i>
+                        Số dư tối thiểu để cảnh báo:
+                      </label>
+                      <input
+                        type="text"
+                        name="minbalance"
+                        value={formData.minbalance}
+                        onChange={handleChange}
+                        placeholder="10"
+                        className="form-control border-2"
+                      />
+                    </div>
+                  </div>
 
-          <div className="mb-3">
-            <label className="form-label">Phí hoàn:</label>
-            <input
-              type="text"
-              name="phihoan"
-              value={formData.phihoan}
-              onChange={handleChange}
-              placeholder="VD: 1000 nếu bỏ trống mặc định là 1000"
-              className="form-control"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Tự động hoàn:</label>
-            <select
-              name="autohoan"
-              value={formData.autohoan}
-              onChange={handleChange}
-              className="form-select"
-            >
-              <option value="on">Bật</option>
-              <option value="off">Tắt</option>
-            </select>
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Trạng Thái:</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="form-select"
-            >
-              <option value="on">Bật</option>
-              <option value="off">Tắt</option>
-            </select>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Cập Nhật Giá Tự Động:</label>
-            <select
-              name="update_price"
-              value={formData.update_price}
-              onChange={handleChange}
-              className="form-select"
-            >
-              <option value="on">Bật</option>
-              <option value="off">Tắt</option>
-            </select>
+                  <div className="row">
+                    <div className="col-4 mb-3">
+                      <label className="form-label fw-bold text-dark">
+                        <i className="fas fa-sync-alt me-1 text-primary"></i>
+                        Tự động hoàn:
+                      </label>
+                      <select
+                        name="autohoan"
+                        value={formData.autohoan}
+                        onChange={handleChange}
+                        className="form-select border-2"
+                      >
+                        <option value="on">✅ Bật</option>
+                        <option value="off">❌ Tắt</option>
+                      </select>
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label fw-bold text-dark">
+                        <i className="fas fa-power-off me-1 text-success"></i>
+                        Trạng Thái:
+                      </label>
+                      <select
+                        name="status"
+                        value={formData.status}
+                        onChange={handleChange}
+                        className="form-select border-2"
+                      >
+                        <option value="on">✅ Bật</option>
+                        <option value="off">❌ Tắt</option>
+                      </select>
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label fw-bold text-dark">
+                        <i className="fas fa-chart-line me-1 text-warning"></i>
+                        Cập nhật giá:
+                      </label>
+                      <select
+                        name="update_price"
+                        value={formData.update_price}
+                        onChange={handleChange}
+                        className="form-select border-2"
+                      >
+                        <option value="on">✅ Bật</option>
+                        <option value="off">❌ Tắt</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onClose}>
-            Hủy
-          </Button>
-          <Button type="submit" variant="success" disabled={loading}>
-            {loading ? "Đang xử lý..." : editingPartner ? "Cập Nhật Đối Tác" : "Thêm Đối Tác"}
-          </Button>
+        <Modal.Footer className="bg-white border-0 px-4 py-3">
+          <div className="d-flex justify-content-between w-100">
+            <Button 
+              variant="outline-secondary" 
+              onClick={onClose} 
+              className="px-4 py-2 fw-bold"
+              style={{ minWidth: '120px' }}
+            >
+              <i className="fas fa-times me-2"></i>
+              Hủy
+            </Button>
+            <Button 
+              type="submit" 
+              variant={editingPartner ? "warning" : "success"} 
+              disabled={loading}
+              className="px-4 py-2 fw-bold shadow-sm"
+              style={{ minWidth: '180px' }}
+            >
+              {loading ? (
+                <>
+                  <i className="fas fa-spinner fa-spin me-2"></i>
+                  Đang xử lý...
+                </>
+              ) : (
+                <>
+                  <i className={`fas ${editingPartner ? 'fa-save' : 'fa-plus'} me-2`}></i>
+                  {editingPartner ? "Cập Nhật Đối Tác" : "Thêm Đối Tác"}
+                </>
+              )}
+            </Button>
+          </div>
         </Modal.Footer>
       </form>
     </Modal>

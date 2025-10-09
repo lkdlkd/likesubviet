@@ -1460,3 +1460,437 @@
         max-height: 335px
     }
 }
+
+/* Modern Modal Styles */
+.modern-modal .modal-content {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.modern-modal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 20px 30px;
+}
+
+.modern-modal .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.modern-modal .modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+.modern-modal .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.modern-modal .modal-body {
+    background: #f8f9fa;
+}
+
+.modern-modal .card {
+    border-radius: 15px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modern-modal .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.modern-modal .card-header {
+    border-radius: 15px 15px 0 0 !important;
+    font-weight: 600;
+    padding: 15px 20px;
+}
+
+.modern-modal .card-body {
+    padding: 20px;
+}
+
+.modern-modal .form-label {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.modern-modal .form-control,
+.modern-modal .form-select {
+    border-radius: 10px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+    border: 2px solid #e9ecef;
+}
+
+.modern-modal .form-control:focus,
+.modern-modal .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    transform: translateY(-1px);
+}
+
+.modern-modal .form-control-lg {
+    padding: 15px 18px;
+    font-size: 1rem;
+}
+
+.modern-modal .alert {
+    border-radius: 10px;
+    border: none;
+}
+
+.modern-modal .btn {
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.modern-modal .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modern-modal .modal-footer {
+    border: none;
+    background: white;
+    border-radius: 0 0 20px 20px;
+}
+
+/* Gradient backgrounds for card headers */
+.modern-modal .bg-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.modern-modal .bg-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+}
+
+/* Icon animations */
+.modern-modal .fas {
+    transition: transform 0.2s ease;
+}
+
+.modern-modal .form-label:hover .fas {
+    transform: scale(1.1);
+}
+
+/* Loading spinner animation */
+.fa-spinner.fa-spin {
+    animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* CKEditor Custom Styles */
+.modern-modal .editor-wrapper {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.modern-modal .editor-wrapper:focus-within {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    border-color: #667eea !important;
+}
+
+.modern-modal .ck-editor__editable {
+    border-radius: 0 0 12px 12px !important;
+    border: none !important;
+}
+
+.modern-modal .ck-toolbar {
+    border-radius: 12px 12px 0 0 !important;
+    border: none !important;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+}
+
+.modern-modal .ck-button {
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+.modern-modal .ck-button:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+    transform: translateY(-1px);
+}
+
+/* Enhanced form styles for category modal */
+.modern-modal .form-select option {
+    padding: 8px 12px;
+}
+
+.modern-modal .text-danger {
+    font-weight: 600;
+}
+
+.modern-modal small.text-muted {
+    font-style: italic;
+}
+
+/* Required field indicator */
+.modern-modal .text-danger {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Platform Modal Specific Styles */
+.modern-modal .logo-preview-container {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.modern-modal .logo-preview img {
+    transition: transform 0.3s ease;
+}
+
+.modern-modal .logo-preview:hover img {
+    transform: scale(1.05);
+}
+
+.modern-modal .logo-gallery {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 15px;
+    background: white;
+}
+
+.modern-modal .logo-gallery::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modern-modal .logo-gallery::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modern-modal .logo-gallery::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 3px;
+}
+
+.modern-modal .logo-gallery::-webkit-scrollbar-thumb:hover {
+    background: #5a6fd8;
+}
+
+.modern-modal .logo-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.modern-modal .logo-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 0%, rgba(102, 126, 234, 0.1) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.modern-modal .logo-item:hover::before {
+    opacity: 1;
+}
+
+.modern-modal .logo-item.selected {
+    animation: logoSelected 0.3s ease;
+}
+
+@keyframes logoSelected {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.modern-modal .no-logo {
+    padding: 30px 20px;
+}
+
+/* Badge animations */
+.modern-modal .badge {
+    animation: fadeInUp 0.3s ease;
+}
+
+/* Service Modal Enhancements */
+.modern-modal .react-select-container .react-select__control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 4px;
+    transition: all 0.3s ease;
+}
+
+.modern-modal .react-select-container .react-select__control:hover {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.modern-modal .react-select-container .react-select__control--is-focused {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.modern-modal .react-select-container .react-select__menu {
+    z-index: 9999 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e9ecef;
+}
+
+.modern-modal .react-select-container .react-select__menu-portal {
+    z-index: 9999 !important;
+}
+
+.modern-modal .react-select-container .react-select__option--is-selected {
+    background-color: #007bff;
+}
+
+.modern-modal .react-select-container .react-select__option--is-focused {
+    background-color: #e7f3ff;
+    color: #333;
+}
+
+.modern-modal .react-select-container .react-select__option:hover {
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.modern-modal .modern-table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.modern-modal .modern-table thead th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 12px 8px;
+    font-size: 0.875rem;
+}
+
+.modern-modal .modern-table.table-success thead th {
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+    color: #2c3e50;
+}
+
+.modern-modal .modern-table thead.table-primary th {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    color: white;
+}
+
+.modern-modal .modern-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.modern-modal .modern-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.modern-modal .modern-table tbody tr.table-success {
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+}
+
+.modern-modal .modern-table tbody tr.table-success:hover {
+    background-color: #c3e6cb;
+}
+
+.modern-modal .modern-table tbody td {
+    vertical-align: middle;
+    padding: 10px 8px;
+    border-color: #e9ecef;
+}
+
+.modern-modal .modern-table .badge {
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+
+.modern-modal .form-control-lg {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+}
+
+.modern-modal .form-control-lg:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.modern-modal .card {
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+}
+
+.modern-modal .card:hover {
+    transform: translateY(-2px);
+}
+
+.modern-modal .card-header {
+    border-radius: 12px 12px 0 0 !important;
+    border-bottom: none;
+    padding: 16px 20px;
+}
+
+.modern-modal .card-body {
+    padding: 20px;
+}
+
+.modern-modal .badge {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+}
+
+.modern-modal .btn {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.modern-modal .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.modern-modal .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+.modern-modal .alert {
+    border: none;
+    border-radius: 8px;
+    border-left: 4px solid #dc3545;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

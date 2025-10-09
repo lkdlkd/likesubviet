@@ -457,6 +457,15 @@ const OrderAdmin = () => {
         <Modal.Body style={{ maxWidth: '100%' }}>
           {selectedOrder && (
             <form>
+              <style>
+                {
+                  `
+                  input-editable {
+                    background-color: #fffbe6;
+                    border: none;
+                    }`
+                }
+              </style>
               <div className="container-fluid">
                 <div className="row g-3">
                   <div className="col-md-3">

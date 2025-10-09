@@ -128,12 +128,14 @@ export default function Doitacpage() {
                         <th>Tên</th>
                         <th>URL API</th>
                         <th>Số dư</th>
+                        <th>Số dư thấp nhất để cảnh báo</th>
                         <th>Phí hoàn</th>
                         <th>Giá cập nhật</th>
                         <th>Tỉ Giá</th>
                         <th>Tự động hoàn</th>
-                        <th>Trạng Thái</th>
                         <th>Cập Nhật Giá</th>
+                        <th>Trạng Thái</th>
+
                       </tr>
                     </thead>
                     <tbody>
@@ -186,12 +188,14 @@ export default function Doitacpage() {
                           ) : (
                             <td>{Math.floor(Number(partner.balance)).toLocaleString("en-US") || "Đang tải..."}</td>
                           )}
+                          <td>{Math.floor(Number(partner.minbalance)).toLocaleString("en-US") || "Đang tải..."}</td>
                           <td>{partner.phihoan}</td>
                           <td>{partner.price_update}</td>
                           <td>{partner.tigia}</td>
                           <td>{partner.autohoan === "on" ? "Bật" : "Tắt"}</td>
-                          <td>{partner.status === "on" ? "Bật" : "Tắt"}</td>
                           <td>{partner.update_price === "on" ? "Bật" : "Tắt"}</td>
+                          <td>{partner.status === "on" ? "Bật" : "Tắt"}</td>
+
                         </tr>
                       ))}
                     </tbody>

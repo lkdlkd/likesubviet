@@ -1,9 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getConfigWeb, updateConfigWeb } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { loadingg } from "@/JS/Loading";
+
+// Suppress ResizeObserver errors
+const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+};
+
+// Handle ResizeObserver errors
+window.addEventListener('error', e => {
+    if (e.message === 'ResizeObserver loop completed with undelivered notifications.' || 
+        e.message === 'ResizeObserver loop limit exceeded') {
+        const resizeObserverErrDiv = document.getElementById('webpack-dev-server-client-overlay-div');
+        const resizeObserverErr = document.getElementById('webpack-dev-server-client-overlay');
+        if (resizeObserverErr) {
+            resizeObserverErr.setAttribute('style', 'display: none');
+        }
+        if (resizeObserverErrDiv) {
+            resizeObserverErrDiv.setAttribute('style', 'display: none');
+        }
+    }
+});
 
 // const platformLogos = {
 //     Gmail : "/img/gmail.png",
@@ -26,9 +54,8 @@ images.keys().forEach((key) => {
 });
 // Danh sách favicon có sẵn
 const faviconList = [
-    { url: "/img/favicon.ico", label: "Favicon mặc định" },
-    { url: "/img/logo192.png", label: "Logo 192x192" },
-    { url: "/img/logo512.png", label: "Logo 512x512" },
+    { url: "/img/favicon.png", label: "Favicon mặc định" },
+    { url: "/img/favicon1.png", label: "Logo 1" },
     // Thêm favicon khác nếu muốn
 ];
 
@@ -45,6 +72,7 @@ const Setting = () => {
         cuphap: "", // Thêm trường cuphap
     });
     const [loading, setLoading] = useState(false);
+    const editorRef = useRef(null);
     const fetchConfig = async () => {
         try {
             loadingg("Đang tải cấu hình website...");
@@ -115,197 +143,381 @@ const Setting = () => {
     return (
         <div className="row">
             <div className="col-md-12">
-                <div className=" card">
-                    <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h2 className="card-title">Cấu hình Website</h2>
+                <div className="card border-0 shadow-lg">
+                    <div className="card-header bg-gradient-primary text-white border-0 py-4">
+                        <div className="d-flex align-items-center">
+                            <div className="icon-circle bg-white bg-opacity-20 me-3">
+                                <i className="fas fa-cogs text-white fs-4"></i>
+                            </div>
+                            <div>
+                                <h2 className="mb-0 fw-bold">Cấu hình Website</h2>
+                                <p className="mb-0 opacity-75">Thiết lập thông tin và giao diện website</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="card-body">
+                    <div className="card-body p-4">
                         <form onSubmit={handleSubmit}>
-                            {/* Tiêu đề */}
-                            <fieldset className="mb-4">
-                                <legend className="text-primary">Thông báo GHIM</legend>
-                                <CKEditor
-                                    editor={ClassicEditor}
-                                    data={formData.tieude}
-                                    onReady={(editor) => {
-                                        editor.ui.view.editable.element.style.height = "300px";
-                                    }}
-                                    onChange={(event, editor) => {
-                                        const data = editor.getData();
-                                        setFormData((prev) => ({ ...prev, tieude: data }));
-                                    }}
-                                />
-                            </fieldset>
+                            {/* Thông báo GHIM */}
+                            <div className="card border-0 shadow-sm mb-4">
+                                <div className="card-header bg-warning text-white border-0">
+                                    <h6 className="mb-0 fw-bold">
+                                        <i className="fas fa-thumbtack me-2"></i>
+                                        Thông báo GHIM
+                                    </h6>
+                                </div>
+                                <div className="card-body">
+                                    <CKEditor
+                                        editor={ClassicEditor}
+                                        data={formData.tieude}
+                                        onReady={(editor) => {
+                                            editorRef.current = editor;
+                                            // Set height with a slight delay to prevent ResizeObserver issues
+                                            setTimeout(() => {
+                                                if (editor && editor.ui && editor.ui.view && editor.ui.view.editable && editor.ui.view.editable.element) {
+                                                    editor.ui.view.editable.element.style.height = "300px";
+                                                }
+                                            }, 100);
+                                        }}
+                                        onChange={(event, editor) => {
+                                            const data = editor.getData();
+                                            setFormData((prev) => ({ ...prev, tieude: data }));
+                                        }}
+                                    />
+                                </div>
+                            </div>
 
                             {/* Logo và Favicon */}
-                            <fieldset className="mb-4">
-                                <legend className="text-primary">Logo và Favicon</legend>
-                                <div className="mb-3">
-                                    <label className="form-label">Logo website (URL)</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={formData.logo}
-                                        onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                                        placeholder="Nhập URL logo"
-                                    />
+                            <div className="card border-0 shadow-sm mb-4">
+                                <div className="card-header bg-info text-white border-0">
+                                    <h6 className="mb-0 fw-bold text-white">
+                                        <i className="fas fa-image me-2"></i>
+                                        Logo và Favicon
+                                    </h6>
                                 </div>
-                                <fieldset className="mb-4">
-                                    <legend className="text-primary">Tiêu đề Website SEO</legend>
-                                    <div className="mb-3">
-                                        <label className="form-label">Tiêu đề (title)</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={formData.title}
-                                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                            placeholder="Nhập tiêu đề website"
-                                        />
-                                    </div>
-                                </fieldset>
-                                <div className="mb-3">
-                                    <label className="form-label">Favicon (URL)</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={formData.favicon}
-                                        onChange={(e) => setFormData({ ...formData, favicon: e.target.value })}
-                                        placeholder="Nhập URL favicon hoặc chọn bên dưới"
-                                        list="favicon-list"
-                                    />
-                                    <datalist id="favicon-list">
-                                        {faviconList.map(f => (
-                                            <option value={f.url} key={f.url}>{f.label}</option>
-                                        ))}
-                                    </datalist>
-                                    <select
-                                        className="form-select mt-2"
-                                        value={formData.favicon}
-                                        onChange={(e) => setFormData({ ...formData, favicon: e.target.value })}
-                                    >
-                                        <option value="">Chọn favicon có sẵn</option>
-                                        {faviconList.map(f => (
-                                            <option value={f.url} key={f.url}>{f.label}</option>
-                                        ))}
-                                    </select>
-                                    {formData.favicon && (
-                                        <div className="mt-2">
-                                            <img src={formData.favicon} alt="Favicon Preview" style={{ maxWidth: "50px", height: "auto" }} />
+                                <div className="card-body">
+                                    <div className="row g-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold">
+                                                <i className="fas fa-image me-1 text-info"></i>
+                                                Logo website (URL)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control form-control-lg"
+                                                value={formData.logo}
+                                                onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                                                placeholder="Nhập URL logo"
+                                            />
                                         </div>
-                                    )}
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold ">
+                                                <i className="fas fa-star me-1 text-warning"></i>
+                                                Favicon (URL)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control form-control-lg"
+                                                value={formData.favicon}
+                                                onChange={(e) => setFormData({ ...formData, favicon: e.target.value })}
+                                                placeholder="Nhập URL favicon hoặc chọn bên dưới"
+                                                list="favicon-list"
+                                            />
+                                            <datalist id="favicon-list">
+                                                {faviconList.map(f => (
+                                                    <option value={f.url} key={f.url}>{f.label}</option>
+                                                ))}
+                                            </datalist>
+                                            <select
+                                                className="form-select mt-2"
+                                                value={formData.favicon}
+                                                onChange={(e) => setFormData({ ...formData, favicon: e.target.value })}
+                                            >
+                                                <option value="">Chọn favicon có sẵn</option>
+                                                {faviconList.map(f => (
+                                                    <option value={f.url} key={f.url}>{f.label}</option>
+                                                ))}
+                                            </select>
+                                            {formData.favicon && (
+                                                <div className="mt-2">
+                                                    <img src={formData.favicon} alt="Favicon Preview" className="border rounded" style={{ maxWidth: "50px", height: "auto" }} />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                            </fieldset>
+                            </div>
 
-                            {/* Cú pháp */}
-                            <fieldset className="mb-4">
-                                <legend className="text-primary">Cú pháp nạp tiền</legend>
-                                <div className="mb-3">
-                                    <label className="form-label">Cú pháp ( naptien , donate,...)</label>
+                            {/* Tiêu đề Website SEO */}
+                            <div className="card border-0 shadow-sm mb-4">
+                                <div className="card-header bg-success text-white border-0">
+                                    <h6 className="mb-0 fw-bold text-white">
+                                        <i className="fas fa-search me-2"></i>
+                                        Tiêu đề Website SEO
+                                    </h6>
+                                </div>
+                                <div className="card-body">
+                                    <label className="form-label fw-bold">
+                                        <i className="fas fa-heading me-1 text-success"></i>
+                                        Tiêu đề (title)
+                                    </label>
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className="form-control form-control-lg"
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        placeholder="Nhập tiêu đề website"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Cú pháp nạp tiền */}
+                            <div className="card border-0 shadow-sm mb-4">
+                                <div className="card-header bg-secondary text-white border-0">
+                                    <h6 className="mb-0 fw-bold text-white">
+                                        <i className="fas fa-code me-2"></i>
+                                        Cú pháp nạp tiền
+                                    </h6>
+                                </div>
+                                <div className="card-body">
+                                    <label className="form-label fw-bold">
+                                        <i className="fas fa-terminal me-1 text-secondary"></i>
+                                        Cú pháp (naptien, donate,...)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-lg"
                                         value={formData.cuphap}
                                         onChange={(e) => setFormData({ ...formData, cuphap: e.target.value })}
                                         placeholder="Nhập cú pháp"
                                     />
                                 </div>
-                            </fieldset>
-                            {/* Link telegram */}
-                            <fieldset className="mb-4">
-                                <legend className="text-primary">Link bot Telegram</legend>
-                                <div className="mb-3">
-                                    <label className="form-label">Link bot Telegram</label>
+                            </div>
+
+                            {/* Link bot Telegram */}
+                            <div className="card border-0 shadow-sm mb-4">
+                                <div className="card-header bg-primary text-white border-0">
+                                    <h6 className="mb-0 fw-bold text-white">
+                                        <i className="fab fa-telegram me-2"></i>
+                                        Link bot Telegram
+                                    </h6>
+                                </div>
+                                <div className="card-body">
+                                    <label className="form-label fw-bold">
+                                        <i className="fas fa-robot me-1 text-primary"></i>
+                                        Link bot Telegram
+                                    </label>
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className="form-control form-control-lg"
                                         value={formData.linktele}
                                         onChange={(e) => setFormData({ ...formData, linktele: e.target.value })}
                                         placeholder="https://t.me/noti_web_245_bot"
                                     />
                                 </div>
-                            </fieldset>
+                            </div>
 
                             {/* Danh sách liên hệ */}
-                            <fieldset className="mb-4">
-                                <legend className="text-primary">Danh sách liên hệ</legend>
-                                {formData.lienhe.map((contact, index) => (
-                                    <div key={index} className="mb-3 border p-3 rounded">
-                                        <div className="mb-2">
-                                            <label className="form-label">Loại liên hệ</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={contact.type}
-                                                onChange={(e) => updateContact(index, "type", e.target.value)}
-                                                placeholder="Nhập loại liên hệ (ví dụ: email, phone)"
-                                            />
-                                        </div>
-                                        <div className="mb-2">
-                                            <label className="form-label">Giá trị liên hệ</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={contact.value}
-                                                onChange={(e) => updateContact(index, "value", e.target.value)}
-                                                placeholder="Ví dụ: https://www.facebook.com/username"
-                                            />
-                                        </div>
-                                        <div className="mb-2">
-                                            <label className="form-label">Logo liên hệ (URL)</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={contact.logolienhe}
-                                                onChange={(e) => updateContact(index, "logolienhe", e.target.value)}
-                                                placeholder="Nhập URL logo liên hệ"
-                                            />
-                                        </div>
-                                        <div className="mb-2">
-                                            <label className="form-label">Logo liên hệ</label>
-                                            <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #ddd', borderRadius: 6, padding: 8 }}>
-                                                <div className="row g-2">
-                                                    {Object.entries(platformLogos).map(([platform, url], idx) => (
-                                                        <div className="col-4 col-md-3" key={idx}>
-                                                            <div
-                                                                onClick={() => updateContact(index, "logolienhe", url)}
-                                                                style={{
-                                                                    border: contact.logolienhe === url ? '2px solid #007bff' : '1px solid #ccc',
-                                                                    borderRadius: 8,
-                                                                    padding: 6,
-                                                                    cursor: 'pointer',
-                                                                    textAlign: 'center',
-                                                                    background: contact.logolienhe === url ? '#eaf4ff' : '#fff',
-                                                                    boxShadow: contact.logolienhe === url ? '0 0 4px #007bff55' : 'none',
-                                                                }}
-                                                            >
-                                                                <img src={url} alt={platform} style={{ maxWidth: 32, maxHeight: 32, objectFit: 'contain', marginBottom: 4 }} />
-                                                                {/* <div style={{ fontSize: 12 }}>{platform}</div> */}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            {contact.logolienhe && (
-                                                <div className="mt-2">
-                                                    <img src={contact.logolienhe} alt="Logo Preview" style={{ maxWidth: "50px", height: "auto" }} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <button type="button" className="btn btn-danger mt-2" onClick={() => removeContact(index)}>
-                                            Xóa liên hệ
+                            <div className="card border-0 shadow-sm mb-4">
+                                <div className="card-header bg-gradient-dark text-white border-0">
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <h6 className="mb-0 fw-bold text-white">
+                                            <i className="fas fa-address-book me-2"></i>
+                                            Danh sách liên hệ
+                                        </h6>
+                                        <button 
+                                            type="button" 
+                                            className="btn btn-light btn-sm fw-bold" 
+                                            onClick={addContact}
+                                        >
+                                            <i className="fas fa-plus me-1"></i>
+                                            Thêm liên hệ
                                         </button>
                                     </div>
-                                ))}
-                                <button type="button" className="btn btn-primary mt-3" onClick={addContact}>
-                                    Thêm liên hệ
-                                </button>
-                            </fieldset>
+                                </div>
+                                <div className="card-body">
+                                    {formData.lienhe.length === 0 ? (
+                                        <div className="text-center py-4">
+                                            <i className="fas fa-address-book fs-1 text-muted mb-3"></i>
+                                            <h6 className="text-muted" style={{ fontSize: '16px', color: '#6c757d' }}>Chưa có liên hệ nào</h6>
+                                            <p className="text-muted mb-0" style={{ fontSize: '14px', color: '#6c757d' }}>Nhấn "Thêm liên hệ" để bắt đầu</p>
+                                        </div>
+                                    ) : (
+                                        <div className="row g-3">
+                                            {formData.lienhe.map((contact, index) => (
+                                                <div key={index} className="col-lg-6">
+                                                    <div className="card border-2 border-light contact-card">
+                                                        <div className="card-header bg-light border-0 d-flex justify-content-between align-items-center">
+                                                            <h6 className="mb-0 fw-bold" style={{ color: '#2c3e50', fontSize: '14px' }}>
+                                                                <i className="fas fa-contact-card me-2 text-primary"></i>
+                                                                Liên hệ #{index + 1}
+                                                            </h6>
+                                                            <button 
+                                                                type="button" 
+                                                                className="btn btn-outline-danger btn-sm" 
+                                                                onClick={() => removeContact(index)}
+                                                                title="Xóa liên hệ"
+                                                                style={{ fontSize: '13px' }}
+                                                            >
+                                                                <i className="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div className="card-body" style={{ padding: '1.25rem' }}>
+                                                            <div className="mb-3">
+                                                                <label className="form-label fw-bold" style={{ color: '#2c3e50', fontSize: '14px' }}>
+                                                                    <i className="fas fa-tag me-1 text-info"></i>
+                                                                    Loại liên hệ
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    className="form-control"
+                                                                    value={contact.type}
+                                                                    onChange={(e) => updateContact(index, "type", e.target.value)}
+                                                                    placeholder="email, phone, facebook, telegram..."
+                                                                    style={{ fontSize: '14px', color: '#2c3e50' }}
+                                                                />
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <label className="form-label fw-bold" style={{ color: '#2c3e50', fontSize: '14px' }}>
+                                                                    <i className="fas fa-link me-1 text-success"></i>
+                                                                    Giá trị liên hệ
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    className="form-control"
+                                                                    value={contact.value}
+                                                                    onChange={(e) => updateContact(index, "value", e.target.value)}
+                                                                    placeholder="https://www.facebook.com/username"
+                                                                    style={{ fontSize: '14px', color: '#2c3e50' }}
+                                                                />
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <label className="form-label fw-bold" style={{ color: '#2c3e50', fontSize: '14px' }}>
+                                                                    <i className="fas fa-image me-1 text-warning"></i>
+                                                                    Logo liên hệ (URL)
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    className="form-control"
+                                                                    value={contact.logolienhe}
+                                                                    onChange={(e) => updateContact(index, "logolienhe", e.target.value)}
+                                                                    placeholder="Nhập URL logo hoặc chọn bên dưới"
+                                                                    style={{ fontSize: '14px', color: '#2c3e50' }}
+                                                                />
+                                                            </div>
+                                                            <div className="mb-3">
+                                                                <label className="form-label fw-bold" style={{ color: '#2c3e50', fontSize: '14px' }}>
+                                                                    <i className="fas fa-images me-1 text-primary"></i>
+                                                                    Chọn logo có sẵn
+                                                                </label>
+                                                                <div className="border rounded-3 p-3" style={{ maxHeight: 200, overflowY: 'auto', backgroundColor: '#f8f9fa' }}>
+                                                                    <div className="row g-2">
+                                                                        {Object.entries(platformLogos).map(([platform, url], idx) => (
+                                                                            <div className="col-4 col-sm-3 col-md-2" key={idx}>
+                                                                                <div
+                                                                                    onClick={() => updateContact(index, "logolienhe", url)}
+                                                                                    className="logo-option"
+                                                                                    style={{
+                                                                                        border: contact.logolienhe === url ? '3px solid #007bff' : '2px solid #dee2e6',
+                                                                                        borderRadius: 8,
+                                                                                        padding: 8,
+                                                                                        cursor: 'pointer',
+                                                                                        textAlign: 'center',
+                                                                                        background: contact.logolienhe === url ? '#e3f2fd' : '#fff',
+                                                                                        boxShadow: contact.logolienhe === url ? '0 4px 12px rgba(0,123,255,0.3)' : '0 2px 4px rgba(0,0,0,0.1)',
+                                                                                        transition: 'all 0.3s ease',
+                                                                                        transform: contact.logolienhe === url ? 'scale(1.05)' : 'scale(1)'
+                                                                                    }}
+                                                                                >
+                                                                                    <img 
+                                                                                        src={url} 
+                                                                                        alt={platform} 
+                                                                                        style={{ 
+                                                                                            maxWidth: 32, 
+                                                                                            maxHeight: 32, 
+                                                                                            objectFit: 'contain',
+                                                                                            filter: contact.logolienhe === url ? 'brightness(1.1)' : 'none'
+                                                                                        }} 
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                                {contact.logolienhe && (
+                                                                    <div className="mt-3 text-center">
+                                                                        <div className="d-inline-block p-2 border rounded bg-light">
+                                                                            <img 
+                                                                                src={contact.logolienhe} 
+                                                                                alt="Logo Preview" 
+                                                                                style={{ maxWidth: "50px", height: "auto" }}
+                                                                                className="rounded"
+                                                                            />
+                                                                            <div className="mt-1">
+                                                                                <small className="text-muted" style={{ fontSize: '12px', color: '#6c757d' }}>Preview</small>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
 
-                            {/* Nút lưu */}
-                            <div className="text-center">
-                                <button type="submit" className="btn btn-success" disabled={loading}>
-                                    {loading ? "Đang lưu..." : "Lưu thay đổi"}
-                                </button>
+                            {/* Submit Button */}
+                            <div className="card border-0 shadow-sm">
+                                <div className="card-body text-center p-4">
+                                    <button 
+                                        type="submit" 
+                                        className="btn btn-gradient-primary btn-lg px-5 fw-bold"
+                                        disabled={loading}
+                                        style={{
+                                            background: loading ? '#6c757d' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            border: 'none',
+                                            borderRadius: '12px',
+                                            transition: 'all 0.3s ease',
+                                            textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                                            boxShadow: loading ? '0 4px 15px rgba(108, 117, 125, 0.3)' : '0 8px 25px rgba(102, 126, 234, 0.4)',
+                                            cursor: loading ? 'not-allowed' : 'pointer'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!loading) {
+                                                e.target.style.transform = 'translateY(-2px)';
+                                                e.target.style.boxShadow = '0 12px 35px rgba(102, 126, 234, 0.6)';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!loading) {
+                                                e.target.style.transform = 'translateY(0)';
+                                                e.target.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.4)';
+                                            }
+                                        }}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <div className="spinner-border spinner-border-sm me-2" role="status">
+                                                    <span className="visually-hidden">Loading...</span>
+                                                </div>
+                                                Đang lưu...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="fas fa-save me-2"></i>
+                                                Lưu cấu hình
+                                            </>
+                                        )}
+                                    </button>
+                                    <div className="mt-3">
+                                        <small style={{ fontSize: '13px', color: '#6c757d' }}>
+                                            <i className="fas fa-info-circle me-1"></i>
+                                            Các thay đổi sẽ được áp dụng ngay lập tức
+                                        </small>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>
