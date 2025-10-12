@@ -178,9 +178,26 @@ const OrderAdmin = () => {
     }
   }
   const userRole = decoded?.role || "user";
-
+  
   return (
-    <div className="row">
+    <>
+      <style>
+        {`
+          .input-editable {
+            background-color: #fffbe6 !important;
+            border: 1px solid #e9ecef !important;
+            color: #495057 !important;
+            cursor: not-allowed !important;
+          }
+          
+          .input-editable:focus {
+            box-shadow: none !important;
+            border-color: #e9ecef !important;
+          }
+        `}
+      </style>
+      <div className="row">
+
       <div className="col-md-12">
         <div className="card">
           <div className="card-header bg-primary text-white">
@@ -457,15 +474,6 @@ const OrderAdmin = () => {
         <Modal.Body style={{ maxWidth: '100%' }}>
           {selectedOrder && (
             <form>
-              <style>
-                {
-                  `
-                  input-editable {
-                    background-color: #fffbe6;
-                    border: none;
-                    }`
-                }
-              </style>
               <div className="container-fluid">
                 <div className="row g-3">
                   <div className="col-md-3">
@@ -566,7 +574,8 @@ const OrderAdmin = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-    </div>
+      </div>
+    </>
   );
 };
 
