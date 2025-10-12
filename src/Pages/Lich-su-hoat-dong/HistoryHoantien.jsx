@@ -142,7 +142,7 @@ export default function HistoryHoantien() {
                 </h3>
 
                 <div className="refund-table-container p-3">
-                    <Table striped bordered hover>
+                    <Table striped Responsive bordered hover>
                         <thead>
                             <tr>
                                 <th>#</th>
