@@ -460,8 +460,8 @@ export default function History() {
                                         </div>
 
                                         {/* Hiển thị bảng lịch sử */}
-                                        <div className="history-table-container p-3">
-                                            <Table striped Responsive bordered hover>
+                                        <div className="history-table-container table-responsive p-3">
+                                            <Table striped bordered hover responsive>
                                                 <thead>
                                                     <tr>
                                                         <th>STT</th>
