@@ -50,7 +50,7 @@ export default function Napthecao({ cardData = [], token }) {
 
     try {
       setLoading(true);
-      loadingg("Vui lòng chờ..."); // Hiển thị thông báo đang tìm kiếm
+      loadingg("Vui lòng chờ...", true, 9999999); // Hiển thị thông báo đang tìm kiếm
       const response = await rechargeCard(cardInfo, token); // Gọi API rechargeCard
       loadingg("", false); // Ẩn thông báo sau khi gọi API xong
 

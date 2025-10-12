@@ -38,6 +38,19 @@ export const adminApproveRefund = async (data, token) => {
   });
   return handleResponse(response);
 };
+
+export const adminDeleteRefunds = async (data, token) => {
+  const response = await fetch(`${API_BASE}/refund`, {
+    method: "DELETE",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
 // Refill đơn hàng
 export const refillOrder = async (madon, token) => {
   const response = await fetch(`${API_BASE}/refill`, {

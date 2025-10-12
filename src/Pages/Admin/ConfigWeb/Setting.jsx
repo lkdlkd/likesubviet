@@ -75,7 +75,7 @@ const Setting = () => {
     const editorRef = useRef(null);
     const fetchConfig = async () => {
         try {
-            loadingg("Đang tải cấu hình website...");
+            loadingg("Đang tải cấu hình website...", true, 9999999);
             const token = localStorage.getItem("token");
             const config = await getConfigWeb(token);
             setFormData({
@@ -97,7 +97,7 @@ const Setting = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        loadingg("Đang lưu cấu hình website...");
+        loadingg("Đang lưu cấu hình website...", true, 9999999);
         try {
             const token = localStorage.getItem("token");
             const sanitizedData = {

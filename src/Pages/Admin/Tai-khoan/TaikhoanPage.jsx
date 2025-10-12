@@ -28,15 +28,15 @@ export default function TaikhoanPage() {
   const token = localStorage.getItem("token");
 
   // Debounce logic: Cập nhật `debouncedSearchQuery` sau 3 giây
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery); // Cập nhật giá trị debounce sau 3 giây
-    }, 3000);
+  // useEffect(() => {
+  //   const handler = setTimeout(() => {
+  //     setDebouncedSearchQuery(searchQuery); // Cập nhật giá trị debounce sau 3 giây
+  //   }, 3000);
 
-    return () => {
-      clearTimeout(handler); // Xóa timeout nếu `searchQuery` thay đổi trước khi hết 3 giây
-    };
-  }, [searchQuery]);
+  //   return () => {
+  //     clearTimeout(handler); // Xóa timeout nếu `searchQuery` thay đổi trước khi hết 3 giây
+  //   };
+  // }, [searchQuery]);
   const fetchUsers = async () => {
     setLoading(true);
     loadingg("Đang tải...", true, 9999999);
@@ -120,33 +120,289 @@ export default function TaikhoanPage() {
   }
 
   return (
-    <div className="row">
-      <div className="col-md-12">
-        <div className=" card">
-          <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h2 className="card-title">Quản lý người dùng</h2>
-          </div>
-          <div className="card-body">
+    <>
+      <style>
+        {`
+          /* Modern User Management Page Styles */
+          .user-container {
+            font-size: 14px;
+            color: #2c3e50;
+          }
+          
+          .user-header-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+          }
+          
+          .user-header-card .card-header {
+            background: transparent;
+            border: none;
+            padding: 1.5rem 2rem;
+            position: relative;
+          }
+          
+          .user-header-card .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+          }
+          
+          .user-header-content {
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+          }
+          
+          .user-icon-circle {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            backdrop-filter: blur(10px);
+          }
+          
+          .user-icon-circle i {
+            font-size: 24px;
+            color: white;
+          }
+          
+          .user-main-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+          
+          .user-content-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e8ecef;
+            overflow: hidden;
+            padding: 1.5rem 2rem;
+          }
+          
+          .user-search-form {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #e8ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+          }
+          
+          .user-search-input {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            font-size: 14px;
+            transition: all 0.3s ease;
+          }
+          
+          .user-search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+          }
+          
+          .user-search-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          
+          .user-search-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            color: white;
+          }
+          
+          .user-limit-select {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 0.6rem;
+            font-size: 14px;
+            transition: all 0.3s ease;
+          }
+          
+          .user-limit-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+          }
+          
+          .user-action-dropdown .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+          }
+          
+          .user-action-dropdown .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+          }
+          
+          .user-action-dropdown .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+          }
+          
+          .user-action-dropdown .dropdown-item {
+            padding: 0.5rem 1rem;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+          }
+          
+          .user-action-dropdown .dropdown-item:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+          }
+          
+          .user-balance {
+            color: #28a745;
+            font-weight: 600;
+          }
+          
+          .user-total-deposit {
+            color: #17a2b8;
+            font-weight: 600;
+          }
+          
+          .user-rank-badge {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+          
+          .user-pagination {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #e8ecef;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+          }
+          
+          .user-pagination .btn {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+          }
+          
+          .user-pagination .btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            color: white;
+          }
+          
+          .user-pagination .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+          
+          .user-pagination-info {
+            font-weight: 600;
+            color: #495057;
+          }
+          
+          @media (max-width: 768px) {
+            .user-container {
+              font-size: 13px;
+            }
+            
+            .user-main-title {
+              font-size: 20px;
+            }
+            
+            .user-header-card .card-header {
+              padding: 1rem 1.5rem;
+            }
+            
+            .user-content-card {
+              padding: 1rem 1.5rem;
+            }
+            
+            .user-search-form {
+              padding: 1rem;
+            }
+            
+            .user-pagination {
+              padding: 1rem;
+            }
+          }
+        `}
+      </style>
+      <div className="user-container">
+        <div className="row">
+          <div className="col-md-12">
+            <div className="user-header-card card">
+              <div className="card-header">
+                <div className="user-header-content">
+                  <div className="user-icon-circle">
+                    <i className="fas fa-users"></i>
+                  </div>
+                  <h2 className="user-main-title">Quản lý người dùng</h2>
+                </div>
+              </div>
+            </div>
+            
+            <div className="user-content-card">
             {/* Ô tìm kiếm */}
-            <form onSubmit={handleSearch} className="mb-4">
-              <div className="row g-2">
+            <form onSubmit={handleSearch} className="user-search-form">
+              <div className="row g-3">
                 <div className="col-md-4">
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-control user-search-input"
                     placeholder="Tìm kiếm theo username"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <div className="col-md-2">
-                  <button type="submit" className="btn btn-primary w-100">
-                    <i className="bi bi-search"></i> Tìm kiếm
+                <div className="col-md-3">
+                  <button type="submit" className="btn user-search-btn w-100">
+                    <i className="fas fa-search"></i> Tìm kiếm
                   </button>
                 </div>
                 <div className="col-md-2">
                   <select
-                    className="form-select"
+                    className="form-select user-limit-select"
                     value={limit}
                     onChange={handleLimitChange}
                   >
@@ -180,14 +436,14 @@ export default function TaikhoanPage() {
 
 
                       <td>
-                        <div className="dropdown">
+                        <div className="user-action-dropdown dropdown">
                           <button
-                            className="btn btn-primary dropdown-toggle"
+                            className="btn dropdown-toggle"
                             type="button"
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
                           >
-                            Thao tác <i className="las la-angle-right ms-1"></i>
+                            Thao tác <i className="las la-angle-down ms-1"></i>
                           </button>
                           <ul className="dropdown-menu">
                             <li>
@@ -195,7 +451,7 @@ export default function TaikhoanPage() {
                                 className="dropdown-item text-success"
                                 onClick={() => setBalanceUser(user)}
                               >
-                                Cộng tiền
+                                <i className="fas fa-plus-circle me-2"></i>Cộng tiền
                               </button>
                             </li>
                             <li>
@@ -203,31 +459,44 @@ export default function TaikhoanPage() {
                                 className="dropdown-item text-danger"
                                 onClick={() => setDeductUser(user)}
                               >
-                                Trừ tiền
+                                <i className="fas fa-minus-circle me-2"></i>Trừ tiền
                               </button>
                             </li>
-
-                            <button
-                              className="dropdown-item text-warning"
-                              onClick={() => setEditingUser(user)}
-                            >
-                              Sửa
-                            </button>
+                            <li>
+                              <button
+                                className="dropdown-item text-warning"
+                                onClick={() => setEditingUser(user)}
+                              >
+                                <i className="fas fa-edit me-2"></i>Sửa
+                              </button>
+                            </li>
                             <li>
                               <button
                                 className="dropdown-item text-danger"
                                 onClick={() => handleDeleteUser(user._id)}
                               >
-                                Xóa
+                                <i className="fas fa-trash me-2"></i>Xóa
                               </button>
                             </li>
                           </ul>
                         </div>
                       </td>
                       <td>{user.username}</td>
-                      <td>{Math.floor(Number(user.balance) || 0).toLocaleString("en-US")} VNĐ</td>
-                      <td>{Math.floor(Number(user.tongnap) || 0).toLocaleString("en-US")} VNĐ</td>
-                      <td>{user.capbac}</td>
+                      <td>
+                        <span className="user-balance">
+                          {Math.floor(Number(user.balance) || 0).toLocaleString("en-US")} VNĐ
+                        </span>
+                      </td>
+                      <td>
+                        <span className="user-total-deposit">
+                          {Math.floor(Number(user.tongnap) || 0).toLocaleString("en-US")} VNĐ
+                        </span>
+                      </td>
+                      <td>
+                        <span className="user-rank-badge">
+                          {user.capbac}
+                        </span>
+                      </td>
                       {/* <td>
                       {user.role === "admin" ? (
                         <span className="badge bg-danger">Quản trị viên</span>
@@ -273,57 +542,58 @@ export default function TaikhoanPage() {
             </div>
 
             {/* Phân trang */}
-            <div className="d-flex justify-content-between align-items-center mt-4">
+            <div className="user-pagination d-flex justify-content-between align-items-center">
               <button
-                className="btn btn-secondary"
+                className="btn"
                 onClick={() => handlePageChange(page - 1)}
                 disabled={page === 1}
               >
-                Trước
+                <i className="fas fa-chevron-left me-2"></i>Trước
               </button>
-              <span>
+              <span className="user-pagination-info">
                 Trang {page} / {totalPages}
               </span>
               <button
-                className="btn btn-secondary"
+                className="btn"
                 onClick={() => handlePageChange(page + 1)}
                 disabled={page === totalPages}
               >
-                Tiếp
+                Tiếp<i className="fas fa-chevron-right ms-2"></i>
               </button>
+            </div>
             </div>
           </div>
         </div>
-
-        {/* Các modal chỉnh sửa */}
-        {editingUser && (
-          <UserEdit
-            fetchUsers={fetchUsers}
-            user={editingUser}
-            token={token}
-            onClose={() => setEditingUser(null)}
-            onUserUpdated={handleUserUpdated}
-          />
-        )}
-        {deductUser && (
-          <DeductBalanceForm
-            fetchUsers={fetchUsers}
-            token={token}
-            user={deductUser}
-            onClose={() => setDeductUser(null)}
-            onUserUpdated={handleUserUpdated}
-          />
-        )}
-        {balanceUser && (
-          <AddBalanceForm
-            fetchUsers={fetchUsers}
-            token={token}
-            user={balanceUser}
-            onClose={() => setBalanceUser(null)}
-            onUserUpdated={handleUserUpdated}
-          />
-        )}
       </div>
-    </div>
+
+      {/* Các modal chỉnh sửa */}
+      {editingUser && (
+        <UserEdit
+          fetchUsers={fetchUsers}
+          user={editingUser}
+          token={token}
+          onClose={() => setEditingUser(null)}
+          onUserUpdated={handleUserUpdated}
+        />
+      )}
+      {deductUser && (
+        <DeductBalanceForm
+          fetchUsers={fetchUsers}
+          token={token}
+          user={deductUser}
+          onClose={() => setDeductUser(null)}
+          onUserUpdated={handleUserUpdated}
+        />
+      )}
+      {balanceUser && (
+        <AddBalanceForm
+          fetchUsers={fetchUsers}
+          token={token}
+          user={balanceUser}
+          onClose={() => setBalanceUser(null)}
+          onUserUpdated={handleUserUpdated}
+        />
+      )}
+    </>
   );
 }

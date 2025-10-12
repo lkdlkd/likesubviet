@@ -69,7 +69,7 @@ export default function Adddoitac({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    loadingg(editingPartner ? "Đang cập nhật đối tác..." : "Đang thêm đối tác...");
+    loadingg(editingPartner ? "Đang cập nhật đối tác..." : "Đang thêm đối tác...", true, 9999999);
     try {
       // Nếu cấu hình biến môi trường, chỉ cho phép 1 URL API cụ thể
       const normalize = (u) => (u || "").trim().replace(/\/+$/, "");

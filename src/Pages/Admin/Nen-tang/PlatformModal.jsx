@@ -46,7 +46,7 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
   }, [formData.name]);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    loadingg(platform ? "Đang cập nhật nền tảng..." : "Đang thêm nền tảng...");
+    loadingg(platform ? "Đang cập nhật nền tảng..." : "Đang thêm nền tảng...", true, 9999999);
     try {
       // Kiểm tra dữ liệu trước khi gửi
       if (!formData.name || !formData.logo) {

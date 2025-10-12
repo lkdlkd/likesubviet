@@ -39,12 +39,171 @@ export default function Addthongbao({ token, onAdd, show, onClose }) {
   };
 
   return (
-    <Modal show={show} onHide={onClose} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Thêm thông báo mới</Modal.Title>
-      </Modal.Header>
-      <form onSubmit={handleSubmit}>
-        <Modal.Body>
+    <>
+      <style>
+        {`
+          // .modal-modern-notification {
+          //   z-index: 1055;
+          // }
+
+          .modal-modern-notification .modal-dialog {
+            margin: 1.75rem auto;
+            max-width: 600px;
+          }
+
+          .modal-modern-notification .modal-content {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+          }
+
+          .modal-modern-notification .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            padding: 1.5rem;
+          }
+
+          .modal-modern-notification .modal-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .modal-modern-notification .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            opacity: 0.8;
+          }
+
+          .modal-modern-notification .btn-close:hover {
+            opacity: 1;
+          }
+
+          .modal-modern-notification .modal-body {
+            padding: 2rem;
+            background: #fafbfc;
+          }
+
+          .modal-modern-notification .form-floating {
+            margin-bottom: 1.5rem;
+          }
+
+          .modal-modern-notification .form-floating > .form-control {
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 1rem 0.75rem 0.25rem;
+            background: white;
+            transition: all 0.3s ease;
+          }
+
+          .modal-modern-notification .form-floating > .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+          }
+
+          .modal-modern-notification .form-floating > label {
+            color: #6c757d;
+            font-weight: 500;
+          }
+
+          .modal-modern-notification .form-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.75rem;
+            font-size: 14px;
+          }
+
+          .modal-modern-notification .ck-editor__editable {
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            min-height: 250px;
+          }
+
+          .modal-modern-notification .ck-editor__editable:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+          }
+
+          .modal-modern-notification .modal-footer {
+            border-top: 1px solid #e9ecef;
+            padding: 1.5rem 2rem;
+            background: white;
+            border-radius: 0 0 12px 12px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+          }
+
+          .modal-modern-notification .btn-modern {
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .modal-modern-notification .btn-modern-secondary {
+            background: #6c757d;
+            color: white;
+          }
+
+          .modal-modern-notification .btn-modern-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+          }
+
+          .modal-modern-notification .btn-modern-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+          }
+
+          .modal-modern-notification .btn-modern-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          }
+
+          .modal-modern-notification .btn-modern-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+          }
+
+          @media (max-width: 768px) {
+            .modal-modern-notification .modal-dialog {
+              margin: 0.5rem;
+              max-width: none;
+            }
+
+            .modal-modern-notification .modal-header,
+            .modal-modern-notification .modal-body,
+            .modal-modern-notification .modal-footer {
+              padding: 1.5rem;
+            }
+          }
+        `}
+      </style>
+
+      <Modal show={show} onHide={onClose} backdrop="static" keyboard={false} className="modal-modern-notification" >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="fas fa-plus-circle"></i>
+            Thêm thông báo mới
+          </Modal.Title>
+        </Modal.Header>
+        <form onSubmit={handleSubmit}>
+          <Modal.Body>
           {/* Tiêu đề */}
           <div className="form-floating mb-3">
             <input
@@ -92,16 +251,36 @@ export default function Addthongbao({ token, onAdd, show, onClose }) {
               }}
             />
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onClose}>
-            Hủy
-          </Button>
-          <Button type="submit" variant="primary" disabled={loading}>
-            {loading ? "Đang thêm..." : "Thêm thông báo"}
-          </Button>
-        </Modal.Footer>
-      </form>
-    </Modal>
+          </Modal.Body>
+          <Modal.Footer>
+            <button 
+              type="button"
+              className="btn btn-modern btn-modern-secondary"
+              onClick={onClose}
+            >
+              <i className="fas fa-times"></i>
+              Hủy
+            </button>
+            <button 
+              type="submit" 
+              className="btn btn-modern btn-modern-primary" 
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <i className="fas fa-spinner fa-spin"></i>
+                  Đang thêm...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-save"></i>
+                  Thêm thông báo
+                </>
+              )}
+            </button>
+          </Modal.Footer>
+        </form>
+      </Modal>
+    </>
   );
 }

@@ -24,7 +24,7 @@ export default function Khuyenmai() {
     // Lấy danh sách chương trình khuyến mãi
     const fetchPromotions = async () => {
         try {
-            loadingg("Đang tải danh sách khuyến mãi...");
+            loadingg("Đang tải danh sách khuyến mãi...", true, 9999999);
             const data = await getPromotions(token);
             setPromotions(data);
         } catch (error) {
@@ -37,7 +37,7 @@ export default function Khuyenmai() {
     // Xử lý khi submit form
     const handleSubmit = async (e) => {
         e.preventDefault();
-        loadingg(isEditing ? "Đang cập nhật khuyến mãi..." : "Đang thêm khuyến mãi...");
+        loadingg(isEditing ? "Đang cập nhật khuyến mãi..." : "Đang thêm khuyến mãi...", true, 9999999);
         try {
             const dataToSubmit = {
                 ...formData,
@@ -86,7 +86,7 @@ export default function Khuyenmai() {
         });
         setIsEditing(true);
         setShowModal(true);
-        fetchPromotions();
+        // fetchPromotions();
     };
 
     function toLocalDatetimeInputValue(dateString) {
@@ -110,7 +110,7 @@ export default function Khuyenmai() {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    loadingg("Đang xóa khuyến mãi...");
+                    loadingg("Đang xóa khuyến mãi...", true, 9999999);
                     await deletePromotion(id, token);
                     Swal.fire("Đã xóa!", "Chương trình khuyến mãi đã được xóa.", "success");
                     fetchPromotions(); // Cập nhật danh sách
@@ -129,26 +129,296 @@ export default function Khuyenmai() {
     }, []);
 
     return (
-        <div className="row">
-            <div className="col-md-12">
-                <div className=" card">
-                    <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h2 className="card-title">Chương Trình Khuyến Mãi</h2>
-                        <button className="btn btn-info mb-3" onClick={() => { setShowModal(true); setIsEditing(false); setFormData({ id: "", name: "", description: "", percentBonus: "", minAmount: 0, startDate: "", endDate: "" }); }}>
-                            Thêm mới chương trình khuyến mãi
-                        </button>
-                    </div>
-                    <PromotionModal
-                        show={showModal}
-                        handleClose={() => setShowModal(false)}
-                        handleSubmit={handleSubmit}
-                        formData={formData}
-                        setFormData={setFormData}
-                        isEditing={isEditing}
-                    />
-                    <div className="card-body">
-                        <h2 className="mb-4">Danh Sách Chương Trình Khuyến Mãi</h2>
-                        <Table bordered responsive hover>
+        <>
+            <style>
+                {`
+                    /* Modern Promotion Page Styles */
+                    .promotion-container {
+                        font-size: 14px;
+                        color: #2c3e50;
+                    }
+                    
+                    .promotion-header-card {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border: none;
+                        border-radius: 12px;
+                        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                        margin-bottom: 1.5rem;
+                        overflow: hidden;
+                    }
+                    
+                    .promotion-header-card .card-header {
+                        background: transparent;
+                        border: none;
+                        padding: 1.5rem 2rem;
+                        position: relative;
+                    }
+                    
+                    .promotion-header-card .card-header::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+                        pointer-events: none;
+                    }
+                    
+                    .promotion-header-content {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        position: relative;
+                        z-index: 1;
+                        flex-wrap: wrap;
+                        gap: 1rem;
+                    }
+                    
+                    .promotion-title-section {
+                        display: flex;
+                        align-items: center;
+                    }
+                    
+                    .promotion-icon-circle {
+                        width: 50px;
+                        height: 50px;
+                        background: rgba(255, 255, 255, 0.2);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-right: 15px;
+                        backdrop-filter: blur(10px);
+                    }
+                    
+                    .promotion-icon-circle i {
+                        font-size: 24px;
+                        color: white;
+                    }
+                    
+                    .promotion-main-title {
+                        font-size: 24px;
+                        font-weight: 600;
+                        margin: 0;
+                        color: white;
+                        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    }
+                    
+                    .promotion-add-btn {
+                        background: rgba(255, 255, 255, 0.2);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        color: white;
+                        padding: 0.6rem 1.2rem;
+                        border-radius: 8px;
+                        font-weight: 500;
+                        font-size: 14px;
+                        transition: all 0.3s ease;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        backdrop-filter: blur(10px);
+                        text-decoration: none;
+                    }
+                    
+                    .promotion-add-btn:hover {
+                        background: rgba(255, 255, 255, 0.3);
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                        color: white;
+                    }
+                    
+                    .promotion-content-card {
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                        border: 1px solid #e8ecef;
+                        overflow: hidden;
+                    }
+                    
+                    .promotion-content-header {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                        padding: 1.5rem 2rem;
+                        border-bottom: 1px solid #e8ecef;
+                        margin: 0;
+                    }
+                    
+                    .promotion-content-title {
+                        font-size: 18px;
+                        font-weight: 600;
+                        color: #2c3e50;
+                        margin: 0;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    
+                    .promotion-content-body {
+                        padding: 1.5rem 2rem;
+                    }
+                    
+                    .promotion-table-container {
+                        border-radius: 8px;
+                        overflow: hidden;
+                        border: 1px solid #e8ecef;
+                    }
+                    
+                    .promotion-action-dropdown .btn {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border: none;
+                        color: white;
+                        padding: 0.4rem 0.8rem;
+                        border-radius: 6px;
+                        font-size: 13px;
+                        font-weight: 500;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .promotion-action-dropdown .btn:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                    }
+                    
+                    .promotion-action-dropdown .dropdown-menu {
+                        border: none;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                        border-radius: 8px;
+                        padding: 0.5rem 0;
+                    }
+                    
+                    .promotion-action-dropdown .dropdown-item {
+                        padding: 0.5rem 1rem;
+                        font-size: 13px;
+                        font-weight: 500;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .promotion-action-dropdown .dropdown-item:hover {
+                        background: #f8f9fa;
+                        transform: translateX(5px);
+                    }
+                    
+                    .promotion-status-badge {
+                        padding: 0.3rem 0.8rem;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+                    
+                    .promotion-status-active {
+                        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                        color: white;
+                    }
+                    
+                    .promotion-status-inactive {
+                        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+                        color: white;
+                    }
+                    
+                    .promotion-percentage {
+                        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+                        color: white;
+                        padding: 0.3rem 0.8rem;
+                        border-radius: 20px;
+                        font-weight: 600;
+                        font-size: 12px;
+                    }
+                    
+                    .promotion-amount {
+                        color: #28a745;
+                        font-weight: 600;
+                    }
+                    
+                    @media (max-width: 768px) {
+                        .promotion-container {
+                            font-size: 13px;
+                        }
+                        
+                        .promotion-main-title {
+                            font-size: 20px;
+                        }
+                        
+                        .promotion-header-card .card-header {
+                            padding: 1rem 1.5rem;
+                        }
+                        
+                        .promotion-header-content {
+                            flex-direction: column;
+                            align-items: stretch;
+                            gap: 1rem;
+                        }
+                        
+                        .promotion-add-btn {
+                            justify-content: center;
+                        }
+                        
+                        .promotion-content-header {
+                            padding: 1rem 1.5rem;
+                        }
+                        
+                        .promotion-content-body {
+                            padding: 1rem 1.5rem;
+                        }
+                    }
+                `}
+            </style>
+            <div className="promotion-container">
+                <div className="row">
+                    <div className="col-md-12">
+                        <div className="promotion-header-card card">
+                            <div className="card-header">
+                                <div className="promotion-header-content">
+                                    <div className="promotion-title-section">
+                                        <div className="promotion-icon-circle">
+                                            <i className="fas fa-gift"></i>
+                                        </div>
+                                        <h2 className="promotion-main-title">Chương Trình Khuyến Mãi</h2>
+                                    </div>
+                                    <button 
+                                        className="promotion-add-btn" 
+                                        onClick={() => { 
+                                            setShowModal(true); 
+                                            setIsEditing(false); 
+                                            setFormData({ 
+                                                id: "", 
+                                                name: "", 
+                                                description: "", 
+                                                percentBonus: "", 
+                                                minAmount: 0, 
+                                                startDate: "", 
+                                                endDate: "",
+                                                repeatMonthly: false
+                                            }); 
+                                        }}
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                        Thêm khuyến mãi
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <PromotionModal
+                            show={showModal}
+                            handleClose={() => setShowModal(false)}
+                            handleSubmit={handleSubmit}
+                            formData={formData}
+                            setFormData={setFormData}
+                            isEditing={isEditing}
+                        />
+                        
+                        <div className="promotion-content-card">
+                            <div className="promotion-content-header">
+                                <h2 className="promotion-content-title">
+                                    <i className="fas fa-list"></i>
+                                    Danh Sách Chương Trình Khuyến Mãi
+                                </h2>
+                            </div>
+                            <div className="promotion-content-body">
+                                <div className="promotion-table-container">
+                                    <Table bordered responsive hover>
                             <thead className="table-light">
                                 <tr>
                                     <th>#</th>
@@ -176,14 +446,14 @@ export default function Khuyenmai() {
                                         <tr key={promotion._id}>
                                             <td>{index + 1}</td>
                                             <td>
-                                                <div className="dropdown">
+                                                <div className="promotion-action-dropdown dropdown">
                                                     <button
-                                                        className="btn btn-primary dropdown-toggle"
+                                                        className="btn dropdown-toggle"
                                                         type="button"
                                                         data-bs-toggle="dropdown"
                                                         aria-expanded="false"
                                                     >
-                                                        Thao tác <i className="las la-angle-right ms-1"></i>
+                                                        Thao tác <i className="las la-angle-down ms-1"></i>
                                                     </button>
                                                     <ul className="dropdown-menu">
                                                         <li>
@@ -191,7 +461,7 @@ export default function Khuyenmai() {
                                                                 className="dropdown-item text-primary"
                                                                 onClick={() => handleEdit(promotion)}
                                                             >
-                                                                Sửa
+                                                                <i className="fas fa-edit me-2"></i>Sửa
                                                             </button>
                                                         </li>
                                                         <li>
@@ -199,15 +469,23 @@ export default function Khuyenmai() {
                                                                 className="dropdown-item text-danger"
                                                                 onClick={() => handleDelete(promotion._id)}
                                                             >
-                                                                Xóa
+                                                                <i className="fas fa-trash me-2"></i>Xóa
                                                             </button>
                                                         </li>
                                                     </ul>
                                                 </div>
                                             </td>
                                             <td>{promotion.name}</td>
-                                            <td>{promotion.percentBonus}%</td>
-                                            <td>{promotion.minAmount}</td>
+                                            <td>
+                                                <span className="promotion-percentage">
+                                                    {promotion.percentBonus}%
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className="promotion-amount">
+                                                    {promotion.minAmount.toLocaleString('en-US')} VNĐ
+                                                </span>
+                                            </td>
                                             <td> {new Date(promotion.startTime).toLocaleString("vi-VN", {
                                                 day: "2-digit",
                                                 month: "2-digit",
@@ -224,15 +502,22 @@ export default function Khuyenmai() {
                                                 minute: "2-digit",
                                                 second: "2-digit",
                                             })}</td>
-                                            <td>{promotion.repeatMonthly ? "Có" : "Không"}</td>
+                                            <td>
+                                                <span className={`promotion-status-badge ${promotion.repeatMonthly ? 'promotion-status-active' : 'promotion-status-inactive'}`}>
+                                                    {promotion.repeatMonthly ? "Có" : "Không"}
+                                                </span>
+                                            </td>
                                         </tr>
                                     ))
                                 )}
                             </tbody>
                         </Table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
