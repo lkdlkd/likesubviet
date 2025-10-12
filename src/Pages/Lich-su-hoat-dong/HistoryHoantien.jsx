@@ -141,8 +141,8 @@ export default function HistoryHoantien() {
                     Danh sách hoàn tiền
                 </h3>
 
-                <div className="refund-table-container p-3">
-                    <Table striped Responsive bordered hover>
+                <div className="refund-table-container table-responsive p-3">
+                    <Table striped bordered hover responsive>
                         <thead>
                             <tr>
                                 <th>#</th>
