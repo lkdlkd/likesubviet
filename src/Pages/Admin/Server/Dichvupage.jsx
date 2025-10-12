@@ -750,7 +750,7 @@ export default function Dichvupage() {
                                     aria-labelledby={`flush-heading-${safeCategoryId}`}
                                     data-bs-parent="#accordion-category"
                                   >
-                                    <div className="responsive-table p-3">
+                                    <div className="table-responsive p-3">
                                       <Table striped bordered hover responsive>
                                         <thead>
                                           <tr>

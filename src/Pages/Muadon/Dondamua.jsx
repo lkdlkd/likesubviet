@@ -202,7 +202,7 @@ const Dondamua = ({ category, showcmt }) => {
 
                         </div>
 
-                        <div className="table-responsive table-bordered">
+                        <div className="table-responsive table-bordered p-3">
                             <Table striped bordered hover responsive>
                                 <thead>
                                     <tr>
