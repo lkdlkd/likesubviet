@@ -14,7 +14,7 @@ const Dondamua = ({ category, showcmt }) => {
             decoded = JSON.parse(atob(token.split(".")[1]));
         } catch (error) { }
     }
-    const userRole = decoded?.role || "user";
+    // const userRole = decoded?.role || "user";
     const username = decoded.username;
 
     const [searchTerm, setSearchTerm] = useState("");
@@ -24,7 +24,7 @@ const Dondamua = ({ category, showcmt }) => {
     const [totalPages, setTotalPages] = useState(1);
     const [limit, setLimit] = useState(10);
     const [selectedStatus, setSelectedStatus] = useState("");
-    const [selectedDomain, setSelectedDomain] = useState("");
+    // const [selectedDomain, setSelectedDomain] = useState("");
 
     // Lấy đơn hàng theo category (path), tìm kiếm, phân trang
     const fetchOrders = async () => {
@@ -143,66 +143,220 @@ const Dondamua = ({ category, showcmt }) => {
 
 
     return (
-        <div className="row">
-            <div className="col-md-12">
-                <div className="">
-                    <div className="">
-                        <div className="row md-3">
-                            <div className="col-md-6 col-lg-3">
-                                <div className="form-group">
-                                    <label  >
-                                        Mã đơn hàng hoặc link
-                                    </label>
-                                    <div className="input-group">
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="Tìm kiếm dữ liệu..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="btn btn-primary d-flex align-items-center"
-                                            onClick={handleSearch}
-                                        >
-                                            <i className="fas fa-search"></i>
-                                        </button>
+        <>
+            <style>
+                {`
+                    /* Modern Order Component Styles */
+                    .order-component-container {
+                        font-size: 14px;
+                        color: #2c3e50;
+                    }
+                    
+                    .order-controls-section {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                        border: 1px solid #e8ecef;
+                        border-radius: 12px;
+                        padding: 1.5rem;
+                        margin-bottom: 1.5rem;
+                    }
+                    
+                    .order-form-control {
+                        border: 1px solid #dee2e6;
+                        border-radius: 8px;
+                        padding: 0.6rem 1rem;
+                        font-size: 14px;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .order-form-control:focus {
+                        border-color: #667eea;
+                        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+                    }
+                    
+                    .order-btn-primary {
+                        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                        border: 1px solid #28a745;
+                        color: white;
+                        padding: 0.6rem 1.5rem;
+                        border-radius: 8px;
+                        font-weight: 500;
+                        font-size: 14px;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .order-btn-primary:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                        color: white;
+                    }
+                    
+                    .order-table-container {
+                        background: white;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                        border: 1px solid #e8ecef;
+                        margin-bottom: 1.5rem;
+                        padding: 1.5rem;
+                    }
+                    
+                    .order-pagination {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                        border-radius: 12px;
+                        padding: 1rem 1.5rem;
+                        margin-top: 1.5rem;
+                    }
+                    
+                    .order-pagination .btn {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border: none;
+                        color: white;
+                        padding: 0.5rem 1rem;
+                        border-radius: 6px;
+                        font-weight: 500;
+                        transition: all 0.3s ease;
+                        margin: 0 0.25rem;
+                    }
+                    
+                    .order-pagination .btn:hover:not(:disabled) {
+                        transform: translateY(-1px);
+                        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+                    }
+                    
+                    .order-pagination .btn:disabled {
+                        background: #6c757d;
+                        opacity: 0.6;
+                    }
+                    
+                    .order-pagination .btn-primary {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border: none;
+                    }
+                    
+                    .order-pagination .btn-outline-secondary {
+                        background: white;
+                        border: 1px solid #dee2e6;
+                        color: #6c757d;
+                    }
+                    
+                    .order-pagination .btn-outline-secondary:hover {
+                        background: #f8f9fa;
+                        border-color: #667eea;
+                        color: #667eea;
+                    }
+                    .orders-controls-section {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                        border: 1px solid #e8ecef;
+                        border-radius: 12px;
+                        padding: 1.5rem;
+                        margin-bottom: 1.5rem;
+                    }
+                    @media (max-width: 768px) {
+                        .order-component-container {
+                            font-size: 13px;
+                        }
+                        
+                        .orders-controls-section {
+                            padding: 1rem;
+                        }
+                        
+                        .order-table-container {
+                            padding: 1rem;
+                            margin: 0 -15px;
+                            border-radius: 0;
+                        }
+                    }
+                `}
+            </style>
+
+            <div className="order-component-container">
+                <div className="row">
+                    <div className="col-md-12">
+
+                        <div className="orders-controls-section">
+                            <div className="row g-3">
+                                <div className="col-md-6 col-lg-3">
+                                    <div className="form-group ">
+                                        <label className="form-label fw-bold text-dark">
+                                            <i className="fas fa-search text-primary me-2"></i>
+                                            Mã đơn hàng hoặc link
+                                        </label>
+                                        <div className="input-group">
+                                            <input
+                                                type="text"
+                                                className="form-control order-form-control"
+                                                placeholder="Tìm kiếm dữ liệu..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="order-btn-primary d-flex align-items-center"
+                                                onClick={handleSearch}
+                                            >
+                                                <i className="fas fa-search"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="col-md-6 col-lg-3">
-                                <div className="form-group">
-                                    <label>Trạng thái:</label>
-                                    <Select
-                                        value={statusOptions.find((option) => option.value === selectedStatus)}
-                                        onChange={(option) => setSelectedStatus(option ? option.value : "")}
-                                        options={statusOptions}
-                                        placeholder="Chọn trạng thái"
-                                        isClearable
-                                    />
+                                <div className="col-md-6 col-lg-3">
+                                    <div className="form-group">
+                                        <label className="form-label fw-semibold text-muted mb-2">
+                                            <i className="fas fa-filter text-info me-2"></i>
+                                            Trạng thái:
+                                        </label>
+                                        <Select
+                                            value={statusOptions.find((option) => option.value === selectedStatus)}
+                                            onChange={(option) => setSelectedStatus(option ? option.value : "")}
+                                            options={statusOptions}
+                                            placeholder="Chọn trạng thái"
+                                            isClearable
+                                            styles={{
+                                                control: (provided, state) => ({
+                                                    ...provided,
+                                                    border: '1px solid #dee2e6',
+                                                    borderRadius: '8px',
+                                                    padding: '0.1rem 0.5rem',
+                                                    fontSize: '14px',
+                                                    boxShadow: state.isFocused ? '0 0 0 0.2rem rgba(102, 126, 234, 0.25)' : 'none',
+                                                    borderColor: state.isFocused ? '#667eea' : '#dee2e6',
+                                                    '&:hover': {
+                                                        borderColor: '#667eea'
+                                                    }
+                                                }),
+                                                option: (provided, state) => ({
+                                                    ...provided,
+                                                    backgroundColor: state.isFocused ? '#f8f9fa' : 'white',
+                                                    color: '#2c3e50',
+                                                    fontSize: '14px'
+                                                })
+                                            }}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="col-md-6 col-lg-3">
-                                <div className="form-group">
-                                    <label>Số đơn hàng/trang:</label>
-                                    <select
-                                        className="form-select"
-                                        value={limit}
-                                        onChange={handleLimitChange}
-                                    >
-                                        <option value={10}>10 nhật ký</option>
-                                        <option value={25}>25 nhật ký</option>
-                                        <option value={50}>50 nhật ký</option>
-                                        <option value={100}>100 nhật ký</option>
-                                        <option value={500}>500 nhật ký</option>
-                                    </select>
+                                <div className="col-md-6 col-lg-3">
+                                    <div className="form-group">
+                                        <label className="form-label fw-bold text-dark">
+                                            <i className="fas fa-list text-warning me-2"></i>
+                                            Số đơn hàng/trang:
+                                        </label>
+                                        <select
+                                            className="order-form-control"
+                                            value={limit}
+                                            onChange={handleLimitChange}
+                                        >
+                                            <option value={10}>10 nhật ký</option>
+                                            <option value={25}>25 nhật ký</option>
+                                            <option value={50}>50 nhật ký</option>
+                                            <option value={100}>100 nhật ký</option>
+                                            <option value={500}>500 nhật ký</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
                         </div>
-
-                        <div className="table-responsive table-bordered p-3">
+                        <div className="order-table-container">
                             <Table striped bordered hover responsive>
                                 <thead>
                                     <tr>
@@ -436,7 +590,6 @@ const Dondamua = ({ category, showcmt }) => {
                                     )}
                                 </tbody>
                             </Table>
-
                         </div>
                         {orders.length > 0 && (
                             <>
@@ -516,10 +669,9 @@ const Dondamua = ({ category, showcmt }) => {
                             </>
                         )}
                     </div>
-
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
