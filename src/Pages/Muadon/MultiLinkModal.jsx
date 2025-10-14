@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Table, Form } from "react-bootstrap";
 import Select from "react-select";
+import { getUid } from "@/Utils/api";
 
 export default function MultiLinkModal({
     show,
@@ -111,7 +112,29 @@ export default function MultiLinkModal({
         return cleanUrl;
     };
     const [showServerWarning, setShowServerWarning] = useState(false);
-    const handleAddLinks = () => {
+    const [isProcessingLinks, setIsProcessingLinks] = useState(false);
+
+    // Hàm chuyển đổi UID cho link
+    const convertLinkToUid = async (link) => {
+        try {
+            const res = await getUid({ link });
+
+            // API trả về format: {status: "success", uid: "100045876123438"}
+            if (res.status === "success" && res.uid) {
+                return res.uid;
+            }
+
+            // Fallback cho format cũ nếu có
+            if (res.success && res.uid) {
+                return res.uid;
+            }
+
+        } catch (error) {
+        }
+        return link; // Trả về link gốc nếu không chuyển được
+    };
+
+    const handleAddLinks = async () => {
         if (!selectedMagoi) {
             setShowServerWarning(true);
             return;
@@ -121,18 +144,112 @@ export default function MultiLinkModal({
             .split("\n")
             .map(l => l.trim())
             .filter(l => l !== "" && !multiLinkList.some(item => item.link === shortenSocialLink(l)));
-        const newLinks = rawLinks.map(l => ({ link: shortenSocialLink(l), ObjectLink: l }));
-        if (newLinks.length > 0) {
+
+        if (rawLinks.length === 0) return;
+
+        setIsProcessingLinks(true);
+
+        try {
+            // Kiểm tra server có hỗ trợ getuid không
+            const selectedService = filteredServers.find(service => service.Magoi === selectedMagoi);
+            const supportsGetUid = selectedService && selectedService.getid === "on";
+
             const commentArr = comments
                 .split("\n")
                 .map(c => c.trim())
                 .filter(c => c !== "");
             const qty = commentArr.length || quantity;
-            setMultiLinkList(list => [
-                ...list,
-                ...newLinks.map(item => ({ ...item, comment: commentArr.join("\n"), quantity: qty }))
-            ]);
+
+            const processedLinks = [];
+
+            for (const rawLink of rawLinks) {
+                const shortenedLink = shortenSocialLink(rawLink);
+                let convertedUID = shortenedLink;
+                let processingStatus = "Đã thêm";
+
+                // Nếu server hỗ trợ getuid, thực hiện chuyển đổi
+                if (supportsGetUid) {
+                    processingStatus = "Đang chuyển UID...";
+                    // Tạm thời thêm vào danh sách với trạng thái đang xử lý
+                    const tempItem = {
+                        link: shortenedLink,
+                        ObjectLink: rawLink,
+                        convertedUID: "",
+                        comment: commentArr.join("\n"),
+                        quantity: qty,
+                        processingStatus,
+                        isProcessing: true
+                    };
+                    processedLinks.push(tempItem);
+                }
+            }
+
+            // Thêm các link vào danh sách trước
+            if (processedLinks.length > 0) {
+                setMultiLinkList(list => [...list, ...processedLinks]);
+            } else {
+                // Nếu không cần getuid, thêm trực tiếp
+                const newLinks = rawLinks.map(l => ({
+                    link: shortenSocialLink(l),
+                    ObjectLink: l,
+                    convertedUID: shortenSocialLink(l),
+                    comment: commentArr.join("\n"),
+                    quantity: qty,
+                    processingStatus: "Đã thêm",
+                    isProcessing: false
+                }));
+                setMultiLinkList(list => [...list, ...newLinks]);
+            }
+
             setMultiLinkInput("");
+
+            // Nếu server hỗ trợ getuid, xử lý từng link
+            if (supportsGetUid && processedLinks.length > 0) {
+                const startIndex = multiLinkList.length;
+
+                for (let i = 0; i < processedLinks.length; i++) {
+                    const currentIndex = startIndex + i;
+                    const rawLink = processedLinks[i].ObjectLink;
+                    try {
+                        const convertedUID = await convertLinkToUid(rawLink);
+
+                        // Cập nhật link đã chuyển đổi
+                        setMultiLinkList(list =>
+                            list.map((item, idx) =>
+                                idx === currentIndex
+                                    ? {
+                                        ...item,
+                                        convertedUID,
+                                        processingStatus: convertedUID !== rawLink && convertedUID !== item.link
+                                            ? "UID đã chuyển"
+                                            : "Giữ nguyên link",
+                                        isProcessing: false
+                                    }
+                                    : item
+                            )
+                        );
+                    } catch (error) {
+                        // Nếu lỗi, giữ nguyên link gốc
+                        setMultiLinkList(list =>
+                            list.map((item, idx) =>
+                                idx === currentIndex
+                                    ? {
+                                        ...item,
+                                        convertedUID: item.link, // Sử dụng link đã rút gọn thay vì rawLink
+                                        processingStatus: "Lỗi chuyển UID",
+                                        isProcessing: false
+                                    }
+                                    : item
+                            )
+                        );
+                    }
+                }
+            }
+
+        } catch (error) {
+
+        } finally {
+            setIsProcessingLinks(false);
         }
     };
     return (
@@ -167,9 +284,23 @@ export default function MultiLinkModal({
                             </div>
                             {filteredServers.map((server, index) => (
                                 selectedMagoi === server.Magoi && (
-                                    <div key={index} className="alert alert-warning">
-                                        <h5 style={{ textAlign: "center" }}>Lưu ý gói</h5>
-                                        <div dangerouslySetInnerHTML={{ __html: server.description }} />
+                                    <div key={index}>
+                                        <div className="alert alert-warning">
+                                            <h5 style={{ textAlign: "center" }}>Lưu ý gói</h5>
+                                            <div dangerouslySetInnerHTML={{ __html: server.description }} />
+                                        </div>
+                                        {/* {server.getid === "on" && (
+                                            <div className="alert alert-info">
+                                                <h6 className="mb-2">
+                                                    <i className="fas fa-info-circle me-2"></i>
+                                                    Tính năng chuyển UID
+                                                </h6>
+                                                <p className="mb-0">
+                                                    Server này hỗ trợ tự động chuyển link thành UID.
+                                                    Khi thêm link vào danh sách, hệ thống sẽ tự động chuyển đổi và hiển thị trong cột "Link đã chuyển".
+                                                </p>
+                                            </div>
+                                        )} */}
                                     </div>
                                 )
                             ))} {(() => {
@@ -280,9 +411,19 @@ export default function MultiLinkModal({
                                 variant="info"
                                 size="sm"
                                 onClick={handleAddLinks}
-                                disabled={isSubmitting || multiLinkInput.split("\n").filter(l => l.trim() !== "").length === 0}
+                                disabled={isSubmitting || isProcessingLinks || multiLinkInput.split("\n").filter(l => l.trim() !== "").length === 0}
                             >
-                                Thêm vào danh sách
+                                {isProcessingLinks ? (
+                                    <>
+                                        <i className="fas fa-spinner fa-spin me-2"></i>
+                                        Đang xử lý...
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="fas fa-plus me-2"></i>
+                                        Thêm vào danh sách
+                                    </>
+                                )}
                             </Button>
                         </div>
                         <div className="col-md-8 card card-body">
@@ -309,6 +450,12 @@ export default function MultiLinkModal({
                                             <th>Thao tác</th>
                                             <th>Trạng thái</th>
                                             <th>Link</th>
+                                            {selectedService && selectedService.getid === "on" && (
+                                                <th title="Link sau khi được chuyển thành UID (nếu server hỗ trợ)">
+                                                    <i className="fas fa-exchange-alt me-1"></i>
+                                                    Link đã chuyển
+                                                </th>
+                                            )}
                                             <th>Số lượng</th>
                                             <th>Giá</th>
                                             <th>Tạm tính</th>
@@ -318,7 +465,15 @@ export default function MultiLinkModal({
                                     </thead>
                                     <tbody>
                                         {multiLinkList.length === 0 ? (
-                                            <tr><td colSpan={selectedService && selectedService.comment === "on" ? 10 : 9} className="text-center">Chưa có link nào</td></tr>
+                                            <tr>
+                                                <td colSpan={
+                                                    9 + // Base columns: #, checkbox, action, status, link, quantity, price, total, server
+                                                    (selectedService && selectedService.getid === "on" ? 1 : 0) + // Link converted column
+                                                    (selectedService && selectedService.comment === "on" ? 1 : 0) // Comment column
+                                                } className="text-center">
+                                                    Chưa có link nào
+                                                </td>
+                                            </tr>
                                         ) : (
                                             multiLinkList.map((item, idx) => {
                                                 const server = filteredServers.find(s => s.Magoi === selectedMagoi);
@@ -360,7 +515,47 @@ export default function MultiLinkModal({
                                                                 {item.trangthai || "Chờ mua"}
                                                             </span>
                                                         </td>
-                                                        <td style={{ wordBreak: 'break-all' }}>{item.link}</td>
+                                                        <td style={{
+                                                            maxWidth: "250px",
+                                                            whiteSpace: "normal",
+                                                            wordWrap: "break-word",
+                                                            overflowWrap: "break-word",
+                                                        }}>{item.link}</td>
+                                                        {selectedService && selectedService.getid === "on" && (
+                                                            <td style={{ wordBreak: 'break-all' }}>
+                                                                {item.isProcessing ? (
+                                                                    <span className="badge bg-info">
+                                                                        <i className="fas fa-spinner fa-spin me-1"></i>
+                                                                        {item.processingStatus}
+                                                                    </span>
+                                                                ) : (
+                                                                    <div>
+                                                                        <span
+                                                                            className={
+                                                                                item.convertedUID && item.convertedUID !== item.link
+                                                                                    ? "text-success fw-bold"
+                                                                                    : "text-muted"
+                                                                            }
+                                                                        >
+                                                                            {item.convertedUID || item.link}
+                                                                        </span>
+                                                                        <div className="mt-1">
+                                                                            {item.convertedUID && item.convertedUID !== item.link ? (
+                                                                                <small className="badge bg-success">
+                                                                                    <i className="fas fa-check-circle me-1"></i>
+                                                                                    Đã chuyển thành UID
+                                                                                </small>
+                                                                            ) : (
+                                                                                <small className="badge bg-secondary">
+                                                                                    <i className="fas fa-link me-1"></i>
+                                                                                    Link gốc
+                                                                                </small>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                        )}
                                                         <td>
                                                             {selectedService && selectedService.comment === "on"
                                                                 ? (item.comment ? item.comment.split("\n").filter(c => c.trim() !== "").length : 0)
@@ -384,10 +579,10 @@ export default function MultiLinkModal({
                                                             {server
                                                                 ? (
                                                                     selectedService && selectedService.comment === "on"
-                                                                        ? ((item.comment ? item.comment.split("\n").filter(c => c.trim() !== "").length : 0) * Number(server.rate)).toLocaleString("en-US")
+                                                                        ? Math.floor((item.comment ? item.comment.split("\n").filter(c => c.trim() !== "").length : 0) * Number(server.rate)).toLocaleString("en-US")
                                                                         : (typeof item.quantity !== 'undefined' && item.quantity !== "")
-                                                                            ? (Number(item.quantity) * Number(server.rate)).toLocaleString("en-US")
-                                                                            : (quantity * Number(server.rate)).toLocaleString("en-US")
+                                                                            ? Math.floor(Number(item.quantity) * Number(server.rate)).toLocaleString("en-US")
+                                                                            : Math.floor(quantity * Number(server.rate)).toLocaleString("en-US")
                                                                 )
                                                                 : ''
                                                             }đ
@@ -420,30 +615,70 @@ export default function MultiLinkModal({
                     </div>
                 </div>
                 <div className="modal-footer d-flex flex-column align-items-stretch">
-                    <div className="mb-2 text-end">
-                        <b>Tổng số link chọn: <span style={{ color: 'red' }}>{totalSelected}</span></b>
-                        <b className="ms-3">Tổng tiền: <span style={{ color: 'red', fontSize: 18 }}>
-                            {multiLinkList && multiLinkList.length > 0
-                                ? selectedMultiLinks.reduce((sum, idx) => {
-                                    const item = multiLinkList[idx];
-                                    const server = filteredServers.find(s => s.Magoi === selectedMagoi);
-                                    const qty = selectedService && selectedService.comment === "on"
-                                        ? (item.comment ? item.comment.split("\n").filter(c => c.trim() !== "").length : 0)
-                                        : (typeof item.quantity !== 'undefined' && item.quantity !== "")
-                                            ? Number(item.quantity)
-                                            : quantity;
-                                    return sum + (server ? qty * Number(server.rate) : 0);
-                                }, 0).toLocaleString('en-US')
-                                : '0'}
-                        </span> VNĐ</b>
+                    <div className="mb-2">
+                        <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                                <b>Tổng số link: <span style={{ color: 'blue' }}>{multiLinkList.length}</span></b>
+                                <b className="ms-3">Đã chọn: <span style={{ color: 'red' }}>{totalSelected}</span></b>
+                                {multiLinkList.some(item => item.isProcessing) && (
+                                    <b className="ms-3">
+                                        <i className="fas fa-exchange-alt fa-spin text-info me-1"></i>
+                                        Đang chuyển: <span style={{ color: 'orange' }}>{multiLinkList.filter(item => item.isProcessing).length}</span>
+                                    </b>
+                                )}
+                            </div>
+                            <div>
+                                <b>Tổng tiền: <span style={{ color: 'red', fontSize: 18 }}>
+                                    {multiLinkList && multiLinkList.length > 0
+                                        ? Math.floor(selectedMultiLinks.reduce((sum, idx) => {
+                                            const item = multiLinkList[idx];
+                                            const server = filteredServers.find(s => s.Magoi === selectedMagoi);
+                                            const qty = selectedService && selectedService.comment === "on"
+                                                ? (item.comment ? item.comment.split("\n").filter(c => c.trim() !== "").length : 0)
+                                                : (typeof item.quantity !== 'undefined' && item.quantity !== "")
+                                                    ? Number(item.quantity)
+                                                    : quantity;
+                                            return sum + (server ? qty * Number(server.rate) : 0);
+                                        }, 0)).toLocaleString('en-US')
+                                        : '0'}
+                                </span> VNĐ</b>
+                            </div>
+                        </div>
                     </div>
                     <div className="d-flex gap-2 justify-content-end">
                         <Button variant="secondary" size="sm" onClick={onHide} disabled={isSubmitting}>
                             Đóng (Vẫn mua đơn)
                         </Button>
 
-                        <Button variant="info" size="sm" onClick={handleMultiLinkSubmit} disabled={isSubmitting || multiLinkList.length === 0 || !selectedMagoi || !quantity}>
-                            {isSubmitting ? "Đang xử lý..." : "Mua hàng"}
+                        <Button 
+                            variant="info" 
+                            size="sm" 
+                            onClick={handleMultiLinkSubmit} 
+                            disabled={
+                                isSubmitting || 
+                                multiLinkList.length === 0 || 
+                                !selectedMagoi || 
+                                !quantity ||
+                                isProcessingLinks ||
+                                multiLinkList.some(item => item.isProcessing) // Disable nếu có link đang chuyển UID
+                            }
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <i className="fas fa-spinner fa-spin me-2"></i>
+                                    Đang xử lý...
+                                </>
+                            ) : isProcessingLinks || multiLinkList.some(item => item.isProcessing) ? (
+                                <>
+                                    <i className="fas fa-exchange-alt fa-spin me-2"></i>
+                                    Đang chuyển UID...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fas fa-shopping-cart me-2"></i>
+                                    Mua hàng
+                                </>
+                            )}
                         </Button>
                         <Button
                             variant="danger"
@@ -455,7 +690,25 @@ export default function MultiLinkModal({
                         </Button>
                     </div>
                     {isStopped && (
-                        <div className="alert alert-danger text-center mt-2">Đã dừng mua đơn tiếp theo, vui lòng chờ thực hiện xong đơn đang xử lý.</div>
+                        <div className="alert alert-danger text-center mt-2">
+                            <i className="fas fa-pause-circle me-2"></i>
+                            Đã dừng mua đơn tiếp theo, vui lòng chờ thực hiện xong đơn đang xử lý.
+                        </div>
+                    )}
+                    {(isProcessingLinks || multiLinkList.some(item => item.isProcessing)) && (
+                        <div className="alert alert-info text-center mt-2">
+                            <i className="fas fa-exchange-alt fa-spin me-2"></i>
+                            Đang chuyển đổi UID cho các link ({multiLinkList.filter(item => !item.isProcessing).length}/{multiLinkList.length} hoàn tất), 
+                            vui lòng chờ hoàn tất trước khi mua hàng.
+                            <div className="progress mt-2" style={{ height: '4px' }}>
+                                <div 
+                                    className="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+                                    style={{ 
+                                        width: `${multiLinkList.length > 0 ? (multiLinkList.filter(item => !item.isProcessing).length / multiLinkList.length) * 100 : 0}%` 
+                                    }}
+                                ></div>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>

@@ -263,7 +263,7 @@ export default function Order() {
                 const item = updatedList[idx];
                 const payload = {
                     category: servers.find((server) => server.Magoi === selectedMagoi)?.category || "",
-                    link: item.link,
+                    link: item.convertedUID || item.link, // Sử dụng convertedUID nếu có, nếu không thì dùng link gốc
                     magoi: selectedMagoi,
                     note,
                     ObjectLink: item.ObjectLink || item.link,
