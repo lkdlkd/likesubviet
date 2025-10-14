@@ -15,7 +15,70 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
     thutu: "",
   });
 
+  const [pathError, setPathError] = useState("");
+
+  const validatePath = (value) => {
+    const errors = [];
+
+    // Kiểm tra dấu cách
+    if (value.includes(' ')) {
+      errors.push("không được chứa dấu cách");
+    }
+
+    // Kiểm tra ký tự đặc biệt không hợp lệ
+    const invalidChars = /[^a-zA-Z0-9\-_]/;
+    if (invalidChars.test(value)) {
+      errors.push("chỉ được chứa chữ cái, số, dấu gạch ngang (-) và gạch dưới (_)");
+    }
+
+    // Kiểm tra độ dài tối thiểu
+    if (value.length > 0 && value.length < 3) {
+      errors.push("phải có ít nhất 3 ký tự");
+    }
+
+    // Kiểm tra độ dài tối đa
+    if (value.length > 50) {
+      errors.push("không được vượt quá 50 ký tự");
+    }
+
+    // Kiểm tra ký tự đầu và cuối
+    if (value.length > 0) {
+      if (value.startsWith('-') || value.startsWith('_')) {
+        errors.push("không được bắt đầu bằng dấu gạch ngang hoặc gạch dưới");
+      }
+      if (value.endsWith('-') || value.endsWith('_')) {
+        errors.push("không được kết thúc bằng dấu gạch ngang hoặc gạch dưới");
+      }
+    }
+
+    // Kiểm tra dấu gạch ngang hoặc gạch dưới liên tiếp
+    if (/--+|__+|-_|_-/.test(value)) {
+      errors.push("không được chứa dấu gạch ngang hoặc gạch dưới liên tiếp");
+    }
+
+    // Kiểm tra chỉ chứa số
+    if (value.length > 0 && /^\d+$/.test(value)) {
+      errors.push("không được chỉ chứa số");
+    }
+
+    return errors;
+  };
+
+  const handlePathChange = (value) => {
+    const errors = validatePath(value);
+
+    if (errors.length > 0) {
+      setPathError(`Đường dẫn ${errors.join(', ')}.`);
+    } else {
+      setPathError("");
+    }
+
+    setFormData({ ...formData, path: value });
+  };
   useEffect(() => {
+    // Reset path error khi component được mount lại
+    setPathError("");
+
     if (category && typeof category === "object") {
       setFormData({
         platforms_id: typeof category.platforms_id === "object" && category.platforms_id?._id
@@ -27,6 +90,14 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
         modal_show: category.modal_show || "",
         thutu: category.thutu || "",
       });
+
+      // Kiểm tra path hiện có khi edit
+      if (category.path) {
+        const errors = validatePath(category.path);
+        if (errors.length > 0) {
+          setPathError(`Đường dẫn ${errors.join(', ')}.`);
+        }
+      }
     } else {
       setFormData({
         platforms_id: "",
@@ -41,6 +112,8 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Kiểm tra thông tin bắt buộc
     if (!formData.platforms_id || !formData.name || !formData.path) {
       Swal.fire({
         title: "Lỗi",
@@ -48,6 +121,14 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
         icon: "error",
         confirmButtonText: "Xác nhận",
       });
+      return;
+    }
+
+    // Kiểm tra đường dẫn có hợp lệ không
+    const pathErrors = validatePath(formData.path);
+    if (pathErrors.length > 0) {
+      const errorMessage = `Đường dẫn ${pathErrors.join(', ')}.`;
+      setPathError(errorMessage);
       return;
     }
     // Pass up and then reset to empty so when modal reopens it's blank
@@ -114,7 +195,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
                         </option>
                         {platforms.map((platform) => (
                           <option key={platform._id} value={platform._id}>
-                           {platform.name}
+                            {platform.name}
                           </option>
                         ))}
                       </select>
@@ -148,15 +229,22 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
                     </label>
                     <input
                       type="text"
-                      className="form-control form-control-lg border-2"
+                      className={`form-control form-control-lg border-2 ${pathError ? 'is-invalid' : ''}`}
                       value={formData.path}
-                      onChange={(e) => setFormData({ ...formData, path: e.target.value })}
-                      placeholder="facebook-like ,tiktok-view ,..."
+                      onChange={(e) => handlePathChange(e.target.value)}
+                      placeholder="facebook-like, tiktok-view, instagram-follow..."
                       required
                     />
+                    {pathError && (
+                      <div className="invalid-feedback d-block">
+                        <i className="fas fa-exclamation-triangle me-1"></i>
+                        {pathError}
+                      </div>
+                    )}
                     <small className="text-muted">
                       <i className="fas fa-info-circle me-1"></i>
-                      Sử dụng dấu gạch ngang (-) thay vì khoảng trắng
+                      <strong>Quy tắc đường dẫn:</strong> Chỉ dùng chữ cái, số, dấu gạch ngang (-), gạch dưới (_).
+                      Độ dài 3-50 ký tự. Không bắt đầu/kết thúc bằng dấu gạch.
                     </small>
                   </div>
                 </div>
@@ -222,8 +310,8 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
         </Modal.Body>
         <Modal.Footer className="bg-white border-0 px-4 py-3">
           <div className="d-flex justify-content-between w-100">
-            <Button 
-              variant="outline-secondary" 
+            <Button
+              variant="outline-secondary"
               onClick={onClose}
               className="px-4 py-2 fw-bold"
               style={{ minWidth: '120px' }}
@@ -231,8 +319,8 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
               <i className="fas fa-times me-2"></i>
               Hủy
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               variant={category ? "warning" : "success"}
               className="px-4 py-2 fw-bold shadow-sm"
               style={{ minWidth: '160px' }}

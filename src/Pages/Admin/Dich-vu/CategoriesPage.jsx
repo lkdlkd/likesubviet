@@ -76,7 +76,7 @@ export default function CategoriesPage() {
             //console.error("Lỗi khi lưu danh mục:", error);
             Swal.fire({
                 title: "Lỗi",
-                text: "Không thể lưu danh mục.",
+                text:  `${error.message || "Không thể lưu danh mục."}`,
                 icon: "error",
                 confirmButtonText: "Xác nhận",
             });
