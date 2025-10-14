@@ -847,7 +847,7 @@ export default function Landing() {
                 50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.6), 0 0 40px rgba(118, 75, 162, 0.4); }
             }
         `;
-        
+
         // Add keyframes to document
         let styleSheet = document.getElementById('api-animations');
         if (!styleSheet) {
@@ -1177,7 +1177,7 @@ export default function Landing() {
             @media (min-width: 641px) and (max-width: 1024px) {
                 .text-4xl { font-size: 2rem; line-height: 2.5rem; }
                 .text-3xl { font-size: 1.75rem; line-height: 2.25rem; }
-                
+
                 .container {
                     max-width: 90% !important;
                 }
@@ -1193,7 +1193,6 @@ export default function Landing() {
                     min-width: 44px;
                     padding: 0.625rem 1rem;
                 }
-                
                 .hover-lift:active {
                     transform: scale(0.98);
                 }
@@ -1608,11 +1607,22 @@ export default function Landing() {
 
                                             <div className="card-body p-4">
                                                 {(error || success) && (
-                                                    <div className={`alert ${error ? 'alert-danger' : 'alert-success'} alert-dismissible fade show`}>
+                                                    <div
+                                                        className={`alert ${error ? 'alert-danger' : 'alert-success'} alert-dismissible fade show position-relative`}
+                                                        style={{ paddingRight: '3rem' }}
+                                                    >
                                                         {error || success}
                                                         <button
                                                             type="button"
-                                                            className="btn-close"
+                                                            className="btn-close position-absolute"
+                                                            style={{
+                                                                top: '50%',
+                                                                right: '0px',
+                                                                transform: 'translateY(-50%)',
+                                                                zIndex: 1,
+                                                                width: '1rem',
+                                                                height: '1rem'
+                                                            }}
                                                             onClick={() => {
                                                                 setError('');
                                                                 setSuccess('');
@@ -2348,7 +2358,7 @@ export default function Landing() {
                             `,
                             animation: 'floatAPI 8s ease-in-out infinite'
                         }}></div>
-                        
+
                         {/* Floating Particles */}
                         {[...Array(6)].map((_, i) => (
                             <div
@@ -2382,16 +2392,16 @@ export default function Landing() {
                                         position: 'relative',
                                         overflow: 'hidden'
                                     }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'scale(1.1)';
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
-                                        e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.5)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'scale(1)';
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                                        e.currentTarget.style.boxShadow = 'none';
-                                    }}>
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1.1)';
+                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
+                                            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.5)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1)';
+                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}>
                                         <i className="fas fa-code me-2"></i>
                                         API Documentation
                                     </div>
@@ -2418,14 +2428,14 @@ export default function Landing() {
                                         transition: 'all 0.3s ease',
                                         transform: 'translateZ(0)'
                                     }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-5px) scale(1.02)';
-                                        e.currentTarget.style.boxShadow = '0 20px 40px rgba(102, 126, 234, 0.2)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                                        e.currentTarget.style.boxShadow = '';
-                                    }}>
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(-5px) scale(1.02)';
+                                            e.currentTarget.style.boxShadow = '0 20px 40px rgba(102, 126, 234, 0.2)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                                            e.currentTarget.style.boxShadow = '';
+                                        }}>
                                         <div className="card-header bg-transparent border-0 py-4 px-4 px-md-5">
                                             <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
                                                 <div>
@@ -2448,9 +2458,9 @@ export default function Landing() {
                                                     <Table striped bordered className="align-middle mb-0" style={{
                                                         background: 'linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%)'
                                                     }}>
-                                                        <tbody style={{'& tr': {transition: 'all 0.2s ease'}}}>
-                                                            <tr 
-                                                                style={{transition: 'all 0.2s ease'}}
+                                                        <tbody style={{ '& tr': { transition: 'all 0.2s ease' } }}>
+                                                            <tr
+                                                                style={{ transition: 'all 0.2s ease' }}
                                                                 onMouseEnter={(e) => {
                                                                     e.currentTarget.style.background = 'linear-gradient(45deg, #e3f2fd 0%, #bbdefb 100%)';
                                                                     e.currentTarget.style.transform = 'scale(1.02)';
@@ -2511,8 +2521,8 @@ export default function Landing() {
                                                                 onClick={() => setActiveApiTab(tab.id)}
                                                                 role="tab"
                                                                 style={{
-                                                                    background: activeApiTab === tab.id 
-                                                                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                                                                    background: activeApiTab === tab.id
+                                                                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                                                                         : 'rgba(255, 255, 255, 0.1)',
                                                                     border: '1px solid rgba(255, 255, 255, 0.2)',
                                                                     color: activeApiTab === tab.id ? 'white' : '#667eea',
@@ -2563,12 +2573,12 @@ export default function Landing() {
                                                                             position: 'relative',
                                                                             overflow: 'hidden'
                                                                         }}
-                                                                        onMouseEnter={(e) => {
-                                                                            e.currentTarget.style.background = 'linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%)';
-                                                                        }}
-                                                                        onMouseLeave={(e) => {
-                                                                            e.currentTarget.style.background = 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)';
-                                                                        }}>
+                                                                            onMouseEnter={(e) => {
+                                                                                e.currentTarget.style.background = 'linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%)';
+                                                                            }}
+                                                                            onMouseLeave={(e) => {
+                                                                                e.currentTarget.style.background = 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)';
+                                                                            }}>
                                                                             <tr>
                                                                                 <th className="fw-semibold">Parameters</th>
                                                                                 <th className="fw-semibold">Description</th>
@@ -2576,16 +2586,16 @@ export default function Landing() {
                                                                         </thead>
                                                                         <tbody>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#2196f3'}}>key</td>
+                                                                                <td className="fw-semibold" style={{ color: '#2196f3' }}>key</td>
                                                                                 <td>API Key</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#2196f3'}}>action</td>
+                                                                                <td className="fw-semibold" style={{ color: '#2196f3' }}>action</td>
                                                                                 <td>"services"</td>
                                                                             </tr>
                                                                         </tbody>
                                                                     </Table>
-                                                                    <h6 className="fw-bold" style={{color: '#2196f3'}}>Example response</h6>
+                                                                    <h6 className="fw-bold" style={{ color: '#2196f3' }}>Example response</h6>
                                                                     <div className="rounded-3 p-3" style={{
                                                                         background: 'linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%)',
                                                                         border: '1px solid #4caf50',
@@ -2641,32 +2651,32 @@ export default function Landing() {
                                                                         </thead>
                                                                         <tbody>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#ff9800'}}>key</td>
+                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>key</td>
                                                                                 <td>API Key</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#ff9800'}}>action</td>
+                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>action</td>
                                                                                 <td>"add"</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#ff9800'}}>service</td>
+                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>service</td>
                                                                                 <td>Service ID</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#ff9800'}}>link</td>
+                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>link</td>
                                                                                 <td>Link</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#ff9800'}}>quantity</td>
+                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>quantity</td>
                                                                                 <td>Needed quantity</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#ff9800'}}>comments</td>
+                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>comments</td>
                                                                                 <td className="text-break">Comments (Only for Custom Comments service)</td>
                                                                             </tr>
                                                                         </tbody>
                                                                     </Table>
-                                                                    <h6 className="fw-bold" style={{color: '#ff9800'}}>Example response</h6>
+                                                                    <h6 className="fw-bold" style={{ color: '#ff9800' }}>Example response</h6>
                                                                     <div className="rounded-3 p-3" style={{
                                                                         background: 'linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%)',
                                                                         border: '1px solid #ff9800',
@@ -2699,20 +2709,20 @@ export default function Landing() {
                                                                         </thead>
                                                                         <tbody>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#4caf50'}}>key</td>
+                                                                                <td className="fw-semibold" style={{ color: '#4caf50' }}>key</td>
                                                                                 <td>API Key</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#4caf50'}}>action</td>
+                                                                                <td className="fw-semibold" style={{ color: '#4caf50' }}>action</td>
                                                                                 <td>"status"</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#4caf50'}}>order</td>
+                                                                                <td className="fw-semibold" style={{ color: '#4caf50' }}>order</td>
                                                                                 <td>Order ID</td>
                                                                             </tr>
                                                                         </tbody>
                                                                     </Table>
-                                                                    <h6 className="fw-bold" style={{color: '#4caf50'}}>Example response</h6>
+                                                                    <h6 className="fw-bold" style={{ color: '#4caf50' }}>Example response</h6>
                                                                     <div className="rounded-3 p-3" style={{
                                                                         background: 'linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%)',
                                                                         border: '1px solid #4caf50',
@@ -2750,20 +2760,20 @@ export default function Landing() {
                                                                         </thead>
                                                                         <tbody>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#e91e63'}}>key</td>
+                                                                                <td className="fw-semibold" style={{ color: '#e91e63' }}>key</td>
                                                                                 <td>API Key</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#e91e63'}}>action</td>
+                                                                                <td className="fw-semibold" style={{ color: '#e91e63' }}>action</td>
                                                                                 <td>"status"</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#e91e63'}}>orders</td>
+                                                                                <td className="fw-semibold" style={{ color: '#e91e63' }}>orders</td>
                                                                                 <td className="text-break">Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
                                                                             </tr>
                                                                         </tbody>
                                                                     </Table>
-                                                                    <h6 className="fw-bold" style={{color: '#e91e63'}}>Example response</h6>
+                                                                    <h6 className="fw-bold" style={{ color: '#e91e63' }}>Example response</h6>
                                                                     <div className="rounded-3 p-3" style={{
                                                                         background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%)',
                                                                         border: '1px solid #e91e63',
@@ -2812,16 +2822,16 @@ export default function Landing() {
                                                                         </thead>
                                                                         <tbody>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#00bcd4'}}>key</td>
+                                                                                <td className="fw-semibold" style={{ color: '#00bcd4' }}>key</td>
                                                                                 <td>API Key</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#00bcd4'}}>action</td>
+                                                                                <td className="fw-semibold" style={{ color: '#00bcd4' }}>action</td>
                                                                                 <td>"balance"</td>
                                                                             </tr>
                                                                         </tbody>
                                                                     </Table>
-                                                                    <h6 className="fw-bold" style={{color: '#00bcd4'}}>Example response</h6>
+                                                                    <h6 className="fw-bold" style={{ color: '#00bcd4' }}>Example response</h6>
                                                                     <div className="rounded-3 p-3" style={{
                                                                         background: 'linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%)',
                                                                         border: '1px solid #00bcd4',
@@ -2855,20 +2865,20 @@ export default function Landing() {
                                                                         </thead>
                                                                         <tbody>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#f44336'}}>key</td>
+                                                                                <td className="fw-semibold" style={{ color: '#f44336' }}>key</td>
                                                                                 <td>API Key</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#f44336'}}>action</td>
+                                                                                <td className="fw-semibold" style={{ color: '#f44336' }}>action</td>
                                                                                 <td>"cancel"</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td className="fw-semibold" style={{color: '#f44336'}}>orders or order</td>
+                                                                                <td className="fw-semibold" style={{ color: '#f44336' }}>orders or order</td>
                                                                                 <td className="text-break">Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
                                                                             </tr>
                                                                         </tbody>
                                                                     </Table>
-                                                                    <h6 className="fw-bold" style={{color: '#f44336'}}>Example response</h6>
+                                                                    <h6 className="fw-bold" style={{ color: '#f44336' }}>Example response</h6>
                                                                     <div className="rounded-3 p-3" style={{
                                                                         background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
                                                                         border: '1px solid #f44336',
@@ -2910,8 +2920,8 @@ export default function Landing() {
 
                                             <div className="mt-5 pt-4 border-top">
                                                 <div className="d-flex gap-3 flex-wrap justify-content-center">
-                                                    <Link 
-                                                        to="/tai-lieu-api" 
+                                                    <Link
+                                                        to="/tai-lieu-api"
                                                         className="btn btn-primary btn-lg rounded-pill px-4"
                                                         style={{
                                                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -2965,7 +2975,7 @@ export default function Landing() {
                                     </div>
                                 </div>
                             </div>
-                                               
+
 
                             {/* API Features */}
                             <div className="row mt-5">
@@ -2977,18 +2987,18 @@ export default function Landing() {
                                         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                                         cursor: 'pointer'
                                     }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-10px) scale(1.05)';
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                                        e.currentTarget.style.boxShadow = '0 20px 40px rgba(102, 126, 234, 0.3)';
-                                        e.currentTarget.style.animation = 'pulse 1.5s ease-in-out infinite';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                                        e.currentTarget.style.boxShadow = 'none';
-                                        e.currentTarget.style.animation = 'none';
-                                    }}>
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(-10px) scale(1.05)';
+                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                                            e.currentTarget.style.boxShadow = '0 20px 40px rgba(102, 126, 234, 0.3)';
+                                            e.currentTarget.style.animation = 'pulse 1.5s ease-in-out infinite';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                            e.currentTarget.style.animation = 'none';
+                                        }}>
                                         <div className="rounded-circle p-4 d-inline-flex mb-3" style={{
                                             width: '80px',
                                             height: '80px',
@@ -3103,13 +3113,24 @@ export default function Landing() {
                                 ></button>
                             </div>
 
-                            <div className="modal-body p-4">
+                            <div className="card-body p-4">
                                 {(error || success) && (
-                                    <div className={`alert ${error ? 'alert-danger' : 'alert-success'} alert-dismissible fade show`}>
+                                    <div
+                                        className={`alert ${error ? 'alert-danger' : 'alert-success'} alert-dismissible fade show position-relative`}
+                                        style={{ paddingRight: '3rem' }}
+                                    >
                                         {error || success}
                                         <button
                                             type="button"
-                                            className="btn-close"
+                                            className="btn-close position-absolute"
+                                            style={{
+                                                top: '50%',
+                                                right: '0px',
+                                                transform: 'translateY(-50%)',
+                                                zIndex: 1,
+                                                width: '1rem',
+                                                height: '1rem'
+                                            }}
                                             onClick={() => {
                                                 setError('');
                                                 setSuccess('');

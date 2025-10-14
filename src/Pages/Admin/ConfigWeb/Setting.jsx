@@ -311,7 +311,7 @@ const Setting = () => {
                                         className="form-control form-control-lg"
                                         value={formData.linktele}
                                         onChange={(e) => setFormData({ ...formData, linktele: e.target.value })}
-                                        placeholder="https://t.me/noti_web_245_bot"
+                                        placeholder="https://t.me/xxxxxx_bot"
                                     />
                                 </div>
                             </div>
