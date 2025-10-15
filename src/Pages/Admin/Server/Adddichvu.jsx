@@ -190,8 +190,9 @@ export default function Adddichvu({
     loadingg("Đang thêm dịch vụ...", true, 9999999);
     try {
       if (selectedServices.length > 0) {
+        const uniqueSelected = getUniqueByService(selectedServices);
         await Promise.all(
-          selectedServices.map(async (service) => {
+          uniqueSelected.map(async (service) => {
             const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
             const tigia = partner?.tigia || 1;
             const ptgia = partner?.price_update || 0;
@@ -259,6 +260,18 @@ export default function Adddichvu({
   const filteredServices = services.filter(
     (service) => service.category === selectedCategory
   );
+
+  // Ensure unique services by service id (string compare)
+  const getUniqueByService = (arr) => {
+    const seen = new Set();
+    return arr.filter((s) => {
+      const id = String(s?.service);
+      if (!id) return false;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  };
 
   // Helper: get unique platforms from categories
   const uniquePlatforms = categories
@@ -942,7 +955,7 @@ export default function Adddichvu({
                                     type="checkbox"
                                     onChange={(e) => {
                                       if (e.target.checked) {
-                                        setSelectedServices(filteredServices);
+                                        setSelectedServices((prev) => getUniqueByService([...(prev || []), ...filteredServices]));
                                       } else {
                                         setSelectedServices([]);
                                       }
@@ -988,11 +1001,11 @@ export default function Adddichvu({
                                     if (isSelected) {
                                       setSelectedServices((prev) =>
                                         prev.filter(
-                                          (selected) => selected.service !== service.service
+                                          (selected) => String(selected.service) !== String(service.service)
                                         )
                                       );
                                     } else {
-                                      setSelectedServices((prev) => [...prev, service]);
+                                      setSelectedServices((prev) => getUniqueByService([...(prev || []), service]));
                                     }
                                   }}
                                 >
@@ -1005,11 +1018,11 @@ export default function Adddichvu({
                                         onChange={(e) => {
                                           e.stopPropagation();
                                           if (e.target.checked) {
-                                            setSelectedServices((prev) => [...prev, service]);
+                                            setSelectedServices((prev) => getUniqueByService([...(prev || []), service]));
                                           } else {
                                             setSelectedServices((prev) =>
                                               prev.filter(
-                                                (selected) => selected.service !== service.service
+                                                (selected) => String(selected.service) !== String(service.service)
                                               )
                                             );
                                           }
