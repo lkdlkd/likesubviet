@@ -2,11 +2,12 @@
 import { useState, useEffect } from "react";
 import Adddichvu from "./Adddichvu";
 import Table from "react-bootstrap/Table";
-import { deleteServer, getServer } from "@/Utils/api";
+import { deleteServer, getServer, getAllSmmPartners, updatePartnerPrices } from "@/Utils/api";
 import Swal from "sweetalert2";
 import EditModal from "./EditModal";
 import { loadingg } from "@/JS/Loading";
-import { useOutletContext } from "react-router-dom";
+import { redirect, useOutletContext } from "react-router-dom";
+import { color } from "framer-motion";
 
 export default function Dichvupage() {
   const { categories: cate } = useOutletContext();
@@ -33,6 +34,10 @@ export default function Dichvupage() {
   // Lấy danh sách nền tảng duy nhất
   const platforms = Array.from(new Set(servers.map((s) => s.type)));
   const [selectedType, setSelectedType] = useState("");
+  // SMM partners & update price state
+  const [smmPartners, setSmmPartners] = useState([]);
+  const [selectedSmm, setSelectedSmm] = useState("");
+  const [updatingPrices, setUpdatingPrices] = useState(false);
 
   const token = localStorage.getItem("token") || "";
 
@@ -61,6 +66,16 @@ export default function Dichvupage() {
       });
     } finally {
       loadingg("Đang tải...", false);
+    }
+  };
+
+  // Load SMM partners for update price action
+  const fetchSmmPartners = async () => {
+    try {
+      const partners = await getAllSmmPartners(token);
+      setSmmPartners(Array.isArray(partners) ? partners : partners?.data || []);
+    } catch (error) {
+      // silent fail; dropdown will be empty
     }
   };
 
@@ -97,6 +112,10 @@ export default function Dichvupage() {
     fetchServers();
     // fetchCategories();
   }, [currentPage, limit, debouncedSearch, quickAddMode]);
+
+  useEffect(() => {
+    fetchSmmPartners();
+  }, []);
 
   // Removed automatic debounced search - now using manual search button
   const handleSearch = async () => {
@@ -285,6 +304,13 @@ export default function Dichvupage() {
             box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
             color: white;
           }
+
+          /* Smaller variant for compact buttons */
+          .service-btn-primary.btn-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 12px;
+            border-radius: 6px;
+          }
           
           .service-btn-toggle {
             background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
@@ -321,6 +347,18 @@ export default function Dichvupage() {
             transform: translateY(-1px);
             box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
             color: white;
+          }
+          /* Subtle inline note */
+          .smm-note {
+            font-size: 12px;
+            color: #6c757d;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+          }
+          .smm-note .pill {
+            color: #495057;
+
           }
           
           .service-warning-text {
@@ -523,6 +561,27 @@ export default function Dichvupage() {
             .service-tabs-section .d-flex {
               flex-direction: column;
             }
+
+            /* Mobile-friendly layout for SMM actions */
+            .smm-actions {
+              width: 100%;
+              margin-top: 10px;
+              justify-content: flex-start !important;
+              gap: 8px;
+            }
+            .smm-actions .service-form-control {
+              min-width: 0 !important;
+              width: 100%;
+            }
+            .smm-actions .btn {
+              padding: 0.45rem 0.8rem;
+              font-size: 12px;
+              border-radius: 6px;
+            }
+            .smm-note {
+              width: 100%;
+              margin-top: 6px;
+            }
           }
         `}
       </style>
@@ -547,29 +606,152 @@ export default function Dichvupage() {
                   <i className="fas fa-cogs"></i>
                   Điều khiển và cài đặt
                 </div>
-                <div className="d-flex flex-wrap align-items-center">
-                  <button
-                    type="button"
-                    className="btn service-btn-primary"
-                    onClick={() => setShowAddModal(true)}
-                  >
-                    <i className="fas fa-plus me-2"></i>
-                    Thêm dịch vụ
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn service-btn-toggle`}
-                    onClick={() => setQuickAddMode((prev) => !prev)}
-                  >
-                    <i className={`fas ${quickAddMode ? "fa-table" : "fa-th-list"} me-2`}></i>
-                    {quickAddMode ? "Hiển thị theo phân trang" : "Hiển thị theo dịch vụ"}
-                  </button>
-                  {quickAddMode && (
-                    <span className="service-warning-text">
-                      <i className="fas fa-info-circle me-2"></i>
-                      Đang ở chế độ hiển thị theo dịch vụ, vui lòng tắt để sử dụng phân trang.
-                    </span>
-                  )}
+                <div className="d-flex flex-wrap align-items-center justify-content-between">
+                  {/* Left: primary actions */}
+                  <div className="d-flex flex-wrap align-items-center" style={{ gap: "8px" }}>
+                    <button
+                      type="button"
+                      className="btn service-btn-primary"
+                      onClick={() => setShowAddModal(true)}
+                    >
+                      <i className="fas fa-plus me-2"></i>
+                      Thêm dịch vụ
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn service-btn-toggle`}
+                      onClick={() => setQuickAddMode((prev) => !prev)}
+                    >
+                      <i className={`fas ${quickAddMode ? "fa-table" : "fa-th-list"} me-2`}></i>
+                      {quickAddMode ? "Hiển thị theo phân trang" : "Hiển thị theo dịch vụ"}
+                    </button>
+                    {quickAddMode && (
+                      <span className="service-warning-text">
+                        <i className="fas fa-info-circle me-2"></i>
+                        Đang ở chế độ hiển thị theo dịch vụ, vui lòng tắt để sử dụng phân trang.
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Right: SMM select + Update Prices */}
+                  <div className="ms-auto smm-actions d-flex flex-column align-items-end" style={{ gap: "6px" }}>
+                    <div className="d-flex align-items-center flex-wrap" style={{ gap: "8px" }}>
+                      <label className="text-muted fw-semibold me-1" htmlFor="smmSelect" style={{ fontSize: 12 }}>Đối tác SMM:</label>
+                      <select
+                        id="smmSelect"
+                        className="form-select service-form-control"
+                        style={{ minWidth: 220 }}
+                        value={selectedSmm}
+                        onChange={(e) => setSelectedSmm(e.target.value)}
+                      >
+                        <option value="" >Chọn đối tác SMM...</option>
+                        {smmPartners
+                          .slice()
+                          .sort((a, b) => (a?.name || "").localeCompare(b?.name || "", "vi", { sensitivity: "base" }))
+                          .map((p) => (
+                            <option key={p._id} value={p._id}>
+                              {p.name}
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="btn service-btn-primary btn-sm"
+                        disabled={!selectedSmm || updatingPrices}
+                        onClick={async () => {
+                          if (!selectedSmm) {
+                            Swal.fire("Thông báo", "Vui lòng chọn một đối tác SMM.", "info");
+                            return;
+                          }
+                          const partner = smmPartners.find((p) => String(p._id) === String(selectedSmm));
+                          const confirm = await Swal.fire({
+                            title: "Cập nhật giá dịch vụ?",
+                            html: `Hệ thống sẽ đồng bộ giá dịch vụ với tỷ lệ <b style="font-weight: bold;color: red;">${partner?.price_update}%</b> từ đối tác <b>${partner?.name || selectedSmm}</b>.` +
+                              `<br/>Thao tác có thể mất vài phút, vui lòng không đóng trang.`,
+                            icon: "question",
+                            showCancelButton: true,
+                            confirmButtonText: "Xác nhận",
+                            cancelButtonText: "Hủy",
+                          });
+                          if (!confirm.isConfirmed) return;
+                          try {
+                            setUpdatingPrices(true);
+                            loadingg("Đang cập nhật giá từ SMM...", true, 9999999);
+                            const res = await updatePartnerPrices(selectedSmm, token);
+                            if (res && res.success) {
+                              const partnerName = res.partner?.name || partner?.name || selectedSmm;
+                              const priceUpdate = res.partner?.price_update;
+                              const total = Number(res.totalServices ?? 0);
+                              const updated = Number(res.updated ?? 0);
+                              const details = `
+                                <div style="text-align:left">
+                                 <b>${res.message || "Đã cập nhật giá."}</b>
+                                  <ul style="padding-left:18px; margin:0">
+                                    <li>Đối tác: <b>${partnerName}</b>${priceUpdate !== undefined ? ` (Phần trăm cập nhật: <b>${priceUpdate}%</b>)` : ""}</li>
+                                    <li>Tổng dịch vụ đối tác: <b>${total}</b></li>
+                                    <li>Số dịch vụ được cập nhật: <b>${updated}</b></li>
+                                  </ul>
+                                </div>`;
+                              loadingg("Đang tải...", false);
+                              await Swal.fire({
+                                title: "Cập nhật thành công",
+                                html: details,
+                                icon: "success",
+                                confirmButtonText: "Đóng",
+                              });
+                              fetchServers();
+                            } else {
+                              const updated = Number(res?.updated ?? 0);
+                              loadingg("Đang tải...", false);
+                              await Swal.fire({
+                                title: "Không có thay đổi",
+                                html: `<div style='text-align:left'>
+                                  <b>${res?.message || "Không có dịch vụ nào để cập nhật."}</b>
+                                  <p style='font-size: 18px;'>Số dịch vụ được cập nhật: <b>${updated}</b></p>
+                                </div>`,
+                                icon: "warning",
+                                confirmButtonText: "Đóng",
+                              });
+                            }
+                            loadingg("Đang tải...", false);
+                          } catch (err) {
+                            Swal.fire("Lỗi", "Không thể cập nhật giá. Vui lòng thử lại.", "error");
+                            loadingg("Đang tải...", false);
+                          } finally {
+                            setUpdatingPrices(false);
+                            loadingg("Đang tải...", false);
+                          }
+                        }}
+                      >
+                        {updatingPrices ? (
+                          <>
+                            <i className="fas fa-spinner fa-spin me-2"></i>
+                            Đang cập nhật...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-sync-alt me-2"></i>
+                            Cập nhật giá
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="smm-note">
+                      <i className="fas fa-info-circle"></i>
+                      {(() => {
+                        const partner = smmPartners.find((p) => String(p._id) === String(selectedSmm));
+                        if (partner) {
+                          return (
+                            <span>
+                              Cập nhật tất cả dịch vụ từ đối tác <b style={{ color: "red" }}>{partner.name}</b> với phần trăm cập nhật giá
+                              <p className="pill">{partner.price_update}%</p>
+                            </span>
+                          );
+                        }
+                        return <span>Chọn đối tác để cập nhật giá. Thao tác có thể mất vài phút.</span>;
+                      })()}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -581,6 +763,7 @@ export default function Dichvupage() {
                 token={token}
                 editMode={false}
                 initialData={{}}
+                datasmm={smmPartners}
                 onSuccess={() => {
                   setShowAddModal(false);
                   fetchServers();

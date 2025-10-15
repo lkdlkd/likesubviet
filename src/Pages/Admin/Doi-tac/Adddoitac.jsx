@@ -190,7 +190,7 @@ export default function Adddoitac({
                     <div className="col-6 mb-3">
                       <label className="form-label fw-bold text-dark">
                         <i className="fas fa-dollar-sign me-1 text-success"></i>
-                        Cập Nhật Giá:
+                        Cập Nhật Giá (%):
                       </label>
                       <input
                         type="text"
@@ -211,7 +211,7 @@ export default function Adddoitac({
                         name="tigia"
                         value={formData.tigia}
                         onChange={handleChange}
-                        placeholder="VD: 25"
+                        placeholder="VD: 25 , 25.5"
                         className="form-control border-2"
                       />
                     </div>

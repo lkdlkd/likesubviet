@@ -12,6 +12,7 @@ export default function Adddichvu({
   token,
   categories,
   fetchServers,
+  datasmm,
   editMode = false,
   initialData = {},
   onSuccess,
@@ -65,23 +66,23 @@ export default function Adddichvu({
   const [selectedServices, setSelectedServices] = useState([]);
   const [quickAddMode, setQuickAddMode] = useState(false); // <--- ADD THIS
 
-  const loadSmmPartners = useCallback(async () => {
-    setLoading(true);
-    loadingg("Đang tải danh sách đối tác...", true, 9999999);
-    try {
-      const data = await getAllSmmPartners(token);
-      setSmmPartners(data);
-    } catch (error) {
-      toast.error("Không thể tải danh sách đối tác. Vui lòng thử lại!");
-    } finally {
-      setLoading(false);
-      loadingg("Đang tải...", false);
-    }
-  }, [token]);
+  // const loadSmmPartners = useCallback(async () => {
+  //   setLoading(true);
+  //   loadingg("Đang tải danh sách đối tác...", true, 9999999);
+  //   try {
+  //     const data = await getAllSmmPartners(token);
+  //     setSmmPartners(data);
+  //   } catch (error) {
+  //     toast.error("Không thể tải danh sách đối tác. Vui lòng thử lại!");
+  //   } finally {
+  //     setLoading(false);
+  //     loadingg("Đang tải...", false);
+  //   }
+  // }, [token]);
 
   useEffect(() => {
-    loadSmmPartners();
-  }, [loadSmmPartners]);
+    setSmmPartners(datasmm || []);
+  }, [datasmm]);
 
   useEffect(() => {
     if (editMode && initialData) {
@@ -125,7 +126,7 @@ export default function Adddichvu({
           setServiceError("");
         } else if (servicesData.data.error) {
           setServices([]);
-            setServiceError(servicesData.data.error);
+          setServiceError(servicesData.data.error);
         }
       } else {
         setServices([]);
@@ -190,9 +191,8 @@ export default function Adddichvu({
     loadingg("Đang thêm dịch vụ...", true, 9999999);
     try {
       if (selectedServices.length > 0) {
-        const uniqueSelected = getUniqueByService(selectedServices);
         await Promise.all(
-          uniqueSelected.map(async (service) => {
+          selectedServices.map(async (service) => {
             const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
             const tigia = partner?.tigia || 1;
             const ptgia = partner?.price_update || 0;
@@ -260,18 +260,6 @@ export default function Adddichvu({
   const filteredServices = services.filter(
     (service) => service.category === selectedCategory
   );
-
-  // Ensure unique services by service id (string compare)
-  const getUniqueByService = (arr) => {
-    const seen = new Set();
-    return arr.filter((s) => {
-      const id = String(s?.service);
-      if (!id) return false;
-      if (seen.has(id)) return false;
-      seen.add(id);
-      return true;
-    });
-  };
 
   // Helper: get unique platforms from categories
   const uniquePlatforms = categories
@@ -378,7 +366,7 @@ export default function Adddichvu({
   ) || null;
 
   return (
-    <Modal show={show} onHide={onClose}  backdrop="static" keyboard={false} centered size="xl" className="modern-modal">
+    <Modal show={show} onHide={onClose} backdrop="static" keyboard={false} centered size="xl" className="modern-modal">
       <Modal.Header closeButton className="bg-gradient-primary text-white border-0">
         <Modal.Title className="d-flex align-items-center">
           <i className={`fas ${editMode ? 'fa-edit' : 'fa-plus-circle'} me-2`}></i>
@@ -757,7 +745,7 @@ export default function Adddichvu({
                         }}
                       />
                     )}
-                    {serviceError  && (
+                    {serviceError && (
                       <div className="alert alert-danger mt-2 py-2">
                         <i className="fas fa-exclamation-triangle me-1"></i>
                         <small>Lỗi SMM: {serviceError}</small>
@@ -955,7 +943,7 @@ export default function Adddichvu({
                                     type="checkbox"
                                     onChange={(e) => {
                                       if (e.target.checked) {
-                                        setSelectedServices((prev) => getUniqueByService([...(prev || []), ...filteredServices]));
+                                        setSelectedServices(filteredServices);
                                       } else {
                                         setSelectedServices([]);
                                       }
@@ -993,19 +981,19 @@ export default function Adddichvu({
                                 (selected) => selected.service === service.service
                               );
                               return (
-                                <tr 
-                                  key={service.service} 
+                                <tr
+                                  key={service.service}
                                   className={isSelected ? 'table-success' : ''}
                                   style={{ cursor: 'pointer' }}
                                   onClick={() => {
                                     if (isSelected) {
                                       setSelectedServices((prev) =>
                                         prev.filter(
-                                          (selected) => String(selected.service) !== String(service.service)
+                                          (selected) => selected.service !== service.service
                                         )
                                       );
                                     } else {
-                                      setSelectedServices((prev) => getUniqueByService([...(prev || []), service]));
+                                      setSelectedServices((prev) => [...prev, service]);
                                     }
                                   }}
                                 >
@@ -1018,11 +1006,11 @@ export default function Adddichvu({
                                         onChange={(e) => {
                                           e.stopPropagation();
                                           if (e.target.checked) {
-                                            setSelectedServices((prev) => getUniqueByService([...(prev || []), service]));
+                                            setSelectedServices((prev) => [...prev, service]);
                                           } else {
                                             setSelectedServices((prev) =>
                                               prev.filter(
-                                                (selected) => String(selected.service) !== String(service.service)
+                                                (selected) => selected.service !== service.service
                                               )
                                             );
                                           }
@@ -1068,7 +1056,7 @@ export default function Adddichvu({
                       </div>
                     )}
                   </div>
-                  
+
                   {selectedServices.length > 0 && (
                     <div className="mt-4">
                       <label className="form-label fw-bold">
@@ -1153,8 +1141,8 @@ export default function Adddichvu({
             {/* Form Actions */}
             <div className="card border-0 shadow-sm">
               <div className="card-body text-center">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   variant={editMode ? "warning" : "success"}
                   disabled={loading}
                   className="px-5 py-2 fw-bold"
@@ -1178,8 +1166,8 @@ export default function Adddichvu({
         </div>
       </Modal.Body>
       <Modal.Footer className="bg-white border-0">
-        <Button 
-          variant="outline-secondary" 
+        <Button
+          variant="outline-secondary"
           onClick={onClose}
           className="px-4 py-2 fw-bold"
         >
