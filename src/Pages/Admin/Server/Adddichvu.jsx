@@ -31,6 +31,8 @@ export default function Adddichvu({
     min: "",
     max: "",
     rate: "",
+    ratevip: "",
+    rateDistributor: "",
     originalRate: "",
     getid: "off",
     comment: "off",
@@ -66,6 +68,29 @@ export default function Adddichvu({
   const [selectedServices, setSelectedServices] = useState([]);
   const [quickAddMode, setQuickAddMode] = useState(false); // <--- ADD THIS
 
+  // Helpers to manage selection without duplicates
+  const dedupeByServiceId = (list) => {
+    const map = new Map();
+    for (const s of list) map.set(s.service, s);
+    return Array.from(map.values());
+  };
+
+  const toggleServiceSelection = (svc) => {
+    setSelectedServices((prev) => {
+      const exists = prev.some((s) => s.service === svc.service);
+      return exists ? prev.filter((s) => s.service !== svc.service) : [...prev, svc];
+    });
+  };
+
+  const setServiceChecked = (svc, checked) => {
+    setSelectedServices((prev) => {
+      const exists = prev.some((s) => s.service === svc.service);
+      if (checked && !exists) return [...prev, svc];
+      if (!checked && exists) return prev.filter((s) => s.service !== svc.service);
+      return prev;
+    });
+  };
+
   // const loadSmmPartners = useCallback(async () => {
   //   setLoading(true);
   //   loadingg("Đang tải danh sách đối tác...", true, 9999999);
@@ -94,7 +119,12 @@ export default function Adddichvu({
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === "min" || name === "max" || name === "rate" ? (value === "" ? "" : Number(value)) : value,
+      [name]:
+        name === "min" || name === "max" || name === "rate" || name === "ratevip" || name === "rateDistributor"
+          ? value === ""
+            ? ""
+            : Number(value)
+          : value,
     });
   };
 
@@ -109,6 +139,8 @@ export default function Adddichvu({
       min: "",
       max: "",
       rate: "",
+      ratevip: "",
+      rateDistributor: "",
     });
     setServices([]);
     setServiceError("");
@@ -153,6 +185,8 @@ export default function Adddichvu({
         min: svc.min || "",
         max: svc.max || "",
         rate: svc.rate * tigia || "",
+        ratevip: svc.rate * tigia || "",
+        rateDistributor: svc.rate * tigia || "",
         originalRate: svc.rate * tigia || "",
         // Update the main category field as well
         category: svc.category || "",
@@ -166,6 +200,8 @@ export default function Adddichvu({
         min: "",
         max: "",
         rate: "",
+        ratevip: "",
+        rateDistributor: "",
         originalRate: "",
         category: "",
       });
@@ -177,8 +213,14 @@ export default function Adddichvu({
     e.preventDefault();
 
     // Kiểm tra giá trị hợp lệ
-    if (formData.min < 0 || formData.max < 0 || formData.rate < 0) {
-      toast.error("Giá trị Min, Max và Giá không được âm!");
+    if (
+      formData.min < 0 ||
+      formData.max < 0 ||
+      formData.rate < 0 ||
+      formData.ratevip < 0 ||
+      formData.rateDistributor < 0
+    ) {
+      toast.error("Giá trị Min, Max, Giá, Giá Đại lý và Giá Nhà Phân Phối không được âm!");
       return;
     }
 
@@ -191,8 +233,9 @@ export default function Adddichvu({
     loadingg("Đang thêm dịch vụ...", true, 9999999);
     try {
       if (selectedServices.length > 0) {
+        const uniqueSelected = dedupeByServiceId(selectedServices);
         await Promise.all(
-          selectedServices.map(async (service) => {
+          uniqueSelected.map(async (service) => {
             const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
             const tigia = partner?.tigia || 1;
             const ptgia = partner?.price_update || 0;
@@ -206,6 +249,8 @@ export default function Adddichvu({
               min: service.min || 0,
               max: service.max || 0,
               rate: finalRate,
+              ratevip: finalRate,
+              rateDistributor: finalRate,
               originalRate: service.rate * tigia,
             };
             await createServer(payload, token);
@@ -228,6 +273,8 @@ export default function Adddichvu({
         min: "",
         max: "",
         rate: "",
+        ratevip: "",
+        rateDistributor: "",
         originalRate: "",
         getid: "off",
         comment: "off",
@@ -678,6 +725,8 @@ export default function Adddichvu({
                           min: "",
                           max: "",
                           rate: "",
+                          ratevip: "",
+                          rateDistributor: "",
                         });
                         setServices([]);
                         setSelectedCategory("");
@@ -777,6 +826,8 @@ export default function Adddichvu({
                                   min: "",
                                   max: "",
                                   rate: "",
+                                  ratevip: "",
+                                  rateDistributor: "",
                                   originalRate: "",
                                   category: "",
                                 });
@@ -797,6 +848,8 @@ export default function Adddichvu({
                                   min: svc.min || "",
                                   max: svc.max || "",
                                   rate: finalRate || "",
+                                  ratevip: finalRate || "",
+                                  rateDistributor: finalRate || "",
                                   originalRate: svc.rate * tigia || "",
                                   category: svc.category || "",
                                 });
@@ -860,12 +913,40 @@ export default function Adddichvu({
                       <div className="col-md-4 mb-3">
                         <label className="form-label fw-bold">
                           <i className="fas fa-dollar-sign me-1 text-success"></i>
-                          Giá (đã tính)
+                          Giá Thành Viên
                         </label>
                         <input
                           type="number"
                           name="rate"
                           value={formData.rate}
+                          onChange={handleChange}
+                          className="form-control form-control-lg"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div className="col-md-4 mb-3">
+                        <label className="form-label fw-bold">
+                          <i className="fas fa-gem me-1 text-warning"></i>
+                          Giá Đại Lý
+                        </label>
+                        <input
+                          type="number"
+                          name="ratevip"
+                          value={formData.ratevip}
+                          onChange={handleChange}
+                          className="form-control form-control-lg"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <label className="form-label fw-bold">
+                          <i className="fas fa-handshake me-1 text-secondary"></i>
+                          Giá Nhà Phân Phối
+                        </label>
+                        <input
+                          type="number"
+                          name="rateDistributor"
+                          value={formData.rateDistributor}
                           onChange={handleChange}
                           className="form-control form-control-lg"
                           placeholder="0.00"
@@ -985,17 +1066,7 @@ export default function Adddichvu({
                                   key={service.service}
                                   className={isSelected ? 'table-success' : ''}
                                   style={{ cursor: 'pointer' }}
-                                  onClick={() => {
-                                    if (isSelected) {
-                                      setSelectedServices((prev) =>
-                                        prev.filter(
-                                          (selected) => selected.service !== service.service
-                                        )
-                                      );
-                                    } else {
-                                      setSelectedServices((prev) => [...prev, service]);
-                                    }
-                                  }}
+                                  onClick={() => toggleServiceSelection(service)}
                                 >
                                   <td>
                                     <div className="form-check">
@@ -1003,18 +1074,7 @@ export default function Adddichvu({
                                         className="form-check-input"
                                         type="checkbox"
                                         checked={isSelected}
-                                        onChange={(e) => {
-                                          e.stopPropagation();
-                                          if (e.target.checked) {
-                                            setSelectedServices((prev) => [...prev, service]);
-                                          } else {
-                                            setSelectedServices((prev) =>
-                                              prev.filter(
-                                                (selected) => selected.service !== service.service
-                                              )
-                                            );
-                                          }
-                                        }}
+                                        onChange={(e) => { e.stopPropagation(); setServiceChecked(service, e.target.checked); }}
                                       />
                                     </div>
                                   </td>
@@ -1082,6 +1142,9 @@ export default function Adddichvu({
                               <th style={{ width: '80px', fontSize: '14px', fontWeight: '600' }}>
                                 <i className="fas fa-arrow-up me-1"></i>Max
                               </th>
+                              <th style={{ width: '100px', fontSize: '14px', fontWeight: '600' }}>
+                                <i className="fas fa-trash-alt me-1"></i>Hành động
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1091,7 +1154,8 @@ export default function Adddichvu({
                               const ptgia = partner?.price_update || 0;
                               const basePrice = (service.rate * tigia).toFixed(4);
                               const finalPrice = Math.ceil(basePrice * 10000 + (basePrice * ptgia) / 100 * 10000) / 10000;
-
+                              const ratevip = finalPrice; // Giá VIP bằng giá cuối cùng
+                              const rateDistributor = finalPrice; // Giá Nhà Phân Phối bằng giá cuối cùng
                               return (
                                 <tr key={index}>
                                   <td>
@@ -1117,7 +1181,11 @@ export default function Adddichvu({
                                     <div style={{ fontSize: '12px', lineHeight: '1.3' }}>
                                       <span style={{ color: '#6c757d', fontWeight: '500' }}>{basePrice}</span>
                                       <span style={{ color: '#17a2b8', fontWeight: '600' }}> + {ptgia}% = </span>
-                                      <span style={{ color: '#28a745', fontWeight: '700' }}>{finalPrice}</span>
+                                      <div>
+                                        <span style={{ color: '#28a745', fontWeight: '700' }}>Thành Viên : {finalPrice}</span><br />
+                                        <span style={{ color: '#ffc107', fontWeight: '700' }}> Đại Lý : {ratevip}</span> <br />
+                                        <span style={{ color: '#6c757d', fontWeight: '700' }}> Nhà Phân Phối : {rateDistributor}</span>
+                                      </div>
                                     </div>
                                   </td>
                                   <td style={{ fontSize: '13px', color: '#495057', fontWeight: '500' }}>
@@ -1125,6 +1193,16 @@ export default function Adddichvu({
                                   </td>
                                   <td style={{ fontSize: '13px', color: '#495057', fontWeight: '500' }}>
                                     {service.max}
+                                  </td>
+                                  <td>
+                                    <button
+                                      type="button"
+                                      className="btn btn-sm btn-outline-danger"
+                                      onClick={() => toggleServiceSelection(service)}
+                                      title="Xóa khỏi danh sách chọn"
+                                    >
+                                      <i className="fas fa-trash"></i>
+                                    </button>
                                   </td>
                                 </tr>
                               );

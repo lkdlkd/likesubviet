@@ -381,123 +381,123 @@ export default function TaikhoanPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="user-content-card">
-            {/* Ô tìm kiếm */}
-            <form onSubmit={handleSearch} className="user-search-form">
-              <div className="row g-3">
-                <div className="col-md-4">
-                  <input
-                    type="text"
-                    className="form-control user-search-input"
-                    placeholder="Tìm kiếm theo username"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+              {/* Ô tìm kiếm */}
+              <form onSubmit={handleSearch} className="user-search-form">
+                <div className="row g-3">
+                  <div className="col-md-4">
+                    <input
+                      type="text"
+                      className="form-control user-search-input"
+                      placeholder="Tìm kiếm theo username"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <button type="submit" className="btn user-search-btn w-100">
+                      <i className="fas fa-search"></i> Tìm kiếm
+                    </button>
+                  </div>
+                  <div className="col-md-2">
+                    <select
+                      className="form-select user-limit-select"
+                      value={limit}
+                      onChange={handleLimitChange}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </div>
                 </div>
-                <div className="col-md-3">
-                  <button type="submit" className="btn user-search-btn w-100">
-                    <i className="fas fa-search"></i> Tìm kiếm
-                  </button>
-                </div>
-                <div className="col-md-2">
-                  <select
-                    className="form-select user-limit-select"
-                    value={limit}
-                    onChange={handleLimitChange}
-                  >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                  </select>
-                </div>
-              </div>
-            </form>
+              </form>
 
-            {/* Bảng danh sách người dùng */}
-            <div className="table-responsive">
-              <Table striped bordered hover>
-                <thead className="table-primary">
-                  <tr>
-                    <th>#</th>
-                    <th>Thao tác</th>
-                    <th>Tài khoản</th>
-                    <th>Số dư</th>
-                    <th>Tổng nạp</th>
-                    <th>Cấp bậc</th>
-                    <th>Thời gian tạo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user, index) => (
-                    <tr key={user._id}>
-                      <td>{(page - 1) * limit + index + 1}</td>
+              {/* Bảng danh sách người dùng */}
+              <div className="table-responsive">
+                <Table striped bordered hover>
+                  <thead className="table-primary">
+                    <tr>
+                      <th>#</th>
+                      <th>Thao tác</th>
+                      <th>Tài khoản</th>
+                      <th>Số dư</th>
+                      <th>Tổng nạp</th>
+                      <th>Cấp bậc</th>
+                      <th>Thời gian tạo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((user, index) => (
+                      <tr key={user._id}>
+                        <td>{(page - 1) * limit + index + 1}</td>
 
 
-                      <td>
-                        <div className="user-action-dropdown dropdown">
-                          <button
-                            className="btn dropdown-toggle"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                          >
-                            Thao tác <i className="las la-angle-down ms-1"></i>
-                          </button>
-                          <ul className="dropdown-menu">
-                            <li>
-                              <button
-                                className="dropdown-item text-success"
-                                onClick={() => setBalanceUser(user)}
-                              >
-                                <i className="fas fa-plus-circle me-2"></i>Cộng tiền
-                              </button>
-                            </li>
-                            <li>
-                              <button
-                                className="dropdown-item text-danger"
-                                onClick={() => setDeductUser(user)}
-                              >
-                                <i className="fas fa-minus-circle me-2"></i>Trừ tiền
-                              </button>
-                            </li>
-                            <li>
-                              <button
-                                className="dropdown-item text-warning"
-                                onClick={() => setEditingUser(user)}
-                              >
-                                <i className="fas fa-edit me-2"></i>Sửa
-                              </button>
-                            </li>
-                            <li>
-                              <button
-                                className="dropdown-item text-danger"
-                                onClick={() => handleDeleteUser(user._id)}
-                              >
-                                <i className="fas fa-trash me-2"></i>Xóa
-                              </button>
-                            </li>
-                          </ul>
-                        </div>
-                      </td>
-                      <td>{user.username}</td>
-                      <td>
-                        <span className="user-balance">
-                          {Math.floor(Number(user.balance) || 0).toLocaleString("en-US")} VNĐ
-                        </span>
-                      </td>
-                      <td>
-                        <span className="user-total-deposit">
-                          {Math.floor(Number(user.tongnap) || 0).toLocaleString("en-US")} VNĐ
-                        </span>
-                      </td>
-                      <td>
-                        <span className="user-rank-badge">
-                          {user.capbac}
-                        </span>
-                      </td>
-                      {/* <td>
+                        <td>
+                          <div className="user-action-dropdown dropdown">
+                            <button
+                              className="btn dropdown-toggle"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                              aria-expanded="false"
+                            >
+                              Thao tác <i className="las la-angle-down ms-1"></i>
+                            </button>
+                            <ul className="dropdown-menu">
+                              <li>
+                                <button
+                                  className="dropdown-item text-success"
+                                  onClick={() => setBalanceUser(user)}
+                                >
+                                  <i className="fas fa-plus-circle me-2"></i>Cộng tiền
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  className="dropdown-item text-danger"
+                                  onClick={() => setDeductUser(user)}
+                                >
+                                  <i className="fas fa-minus-circle me-2"></i>Trừ tiền
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  className="dropdown-item text-warning"
+                                  onClick={() => setEditingUser(user)}
+                                >
+                                  <i className="fas fa-edit me-2"></i>Sửa
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  className="dropdown-item text-danger"
+                                  onClick={() => handleDeleteUser(user._id)}
+                                >
+                                  <i className="fas fa-trash me-2"></i>Xóa
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                        </td>
+                        <td>{user.username}</td>
+                        <td>
+                          <span className="user-balance">
+                            {Math.floor(Number(user.balance) || 0).toLocaleString("en-US")} VNĐ
+                          </span>
+                        </td>
+                        <td>
+                          <span className="user-total-deposit">
+                            {Math.floor(Number(user.tongnap) || 0).toLocaleString("en-US")} VNĐ
+                          </span>
+                        </td>
+                        <td>
+                          <span className="user-rank-badge">
+                            {user.capbac === "member" ? "Thành viên" : user?.capbac === "vip" ? "Đại lý" : user?.capbac === "distributor" ? "Nhà Phân Phối" : "Thành viên"}
+                          </span>
+                        </td>
+                        {/* <td>
                       {user.role === "admin" ? (
                         <span className="badge bg-danger">Quản trị viên</span>
                       ) : (
@@ -511,7 +511,7 @@ export default function TaikhoanPage() {
                         <span className="badge bg-secondary">Không hoạt động</span>
                       )}
                     </td> */}
-                      {/* <td>
+                        {/* <td>
                       <button
                         className="btn btn-info btn-sm me-2"
                         onClick={() => setEditingUser(user)}
@@ -525,42 +525,42 @@ export default function TaikhoanPage() {
                         Xóa
                       </button>
                     </td> */}
-                      <td>
-                        {new Date(user.createdAt).toLocaleString("vi-VN", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
+                        <td>
+                          {new Date(user.createdAt).toLocaleString("vi-VN", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                          })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
 
-            {/* Phân trang */}
-            <div className="user-pagination d-flex justify-content-between align-items-center">
-              <button
-                className="btn"
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page === 1}
-              >
-                <i className="fas fa-chevron-left me-2"></i>Trước
-              </button>
-              <span className="user-pagination-info">
-                Trang {page} / {totalPages}
-              </span>
-              <button
-                className="btn"
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page === totalPages}
-              >
-                Tiếp<i className="fas fa-chevron-right ms-2"></i>
-              </button>
-            </div>
+              {/* Phân trang */}
+              <div className="user-pagination d-flex justify-content-between align-items-center">
+                <button
+                  className="btn"
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page === 1}
+                >
+                  <i className="fas fa-chevron-left me-2"></i>Trước
+                </button>
+                <span className="user-pagination-info">
+                  Trang {page} / {totalPages}
+                </span>
+                <button
+                  className="btn"
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page === totalPages}
+                >
+                  Tiếp<i className="fas fa-chevron-right ms-2"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>

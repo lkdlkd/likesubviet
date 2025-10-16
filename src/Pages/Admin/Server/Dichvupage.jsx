@@ -38,6 +38,10 @@ export default function Dichvupage() {
   const [smmPartners, setSmmPartners] = useState([]);
   const [selectedSmm, setSelectedSmm] = useState("");
   const [updatingPrices, setUpdatingPrices] = useState(false);
+  // Price adjustment percents for member, agent, distributor
+  const [adjustMemberPct, setAdjustMemberPct] = useState(0);
+  const [adjustAgentPct, setAdjustAgentPct] = useState(0);
+  const [adjustDistributorPct, setAdjustDistributorPct] = useState(0);
 
   const token = localStorage.getItem("token") || "";
 
@@ -606,155 +610,258 @@ export default function Dichvupage() {
                   <i className="fas fa-cogs"></i>
                   Điều khiển và cài đặt
                 </div>
-                <div className="d-flex flex-wrap align-items-center justify-content-between">
-                  {/* Left: primary actions */}
-                  <div className="d-flex flex-wrap align-items-center" style={{ gap: "8px" }}>
-                    <button
-                      type="button"
-                      className="btn service-btn-primary"
-                      onClick={() => setShowAddModal(true)}
-                    >
-                      <i className="fas fa-plus me-2"></i>
-                      Thêm dịch vụ
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn service-btn-toggle`}
-                      onClick={() => setQuickAddMode((prev) => !prev)}
-                    >
-                      <i className={`fas ${quickAddMode ? "fa-table" : "fa-th-list"} me-2`}></i>
-                      {quickAddMode ? "Hiển thị theo phân trang" : "Hiển thị theo dịch vụ"}
-                    </button>
-                    {quickAddMode && (
-                      <span className="service-warning-text">
-                        <i className="fas fa-info-circle me-2"></i>
-                        Đang ở chế độ hiển thị theo dịch vụ, vui lòng tắt để sử dụng phân trang.
-                      </span>
-                    )}
-                  </div>
 
-                  {/* Right: SMM select + Update Prices */}
-                  <div className="ms-auto smm-actions d-flex flex-column align-items-end" style={{ gap: "6px" }}>
-                    <div className="d-flex align-items-center flex-wrap" style={{ gap: "8px" }}>
-                      <label className="text-muted fw-semibold me-1" htmlFor="smmSelect" style={{ fontSize: 12 }}>Đối tác SMM:</label>
-                      <select
-                        id="smmSelect"
-                        className="form-select service-form-control"
-                        style={{ minWidth: 220 }}
-                        value={selectedSmm}
-                        onChange={(e) => setSelectedSmm(e.target.value)}
-                      >
-                        <option value="" >Chọn đối tác SMM...</option>
-                        {smmPartners
-                          .slice()
-                          .sort((a, b) => (a?.name || "").localeCompare(b?.name || "", "vi", { sensitivity: "base" }))
-                          .map((p) => (
-                            <option key={p._id} value={p._id}>
-                              {p.name}
-                            </option>
-                          ))}
-                      </select>
+                {/* Primary Actions Section */}
+                <div className="row mb-4">
+                  <div className="col-12">
+                    <div className="d-flex flex-wrap align-items-center" style={{ gap: "12px" }}>
                       <button
                         type="button"
-                        className="btn service-btn-primary btn-sm"
-                        disabled={!selectedSmm || updatingPrices}
-                        onClick={async () => {
-                          if (!selectedSmm) {
-                            Swal.fire("Thông báo", "Vui lòng chọn một đối tác SMM.", "info");
-                            return;
-                          }
-                          const partner = smmPartners.find((p) => String(p._id) === String(selectedSmm));
-                          const confirm = await Swal.fire({
-                            title: "Cập nhật giá dịch vụ?",
-                            html: `Hệ thống sẽ đồng bộ giá dịch vụ với tỷ lệ <b style="font-weight: bold;color: red;">${partner?.price_update}%</b> từ đối tác <b>${partner?.name || selectedSmm}</b>.` +
-                              `<br/>Thao tác có thể mất vài phút, vui lòng không đóng trang.`,
-                            icon: "question",
-                            showCancelButton: true,
-                            confirmButtonText: "Xác nhận",
-                            cancelButtonText: "Hủy",
-                          });
-                          if (!confirm.isConfirmed) return;
-                          try {
-                            setUpdatingPrices(true);
-                            loadingg("Đang cập nhật giá từ SMM...", true, 9999999);
-                            const res = await updatePartnerPrices(selectedSmm, token);
-                            if (res && res.success) {
-                              const partnerName = res.partner?.name || partner?.name || selectedSmm;
-                              const priceUpdate = res.partner?.price_update;
-                              const total = Number(res.totalServices ?? 0);
-                              const updated = Number(res.updated ?? 0);
-                              const details = `
-                                <div style="text-align:left">
-                                 <b>${res.message || "Đã cập nhật giá."}</b>
-                                  <ul style="padding-left:18px; margin:0">
-                                    <li>Đối tác: <b>${partnerName}</b>${priceUpdate !== undefined ? ` (Phần trăm cập nhật: <b>${priceUpdate}%</b>)` : ""}</li>
-                                    <li>Tổng dịch vụ đối tác: <b>${total}</b></li>
-                                    <li>Số dịch vụ được cập nhật: <b>${updated}</b></li>
-                                  </ul>
-                                </div>`;
-                              loadingg("Đang tải...", false);
-                              await Swal.fire({
-                                title: "Cập nhật thành công",
-                                html: details,
-                                icon: "success",
-                                confirmButtonText: "Đóng",
-                              });
-                              fetchServers();
-                            } else {
-                              const updated = Number(res?.updated ?? 0);
-                              loadingg("Đang tải...", false);
-                              await Swal.fire({
-                                title: "Không có thay đổi",
-                                html: `<div style='text-align:left'>
-                                  <b>${res?.message || "Không có dịch vụ nào để cập nhật."}</b>
-                                  <p style='font-size: 18px;'>Số dịch vụ được cập nhật: <b>${updated}</b></p>
-                                </div>`,
-                                icon: "warning",
-                                confirmButtonText: "Đóng",
-                              });
-                            }
-                            loadingg("Đang tải...", false);
-                          } catch (err) {
-                            Swal.fire("Lỗi", "Không thể cập nhật giá. Vui lòng thử lại.", "error");
-                            loadingg("Đang tải...", false);
-                          } finally {
-                            setUpdatingPrices(false);
-                            loadingg("Đang tải...", false);
-                          }
-                        }}
+                        className="btn service-btn-primary"
+                        onClick={() => setShowAddModal(true)}
                       >
-                        {updatingPrices ? (
-                          <>
-                            <i className="fas fa-spinner fa-spin me-2"></i>
-                            Đang cập nhật...
-                          </>
-                        ) : (
-                          <>
-                            <i className="fas fa-sync-alt me-2"></i>
-                            Cập nhật giá
-                          </>
-                        )}
+                        <i className="fas fa-plus me-2"></i>
+                        Thêm dịch vụ
                       </button>
+                      <button
+                        type="button"
+                        className={`btn service-btn-toggle`}
+                        onClick={() => setQuickAddMode((prev) => !prev)}
+                      >
+                        <i className={`fas ${quickAddMode ? "fa-table" : "fa-th-list"} me-2`}></i>
+                        {quickAddMode ? "Hiển thị theo phân trang" : "Hiển thị theo dịch vụ"}
+                      </button>
+                      {quickAddMode && (
+                        <span className="service-warning-text">
+                          <i className="fas fa-info-circle me-2"></i>
+                          Đang ở chế độ hiển thị theo dịch vụ, vui lòng tắt để sử dụng phân trang.
+                        </span>
+                      )}
                     </div>
-                    <div className="smm-note">
-                      <i className="fas fa-info-circle"></i>
-                      {(() => {
-                        const partner = smmPartners.find((p) => String(p._id) === String(selectedSmm));
-                        if (partner) {
-                          return (
-                            <span>
-                              Cập nhật tất cả dịch vụ từ đối tác <b style={{ color: "red" }}>{partner.name}</b> với phần trăm cập nhật giá
-                              <p className="pill">{partner.price_update}%</p>
-                            </span>
-                          );
-                        }
-                        return <span>Chọn đối tác để cập nhật giá. Thao tác có thể mất vài phút.</span>;
-                      })()}
+                  </div>
+                </div>
+
+                {/* SMM Price Update Section */}
+                <div className="row">
+                  <div className="col-12">
+                    <div className="card border-0 shadow-sm bg-light">
+                      <div className="card-header bg-gradient-info text-white py-2">
+                        <h6 className="mb-0">
+                          <i className="fas fa-sync-alt me-2"></i>
+                          Cập nhật giá từ đối tác SMM
+                        </h6>
+                      </div>
+                      <div className="card-body p-3 bg-white">
+                        <div className="row align-items-center">
+                          {/* SMM Partner Selection */}
+                          <div className="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                            <label className="form-label fw-semibold mb-1">Đối tác SMM</label>
+                            <select
+                              id="smmSelect"
+                              className="form-select service-form-control"
+                              value={selectedSmm}
+                              onChange={(e) => setSelectedSmm(e.target.value)}
+                            >
+                              <option value="">Chọn đối tác SMM...</option>
+                              {smmPartners
+                                .slice()
+                                .sort((a, b) => (a?.name || "").localeCompare(b?.name || "", "vi", { sensitivity: "base" }))
+                                .map((p) => (
+                                  <option key={p._id} value={p._id}>
+                                    {p.name}
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+
+                          {/* Percentage Adjustments */}
+                          <div className="col-lg-6 col-md-6 mb-3 mb-lg-0">
+                            <label className="form-label fw-semibold mb-1">Điều chỉnh phần trăm (%)</label>
+                            <div className="row g-2">
+                              <div className="col-lg-4 col-md-4 col-12">
+                                <div className="input-group input-group-sm">
+                                  <input
+                                    type="number"
+                                    className="form-control service-form-control"
+                                    placeholder="0"
+                                    value={adjustMemberPct === 0 ? "" : adjustMemberPct}
+                                    onChange={(e) => setAdjustMemberPct(e.target.value === "" ? 0 : Number(e.target.value))}
+                                    title="% muốn tăng Thành Viên"
+                                  />
+                                  <span className="input-group-text">Thành Viên</span>
+                                </div>
+                                {/* <small className="text-muted">Thành viên</small> */}
+                              </div>
+                              <div className="col-lg-4 col-md-4 col-12">
+                                <div className="input-group input-group-sm">
+                                  <input
+                                    type="number"
+                                    className="form-control service-form-control"
+                                    placeholder="0"
+                                    value={adjustAgentPct === 0 ? "" : adjustAgentPct}
+                                    onChange={(e) => setAdjustAgentPct(e.target.value === "" ? 0 : Number(e.target.value))}
+                                    title="% muốn tăng Đại lý"
+                                  />
+                                  <span className="input-group-text">Đại Lý</span>
+                                </div>
+                                {/* <small className="text-muted">Đại lý</small> */}
+                              </div>
+                              <div className="col-lg-4 col-md-4 col-12">
+                                <div className="input-group input-group-sm">
+                                  <input
+                                    type="number"
+                                    className="form-control service-form-control"
+                                    placeholder="0"
+                                    value={adjustDistributorPct === 0 ? "" : adjustDistributorPct}
+                                    onChange={(e) => setAdjustDistributorPct(e.target.value === "" ? 0 : Number(e.target.value))}
+                                    title="% muốn tăng Nhà phân phối"
+                                  />
+                                  <span className="input-group-text">Nhà Phân Phối</span>
+                                </div>
+                                {/* <small className="text-muted">Nhà phân phối</small> */}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Update Button */}
+                          <div className="col-lg-3 col-md-12">
+                            <label className="form-label fw-semibold mb-1 d-none d-lg-block">&nbsp;</label>
+                            <button
+                              type="button"
+                              className="btn service-btn-primary w-100"
+                              disabled={!selectedSmm || updatingPrices}
+                              onClick={async () => {
+                                if (!selectedSmm) {
+                                  Swal.fire("Thông báo", "Vui lòng chọn một đối tác SMM.", "info");
+                                  return;
+                                }
+                                const partner = smmPartners.find((p) => String(p._id) === String(selectedSmm));
+                                const confirm = await Swal.fire({
+                                  title: "Cập nhật giá dịch vụ?",
+                                  html: `Hệ thống sẽ đồng bộ giá dịch vụ từ đối tác <b>${partner?.name || selectedSmm}</b>.<br/>`
+                                    + `Tăng thêm: <b>${adjustMemberPct}%</b> (Thành viên), <b>${adjustAgentPct}%</b> (Đại lý), <b>${adjustDistributorPct}%</b> (Nhà phân phối).`
+                                    + `<br/>Thao tác có thể mất vài phút, vui lòng không đóng trang.`,
+                                  icon: "question",
+                                  showCancelButton: true,
+                                  confirmButtonText: "Xác nhận",
+                                  cancelButtonText: "Hủy",
+                                });
+                                if (!confirm.isConfirmed) return;
+                                try {
+                                  setUpdatingPrices(true);
+                                  loadingg("Đang cập nhật giá từ SMM...", true, 9999999);
+                                  const payload = {
+                                    adjustMemberPct,
+                                    adjustAgentPct,
+                                    adjustDistributorPct,
+                                  };
+                                  const res = await updatePartnerPrices(payload, selectedSmm, token);
+                                  if (res && res.success) {
+                                    const partnerName = res.partner?.name || partner?.name || selectedSmm;
+                                    const partnerId = res.partner?.id || selectedSmm;
+                                    const applied = res.applied || {};
+                                    const mem = applied.adjustMemberPct ?? adjustMemberPct ?? 0;
+                                    const ag = applied.adjustAgentPct ?? adjustAgentPct ?? 0;
+                                    const dist = applied.adjustDistributorPct ?? adjustDistributorPct ?? 0;
+                                    const total = Number(res.totalServices ?? 0);
+                                    const updatedMember = Number(res.updatedRate ?? 0);
+                                    const updatedVip = Number(res.updatedRateVip ?? 0);
+                                    const updatedDistributor = Number(res.updatedRateDistributor ?? 0);
+                                    const details = `
+                                      <div style="text-align:left">
+                                        <b>${res.message || "Đã cập nhật giá theo phần trăm yêu cầu."}</b>
+                                        <ul style="padding-left:18px; margin:0">
+                                          <li>Đối tác: <b>${partnerName}</b></li>
+                                          <li>Phần trăm áp dụng: Thành viên <b>${mem}%</b>, Đại lý <b>${ag}%</b>, Nhà phân phối <b>${dist}%</b></li>
+                                          <li>Tổng dịch vụ: <b>${total}</b></li>
+                                          <li>Cập nhật Thành viên: <b>${updatedMember}</b></li>
+                                          <li>Cập nhật Đại lý: <b>${updatedVip}</b></li>
+                                          <li>Cập nhật Nhà phân phối: <b>${updatedDistributor}</b></li>
+                                        </ul>
+                                      </div>`;
+                                    loadingg("Đang tải...", false);
+                                    await Swal.fire({
+                                      title: "Cập nhật thành công",
+                                      html: details,
+                                      icon: "success",
+                                      confirmButtonText: "Đóng",
+                                    });
+                                    fetchServers();
+                                  } else {
+                                    const updatedMember = Number(res?.updatedRate ?? 0);
+                                    const updatedVip = Number(res?.updatedRateVip ?? 0);
+                                    const updatedDistributor = Number(res?.updatedRateDistributor ?? 0);
+                                    const totalUpdated = updatedMember + updatedVip + updatedDistributor;
+                                    loadingg("Đang tải...", false);
+                                    await Swal.fire({
+                                      title: "Không có thay đổi",
+                                      html: `<div style='text-align:left'>
+                                        <b>${res?.message || "Không có dịch vụ nào để cập nhật."}</b>
+                                        <ul style='padding-left:18px; margin:0'>
+                                          <li>Cập nhật Thành viên: <b>${updatedMember}</b></li>
+                                          <li>Cập nhật Đại lý: <b>${updatedVip}</b></li>
+                                          <li>Cập nhật Nhà phân phối: <b>${updatedDistributor}</b></li>
+                                          <li>Tổng cập nhật: <b>${totalUpdated}</b></li>
+                                        </ul>
+                                      </div>`,
+                                      icon: "warning",
+                                      confirmButtonText: "Đóng",
+                                    });
+                                  }
+                                  loadingg("Đang tải...", false);
+                                } catch (err) {
+                                  Swal.fire("Lỗi", "Không thể cập nhật giá. Vui lòng thử lại.", "error");
+                                  loadingg("Đang tải...", false);
+                                } finally {
+                                  setUpdatingPrices(false);
+                                  loadingg("Đang tải...", false);
+                                }
+                              }}
+                            >
+                              {updatingPrices ? (
+                                <>
+                                  <i className="fas fa-spinner fa-spin me-2"></i>
+                                  Đang cập nhật...
+                                </>
+                              ) : (
+                                <>
+                                  <i className="fas fa-sync-alt me-2"></i>
+                                  Cập nhật giá
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* SMM Note */}
+                        <div className="row mt-3">
+                          <div className="col-12">
+                            <div className="alert alert-info py-2 mb-0">
+                              <small className="d-flex align-items-center">
+                                <i className="fas fa-info-circle me-2"></i>
+                                {(() => {
+                                  const partner = smmPartners.find((p) => String(p._id) === String(selectedSmm));
+                                  if (partner) {
+                                    return (
+                                      <span>
+                                        Sẽ cập nhật từ đối tác <b className="text-primary">{partner.name}</b> với điều chỉnh:
+                                        <span className="badge bg-primary ms-1">{adjustMemberPct}% Thành Viên</span>
+                                        <span className="badge bg-warning ms-1">{adjustAgentPct}% Đại Lý</span>
+                                        <span className="badge bg-secondary ms-1">{adjustDistributorPct}% Nhà Phân Phối</span>
+                                      </span>
+                                    );
+                                  }
+                                  return <span>Chọn đối tác để cập nhật giá. Thao tác có thể mất vài phút.</span>;
+                                })()}
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-
               <Adddichvu
                 fetchServers={fetchServers}
                 show={showAddModal}
@@ -1054,6 +1161,12 @@ export default function Dichvupage() {
                                                     <li>
                                                       <b>Giá</b> : {serverItem.rate}
                                                     </li>
+                                                    <li>
+                                                      <b>Giá VIP</b> : {serverItem.ratevip}
+                                                    </li>
+                                                    <li>
+                                                      <b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}
+                                                    </li>
                                                   </ul>
                                                 </td>
                                                 <td >
@@ -1257,6 +1370,12 @@ export default function Dichvupage() {
                                 <li>
                                   <b>Giá</b> : {serverItem.rate}
                                 </li>
+                                <li>
+                                  <b>Giá VIP</b> : {serverItem.ratevip}
+                                </li>
+                                <li>
+                                  <b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}
+                                </li>
                               </ul>
                             </td>
                             <td >
@@ -1368,6 +1487,7 @@ export default function Dichvupage() {
           />
         </div>
       </div>
+
     </>
   );
 }

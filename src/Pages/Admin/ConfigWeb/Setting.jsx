@@ -20,7 +20,7 @@ const debounce = (func, wait) => {
 
 // Handle ResizeObserver errors
 window.addEventListener('error', e => {
-    if (e.message === 'ResizeObserver loop completed with undelivered notifications.' || 
+    if (e.message === 'ResizeObserver loop completed with undelivered notifications.' ||
         e.message === 'ResizeObserver loop limit exceeded') {
         const resizeObserverErrDiv = document.getElementById('webpack-dev-server-client-overlay-div');
         const resizeObserverErr = document.getElementById('webpack-dev-server-client-overlay');
@@ -65,11 +65,13 @@ const Setting = () => {
         title: "",
         logo: "",
         favicon: "",
-        linktele : "",
+        linktele: "",
         lienhe: [
             { type: "", value: "", logolienhe: "" },
         ],
         cuphap: "", // Thêm trường cuphap
+        daily: "", // Thêm trường daily (đại lý)
+        distributor: "", // Thêm trường distributor (nhà phân phối)
     });
     const [loading, setLoading] = useState(false);
     const editorRef = useRef(null);
@@ -82,7 +84,9 @@ const Setting = () => {
                 ...config.data,
                 lienhe: Array.isArray(config.data.lienhe) ? config.data.lienhe : [],
                 cuphap: config.data.cuphap || "", // Lấy giá trị cuphap từ API
-                linktele : config.data.linktele || "",
+                linktele: config.data.linktele || "",
+                daily: config.data.daily || "", // Lấy giá trị daily từ API
+                distributor: config.data.distributor || "", // Lấy giá trị distributor từ API
             });
         } catch (error) {
             toast.error("Không thể tải cấu hình website!");
@@ -110,6 +114,8 @@ const Setting = () => {
                 ),
                 cuphap: formData.cuphap, // Gửi trường cuphap lên API
                 linktele: formData.linktele, // Gửi trường linktele lên API
+                daily: formData.daily, // Gửi trường daily lên API
+                distributor: formData.distributor, // Gửi trường distributor lên API
             };
             await updateConfigWeb(sanitizedData, token);
             fetchConfig(); // Tải lại cấu hình sau khi cập nhật
@@ -183,6 +189,58 @@ const Setting = () => {
                                             setFormData((prev) => ({ ...prev, tieude: data }));
                                         }}
                                     />
+                                </div>
+                            </div>
+                            <div className="card border-0 shadow-sm mb-4">
+                                <div className="card-header bg-gradient-warning text-white border-0">
+                                    <h6 className="mb-0 fw-bold text-white">
+                                        <i className="fas fa-level-up-alt me-2"></i>
+                                        Tự động nâng cấp bậc nhập số tiền level đại lý|nhà phân phối
+                                    </h6>
+                                </div>
+                                <div className="card-body">
+                                    <div className="row g-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold">
+                                                <i className="fas fa-user-tie me-1 text-warning"></i>
+                                                Số tiền nâng cấp Đại lý
+                                            </label>
+                                            <div className="input-group">
+                                                <input
+                                                    type="number"
+                                                    className="form-control form-control-lg"
+                                                    value={formData.daily}
+                                                    onChange={(e) => setFormData({ ...formData, daily: e.target.value })}
+                                                    placeholder="0"
+                                                />
+                                                <span className="input-group-text">VNĐ</span>
+                                            </div>
+                                            <small className="text-muted mt-1 d-block">
+                                                <i className="fas fa-info-circle me-1"></i>
+                                                Số tiền tối thiểu để tự động nâng cấp lên bậc Đại lý
+                                            </small>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold">
+                                                <i className="fas fa-industry me-1 text-dark"></i>
+                                                Số tiền nâng cấp Nhà phân phối
+                                            </label>
+                                            <div className="input-group">
+                                                <input
+                                                    type="number"
+                                                    className="form-control form-control-lg"
+                                                    value={formData.distributor}
+                                                    onChange={(e) => setFormData({ ...formData, distributor: e.target.value })}
+                                                    placeholder="0"
+                                                />
+                                                <span className="input-group-text">VNĐ</span>
+                                            </div>
+                                            <small className="text-muted mt-1 d-block">
+                                                <i className="fas fa-info-circle me-1"></i>
+                                                Số tiền tối thiểu để tự động nâng cấp lên bậc Nhà phân phối
+                                            </small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -293,6 +351,9 @@ const Setting = () => {
                                 </div>
                             </div>
 
+                            {/* Tự động nâng cấp bậc */}
+
+
                             {/* Link bot Telegram */}
                             <div className="card border-0 shadow-sm mb-4">
                                 <div className="card-header bg-primary text-white border-0">
@@ -324,9 +385,9 @@ const Setting = () => {
                                             <i className="fas fa-address-book me-2"></i>
                                             Danh sách liên hệ
                                         </h6>
-                                        <button 
-                                            type="button" 
-                                            className="btn btn-light btn-sm fw-bold" 
+                                        <button
+                                            type="button"
+                                            className="btn btn-light btn-sm fw-bold"
                                             onClick={addContact}
                                         >
                                             <i className="fas fa-plus me-1"></i>
@@ -351,9 +412,9 @@ const Setting = () => {
                                                                 <i className="fas fa-contact-card me-2 text-primary"></i>
                                                                 Liên hệ #{index + 1}
                                                             </h6>
-                                                            <button 
-                                                                type="button" 
-                                                                className="btn btn-outline-danger btn-sm" 
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-outline-danger btn-sm"
                                                                 onClick={() => removeContact(index)}
                                                                 title="Xóa liên hệ"
                                                                 style={{ fontSize: '13px' }}
@@ -428,15 +489,15 @@ const Setting = () => {
                                                                                         transform: contact.logolienhe === url ? 'scale(1.05)' : 'scale(1)'
                                                                                     }}
                                                                                 >
-                                                                                    <img 
-                                                                                        src={url} 
-                                                                                        alt={platform} 
-                                                                                        style={{ 
-                                                                                            maxWidth: 32, 
-                                                                                            maxHeight: 32, 
+                                                                                    <img
+                                                                                        src={url}
+                                                                                        alt={platform}
+                                                                                        style={{
+                                                                                            maxWidth: 32,
+                                                                                            maxHeight: 32,
                                                                                             objectFit: 'contain',
                                                                                             filter: contact.logolienhe === url ? 'brightness(1.1)' : 'none'
-                                                                                        }} 
+                                                                                        }}
                                                                                     />
                                                                                 </div>
                                                                             </div>
@@ -446,9 +507,9 @@ const Setting = () => {
                                                                 {contact.logolienhe && (
                                                                     <div className="mt-3 text-center">
                                                                         <div className="d-inline-block p-2 border rounded bg-light">
-                                                                            <img 
-                                                                                src={contact.logolienhe} 
-                                                                                alt="Logo Preview" 
+                                                                            <img
+                                                                                src={contact.logolienhe}
+                                                                                alt="Logo Preview"
                                                                                 style={{ maxWidth: "50px", height: "auto" }}
                                                                                 className="rounded"
                                                                             />
@@ -471,8 +532,8 @@ const Setting = () => {
                             {/* Submit Button */}
                             <div className="card border-0 shadow-sm">
                                 <div className="card-body text-center p-4">
-                                    <button 
-                                        type="submit" 
+                                    <button
+                                        type="submit"
                                         className="btn btn-gradient-primary btn-lg px-5 fw-bold"
                                         disabled={loading}
                                         style={{

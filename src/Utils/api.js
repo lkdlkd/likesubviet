@@ -384,10 +384,14 @@ export const getAllSmmPartners = async (token) => {
   return handleResponse(response);
 };
 
-export const updatePartnerPrices = async (id, token) => {
+export const updatePartnerPrices = async (data, id, token) => {
   const response = await fetch(`${API_BASE}/smm/${id}`, {
-    method: "GET",
-    headers: withNoStore({ Authorization: `Bearer ${token}` }),
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify(data),
     cache: "no-store",
   });
   return handleResponse(response);

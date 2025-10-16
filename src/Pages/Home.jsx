@@ -284,7 +284,7 @@ const Home = () => {
                                 </div>
                             </div>
                             <div className="flex-grow-1 ms-3">
-                                <h4 className="mb-0">{user?.capbac || "Chưa có"}</h4>
+                                <h4 className="mb-0">{user?.capbac === "member" ? "Thành viên" : user?.capbac === "vip" ? "Đại lý" : user?.capbac === "distributor" ? "Nhà Phân Phối" : "Thành viên"}</h4>
                                 <h6 className="mb-0 text-muted">Cấp bậc</h6>
                             </div>
                         </div>

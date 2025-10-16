@@ -15,6 +15,8 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     min: "",
     max: "",
     rate: "",
+    ratevip: "",
+    rateDistributor: "",
     getid: "off",
     comment: "off",
     reaction: "off",
@@ -48,7 +50,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     setFormData({
       ...formData,
       [name]:
-        name === "min" || name === "max" || name === "rate"
+        name === "min" || name === "max" || name === "rate" || name === "ratevip" || name === "rateDistributor"
           ? value === ""
             ? ""
             : Number(value)
@@ -60,8 +62,8 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     e.preventDefault();
 
     // Kiểm tra giá trị hợp lệ
-    if (formData.min < 0 || formData.max < 0 || formData.rate < 0) {
-      toast.error("Giá trị Min, Max và Giá không được âm!");
+    if (formData.min < 0 || formData.max < 0 || formData.rate < 0 || formData.ratevip < 0 || formData.rateDistributor < 0) {
+      toast.error("Giá trị Min, Max, Giá, Giá VIP và Giá Đại lý không được âm!");
       return;
     }
 
@@ -78,6 +80,8 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       min: formData.min || 0,
       max: formData.max || 0,
       rate: formData.rate || 0,
+      ratevip: formData.ratevip || 0,
+      rateDistributor: formData.rateDistributor || 0,
       getid: formData.getid,
       comment: formData.comment,
       reaction: formData.reaction,
@@ -102,7 +106,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
   };
 
   return (
-    <Modal show={show} onHide={onClose}  backdrop="static" keyboard={false} centered size="xl" className="modern-modal">
+    <Modal show={show} onHide={onClose} backdrop="static" keyboard={false} centered size="xl" className="modern-modal">
       <Modal.Header closeButton className="bg-gradient-warning text-white border-0">
         <Modal.Title className="d-flex align-items-center">
           <i className="fas fa-edit me-2"></i>
@@ -293,7 +297,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                     />
                   </div>
                 </div>
-                
+
                 {/* Limits and Pricing */}
                 <div className="row g-3">
                   <div className="col-md-3">
@@ -329,7 +333,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                   <div className="col-md-3">
                     <label className="form-label fw-bold">
                       <i className="fas fa-dollar-sign me-1 text-success"></i>
-                      Giá <span className="text-danger">*</span>
+                      Giá Thành Viên <span className="text-danger">*</span>
                     </label>
                     <input
                       type="number"
@@ -339,6 +343,34 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       className="form-control form-control-lg"
                       placeholder="0.00"
                       required
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-gem me-1 text-warning"></i>
+                      Giá Đại Lý
+                    </label>
+                    <input
+                      type="number"
+                      name="ratevip"
+                      value={formData.ratevip}
+                      onChange={handleChange}
+                      className="form-control form-control-lg"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-handshake me-1 text-secondary"></i>
+                      Giá Nhà Phân Phối
+                    </label>
+                    <input
+                      type="number"
+                      name="rateDistributor"
+                      value={formData.rateDistributor}
+                      onChange={handleChange}
+                      className="form-control form-control-lg"
+                      placeholder="0.00"
                     />
                   </div>
                   <div className="col-md-3">
@@ -398,16 +430,16 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       </Modal.Body>
       <Modal.Footer className="border-0 bg-light px-4 py-3">
         <div className="d-flex gap-2 w-100 justify-content-end">
-          <Button 
-            variant="outline-secondary" 
+          <Button
+            variant="outline-secondary"
             onClick={onClose}
             className="px-4 fw-bold"
           >
             <i className="fas fa-times me-2"></i>
             Hủy
           </Button>
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             onClick={handleSubmit}
             className="px-4 fw-bold"
           >

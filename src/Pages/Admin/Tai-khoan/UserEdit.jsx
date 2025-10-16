@@ -419,13 +419,15 @@ function UserEdit({ user, token, onClose, fetchUsers, onUserUpdated }) {
                   </label>
                   <div className="input-icon-wrapper">
                     <i className="fas fa-medal input-icon"></i>
-                    <input
-                      type="text"
-                      className="user-form-control input-with-icon"
+                    <select
                       value={capbac}
                       onChange={(e) => setCapbac(e.target.value)}
-                      placeholder="Nhập cấp bậc"
-                    />
+                      className="user-form-control input-with-icon"
+                    >
+                      <option value="member">Thành Viên</option>
+                      <option value="vip">Đại lý</option>
+                      <option value="distributor">Nhà phân phối</option>
+                    </select>
                   </div>
                 </div>
               </div>

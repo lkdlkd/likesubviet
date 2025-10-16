@@ -198,7 +198,7 @@ export default function Header({ user }) {
                                                         </span>
                                                     </h6>
                                                     <span className="badge bg-primary">
-                                                        {user?.capbac || ""}
+                                                        {user?.capbac === "member" ? "Thành viên" : user?.capbac === "vip" ? "Đại lý" : user?.capbac === "distributor" ? "Nhà Phân Phối" : "Thành viên"}
                                                     </span>
                                                 </div>
                                             </div>
