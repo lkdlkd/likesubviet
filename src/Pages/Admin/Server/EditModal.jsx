@@ -24,11 +24,13 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     refil: "off",
     cancel: "off",
     isActive: true,
+    ischeck: false,
     thutu: "",
   });
 
   const [form, setForm] = useState({
     type: "",
+    Magoi: "",
     category: "",
     originalRate: "",
     DomainSmm: "",
@@ -90,6 +92,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       cancel: formData.cancel,
       isActive: formData.isActive,
       thutu: formData.thutu,
+      ischeck: formData.ischeck,
     };
 
     loadingg("Đang cập nhật dịch vụ...", true, 99999999);
@@ -204,6 +207,19 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                 <div className="row g-3 mb-3">
                   <div className="col-md-6">
                     <label className="form-label fw-bold">
+                      <i className="fas fa-hashtag me-1 text-info"></i>
+                      Mã gói<span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="serviceId"
+                      value={form.Magoi}
+                      className="form-control form-control-lg"
+                      disabled
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
                       <i className="fas fa-sort-numeric-up me-1 text-warning"></i>
                       Thứ tự
                     </label>
@@ -216,7 +232,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       placeholder="Nhập thứ tự hiển thị"
                     />
                   </div>
-                  <div className="col-md-6">
+                  {/* <div className="col-md-6">
                     <label className="form-label fw-bold">
                       <i className="fas fa-toggle-on me-1 text-primary"></i>
                       Trạng thái
@@ -235,7 +251,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       <option value="true">🟢 Hoạt động</option>
                       <option value="false">🔴 Đóng</option>
                     </select>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="row g-3 mb-3">
                   <div className="col-md-12">
@@ -399,6 +415,52 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                 </h6>
               </div>
               <div className="card-body">
+                <div className="row g-3 mb-3">
+
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-toggle-on me-1 text-primary"></i>
+                      Trạng thái
+                    </label>
+                    <select
+                      name="isActive"
+                      value={formData.isActive ? "true" : "false"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          isActive: e.target.value === "true",
+                        })
+                      }
+                      className="form-select form-select-lg"
+                    >
+                      <option value="true">🟢 Hoạt động</option>
+                      <option value="false">🔴 Đóng</option>
+                    </select>
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-money-bill-wave me-1 text-primary"></i>
+                      Mua không check giá (<b style={{fontSize : 15, color: 'red'}}> có thể bán lỗ </b>)
+                    </label>
+                    <select
+                      name="ischeck"
+                      value={formData.ischeck ? "true" : "false"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          ischeck: e.target.value === "true",
+                        })
+                      }
+                      className="form-select form-select-lg"
+                    >
+                      <option value="true">🟢 Bật</option>
+                      <option value="false">🔴 Tắt</option>
+                    </select>
+                  </div>
+
+                </div>
+
                 <div className="row g-3">
                   {[
                     { key: 'getid', label: 'Get UID', icon: 'fas fa-user-tag', color: 'text-primary' },
