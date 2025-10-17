@@ -197,7 +197,11 @@ export default function Header({ user }) {
                                                             đ
                                                         </span>
                                                     </h6>
-                                                    <span className="badge bg-primary">
+                                                    <span className={`badge ${
+                                                        user?.capbac === "member" ? "bg-secondary" : 
+                                                        user?.capbac === "vip" ? "bg-warning" : 
+                                                        user?.capbac === "distributor" ? "bg-danger" : "bg-secondary"
+                                                    }`}>
                                                         {user?.capbac === "member" ? "Thành viên" : user?.capbac === "vip" ? "Đại lý" : user?.capbac === "distributor" ? "Nhà Phân Phối" : "Thành viên"}
                                                     </span>
                                                 </div>

@@ -297,7 +297,6 @@ export default function TaikhoanPage() {
           }
           
           .user-rank-badge {
-            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
             color: white;
             padding: 0.3rem 0.8rem;
             border-radius: 20px;
@@ -305,6 +304,31 @@ export default function TaikhoanPage() {
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+          }
+          
+          .user-rank-badge.rank-member {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border-color: #6c757d;
+          }
+          
+          .user-rank-badge.rank-vip {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            border-color: #ffc107;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+          }
+          
+          .user-rank-badge.rank-distributor {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border-color: #dc3545;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+          }
+          
+          .user-rank-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
           }
           
           .user-pagination {
@@ -493,7 +517,11 @@ export default function TaikhoanPage() {
                           </span>
                         </td>
                         <td>
-                          <span className="user-rank-badge">
+                          <span className={`user-rank-badge ${
+                            user.capbac === "member" ? "rank-member" : 
+                            user?.capbac === "vip" ? "rank-vip" : 
+                            user?.capbac === "distributor" ? "rank-distributor" : "rank-member"
+                          }`}>
                             {user.capbac === "member" ? "Thành viên" : user?.capbac === "vip" ? "Đại lý" : user?.capbac === "distributor" ? "Nhà Phân Phối" : "Thành viên"}
                           </span>
                         </td>
