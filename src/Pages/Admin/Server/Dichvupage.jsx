@@ -1162,7 +1162,7 @@ export default function Dichvupage() {
                                                       <b>Giá</b> : {serverItem.rate}
                                                     </li>
                                                     <li>
-                                                      <b>Giá VIP</b> : {serverItem.ratevip}
+                                                      <b>Giá Đại Lý</b> : {serverItem.ratevip}
                                                     </li>
                                                     <li>
                                                       <b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}
@@ -1378,7 +1378,7 @@ export default function Dichvupage() {
                                   <b>Giá</b> : {serverItem.rate}
                                 </li>
                                 <li>
-                                  <b>Giá VIP</b> : {serverItem.ratevip}
+                                  <b>Giá Đại Lý</b> : {serverItem.ratevip}
                                 </li>
                                 <li>
                                   <b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}

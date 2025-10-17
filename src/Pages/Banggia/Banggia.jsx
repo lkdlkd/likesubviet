@@ -416,7 +416,7 @@ const Banggia = () => {
                                                                                     <th style={{ minWidth: "180px", width: "30%" }}>Tên máy chủ</th>
                                                                                     <th style={{ minWidth: "80px", width: "15%" }}>Thành Viên</th>
                                                                                     <th style={{ minWidth: "80px", width: "15%" }}>Đại Lý</th>
-                                                                                    <th style={{ minWidth: "80px", width: "15%" }}>NPP</th>
+                                                                                    <th style={{ minWidth: "80px", width: "15%" }}>Nhà Phân Phối</th>
                                                                                     <th style={{ minWidth: "70px", width: "10%" }}>Tốc độ</th>
                                                                                     <th style={{ minWidth: "60px", width: "7%" }}>Mua</th>
                                                                                 </tr>
