@@ -412,13 +412,13 @@ const Banggia = () => {
                                                                         <Table bordered hover className="mb-0 table-centered table-sm">
                                                                             <thead>
                                                                                 <tr>
-                                                                                    <th style={{minWidth: "50px", width: "8%"}}>Id</th>
-                                                                                    <th style={{minWidth: "180px", width: "30%"}}>Tên máy chủ</th>
-                                                                                    <th style={{minWidth: "80px", width: "15%"}}>Thành Viên</th>
-                                                                                    <th style={{minWidth: "80px", width: "15%"}}>Đại Lý</th>
-                                                                                    <th style={{minWidth: "80px", width: "15%"}}>NPP</th>
-                                                                                    <th style={{minWidth: "70px", width: "10%"}}>Tốc độ</th>
-                                                                                    <th style={{minWidth: "60px", width: "7%"}}>Mua</th>
+                                                                                    <th style={{ minWidth: "50px", width: "8%" }}>Id</th>
+                                                                                    <th style={{ minWidth: "180px", width: "30%" }}>Tên máy chủ</th>
+                                                                                    <th style={{ minWidth: "80px", width: "15%" }}>Thành Viên</th>
+                                                                                    <th style={{ minWidth: "80px", width: "15%" }}>Đại Lý</th>
+                                                                                    <th style={{ minWidth: "80px", width: "15%" }}>NPP</th>
+                                                                                    <th style={{ minWidth: "70px", width: "10%" }}>Tốc độ</th>
+                                                                                    <th style={{ minWidth: "60px", width: "7%" }}>Mua</th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
@@ -432,21 +432,31 @@ const Banggia = () => {
                                                                                             overflowWrap: "break-word",
                                                                                             fontSize: "0.85rem"
                                                                                         }}>{server.maychu} {server.name}</td>
-                                                                                        <td className="text-end" style={{fontSize: "0.85rem"}}>
-                                                                                            {Number(server.rate).toLocaleString("vi-VN")}đ
+                                                                                        <td className="text-end" style={{ fontSize: "0.85rem" }}>
+                                                                                            {(() => {
+                                                                                                const rate = String(server.rate);
+                                                                                                if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
+                                                                                                if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
+                                                                                                return rate; // giữ nguyên nếu chỉ là số thường
+                                                                                            })()}đ
                                                                                         </td>
-                                                                                        <td className="text-end" style={{fontSize: "0.85rem"}}>
-                                                                                            {Number(server.ratevip).toLocaleString("vi-VN")}đ
+                                                                                        <td className="text-end" style={{ fontSize: "0.85rem" }}>
+                                                                                            {(() => {
+                                                                                                const rate = String(server.rate);
+                                                                                                if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
+                                                                                                if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
+                                                                                                return rate; // giữ nguyên nếu chỉ là số thường
+                                                                                            })()}đ
                                                                                         </td>
-                                                                                        <td className="text-end" style={{fontSize: "0.85rem"}}>
+                                                                                        <td className="text-end" style={{ fontSize: "0.85rem" }}>
                                                                                             {server.rateDistributor}đ
                                                                                         </td>
-                                                                                        <td className="text-center" style={{fontSize: "0.8rem"}}>{server.tocdodukien}</td>
+                                                                                        <td className="text-center" style={{ fontSize: "0.8rem" }}>{server.tocdodukien}</td>
                                                                                         <td className="text-center">
                                                                                             <Link
                                                                                                 className="btn btn-sm btn-success"
                                                                                                 to={`/order/${String(server.path).toLowerCase()}`}
-                                                                                                style={{fontSize: "0.75rem", padding: "0.25rem 0.5rem"}}
+                                                                                                style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}
                                                                                             >
                                                                                                 Mua
                                                                                             </Link>
