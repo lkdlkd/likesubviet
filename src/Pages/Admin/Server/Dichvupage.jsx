@@ -1159,13 +1159,13 @@ export default function Dichvupage() {
                                                       <b>Giá gốc</b> : {serverItem.originalRate}
                                                     </li>
                                                     <li>
-                                                      <b>Giá</b> : {serverItem.rate}
+                                                      <b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}
                                                     </li>
                                                     <li>
                                                       <b>Giá Đại Lý</b> : {serverItem.ratevip}
                                                     </li>
                                                     <li>
-                                                      <b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}
+                                                      <b>Giá Thành Viên</b> : {serverItem.rate}
                                                     </li>
                                                   </ul>
                                                 </td>
@@ -1375,13 +1375,13 @@ export default function Dichvupage() {
                                   <b>Giá gốc</b> : {serverItem.originalRate}
                                 </li>
                                 <li>
-                                  <b>Giá</b> : {serverItem.rate}
+                                  <b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}
                                 </li>
                                 <li>
                                   <b>Giá Đại Lý</b> : {serverItem.ratevip}
                                 </li>
                                 <li>
-                                  <b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}
+                                  <b>Giá Thành Viên</b> : {serverItem.rate}
                                 </li>
                               </ul>
                             </td>
