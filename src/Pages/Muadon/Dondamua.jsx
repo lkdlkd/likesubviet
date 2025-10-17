@@ -341,7 +341,7 @@ const Dondamua = ({ category, showcmt }) => {
                                             Số đơn hàng/trang:
                                         </label>
                                         <select
-                                            className="order-form-control"
+                                            className="select form-control order-form-control"
                                             value={limit}
                                             onChange={handleLimitChange}
                                         >
