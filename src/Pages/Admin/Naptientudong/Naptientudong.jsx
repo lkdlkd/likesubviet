@@ -379,6 +379,7 @@ export default function Naptientudong() {
                                             <tr>
                                                 <th>#</th>
                                                 <th>Ngân hàng</th>
+                                                <th>Số tài khoản</th>
                                                 <th>Username</th>
                                                 <th>Mã giao dịch</th>
                                                 <th>Số tiền</th>
@@ -393,6 +394,7 @@ export default function Naptientudong() {
                                                     <tr key={transaction._id || index}>
                                                         <td>{(page - 1) * limit + index + 1}</td>
                                                         <td>{transaction.typeBank || "N/A"}</td>
+                                                        <td>{transaction.accountNumber || "N/A"}</td>
                                                         <td>{transaction.username || "N/A"}</td>
                                                         <td>{transaction.transactionID || "N/A"}</td>
                                                         <td>{transaction.amount || "N/A"}</td>
