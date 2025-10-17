@@ -404,9 +404,14 @@ export default function Naptientudong() {
                                                             )}
                                                         </td>
                                                         <td>
-                                                            {moment(transaction.transactionDate).format(
-                                                                "YYYY-MM-DD HH:mm:ss"
-                                                            ) || "N/A"}
+                                                            {new Date(transaction.createdAt).toLocaleString("vi-VN", {
+                                                                day: "2-digit",
+                                                                month: "2-digit",
+                                                                year: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                                second: "2-digit",
+                                                            })}
                                                         </td>
                                                         <td>{transaction.description || "N/A"}</td>
                                                     </tr>
