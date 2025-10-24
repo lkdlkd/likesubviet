@@ -65,8 +65,11 @@
   font-weight: bold !important;
 
 }
-
-
+ @media (max-width: 1200px) {
+  .kd {
+    margin-top: 4px;
+  } 
+}
 #preloader {
   background-color: #fff;
   padding: 0;

@@ -587,7 +587,7 @@ export default function Order() {
                                                                     return (
                                                                         <>
                                                                             {isTopSeller ? (
-                                                                                <span className="badge  bg-opacity-10 text-dark border border-success ms-1"
+                                                                                <span className="badge kd  bg-opacity-10 text-dark border border-success ms-1"
                                                                                     style={{
                                                                                         borderRadius: 12,
                                                                                         fontSize: 12,
@@ -610,7 +610,7 @@ export default function Order() {
                                                                                 //     🔥 Bán chạy nhất: {server.luotban.toLocaleString()}
                                                                                 // </span>
                                                                             ) : (
-                                                                                <span className="badge  bg-opacity-10 text-dark border border-success ms-1"
+                                                                                <span className="badge kd  bg-opacity-10 text-dark border border-success ms-1"
                                                                                     style={{
                                                                                         borderRadius: 12,
                                                                                         fontSize: 12,
