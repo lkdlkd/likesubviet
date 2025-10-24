@@ -40,6 +40,7 @@ export default function Order() {
     React.useEffect(() => {
         isStoppedRef.current = isStopped;
     }, [isStopped]);
+    const [category, setCategory] = useState("");
 
     // Thêm state cho danh sách link và link nhập mới
     const [multiLinkList, setMultiLinkList] = useState([]);
@@ -63,6 +64,7 @@ export default function Order() {
                 const response = await getServerByTypeAndCategory(path, token);
                 setServers(response.data || []); // Giả sử API trả về `data`
                 setModalShow(response.notes || ""); // Lưu ý: `modal_show` cần được trả về từ API
+                setCategory(response.category || ""); // Lưu category từ response
             } catch (error) {
 
                 // Swal.fire({
@@ -384,7 +386,7 @@ export default function Order() {
         return ketQua;
     };
     const tien = useMemo(() => convertNumberToWords(Number(totalCost).toLocaleString("en-US")), [totalCost]);
-    const category = servers.length > 0 ? servers[0].category : path;
+
 
 
     const shortenSocialLink = (url) => {
