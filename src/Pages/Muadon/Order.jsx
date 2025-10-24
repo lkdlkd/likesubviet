@@ -559,8 +559,11 @@ export default function Order() {
                                                             />
                                                             <label className="form-check-label" htmlFor={`server-${server.Magoi}`}>
                                                                 <strong className="badge bg-info">[{server.Magoi}] </strong>
-                                                                {/* <span className="badge bg-success ">{server.maychu}</span> */}
-                                                                <span className="font-semibold"> - {server.maychu} {server.name} </span>
+                                                                {" - "}
+                                                                {server.maychu !== "" && server.maychu !== " " && server.maychu !== "   " && (
+                                                                <span className="badge bg-success ">{server.maychu} </span>
+                                                                )}
+                                                                <span className="font-semibold " style={{ padding: "0.2rem 0rem"}}> {server.name} </span>
                                                                 <span className="badge bg-primary ">
                                                                     {/* {Number(server.rate).toLocaleString("en-US")}đ */}
                                                                     {/* {server.rate}đ */}
