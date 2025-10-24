@@ -69,6 +69,7 @@ const Setting = () => {
         lienhe: [
             { type: "", value: "", logolienhe: "" },
         ],
+        viewluotban : "",
         cuphap: "", // Thêm trường cuphap
         daily: "", // Thêm trường daily (đại lý)
         distributor: "", // Thêm trường distributor (nhà phân phối)
@@ -87,6 +88,7 @@ const Setting = () => {
                 linktele: config.data.linktele || "",
                 daily: config.data.daily || "", // Lấy giá trị daily từ API
                 distributor: config.data.distributor || "", // Lấy giá trị distributor từ API
+                viewluotban: config.data.viewluotban || "", // Lấy giá trị viewluotban từ API
             });
         } catch (error) {
             toast.error("Không thể tải cấu hình website!");
@@ -116,6 +118,7 @@ const Setting = () => {
                 linktele: formData.linktele, // Gửi trường linktele lên API
                 daily: formData.daily, // Gửi trường daily lên API
                 distributor: formData.distributor, // Gửi trường distributor lên API
+                viewluotban: formData.viewluotban, // Gửi trường viewluotban lên API
             };
             await updateConfigWeb(sanitizedData, token);
             fetchConfig(); // Tải lại cấu hình sau khi cập nhật
@@ -351,6 +354,29 @@ const Setting = () => {
                                 </div>
                             </div>
 
+                            {/*View lượt bán*/}
+                            <div className="card border-0 shadow-sm mb-4">
+                                <div className="card-header bg-secondary text-white border-0">
+                                    <h6 className="mb-0 fw-bold text-white">
+                                        <i className="fas fa-code me-2"></i>
+                                        Hiển thị lượt bán
+                                    </h6>
+                                </div>
+                                <div className="card-body">
+                                    <label className="form-label fw-bold">
+                                        <i className="fas fa-terminal me-1 text-secondary"></i>
+                                        Hiển thị lượt bán của từng server
+                                    </label>
+                                    <select
+                                        className="form-select form-select-lg"
+                                        value={formData.viewluotban}
+                                        onChange={(e) => setFormData({ ...formData, viewluotban: e.target.value })}
+                                    >
+                                        <option value="false">Ẩn</option>
+                                        <option value="true">Hiển thị</option>
+                                    </select>
+                                </div>
+                            </div>
                             {/* Tự động nâng cấp bậc */}
 
 

@@ -578,6 +578,121 @@ export default function Order() {
                                                                 {server.cancel === "on" && (
                                                                     <span className="badge bg-warning ms-1">Có hủy hoàn</span>
                                                                 )}
+
+                                                                {server.luotban !== undefined && server.luotban !== null && (() => {
+                                                                    // Tìm lượt bán cao nhất trong tất cả servers
+                                                                    const maxLuotban = Math.max(...servers.map(s => s.luotban || 0));
+                                                                    const isTopSeller = server.luotban === maxLuotban;
+
+                                                                    return (
+                                                                        <>
+                                                                            {isTopSeller ? (
+                                                                                <span className="badge  bg-opacity-10 text-dark border border-success ms-1"
+                                                                                    style={{
+                                                                                        borderRadius: 12,
+                                                                                        fontSize: 12,
+                                                                                        fontWeight: "600",
+                                                                                        padding: "4px 10px"
+                                                                                    }}>
+                                                                                    <i className="bi bi-check-circle-fill me-1"></i>
+                                                                                   🔥 Đã bán: {server.luotban.toLocaleString()}
+                                                                                </span>
+                                                                                // <span className="badge ms-1"
+                                                                                //     style={{
+                                                                                //         background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                                                                                //         color: "#fff",
+                                                                                //         borderRadius: 15,
+                                                                                //         fontSize: 12,
+                                                                                //         fontWeight: "600",
+                                                                                //         padding: "5px 12px",
+                                                                                //         boxShadow: "0 2px 8px rgba(245, 87, 108, 0.4)"
+                                                                                //     }}>
+                                                                                //     🔥 Bán chạy nhất: {server.luotban.toLocaleString()}
+                                                                                // </span>
+                                                                            ) : (
+                                                                                <span className="badge  bg-opacity-10 text-dark border border-success ms-1"
+                                                                                    style={{
+                                                                                        borderRadius: 12,
+                                                                                        fontSize: 12,
+                                                                                        fontWeight: "600",
+                                                                                        padding: "4px 10px"
+                                                                                    }}>
+                                                                                    <i className="bi bi-check-circle-fill me-1"></i>
+                                                                                    Đã bán: {server.luotban.toLocaleString()}
+                                                                                </span>
+                                                                            )}
+                                                                        </>
+                                                                    );
+                                                                })()}
+
+
+
+
+
+                                                                {/* {server.luotban !== undefined && server.luotban !== null && (
+                                                                    <span className="badge ms-1"
+                                                                        style={{
+                                                                            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                                                            color: "#fff",
+                                                                            borderRadius: 15,
+                                                                            fontSize: 12,
+                                                                            fontWeight: "600",
+                                                                            padding: "5px 12px",
+                                                                            boxShadow: "0 2px 8px rgba(102, 126, 234, 0.3)"
+                                                                        }}>
+                                                                        🔥 {server.luotban.toLocaleString()} đã bán
+                                                                    </span>
+                                                                )}
+                                                                {server.luotban !== undefined && server.luotban !== null && (
+                                                                    <span className="badge bg-success bg-opacity-10 text-success border border-success ms-1"
+                                                                        style={{
+                                                                            borderRadius: 12,
+                                                                            fontSize: 12,
+                                                                            fontWeight: "600",
+                                                                            padding: "4px 10px"
+                                                                        }}>
+                                                                        <i className="bi bi-check-circle-fill me-1"></i>
+                                                                        Đã bán: {server.luotban.toLocaleString()}
+                                                                    </span>
+                                                                )}
+                                                                {server.luotban !== undefined && server.luotban !== null && (
+                                                                    <span className="badge ms-1"
+                                                                        style={{
+                                                                            background: "#f8f9fa",
+                                                                            color: "#495057",
+                                                                            border: "1px solid #dee2e6",
+                                                                            borderRadius: 50,
+                                                                            fontSize: 11,
+                                                                            fontWeight: "600",
+                                                                            padding: "5px 12px",
+                                                                            display: "inline-flex",
+                                                                            alignItems: "center",
+                                                                            gap: "6px"
+                                                                        }}>
+                                                                        <span style={{
+                                                                            width: 6,
+                                                                            height: 6,
+                                                                            borderRadius: "50%",
+                                                                            background: "#28a745",
+                                                                            display: "inline-block"
+                                                                        }}></span>
+                                                                        {server.luotban.toLocaleString()} đã bán
+                                                                    </span>
+                                                                )}
+                                                                {server.luotban !== undefined && server.luotban !== null && (
+                                                                    <span className="badge ms-1"
+                                                                        style={{
+                                                                            background: "#fff",
+                                                                            color: "#ee4d2d",
+                                                                            border: "1px solid #ee4d2d",
+                                                                            borderRadius: 2,
+                                                                            fontSize: 11,
+                                                                            fontWeight: "600",
+                                                                            padding: "3px 8px"
+                                                                        }}>
+                                                                        Đã bán {server.luotban.toLocaleString('vi-VN')}
+                                                                    </span>
+                                                                )} */}
                                                                 {/* <span className="custom-control-label">
                                                         {" "}
                                                         - ID server - {server.Magoi}
