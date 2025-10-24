@@ -626,9 +626,6 @@ export default function Order() {
                                                                 })()}
 
 
-
-
-
                                                                 {/* {server.luotban !== undefined && server.luotban !== null && (
                                                                     <span className="badge ms-1"
                                                                         style={{
