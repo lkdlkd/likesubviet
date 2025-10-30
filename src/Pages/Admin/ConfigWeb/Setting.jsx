@@ -69,7 +69,7 @@ const Setting = () => {
         lienhe: [
             { type: "", value: "", logolienhe: "" },
         ],
-        viewluotban : "",
+        viewluotban: false,
         cuphap: "", // Thêm trường cuphap
         daily: "", // Thêm trường daily (đại lý)
         distributor: "", // Thêm trường distributor (nhà phân phối)
@@ -88,7 +88,7 @@ const Setting = () => {
                 linktele: config.data.linktele || "",
                 daily: config.data.daily || "", // Lấy giá trị daily từ API
                 distributor: config.data.distributor || "", // Lấy giá trị distributor từ API
-                viewluotban: config.data.viewluotban || "", // Lấy giá trị viewluotban từ API
+                viewluotban: config.data.viewluotban || false, // Lấy giá trị viewluotban từ API
             });
         } catch (error) {
             toast.error("Không thể tải cấu hình website!");
@@ -138,6 +138,10 @@ const Setting = () => {
     };
 
     const addContact = () => {
+        if (formData.lienhe.length >= 10) {
+            toast.warning("Chỉ có thể thêm tối đa 10 liên hệ!");
+            return;
+        }
         setFormData((prev) => ({
             ...prev,
             lienhe: [...prev.lienhe, { type: "", value: "", logolienhe: "" }],
@@ -369,8 +373,8 @@ const Setting = () => {
                                     </label>
                                     <select
                                         className="form-select form-select-lg"
-                                        value={formData.viewluotban}
-                                        onChange={(e) => setFormData({ ...formData, viewluotban: e.target.value })}
+                                        value={formData.viewluotban ? "true" : "false"}
+                                        onChange={(e) => setFormData({ ...formData, viewluotban: e.target.value === "true" })}
                                     >
                                         <option value="false">Ẩn</option>
                                         <option value="true">Hiển thị</option>
