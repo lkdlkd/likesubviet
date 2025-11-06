@@ -23,6 +23,8 @@ export default function Adddoitac({
     url_api: ALLOWED_API_URL || "",
     api_token: "",
     price_update: "",
+    price_updateVip: "",
+    price_updateDistributor: "",
     tigia: "",
     phihoan: 1000, // Mặc định là 1000
     minbalance: 100000,
@@ -49,6 +51,8 @@ export default function Adddoitac({
         url_api: ALLOWED_API_URL || "",
         api_token: "",
         price_update: "",
+        price_updateVip: "",
+        price_updateDistributor: "",
         tigia: "",
         phihoan: 1000, // Mặc định là 1000
         autohoan: "on",
@@ -190,12 +194,40 @@ export default function Adddoitac({
                     <div className="col-6 mb-3">
                       <label className="form-label fw-bold text-dark">
                         <i className="fas fa-dollar-sign me-1 text-success"></i>
-                        Cập Nhật Giá (%):
+                        Cập Nhật Giá Thành Viên (%):
                       </label>
                       <input
                         type="text"
                         name="price_update"
                         value={formData.price_update}
+                        onChange={handleChange}
+                        placeholder="10"
+                        className="form-control border-2"
+                      />
+                    </div>
+                    <div className="col-6 mb-3">
+                      <label className="form-label fw-bold text-dark">
+                        <i className="fas fa-dollar-sign me-1 text-success"></i>
+                        Cập Nhật Giá Đại Lý (%):
+                      </label>
+                      <input
+                        type="text"
+                        name="price_updateVip"
+                        value={formData.price_updateVip}
+                        onChange={handleChange}
+                        placeholder="10"
+                        className="form-control border-2"
+                      />
+                    </div>
+                    <div className="col-6 mb-3">
+                      <label className="form-label fw-bold text-dark">
+                        <i className="fas fa-dollar-sign me-1 text-success"></i>
+                        Cập Nhật Giá Nhà Phân Phối (%):
+                      </label>
+                      <input
+                        type="text"
+                        name="price_updateDistributor"
+                        value={formData.price_updateDistributor}
                         onChange={handleChange}
                         placeholder="10"
                         className="form-control border-2"
@@ -303,18 +335,18 @@ export default function Adddoitac({
         </Modal.Body>
         <Modal.Footer className="bg-white border-0 px-4 py-3">
           <div className="d-flex justify-content-between w-100">
-            <Button 
-              variant="outline-secondary" 
-              onClick={onClose} 
+            <Button
+              variant="outline-secondary"
+              onClick={onClose}
               className="px-4 py-2 fw-bold"
               style={{ minWidth: '120px' }}
             >
               <i className="fas fa-times me-2"></i>
               Hủy
             </Button>
-            <Button 
-              type="submit" 
-              variant={editingPartner ? "warning" : "success"} 
+            <Button
+              type="submit"
+              variant={editingPartner ? "warning" : "success"}
               disabled={loading}
               className="px-4 py-2 fw-bold shadow-sm"
               style={{ minWidth: '180px' }}

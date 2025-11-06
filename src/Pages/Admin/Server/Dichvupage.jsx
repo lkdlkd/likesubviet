@@ -121,6 +121,24 @@ export default function Dichvupage() {
     fetchSmmPartners();
   }, []);
 
+  // Auto-fill adjustment percentages when SMM partner is selected
+  useEffect(() => {
+    if (selectedSmm && smmPartners.length > 0) {
+      const partner = smmPartners.find((p) => String(p._id) === String(selectedSmm));
+      if (partner) {
+        // Auto-fill from partner's default values
+        setAdjustMemberPct(Number(partner.price_update) || 0);
+        setAdjustAgentPct(Number(partner.price_updateVip) || 0);
+        setAdjustDistributorPct(Number(partner.price_updateDistributor) || 0);
+      }
+    } else {
+      // Reset when no SMM is selected
+      setAdjustMemberPct(0);
+      setAdjustAgentPct(0);
+      setAdjustDistributorPct(0);
+    }
+  }, [selectedSmm, smmPartners]);
+
   // Removed automatic debounced search - now using manual search button
   const handleSearch = async () => {
     setIsSearching(true);
@@ -684,13 +702,12 @@ export default function Dichvupage() {
                                     type="number"
                                     className="form-control service-form-control"
                                     placeholder="0"
-                                    value={adjustMemberPct === 0 ? "" : adjustMemberPct}
-                                    onChange={(e) => setAdjustMemberPct(e.target.value === "" ? 0 : Number(e.target.value))}
-                                    title="% muốn tăng Thành Viên"
+                                    value={adjustDistributorPct === 0 ? "" : adjustDistributorPct}
+                                    onChange={(e) => setAdjustDistributorPct(e.target.value === "" ? 0 : Number(e.target.value))}
+                                    title="% muốn tăng Nhà phân phối"
                                   />
-                                  <span className="input-group-text">Thành Viên</span>
+                                  <span className="input-group-text">Nhà Phân Phối</span>
                                 </div>
-                                {/* <small className="text-muted">Thành viên</small> */}
                               </div>
                               <div className="col-lg-4 col-md-4 col-12">
                                 <div className="input-group input-group-sm">
@@ -704,7 +721,6 @@ export default function Dichvupage() {
                                   />
                                   <span className="input-group-text">Đại Lý</span>
                                 </div>
-                                {/* <small className="text-muted">Đại lý</small> */}
                               </div>
                               <div className="col-lg-4 col-md-4 col-12">
                                 <div className="input-group input-group-sm">
@@ -712,13 +728,12 @@ export default function Dichvupage() {
                                     type="number"
                                     className="form-control service-form-control"
                                     placeholder="0"
-                                    value={adjustDistributorPct === 0 ? "" : adjustDistributorPct}
-                                    onChange={(e) => setAdjustDistributorPct(e.target.value === "" ? 0 : Number(e.target.value))}
-                                    title="% muốn tăng Nhà phân phối"
+                                    value={adjustMemberPct === 0 ? "" : adjustMemberPct}
+                                    onChange={(e) => setAdjustMemberPct(e.target.value === "" ? 0 : Number(e.target.value))}
+                                    title="% muốn tăng Thành Viên"
                                   />
-                                  <span className="input-group-text">Nhà Phân Phối</span>
+                                  <span className="input-group-text">Thành Viên</span>
                                 </div>
-                                {/* <small className="text-muted">Nhà phân phối</small> */}
                               </div>
                             </div>
                           </div>

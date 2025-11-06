@@ -241,6 +241,9 @@ export default function Adddichvu({
             const ptgia = partner?.price_update || 0;
             const baseRate = service.rate * tigia;
             const finalRate = Math.ceil(baseRate * 10000 + (baseRate * ptgia) / 100 * 10000) / 10000;
+
+            const VipRate = Math.ceil(baseRate * 10000 + (baseRate * partner.price_updateVip) / 100 * 10000) / 10000;
+            const DistributorRate = Math.ceil(baseRate * 10000 + (baseRate * partner.price_updateDistributor) / 100 * 10000) / 10000;
             const payload = {
               ...formData,
               serviceId: service.service,
@@ -249,8 +252,8 @@ export default function Adddichvu({
               min: service.min || 0,
               max: service.max || 0,
               rate: finalRate,
-              ratevip: finalRate,
-              rateDistributor: finalRate,
+              ratevip: VipRate,
+              rateDistributor: DistributorRate,
               originalRate: service.rate * tigia,
             };
             await createServer(payload, token);
@@ -838,8 +841,12 @@ export default function Adddichvu({
                               const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
                               const tigia = partner?.tigia || 1;
                               const ptgia = partner?.price_update || 0;
+                              const ptvip = partner?.price_updateVip || 0;
+                              const ptdistributor = partner?.price_updateDistributor || 0;
                               const baseRate = svc.rate * tigia;
                               const finalRate = Math.ceil(baseRate * 10000 + (baseRate * ptgia) / 100 * 10000) / 10000;
+                              const VipRate = Math.ceil(baseRate * 10000 + (baseRate * ptvip) / 100 * 10000) / 10000;
+                              const DistributorRate = Math.ceil(baseRate * 10000 + (baseRate * ptdistributor) / 100 * 10000) / 10000;
                               if (svc) {
                                 setFormData({
                                   ...formData,
@@ -848,8 +855,8 @@ export default function Adddichvu({
                                   min: svc.min || "",
                                   max: svc.max || "",
                                   rate: finalRate || "",
-                                  ratevip: finalRate || "",
-                                  rateDistributor: finalRate || "",
+                                  ratevip: VipRate || "",
+                                  rateDistributor: DistributorRate || "",
                                   originalRate: svc.rate * tigia || "",
                                   category: svc.category || "",
                                 });
@@ -1152,10 +1159,14 @@ export default function Adddichvu({
                               const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
                               const tigia = partner?.tigia || 1;
                               const ptgia = partner?.price_update || 0;
+                              const ptvip = partner?.price_updateVip || 0;
+                              const ptdistributor = partner?.price_updateDistributor || 0;
                               const basePrice = (service.rate * tigia).toFixed(4);
+                              
                               const finalPrice = Math.ceil(basePrice * 10000 + (basePrice * ptgia) / 100 * 10000) / 10000;
-                              const ratevip = finalPrice; // Giá VIP bằng giá cuối cùng
-                              const rateDistributor = finalPrice; // Giá Nhà Phân Phối bằng giá cuối cùng
+                              const ratevip = Math.ceil(basePrice * 10000 + (basePrice * ptvip) / 100 * 10000) / 10000; // Giá VIP bằng giá cuối cùng
+                              const rateDistributor = Math.ceil(basePrice * 10000 + (basePrice * ptdistributor) / 100 * 10000) / 10000; // Giá Nhà Phân Phối bằng giá cuối cùng
+                              
                               return (
                                 <tr key={index}>
                                   <td>
@@ -1179,12 +1190,12 @@ export default function Adddichvu({
                                   </td>
                                   <td>
                                     <div style={{ fontSize: '12px', lineHeight: '1.3' }}>
-                                      <span style={{ color: '#6c757d', fontWeight: '500' }}>{basePrice}</span>
-                                      <span style={{ color: '#17a2b8', fontWeight: '600' }}> + {ptgia}% = </span>
+                                      <span style={{ color: '#6c757d', fontWeight: '500' }}>Giá gốc : {basePrice}</span>
+                                      {/* <span style={{ color: '#17a2b8', fontWeight: '600' }}> + {ptgia}% = </span> */}
                                       <div>
-                                        <span style={{ color: '#28a745', fontWeight: '700' }}>Thành Viên : {finalPrice}</span><br />
-                                        <span style={{ color: '#ffc107', fontWeight: '700' }}> Đại Lý : {ratevip}</span> <br />
-                                        <span style={{ color: '#6c757d', fontWeight: '700' }}> Nhà Phân Phối : {rateDistributor}</span>
+                                        <span style={{ color: '#6c757d', fontWeight: '700' }}>Nhà Phân Phối ({partner.price_updateDistributor}%): {rateDistributor}</span><br />
+                                        <span style={{ color: '#ffc107', fontWeight: '700' }}>Đại Lý ({partner.price_updateVip}%): {ratevip}</span> <br />
+                                        <span style={{ color: '#28a745', fontWeight: '700' }}>Thành Viên ({partner.price_update}%): {finalPrice}</span>
                                       </div>
                                     </div>
                                   </td>

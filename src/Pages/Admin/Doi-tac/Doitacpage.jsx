@@ -392,7 +392,19 @@ export default function Doitacpage() {
                               )}
                               <td>{Math.floor(Number(partner.minbalance)).toLocaleString("en-US") || "Đang tải..."}</td>
                               <td>{partner.phihoan}</td>
-                              <td>{partner.price_update}</td>
+                              <td>
+                                <ul>
+                                  <li>
+                                    <b>Giá Nhà Phân Phối</b> : {partner.price_updateDistributor}
+                                  </li>
+                                  <li>
+                                    <b>Giá Đại Lý</b> : {partner.price_updateVip}
+                                  </li>
+                                  <li>
+                                    <b>Giá Thành Viên</b> : {partner.price_update}
+                                  </li>
+                                </ul>
+                              </td>
                               <td>{partner.tigia}</td>
                               <td>{partner.autohoan === "on" ? "Bật" : "Tắt"}</td>
                               <td>{partner.update_price === "on" ? "Bật" : "Tắt"}</td>
