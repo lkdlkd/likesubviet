@@ -207,40 +207,40 @@ function MenuUser({ user, categories, configWeb }) {
                 //     border-left: 2px solid #28a745;
                 // }
                 
-                .b-brand {
-                    transition: all 0.3s ease;
-                    padding: 15px;
-                    border-radius: 12px;
-                    position: relative;
-                    overflow: hidden;
-                }
-                .b-brand::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: linear-gradient(135deg, rgba(0,123,255,0.03), rgba(40,167,69,0.02));
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                    border-radius: 12px;
-                }
-                .b-brand:hover::before {
-                    opacity: 1;
-                }
-                .b-brand:hover {
-                    transform: scale(1.01);
-                }
+                // .b-brand {
+                //     transition: all 0.3s ease;
+                //     padding: 15px;
+                //     border-radius: 12px;
+                //     position: relative;
+                //     overflow: hidden;
+                // }
+                // .b-brand::before {
+                //     content: '';
+                //     position: absolute;
+                //     top: 0;
+                //     left: 0;
+                //     right: 0;
+                //     bottom: 0;
+                //     background: linear-gradient(135deg, rgba(0,123,255,0.03), rgba(40,167,69,0.02));
+                //     opacity: 0;
+                //     transition: opacity 0.3s ease;
+                //     border-radius: 12px;
+                // }
+                // .b-brand:hover::before {
+                //     opacity: 1;
+                // }
+                // .b-brand:hover {
+                //     transform: scale(1.01);
+                // }
                 
-                .logo-lg {
-                    transition: all 0.3s ease;
-                    filter: brightness(1.1);
-                }
-                .b-brand:hover .logo-lg {
-                    filter: brightness(1.1) saturate(1.05);
-                    transform: scale(1.02);
-                }
+                // .logo-lg {
+                //     transition: all 0.3s ease;
+                //     filter: brightness(1.1);
+                // }
+                // .b-brand:hover .logo-lg {
+                //     filter: brightness(1.1) saturate(1.05);
+                //     transform: scale(1.02);
+                // }
                 
                 .navbar-content {
                     position: relative;
@@ -304,255 +304,251 @@ function MenuUser({ user, categories, configWeb }) {
                 //     animation: pulse 2s infinite;
                 // }
             `}</style>
-            
+
             <nav className="pc-sidebar">
                 <div className="navbar-wrapper">
                     <div className="m-header">
-                        <div className="b-brand text-primary">
-                            <div className="m-header">
-                                <Link to="/home" className="b-brand text-primary">
-                                    {isValidUrl(config.logo) ? (
-                                        <img
-                                            src={config.logo}
-                                            className="img-fluid logo-lg"
-                                            alt="logo"
-                                            style={{ maxHeight: "110px", objectFit: "contain" }}
-                                            onError={(e) => (e.target.style.display = "none")} // Ẩn ảnh nếu không tải được
-                                        />
-                                    ) : (
-                                        <span className="text-dark" style={{ fontSize: "30px", fontWeight: "bold" }}>
-                                            {config.logo || "Logo"}
-                                        </span>
-                                    )}
-                                </Link>
-                            </div>
-                        </div>
+                        <Link to="/home" className="b-brand text-primary">
+                            {isValidUrl(config.logo) ? (
+                                <img
+                                    src={config.logo}
+                                    className="img-fluid logo-lg"
+                                    alt="logo"
+                                    style={{ maxHeight: "110px", objectFit: "contain" }}
+                                    onError={(e) => (e.target.style.display = "none")} // Ẩn ảnh nếu không tải được
+                                />
+                            ) : (
+                                <span className="text-dark " style={{ marginLeft: "80px", fontSize: "30px", fontWeight: "bold" }}>
+                                    {config.logo || "Logo"}
+                                </span>
+                            )}
+                        </Link>
                     </div>
                     <SimpleBar style={{ maxHeight: '90dvh', minHeight: 0 }} className="navbar-content mb-3">
-                    <ul className="pc-navbar">
-                        {userRole === "admin" && (
-                            <>
-                                <li className="pc-item pc-caption">
-                                    <label>Bảng Điều Khiển</label>
-                                </li>
-                                <li className="pc-item pc-hasmenu">
-                                    <a
-                                        onClick={() => toggleMenu("Menu")}
-                                        className="pc-link d-flex align-items-center justify-content-between"
-                                        style={{ cursor: "pointer" }}
-                                    >
-                                        <span>
-                                            <span className="pc-micon">
-                                                <img src="/img/dashboard.png" className="wid-35" alt="" />
+                        <ul className="pc-navbar">
+                            {userRole === "admin" && (
+                                <>
+                                    <li className="pc-item pc-caption">
+                                        <label>Bảng Điều Khiển</label>
+                                    </li>
+                                    <li className="pc-item pc-hasmenu">
+                                        <a
+                                            onClick={() => toggleMenu("Menu")}
+                                            className="pc-link d-flex align-items-center justify-content-between"
+                                            style={{ cursor: "pointer" }}
+                                        >
+                                            <span>
+                                                <span className="pc-micon">
+                                                    <img src="/img/dashboard.png" className="wid-35" alt="" />
+                                                </span>
+                                                <span className="pc-mtext">QUẢN LÝ HỆ THỐNG</span>
                                             </span>
-                                            <span className="pc-mtext">QUẢN LÝ HỆ THỐNG</span>
-                                        </span>
-                                        <span className="pc-arrow ms-2">
-                                            {activeMenu === "Menu" ? <SlArrowDown /> : <SlArrowRight />}
-                                        </span>
-                                    </a>
-                                    {activeMenu === "Menu" && (
-                                        <ul className="pc-submenu" style={{ listStyleType: "none" }}>
-                                            <li className="pc-item">
-                                                <Link to="/admin/setting" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Cài đặt trang</span>
-                                                </Link>
-                                            </li>
-                                            <li className="pc-item">
-                                                <Link to="/admin/khuyen-mai" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Cài đặt khuyễn mãi</span>
-                                                </Link>
-                                            </li>
-                                            {/* <li className="pc-item">
+                                            <span className="pc-arrow ms-2">
+                                                {activeMenu === "Menu" ? <SlArrowDown /> : <SlArrowRight />}
+                                            </span>
+                                        </a>
+                                        {activeMenu === "Menu" && (
+                                            <ul className="pc-submenu" style={{ listStyleType: "none" }}>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/setting" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Cài đặt trang</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/khuyen-mai" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Cài đặt khuyễn mãi</span>
+                                                    </Link>
+                                                </li>
+                                                {/* <li className="pc-item">
                                                 <Link to="/admin/setting-thecao" className="pc-link">
                                                     <span className="pc-mtext">Cấu hình nạp thẻ</span>
                                                 </Link>
                                             </li> */}
-                                            <li className="pc-item">
-                                                <Link to="/admin/config-tele" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Cấu hình Telegram</span>
-                                                </Link>
-                                            </li>
-                                            <li className="pc-item">
-                                                <Link to="/admin/tai-khoan" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Khách hàng</span>
-                                                </Link>
-                                            </li>
-                                            <li className="pc-item">
-                                                <Link to="/admin/orders" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Đơn hàng</span>
-                                                </Link>
-                                            </li>
-                                            <li className="pc-item">
-                                                <Link to="/admin/refund" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Hoàn tiền</span>
-                                                </Link>
-                                            </li>
-                                            <li className="pc-item">
-                                                <Link to="/admin/thongke" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Thống kê</span>
-                                                </Link>
-                                            </li>
-                                            <li className="pc-item">
-                                                <Link to="/admin/bank-king" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Nạp tiền</span>
-                                                </Link>
-                                            </li>
-                                            <li className="pc-item">
-                                                <Link to="/admin/nap-tien-tu-dong" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Quản lý nạp tiền tự động</span>
-                                                </Link>
-                                            </li>
-                                            <li className="pc-item">
-                                                <Link to="/admin/taothongbao" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Thông báo</span>
-                                                </Link>
-                                            </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/config-tele" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Cấu hình Telegram</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/tai-khoan" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Khách hàng</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/orders" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Đơn hàng</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/refund" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Hoàn tiền</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/thongke" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Thống kê</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/bank-king" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Nạp tiền</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/nap-tien-tu-dong" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Quản lý nạp tiền tự động</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/taothongbao" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Thông báo</span>
+                                                    </Link>
+                                                </li>
 
-                                        </ul>
-                                    )}
-                                </li>
-                                <li className="pc-item pc-hasmenu">
-                                    <a
-                                        onClick={() => toggleMenu("dichvu")}
-                                        className="pc-link d-flex align-items-center justify-content-between"
-                                        style={{ cursor: "pointer" }}
-                                    >
-                                        <span>
-                                            <span className="pc-micon">
-                                                <img src="/img/dashboard.png" className="wid-35" alt="" width={35} height={35} />
-                                            </span>
-                                            <span className="pc-mtext">MENU DỊCH VỤ</span>
-                                        </span>
-                                        <span className="pc-arrow ms-2">
-                                            {activeMenu === "dichvu" ? <SlArrowDown /> : <SlArrowRight />}
-                                        </span>
-                                    </a>
-                                    {activeMenu === "dichvu" && (
-                                        <ul className="pc-submenu" style={{ listStyleType: "none" }}>
-                                            <li className="pc-item">
-                                                <Link to="/admin/doitac" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Thêm đối tác</span>
-                                                </Link>
-                                            </li>
-                                            <li className="pc-item">
-                                                <Link to="/admin/nen-tang" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Thêm nền tảng</span>
-                                                </Link>
-                                            </li>
-                                            <li className="pc-item">
-                                                <Link to="/admin/dich-vu" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Thêm dịch vụ</span>
-                                                </Link>
-                                            </li>
-
-                                            <li className="pc-item">
-                                                <Link to="/admin/server" onClick={() => handleNavigation()} className="pc-link">
-                                                    <span className="pc-mtext">Thêm server</span>
-                                                </Link>
-                                            </li>
-                                        </ul>
-                                    )}
-                                </li>
-                            </>
-                        )}
-                        <li className="pc-item pc-caption">
-                            <label>Bảng Điều Khiển</label>
-                        </li>
-                        {/* Menu dành cho tất cả người dùng */}
-                        <li className="pc-item pc-hasmenu">
-                            <a
-                                onClick={() => toggleMenu("Menuhethonghethong")}
-                                className="pc-link"
-                                style={{ cursor: "pointer" }}
-                            >
-                                <span className="pc-micon">
-                                    <img src="/img/dashboard.png" className="wid-35" alt="" />
-                                </span>
-                                <span className="pc-mtext">MENU HỆ THỐNG</span>
-                                <span className="pc-arrow ms-2">
-                                    {activeMenu === "Menuhethonghethong" ? <SlArrowDown /> : <SlArrowRight />}
-                                </span>
-                            </a>
-                            {activeMenu === "Menuhethonghethong" && (
-
-                                <ul className="pc-submenu" style={{ listStyleType: "none" }}>
-                                    <li className="pc-item">
-                                        <Link to="/profile"
-                                            onClick={() => handleNavigation()}
-                                            className="pc-link"
+                                            </ul>
+                                        )}
+                                    </li>
+                                    <li className="pc-item pc-hasmenu">
+                                        <a
+                                            onClick={() => toggleMenu("dichvu")}
+                                            className="pc-link d-flex align-items-center justify-content-between"
                                             style={{ cursor: "pointer" }}
                                         >
-                                            {/* <span className="pc-micon">
+                                            <span>
+                                                <span className="pc-micon">
+                                                    <img src="/img/dashboard.png" className="wid-35" alt="" width={35} height={35} />
+                                                </span>
+                                                <span className="pc-mtext">MENU DỊCH VỤ</span>
+                                            </span>
+                                            <span className="pc-arrow ms-2">
+                                                {activeMenu === "dichvu" ? <SlArrowDown /> : <SlArrowRight />}
+                                            </span>
+                                        </a>
+                                        {activeMenu === "dichvu" && (
+                                            <ul className="pc-submenu" style={{ listStyleType: "none" }}>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/doitac" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Thêm đối tác</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/nen-tang" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Thêm nền tảng</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/dich-vu" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Thêm dịch vụ</span>
+                                                    </Link>
+                                                </li>
+
+                                                <li className="pc-item">
+                                                    <Link to="/admin/server" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Thêm server</span>
+                                                    </Link>
+                                                </li>
+                                            </ul>
+                                        )}
+                                    </li>
+                                </>
+                            )}
+                            <li className="pc-item pc-caption">
+                                <label>Bảng Điều Khiển</label>
+                            </li>
+                            {/* Menu dành cho tất cả người dùng */}
+                            <li className="pc-item pc-hasmenu">
+                                <a
+                                    onClick={() => toggleMenu("Menuhethonghethong")}
+                                    className="pc-link"
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    <span className="pc-micon">
+                                        <img src="/img/dashboard.png" className="wid-35" alt="" />
+                                    </span>
+                                    <span className="pc-mtext">MENU HỆ THỐNG</span>
+                                    <span className="pc-arrow ms-2">
+                                        {activeMenu === "Menuhethonghethong" ? <SlArrowDown /> : <SlArrowRight />}
+                                    </span>
+                                </a>
+                                {activeMenu === "Menuhethonghethong" && (
+
+                                    <ul className="pc-submenu" style={{ listStyleType: "none" }}>
+                                        <li className="pc-item">
+                                            <Link to="/profile"
+                                                onClick={() => handleNavigation()}
+                                                className="pc-link"
+                                                style={{ cursor: "pointer" }}
+                                            >
+                                                {/* <span className="pc-micon">
                                                 <i className="ti ti-user-circle fs-4 text-primary"></i>
                                             </span> */}
-                                            <span className="pc-mtext">Thông Tin Cá Nhân</span>
-                                        </Link>
-                                    </li>
-                                    <li className="pc-item">
-                                        <Link to="/nap-tien"
-                                            onClick={() => handleNavigation()}
-                                            className="pc-link"
-                                            style={{ cursor: "pointer" }}
-                                        >
-                                            {/* <span className="pc-micon">
+                                                <span className="pc-mtext">Thông Tin Cá Nhân</span>
+                                            </Link>
+                                        </li>
+                                        <li className="pc-item">
+                                            <Link to="/nap-tien"
+                                                onClick={() => handleNavigation()}
+                                                className="pc-link"
+                                                style={{ cursor: "pointer" }}
+                                            >
+                                                {/* <span className="pc-micon">
                                                 <i className="ti ti-credit-card fs-4 text-success"></i>
                                             </span> */}
-                                            <span className="pc-mtext">Nạp Tiền</span>
-                                        </Link>
-                                    </li>
-                                    <li className="pc-item">
-                                        <Link to="/lich-su-hoat-dong"
-                                            onClick={() => handleNavigation()}
-                                            className="pc-link"
-                                            style={{ cursor: "pointer" }}
-                                        >
-                                            {/* <span className="pc-micon">
+                                                <span className="pc-mtext">Nạp Tiền</span>
+                                            </Link>
+                                        </li>
+                                        <li className="pc-item">
+                                            <Link to="/lich-su-hoat-dong"
+                                                onClick={() => handleNavigation()}
+                                                className="pc-link"
+                                                style={{ cursor: "pointer" }}
+                                            >
+                                                {/* <span className="pc-micon">
                                                 <i className="ti ti-history fs-4 text-info"></i>
                                             </span> */}
-                                            <span className="pc-mtext">Lịch Sử Hoạt Động</span>
-                                        </Link>
-                                    </li>
-                                    <li className="pc-item">
-                                        <Link to="/tai-lieu-api"
-                                            onClick={() => handleNavigation()}
-                                            className="pc-link"
-                                            style={{ cursor: "pointer" }}
-                                        >
-                                            {/* <span className="pc-micon">
+                                                <span className="pc-mtext">Lịch Sử Hoạt Động</span>
+                                            </Link>
+                                        </li>
+                                        <li className="pc-item">
+                                            <Link to="/tai-lieu-api"
+                                                onClick={() => handleNavigation()}
+                                                className="pc-link"
+                                                style={{ cursor: "pointer" }}
+                                            >
+                                                {/* <span className="pc-micon">
                                                 <i className="ti ti-api fs-4 text-warning"></i>
                                             </span> */}
-                                            <span className="pc-mtext">Tài liệu API V2</span>
-                                        </Link>
-                                    </li>
-                                    <li className="pc-item">
-                                        <Link to="/bang-gia" className="pc-link"
-                                            onClick={() => handleNavigation()}
-                                            style={{ cursor: "pointer" }}
-                                        >
-                                            {/* <span className="pc-micon">
+                                                <span className="pc-mtext">Tài liệu API V2</span>
+                                            </Link>
+                                        </li>
+                                        <li className="pc-item">
+                                            <Link to="/bang-gia" className="pc-link"
+                                                onClick={() => handleNavigation()}
+                                                style={{ cursor: "pointer" }}
+                                            >
+                                                {/* <span className="pc-micon">
                                                 <i className="ti ti-currency-dollar fs-4 text-secondary"></i>
                                             </span> */}
-                                            <span className="pc-mtext">Bảng giá</span>
-                                        </Link>
-                                    </li>
-                                </ul>
-                            )}
-                        </li>
-                        <li className="pc-item pc-caption">
-                            <label>Danh Sách Dịch Vụ</label>
-                        </li>
-                        <li className="pc-item pc-hasmenu">
-                            <Link to="/order" className="pc-link pulse-item"
-                                onClick={() => handleNavigation()}
-                                style={{ cursor: "pointer" }}
-                            >
-                                <span className="pc-micon">
-                                    <img src="https://i.imgur.com/LtJfhAt.gif" className="wid-35" alt="" width={35} height={35} />
-                                </span>
-                                <span className="pc-mtext">Mua dịch vụ</span>
-                            </Link>
-                            {/* <a
+                                                <span className="pc-mtext">Bảng giá</span>
+                                            </Link>
+                                        </li>
+                                    </ul>
+                                )}
+                            </li>
+                            <li className="pc-item pc-caption">
+                                <label>Danh Sách Dịch Vụ</label>
+                            </li>
+                            <li className="pc-item pc-hasmenu">
+                                <Link to="/order" className="pc-link pulse-item"
+                                    onClick={() => handleNavigation()}
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    <span className="pc-micon">
+                                        <img src="https://i.imgur.com/LtJfhAt.gif" className="wid-35" alt="" width={35} height={35} />
+                                    </span>
+                                    <span className="pc-mtext">Mua dịch vụ</span>
+                                </Link>
+                                {/* <a
                                 style={{ cursor: "pointer" }}
                                 onClick={() => handleNavigation("/order")}
                                 className="pc-link">
@@ -561,66 +557,66 @@ function MenuUser({ user, categories, configWeb }) {
                                 </span>
                                 <span className="pc-mtext">Mua dịch vụ</span>
                             </a> */}
-                        </li>
-                        <li className="pc-item">
-                            <Link
-                                onClick={() => handleNavigation()}
-                                to="/danh-sach-don"
-                                style={{ cursor: "pointer" }}
-                                className="pc-link">
-                                <span className="pc-micon">
-                                    <img src="/img/transactions.png" className="wid-35" alt="Service Platform 1" />
-                                </span>
-                                <span className="pc-mtext">Danh sách đơn</span>
-                            </Link>
-                        </li>
-                        <li className="pc-item pc-caption">
-                            <label>Danh Sách Dịch Vụ</label>
-                        </li>
-                        {Object.values(groupedCategories).map((group) =>
-                            group.platform && group.platform._id ? (
-                                <li key={group.platform._id} className="pc-item pc-hasmenu">
-                                    <a
-                                        onClick={() => toggleMenu(group.platform._id)}
-                                        className="pc-link d-flex align-items-center justify-content-between"
-                                        style={{ cursor: "pointer" }}
-                                    >
-                                        <span>
-                                            <span className="pc-micon">
-                                                <img
-                                                    src={group.platform.logo}
-                                                    className="wid-35"
-                                                    alt={group.platform.name}
-                                                />
+                            </li>
+                            <li className="pc-item">
+                                <Link
+                                    onClick={() => handleNavigation()}
+                                    to="/danh-sach-don"
+                                    style={{ cursor: "pointer" }}
+                                    className="pc-link">
+                                    <span className="pc-micon">
+                                        <img src="/img/transactions.png" className="wid-35" alt="Service Platform 1" />
+                                    </span>
+                                    <span className="pc-mtext">Danh sách đơn</span>
+                                </Link>
+                            </li>
+                            <li className="pc-item pc-caption">
+                                <label>Danh Sách Dịch Vụ</label>
+                            </li>
+                            {Object.values(groupedCategories).map((group) =>
+                                group.platform && group.platform._id ? (
+                                    <li key={group.platform._id} className="pc-item pc-hasmenu">
+                                        <a
+                                            onClick={() => toggleMenu(group.platform._id)}
+                                            className="pc-link d-flex align-items-center justify-content-between"
+                                            style={{ cursor: "pointer" }}
+                                        >
+                                            <span>
+                                                <span className="pc-micon">
+                                                    <img
+                                                        src={group.platform.logo}
+                                                        className="wid-35"
+                                                        alt={group.platform.name}
+                                                    />
+                                                </span>
+                                                <span className="pc-mtext">{group.platform.name}</span>
                                             </span>
-                                            <span className="pc-mtext">{group.platform.name}</span>
-                                        </span>
-                                        <span className="pc-arrow ms-2">
-                                            {activeMenu === group.platform._id ? <SlArrowDown /> : <SlArrowRight />}
-                                        </span>
-                                    </a>
-                                    {activeMenu === group.platform._id && (
-                                        <ul className="pc-submenu" style={{ listStyleType: "none" }}>
-                                            {group.services.map((service) =>
-                                                service._id ? (
-                                                    <li key={service._id} className="pc-item">
-                                                        <Link to={`/order/${service.path.toLowerCase()}`}
-                                                            onClick={() => handleNavigation()}
-                                                            className="pc-link service-item">
-                                                            <span className="pc-mtext">{service.name}</span>
-                                                        </Link>
-                                                    </li>
-                                                ) : null
-                                            )}
-                                        </ul>
-                                    )}
-                                </li>
-                            ) : null
-                        )}
-                    </ul>
-                </SimpleBar>
-            </div>
-        </nav>
+                                            <span className="pc-arrow ms-2">
+                                                {activeMenu === group.platform._id ? <SlArrowDown /> : <SlArrowRight />}
+                                            </span>
+                                        </a>
+                                        {activeMenu === group.platform._id && (
+                                            <ul className="pc-submenu" style={{ listStyleType: "none" }}>
+                                                {group.services.map((service) =>
+                                                    service._id ? (
+                                                        <li key={service._id} className="pc-item">
+                                                            <Link to={`/order/${service.path.toLowerCase()}`}
+                                                                onClick={() => handleNavigation()}
+                                                                className="pc-link service-item">
+                                                                <span className="pc-mtext">{service.name}</span>
+                                                            </Link>
+                                                        </li>
+                                                    ) : null
+                                                )}
+                                            </ul>
+                                        )}
+                                    </li>
+                                ) : null
+                            )}
+                        </ul>
+                    </SimpleBar>
+                </div>
+            </nav>
         </>
     );
 }
