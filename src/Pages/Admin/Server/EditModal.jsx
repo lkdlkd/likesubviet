@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import { toast } from "react-toastify";
-import { updateServer } from "@/Utils/api";
 import { loadingg } from "@/JS/Loading";
+import { updateServer } from "@/Utils/api";
+import { useEffect, useState } from "react";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import { toast } from "react-toastify";
 
 export default function EditModal({ show, fetchServers, onClose, initialData, token }) {
   const [formData, setFormData] = useState({

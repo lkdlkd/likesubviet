@@ -1,12 +1,12 @@
 'use client';
-import { useState, useEffect, useCallback } from "react";
-import { createServer, getAllSmmPartners, getServicesFromSmm } from "@/Utils/api";
-import { toast } from "react-toastify";
+import { loadingg } from "@/JS/Loading";
+import { createServer, getServicesFromSmm } from "@/Utils/api";
+import { useEffect, useState } from "react";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 import Select from "react-select";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import { loadingg } from "@/JS/Loading";
+import { toast } from "react-toastify";
 
 export default function Adddichvu({
   token,
@@ -126,49 +126,6 @@ export default function Adddichvu({
             : Number(value)
           : value,
     });
-  };
-
-  const handleDomainChange = async (e) => {
-    const domain = e.target.value;
-    setFormData({
-      ...formData,
-      DomainSmm: domain,
-      serviceId: "",
-      serviceName: "",
-      originalRate: "",
-      min: "",
-      max: "",
-      rate: "",
-      ratevip: "",
-      rateDistributor: "",
-    });
-    setServices([]);
-    setServiceError("");
-    const partner = smmPartners.find((p) => String(p._id) === String(domain));
-    if (!partner) return;
-
-    try {
-      setLoadingServices(true);
-      loadingg("Đang tải danh sách dịch vụ...", true, 9999999);
-      const servicesData = await getServicesFromSmm(partner._id, token);
-      // Trường hợp API trả về { success: true, data: { error: "Invalid key" } }
-      if (servicesData && servicesData.data) {
-        if (Array.isArray(servicesData.data)) {
-          setServices(servicesData.data);
-          setServiceError("");
-        } else if (servicesData.data.error) {
-          setServices([]);
-          setServiceError(servicesData.data.error);
-        }
-      } else {
-        setServices([]);
-      }
-    } catch (error) {
-      toast.error("Không thể lấy danh sách dịch vụ từ đối tác. Vui lòng thử lại!");
-    } finally {
-      setLoadingServices(false);
-      loadingg("Đang tải...", false);
-    }
   };
 
   const handleServiceChange = (e) => {
@@ -342,16 +299,6 @@ export default function Adddichvu({
     { value: "off", label: "Tắt" },
   ];
 
-  const reactionOptions = [
-    { value: "on", label: "Bật" },
-    { value: "off", label: "Tắt" },
-  ];
-
-  const matliveOptions = [
-    { value: "on", label: "Bật" },
-    { value: "off", label: "Tắt" },
-  ];
-
   const isActiveOptions = [
     { value: true, label: "Hiển thị" },
     { value: false, label: "Ẩn" },
@@ -389,14 +336,6 @@ export default function Adddichvu({
 
   const selectedCommentOption = commentOptions.find(
     (opt) => opt.value === formData.comment
-  ) || null;
-
-  const selectedReactionOption = reactionOptions.find(
-    (opt) => opt.value === formData.reaction
-  ) || null;
-
-  const selectedMatliveOption = matliveOptions.find(
-    (opt) => opt.value === formData.matlive
   ) || null;
 
   const selectedIsActiveOption = isActiveOptions.find(
@@ -1064,7 +1003,6 @@ export default function Adddichvu({
                             {filteredServices.map((service) => {
                               const partner = smmPartners.find((p) => String(p._id) === String(formData.DomainSmm));
                               const tigia = partner?.tigia || 1;
-                              const ptgia = partner?.price_update || 0;
                               const isSelected = selectedServices.some(
                                 (selected) => selected.service === service.service
                               );

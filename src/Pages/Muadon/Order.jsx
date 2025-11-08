@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useParams } from "react-router-dom";
-import Swal from "sweetalert2";
-import { getUid, addOrder, getServerByTypeAndCategory } from "@/Utils/api";
-import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
+import { addOrder, getServerByTypeAndCategory, getUid } from "@/Utils/api";
+import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import Modalnote from "./Modal_note"; // Giả sử bạn đã định nghĩa Modalnote trong cùng thư mục
 import MultiLinkModal from "./MultiLinkModal";
 // import { useTranslation } from "react-i18next";
 // import { useDispatch } from "react-redux";
 // import { setUser } from "@/redux/slices/userSlice";
 // import { io } from "socket.io-client";
-import { Button, Modal } from "react-bootstrap";
-import Select from "react-select";
 import Dondamua from "./Dondamua";
 
 export default function Order() {
@@ -223,13 +221,16 @@ export default function Order() {
                     payload.quantity = quantity;
                 }
                 const res = await addOrder(payload, token);
-                loadingg("", false); // Đóng loading khi xong
-                await Swal.fire({
-                    title: "Thành công",
-                    text: "Mua dịch vụ thành công",
-                    icon: "success",
-                    confirmButtonText: "Xác nhận",
-                });
+                if (res.success) {
+                    loadingg("", false); // Đóng loading khi xong
+                    await Swal.fire({
+                        title: "Thành công",
+                        text: "Mua dịch vụ thành công",
+                        icon: "success",
+                        confirmButtonText: "Xác nhận",
+                    });
+                }
+
             } catch (error) {
                 loadingg("", false); // Đóng loading khi xong
 
@@ -251,7 +252,7 @@ export default function Order() {
         const selectedService = filteredServers.find(
             (service) => service.Magoi === selectedMagoi
         );
-        const qty = selectedService && selectedService.comment === "on" ? cmtqlt : quantity;
+        // const qty = selectedService && selectedService.comment === "on" ? cmtqlt : quantity;
         setIsSubmitting(true);
         // Tạo bản sao để cập nhật trạng thái từng link
         let updatedList = [...multiLinkList];
@@ -561,9 +562,9 @@ export default function Order() {
                                                                 <strong className="badge bg-info">[{server.Magoi}] </strong>
                                                                 {" - "}
                                                                 {server.maychu !== "" && server.maychu !== " " && server.maychu !== "   " && (
-                                                                <span className="badge bg-success ">{server.maychu} </span>
+                                                                    <span className="badge bg-success ">{server.maychu} </span>
                                                                 )}
-                                                                <span className="font-semibold " style={{ padding: "0.2rem 0rem"}}> {server.name} </span>
+                                                                <span className="font-semibold " style={{ padding: "0.2rem 0rem" }}> {server.name} </span>
                                                                 <span className="badge bg-primary ">
                                                                     {/* {Number(server.rate).toLocaleString("en-US")}đ */}
                                                                     {/* {server.rate}đ */}
@@ -600,7 +601,7 @@ export default function Order() {
                                                                                         padding: "4px 10px"
                                                                                     }}>
                                                                                     <i className="bi bi-check-circle-fill me-1"></i>
-                                                                                   🔥 Đã bán: {server.luotban.toLocaleString()}
+                                                                                    🔥 Đã bán: {server.luotban.toLocaleString()}
                                                                                 </span>
                                                                                 // <span className="badge ms-1"
                                                                                 //     style={{
@@ -821,7 +822,7 @@ export default function Order() {
                                                                 <h3 className="alert-heading">
                                                                     Tổng thanh toán:{" "}
                                                                     <span className="text-danger">
-                                                                       {Math.floor(Number(totalCost)).toLocaleString("en-US")}
+                                                                        {Math.floor(Number(totalCost)).toLocaleString("en-US")}
                                                                     </span>{" "}
                                                                     đ
                                                                     {/* -{" "}

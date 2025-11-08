@@ -1,13 +1,12 @@
 'use client';
-import { useState, useEffect } from "react";
-import Adddichvu from "./Adddichvu";
-import Table from "react-bootstrap/Table";
-import { deleteServer, getServer, getAllSmmPartners, updatePartnerPrices } from "@/Utils/api";
-import Swal from "sweetalert2";
-import EditModal from "./EditModal";
 import { loadingg } from "@/JS/Loading";
-import { redirect, useOutletContext } from "react-router-dom";
-import { color } from "framer-motion";
+import { deleteServer, getAllSmmPartners, getServer, updatePartnerPrices } from "@/Utils/api";
+import { useEffect, useState } from "react";
+import Table from "react-bootstrap/Table";
+import { useOutletContext } from "react-router-dom";
+import Swal from "sweetalert2";
+import Adddichvu from "./Adddichvu";
+import EditModal from "./EditModal";
 
 export default function Dichvupage() {
   const { categories: cate } = useOutletContext();
@@ -24,8 +23,6 @@ export default function Dichvupage() {
     totalPages: 1,
     pageSize: 10,
   });
-  const [editMode, setEditMode] = useState(false);
-  const [selectedServer, setSelectedServer] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false); // Trạng thái hiển thị modal chỉnh sửa
   const [selectedService, setSelectedService] = useState(null); // Dịch vụ được chọn để chỉnh sửa
   const [quickAddMode, setQuickAddMode] = useState(true); // <--- ADD THIS
@@ -173,11 +170,6 @@ export default function Dichvupage() {
   const handleEdit = (server) => {
     setSelectedService(server); // Lưu dịch vụ được chọn
     setShowEditModal(true); // Hiển thị modal
-  };
-
-  const handleCancelEdit = () => {
-    setEditMode(false);
-    setSelectedServer(null);
   };
 
   const handleDelete = async (serverId) => {
@@ -773,7 +765,6 @@ export default function Dichvupage() {
                                   const res = await updatePartnerPrices(payload, selectedSmm, token);
                                   if (res && res.success) {
                                     const partnerName = res.partner?.name || partner?.name || selectedSmm;
-                                    const partnerId = res.partner?.id || selectedSmm;
                                     const applied = res.applied || {};
                                     const mem = applied.adjustMemberPct ?? adjustMemberPct ?? 0;
                                     const ag = applied.adjustAgentPct ?? adjustAgentPct ?? 0;

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Button, Modal, Table, Form } from "react-bootstrap";
-import Select from "react-select";
 import { getUid } from "@/Utils/api";
+import { useEffect, useState } from "react";
+import { Button, Modal, Table } from "react-bootstrap";
+import Select from "react-select";
 
 export default function MultiLinkModal({
     show,
@@ -53,7 +53,7 @@ export default function MultiLinkModal({
     const selectedService = filteredServers.find(service => service.Magoi === selectedMagoi);
     // Tính tổng tiền các link đã chọn
     const totalSelected = selectedMultiLinks.length;
-    const totalAmount = quantity * rate * totalSelected;
+    // const totalAmount = quantity * rate * totalSelected;
     useEffect(() => {
         const computedQty = comments
             .split(/\r?\n/)

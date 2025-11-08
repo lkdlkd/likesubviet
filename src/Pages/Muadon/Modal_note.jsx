@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import Modal from "react-bootstrap/Modal";
+import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import { useParams } from "react-router-dom";
 
 export default function Modalnote({ modal_Show }) {
   const [show, setShow] = useState(false); // Trạng thái hiển thị modal

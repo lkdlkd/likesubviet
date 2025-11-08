@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-import Select from "react-select";
 import { loadingg } from "@/JS/Loading";
-import { getUid, addOrder, getServer } from "@/Utils/api";
+import { addOrder, getServer, getUid } from "@/Utils/api";
+import { useEffect, useMemo, useState } from "react";
+import Select from "react-select";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 export default function Ordernhanh() {
     // Các state của form
@@ -25,8 +24,6 @@ export default function Ordernhanh() {
     const [cmtqlt, setcomputedQty] = useState(0);
     const [ObjectLink, setObjectLink] = useState(""); // Lưu input gốc
     const [isConverting, setIsConverting] = useState(false);
-    const [searchService, setSearchService] = useState(null);
-    const navigate = useNavigate();
     const token = localStorage.getItem("token");
     let decoded = {};
     if (token) {
@@ -646,7 +643,6 @@ export default function Ordernhanh() {
                                         } else {
                                             setSelectedMagoi("");
                                         }
-                                        setSearchService(opt);
                                     }}
                                     placeholder="---Tìm dịch vụ---"
                                     isClearable

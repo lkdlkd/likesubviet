@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
 import Header from "@/Components/Header";
 import Menu from "@/Components/Menu";
+import { getCategories, getConfigWeb, getMe, getNotifications } from "@/Utils/api";
+import { useEffect, useState } from "react";
+import { Helmet } from 'react-helmet-async';
+import { Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { Helmet, HelmetProvider } from 'react-helmet-async';
-import Logout from "./Logout";
-import { getCategories, getMe, getNotifications, getConfigWeb } from "@/Utils/api";
 // import Widget from "./Widget";
 import Widget from "./Wingets";
 
@@ -117,7 +116,7 @@ const Layout = () => {
                         <div className="col-sm-6 my-1">
                             <strong>
                                 <p className="m-0 text-muted">
-                                    Copyright © {new Date().getFullYear()}. <a target="_blank">{Domain} - Hệ Thống Dịch Vụ MXH Số 1 Việt Nam</a> - Social Media Marketing.
+                                    Copyright © {new Date().getFullYear()}. <span target="_blank">{Domain} - Hệ Thống Dịch Vụ MXH Số 1 Việt Nam</span> - Social Media Marketing.
                                 </p>
                             </strong>
                         </div>
