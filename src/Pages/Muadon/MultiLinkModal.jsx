@@ -119,16 +119,10 @@ export default function MultiLinkModal({
         try {
             const res = await getUid({ link });
 
-            // API trả về format: {status: "success", uid: "100045876123438"}
-            if (res.status === "success" && res.uid) {
-                return res.uid;
-            }
-
             // Fallback cho format cũ nếu có
             if (res.success && res.uid) {
                 return res.uid;
             }
-
         } catch (error) {
         }
         return link; // Trả về link gốc nếu không chuyển được
@@ -650,14 +644,14 @@ export default function MultiLinkModal({
                             Đóng (Vẫn mua đơn)
                         </Button>
 
-                        <Button 
-                            variant="info" 
-                            size="sm" 
-                            onClick={handleMultiLinkSubmit} 
+                        <Button
+                            variant="info"
+                            size="sm"
+                            onClick={handleMultiLinkSubmit}
                             disabled={
-                                isSubmitting || 
-                                multiLinkList.length === 0 || 
-                                !selectedMagoi || 
+                                isSubmitting ||
+                                multiLinkList.length === 0 ||
+                                !selectedMagoi ||
                                 !quantity ||
                                 isProcessingLinks ||
                                 multiLinkList.some(item => item.isProcessing) // Disable nếu có link đang chuyển UID
@@ -698,13 +692,13 @@ export default function MultiLinkModal({
                     {(isProcessingLinks || multiLinkList.some(item => item.isProcessing)) && (
                         <div className="alert alert-info text-center mt-2">
                             <i className="fas fa-exchange-alt fa-spin me-2"></i>
-                            Đang chuyển đổi UID cho các link ({multiLinkList.filter(item => !item.isProcessing).length}/{multiLinkList.length} hoàn tất), 
+                            Đang chuyển đổi UID cho các link ({multiLinkList.filter(item => !item.isProcessing).length}/{multiLinkList.length} hoàn tất),
                             vui lòng chờ hoàn tất trước khi mua hàng.
                             <div className="progress mt-2" style={{ height: '4px' }}>
-                                <div 
-                                    className="progress-bar progress-bar-striped progress-bar-animated bg-info" 
-                                    style={{ 
-                                        width: `${multiLinkList.length > 0 ? (multiLinkList.filter(item => !item.isProcessing).length / multiLinkList.length) * 100 : 0}%` 
+                                <div
+                                    className="progress-bar progress-bar-striped progress-bar-animated bg-info"
+                                    style={{
+                                        width: `${multiLinkList.length > 0 ? (multiLinkList.filter(item => !item.isProcessing).length / multiLinkList.length) * 100 : 0}%`
                                     }}
                                 ></div>
                             </div>

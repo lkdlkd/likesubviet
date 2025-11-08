@@ -128,13 +128,15 @@ export default function Order() {
         const timer = setTimeout(async () => {
             try {
                 const res = await getUid({ link: rawLink });
-                if (res.status !== "error" && res.uid) {
+                if (res.success && res.uid) {
                     setConvertedUID(res.uid);
                     toast.success("Chuyển đổi UID thành công!");
                 } else {
+                    toast.error(res.message || "Chuyển đổi UID thất bại!");
                     setConvertedUID("");
                 }
             } catch (error) {
+                toast.error(error.message || "Chuyển đổi UID thất bại!");
                 setConvertedUID("");
             } finally {
                 setIsConverting(false);

@@ -281,14 +281,16 @@ export default function Ordernhanh() {
         const timer = setTimeout(async () => {
             try {
                 const res = await getUid({ link: rawLink });
-                if (res.status !== "error" && res.uid) {
+                if (res.success && res.uid) {
                     setConvertedUID(res.uid);
                     toast.success("Chuyển đổi UID thành công!");
 
                 } else {
+                    toast.error(res.message || "Chuyển đổi UID thất bại!");
                     setConvertedUID("");
                 }
             } catch (error) {
+                toast.error(error.message || "Chuyển đổi UID thất bại!");
                 setConvertedUID("");
             } finally {
                 setIsConverting(false);
@@ -366,14 +368,15 @@ export default function Ordernhanh() {
                 }
 
                 const res = await addOrder(payload, token);
-                loadingg("", false); // Đóng loading khi xong
-
-                await Swal.fire({
-                    title: "Thành công",
-                    text: "Mua dịch vụ thành công",
-                    icon: "success",
-                    confirmButtonText: "Xác nhận",
-                });
+                if (res.success) {
+                    loadingg("", false); // Đóng loading khi xong
+                    await Swal.fire({
+                        title: "Thành công",
+                        text: "Mua dịch vụ thành công",
+                        icon: "success",
+                        confirmButtonText: "Xác nhận",
+                    });
+                }
 
             } catch (error) {
                 loadingg("", false); // Đóng loading khi xong
