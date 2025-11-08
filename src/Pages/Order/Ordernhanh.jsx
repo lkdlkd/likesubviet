@@ -70,7 +70,7 @@ export default function Ordernhanh() {
             setSelectedType({
                 value: firstType,
                 label: (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {serverWithLogo && serverWithLogo.logo && (
                             <img src={serverWithLogo.logo} alt={firstType} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                         )}
@@ -87,7 +87,7 @@ export default function Ordernhanh() {
                 setSelectedCategory({
                     value: firstCategory,
                     label: (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             {serverWithLogoCat && serverWithLogoCat.logo && (
                                 <img src={serverWithLogoCat.logo} alt={firstCategory} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                             )}
@@ -121,7 +121,7 @@ export default function Ordernhanh() {
         return {
             value: type,
             label: (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {serverWithLogo && serverWithLogo.logo && (
                         <img src={serverWithLogo.logo} alt={type} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                     )}
@@ -148,7 +148,7 @@ export default function Ordernhanh() {
             return {
                 value: cat,
                 label: (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {serverWithLogo && serverWithLogo.logo && (
                             <img src={serverWithLogo.logo} alt={cat} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                         )}
@@ -180,7 +180,7 @@ export default function Ordernhanh() {
             setSelectedType({
                 value: option.value,
                 label: (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {serverWithLogo && serverWithLogo.logo && (
                             <img src={serverWithLogo.logo} alt={option.value} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                         )}
@@ -197,7 +197,7 @@ export default function Ordernhanh() {
                 setSelectedCategory({
                     value: firstCategory,
                     label: (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             {serverWithLogoCat && serverWithLogoCat.logo && (
                                 <img src={serverWithLogoCat.logo} alt={firstCategory} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                             )}
@@ -450,12 +450,12 @@ export default function Ordernhanh() {
 
         let ketQua = docSoNguyen(phanNguyen);
 
-        if (phanThapPhanStr) {
-            ketQua += " phẩy";
-            for (let digit of phanThapPhanStr) {
-                ketQua += ` ${chuSo[Number(digit)]}`;
-            }
-        }
+        // if (phanThapPhanStr) {
+        //     ketQua += " phẩy";
+        //     for (let digit of phanThapPhanStr) {
+        //         ketQua += ` ${chuSo[Number(digit)]}`;
+        //     }
+        // }
 
         // ✅ Viết hoa chữ cái đầu & chuẩn dấu phẩy
         ketQua = ketQua.charAt(0).toUpperCase() + ketQua.slice(1);
@@ -484,11 +484,11 @@ export default function Ordernhanh() {
                     <span className="font-semibold"> {s.logo && (
                         <img src={s.logo} alt={s.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                     )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} {s.name} <span className="badge bg-primary">{(() => {
-                            const rate = String(s.rate);
-                            if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
-                            if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
-                            return rate; // giữ nguyên nếu chỉ là số thường
-                        })()}đ</span>
+                        const rate = String(s.rate);
+                        if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
+                        if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
+                        return rate; // giữ nguyên nếu chỉ là số thường
+                    })()}đ</span>
                         <span className={`badge ms-1 ${s.isActive ? 'bg-success' : 'bg-danger'}`}>{s.isActive ? " Hoạt động" : " Không hoạt động"}</span>
                         {s.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}
                         {s.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
@@ -617,7 +617,7 @@ export default function Ordernhanh() {
                                             setSelectedType(opt.server.type ? {
                                                 value: opt.server.type,
                                                 label: (
-                                                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                    <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                         {opt.server.logo && (
                                                             <img src={opt.server.logo} alt={opt.server.type} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                                                         )}
@@ -630,7 +630,7 @@ export default function Ordernhanh() {
                                             setSelectedCategory(opt.server.category ? {
                                                 value: opt.server.category,
                                                 label: (
-                                                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                    <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                         {opt.server.logo && (
                                                             <img src={opt.server.logo} alt={opt.server.category} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                                                         )}
@@ -850,7 +850,7 @@ export default function Ordernhanh() {
                                                 <h3 className="alert-heading">
                                                     Tổng thanh toán:{" "}
                                                     <span className="text-danger">
-                                                        {Number(totalCost).toLocaleString("en-US")}
+                                                        {Math.floor(Number(totalCost)).toLocaleString("en-US")}
                                                     </span>{" "}
                                                     VNĐ
                                                 </h3>

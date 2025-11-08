@@ -954,6 +954,8 @@ export default function Dichvupage() {
                     <option value={50}>50</option>
                     <option value={100}>100</option>
                     <option value={500}>500</option>
+                    <option value={1000}>1000</option>
+                    <option value={2000}>2000</option>
 
                   </select>
                 </div>
@@ -1164,6 +1166,12 @@ export default function Dichvupage() {
                                                         <span className="badge bg-success">Hoạt động</span>
                                                       ) : (
                                                         <span className="badge bg-danger">Đóng</span>
+                                                      )}
+                                                      <br />
+                                                      {serverItem.status ? (
+                                                        <span className="badge bg-success ms-1">Hiện</span>
+                                                      ) : (
+                                                        <span className="badge bg-danger ms-1">Ẩn</span>
                                                       )}
                                                     </li>
                                                   </ul>

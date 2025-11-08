@@ -590,8 +590,7 @@ const Danhsachdon = () => {
                                                 <th>Thông tin</th>
                                                 <th>Trạng thái</th>
                                                 <th>Bình luận</th>
-                                                <th>Ngày tạo</th>
-                                                <th>Thời gian cập nhật</th>
+                                                <th>Thời gian</th>
                                                 <th>Ghi chú</th>
                                             </tr>
                                         </thead>
@@ -752,14 +751,6 @@ const Danhsachdon = () => {
                                                                     {/* {Number(order.totalCost).toLocaleString("en-US")} */}
                                                                 </li>
                                                             </ul>
-                                                            {/* <td>{order.start}</td>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <span>Bắt đầu</span>
-                                                    <span>Đã chạy</span>
-                                                    <span>Số lượng mua</span>
-                                                    <span>Giá</span> */}
                                                         </td>
 
                                                         {/* <td>{Number(order.totalCost).toLocaleString("en-US")}</td> */}
@@ -795,24 +786,23 @@ const Danhsachdon = () => {
                                                             </textarea>
                                                         </td>
                                                         <td>
-                                                            {new Date(order.createdAt).toLocaleString("vi-VN", {
+                                                            <span> {new Date(order.createdAt).toLocaleString("vi-VN", {
                                                                 day: "2-digit",
                                                                 month: "2-digit",
                                                                 year: "numeric",
                                                                 hour: "2-digit",
                                                                 minute: "2-digit",
                                                                 second: "2-digit",
-                                                            })}
-                                                        </td>
-                                                        <td>
-                                                            {new Date(order.updatedAt).toLocaleString("vi-VN", {
+                                                            })}</span>
+                                                            <br />
+                                                            <span> {new Date(order.updatedAt).toLocaleString("vi-VN", {
                                                                 day: "2-digit",
                                                                 month: "2-digit",
                                                                 year: "numeric",
                                                                 hour: "2-digit",
                                                                 minute: "2-digit",
                                                                 second: "2-digit",
-                                                            })}
+                                                            })}</span>
                                                         </td>
                                                         <td style={{
                                                             maxWidth: "250px",

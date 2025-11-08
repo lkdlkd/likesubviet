@@ -25,6 +25,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     cancel: "off",
     isActive: true,
     ischeck: false,
+    status : true, 
     thutu: "",
   });
 
@@ -37,6 +38,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     serviceName: "",
     serviceId: "",
     isActive: true,
+    status : true,
     thutu: "",
   });
 
@@ -91,6 +93,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       refil: formData.refil,
       cancel: formData.cancel,
       isActive: formData.isActive,
+      status : formData.status,
       thutu: formData.thutu,
       ischeck: formData.ischeck,
     };
@@ -416,7 +419,6 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
               </div>
               <div className="card-body">
                 <div className="row g-3 mb-3">
-
                   <div className="col-md-6">
                     <label className="form-label fw-bold">
                       <i className="fas fa-toggle-on me-1 text-primary"></i>
@@ -435,6 +437,27 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                     >
                       <option value="true">🟢 Hoạt động</option>
                       <option value="false">🔴 Đóng</option>
+                    </select>
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">
+                      <i className="fas fa-toggle-on me-1 text-primary"></i>
+                      Trạng thái hiển thị
+                    </label>
+                    <select
+                      name="status"
+                      value={formData.status ? "true" : "false"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          status: e.target.value === "true",
+                        })
+                      }
+                      className="form-select form-select-lg"
+                    >
+                      <option value="true">Hiện</option>
+                      <option value="false">Ẩn</option>
                     </select>
                   </div>
 

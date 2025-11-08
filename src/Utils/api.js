@@ -308,9 +308,12 @@ export const getUserHistory = async (token, page = 1, limit = 10, orderId, searc
 };
 
 // Server
-export const getServer = async (token, page = 1, limit = 100000, search = "") => {
+export const getServer = async (token, page, limit, search = "") => {
   // Xây dựng query string
-  let queryString = `?page=${page}&limit=${limit}`;
+  let queryString = "";
+  if (page && limit) {
+    queryString = `?page=${page}&limit=${limit}`;
+  }
   if (search) queryString += `&search=${encodeURIComponent(search)}`;
 
   const response = await fetch(`${API_BASE}/server${queryString}`, {

@@ -369,8 +369,8 @@ const Dondamua = ({ category, showcmt }) => {
                                         <th>Trạng thái</th>
                                         {showcmt && <th>Bình luận</th>}
                                         {/* <th>Bình luận</th> */}
-                                        <th>Ngày tạo</th>
-                                        <th>Thời gian cập nhật</th>
+                                        <th>Thời gian</th>
+                                        {/* <th>Thời gian cập nhật</th> */}
                                         <th>Ghi chú</th>
                                     </tr>
                                 </thead>
@@ -560,25 +560,25 @@ const Dondamua = ({ category, showcmt }) => {
                                                     </td>
                                                 )}
                                                 <td>
-                                                    {new Date(order.createdAt).toLocaleString("vi-VN", {
+                                                    <span> {new Date(order.createdAt).toLocaleString("vi-VN", {
                                                         day: "2-digit",
                                                         month: "2-digit",
                                                         year: "numeric",
                                                         hour: "2-digit",
                                                         minute: "2-digit",
                                                         second: "2-digit",
-                                                    })}
-                                                </td>
-                                                <td>
-                                                    {new Date(order.updatedAt).toLocaleString("vi-VN", {
+                                                    })}</span>
+                                                    <br />
+                                                    <span> {new Date(order.updatedAt).toLocaleString("vi-VN", {
                                                         day: "2-digit",
                                                         month: "2-digit",
                                                         year: "numeric",
                                                         hour: "2-digit",
                                                         minute: "2-digit",
                                                         second: "2-digit",
-                                                    })}
+                                                    })}</span>
                                                 </td>
+
                                                 <td style={{
                                                     maxWidth: "250px",
                                                     whiteSpace: "normal",

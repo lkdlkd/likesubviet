@@ -374,12 +374,12 @@ export default function Order() {
 
         let ketQua = docSoNguyen(phanNguyen);
 
-        if (phanThapPhanStr) {
-            ketQua += " phẩy";
-            for (let digit of phanThapPhanStr) {
-                ketQua += ` ${chuSo[Number(digit)]}`;
-            }
-        }
+        // if (phanThapPhanStr) {
+        //     ketQua += " phẩy";
+        //     for (let digit of phanThapPhanStr) {
+        //         ketQua += ` ${chuSo[Number(digit)]}`;
+        //     }
+        // }
 
         // ✅ Viết hoa chữ cái đầu & chuẩn dấu phẩy
         ketQua = ketQua.charAt(0).toUpperCase() + ketQua.slice(1);
@@ -570,7 +570,7 @@ export default function Order() {
                                                                     {(() => {
                                                                         const rate = String(server.rate);
                                                                         if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
-                                                                        if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
+                                                                        if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi , thành .
                                                                         return rate; // giữ nguyên nếu chỉ là số thường
                                                                     })()}đ
                                                                 </span>
@@ -821,7 +821,7 @@ export default function Order() {
                                                                 <h3 className="alert-heading">
                                                                     Tổng thanh toán:{" "}
                                                                     <span className="text-danger">
-                                                                        {Number(totalCost).toLocaleString("en-US")}
+                                                                       {Math.floor(Number(totalCost)).toLocaleString("en-US")}
                                                                     </span>{" "}
                                                                     đ
                                                                     {/* -{" "}

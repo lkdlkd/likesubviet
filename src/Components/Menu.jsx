@@ -529,7 +529,7 @@ function MenuUser({ user, categories, configWeb }) {
                                                 {/* <span className="pc-micon">
                                                 <i className="ti ti-currency-dollar fs-4 text-secondary"></i>
                                             </span> */}
-                                                <span className="pc-mtext">Bảng giá</span>
+                                                <span className="pc-mtext">Bảng giá và cấp bậc</span>
                                             </Link>
                                         </li>
                                     </ul>
