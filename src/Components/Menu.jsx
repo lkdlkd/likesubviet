@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { SlArrowDown, SlArrowRight } from "react-icons/sl";
 import { Link, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
-import { SlArrowRight } from "react-icons/sl";
-import { SlArrowDown } from "react-icons/sl";
 function MenuUser({ user, categories, configWeb }) {
     const navigate = useNavigate(); // Khởi tạo useNavigate
     const [activeMenu, setActiveMenu] = useState(null);
