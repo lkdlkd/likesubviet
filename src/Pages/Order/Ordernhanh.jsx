@@ -483,7 +483,7 @@ export default function Ordernhanh() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span className="font-semibold"> {s.logo && (
                         <img src={s.logo} alt={s.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
-                    )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} {s.name} <span className="badge bg-primary">{(() => {
+                    )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} <span style={{lineHeight: "1.2",verticalAlign: "middle"}} dangerouslySetInnerHTML={{ __html: s.name }} /> <span className="badge bg-primary">{(() => {
                         const rate = String(s.rate);
                         if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
                         if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
@@ -578,7 +578,7 @@ export default function Ordernhanh() {
                     <span className="font-semibold"> {server.logo && (
                         <img src={server.logo} alt={server.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                     )}
-                        <strong className="badge bg-info">[{server.Magoi}]</strong> - {server.maychu} {server.name} <span className="badge bg-primary">{(() => {
+                        <strong className="badge bg-info">[{server.Magoi}]</strong> - {server.maychu} <span style={{lineHeight: "1.2",verticalAlign: "middle"}} dangerouslySetInnerHTML={{ __html: server.name }} /> <span className="badge bg-primary">{(() => {
                             const rate = String(server.rate);
                             if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
                             if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,

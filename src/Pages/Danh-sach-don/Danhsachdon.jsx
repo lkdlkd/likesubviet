@@ -739,7 +739,7 @@ const Danhsachdon = () => {
                                                             overflowWrap: "break-word",
                                                         }}>
                                                             {order.maychu}
-                                                            {order.namesv}
+                                                            <span dangerouslySetInnerHTML={{ __html: order.namesv }} />
                                                         </td>
                                                         <td>
                                                             <ul>

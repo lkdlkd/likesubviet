@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useMemo } from "react";
-import Table from "react-bootstrap/Table";
-import Select from "react-select";
-import { getServer } from "@/Utils/api";
-import { useNavigate, Link } from "react-router-dom";
 import { loadingg } from "@/JS/Loading";
-import { useOutletContext } from "react-router-dom";
+import { getServer } from "@/Utils/api";
+import { useEffect, useMemo, useState } from "react";
+import Table from "react-bootstrap/Table";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import Select from "react-select";
 const Banggia = () => {
     const [servers, setServers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -431,7 +430,7 @@ const Banggia = () => {
                                                                                             wordWrap: "break-word",
                                                                                             overflowWrap: "break-word",
                                                                                             fontSize: "0.85rem"
-                                                                                        }}>{server.maychu} {server.name}</td>
+                                                                                        }}>{server.maychu} <span dangerouslySetInnerHTML={{ __html: server.name }} /></td>
                                                                                         <td className="text-end" style={{ fontSize: "0.85rem" }}>
                                                                                             {(() => {
                                                                                                 const rate = String(server.rate);

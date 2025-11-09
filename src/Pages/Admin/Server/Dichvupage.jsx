@@ -1140,7 +1140,7 @@ export default function Dichvupage() {
                                                       <b>Mã gói</b> : {serverItem.Magoi}
                                                     </li>
                                                     <li>
-                                                      <b>Tên</b> : {serverItem.maychu} {serverItem.name}
+                                                      <b>Tên</b> : {serverItem.maychu} <span dangerouslySetInnerHTML={{ __html: serverItem.name }} />
                                                     </li>
                                                     <li>
                                                       <b>Nền tảng</b> : {serverItem.type}

@@ -928,7 +928,7 @@ const OrderAdmin = () => {
                           </td>
                           <td style={{ maxWidth: "250px", whiteSpace: "normal", wordWrap: "break-word", overflowWrap: "break-word" }}>
                             {order.maychu}
-                            {order.namesv}
+                            <span dangerouslySetInnerHTML={{ __html: order.namesv }} />
                           </td>
                           <td>
                             <ul>
@@ -1394,7 +1394,7 @@ const OrderAdmin = () => {
           </Modal.Footer>
         </Modal>
       </div>
-      
+
     </>
   );
 };

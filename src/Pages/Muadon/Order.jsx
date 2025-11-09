@@ -566,7 +566,16 @@ export default function Order() {
                                                                 {server.maychu !== "" && server.maychu !== " " && server.maychu !== "   " && (
                                                                     <span className="badge bg-success ">{server.maychu} </span>
                                                                 )}
-                                                                <span className="font-semibold " style={{ padding: "0.2rem 0rem" }}> {server.name} </span>
+                                                                {" "}
+                                                                <span
+                                                                    className="font-semibold"
+                                                                    style={{
+                                                                        lineHeight: "1.2",
+                                                                        verticalAlign: "middle"
+                                                                    }}
+                                                                    dangerouslySetInnerHTML={{ __html: server.name }}
+                                                                ></span>
+                                                                {" "}
                                                                 <span className="badge bg-primary ">
                                                                     {/* {Number(server.rate).toLocaleString("en-US")}đ */}
                                                                     {/* {server.rate}đ */}

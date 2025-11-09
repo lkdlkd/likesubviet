@@ -479,18 +479,18 @@ export default function ThongkePage() {
                     </div>
                 </div>
 
-            <div className="row">
-                {stats.map((stat, index) => (
-                    <div className="col-md-3" key={index}>
-                        <div className="card">
-                            <div className="card-body p-3">
-                                <div className="d-flex align-items-center">
-                                    <div className={`avtar ${stat.bg} me-3`}>
-                                        <i className={`${stat.icon} fs-2`}></i>
-                                    </div>
-                                    <div>
-                                        <h4 className="mb-0"> {Math.floor(Number(stat.value)).toLocaleString("en-US")}
-                                            {/* {Number(stat.value).toLocaleString("en-US")} */}
+                <div className="row">
+                    {stats.map((stat, index) => (
+                        <div className="col-md-3" key={index}>
+                            <div className="card">
+                                <div className="card-body p-3">
+                                    <div className="d-flex align-items-center">
+                                        <div className={`avtar ${stat.bg} me-3`}>
+                                            <i className={`${stat.icon} fs-2`}></i>
+                                        </div>
+                                        <div>
+                                            <h4 className="mb-0"> {Math.floor(Number(stat.value)).toLocaleString("en-US")}
+                                                {/* {Number(stat.value).toLocaleString("en-US")} */}
                                             </h4>
                                             <p className="stats-label mb-0 text-opacity-75 capitalize">{stat.label}</p>
                                             {stat.extra}
@@ -611,7 +611,8 @@ export default function ThongkePage() {
                                                     whiteSpace: "normal",
                                                     wordWrap: "break-word",
                                                     overflowWrap: "break-word",
-                                                }}>{item.namesv}</td>
+                                                }}><span dangerouslySetInnerHTML={{ __html: item.namesv }} />
+                                                </td>
                                                 <td>{item.totalOrders}</td>
                                                 <td>{Math.floor(Number(item.totalAmount)).toLocaleString('en-US')}</td>
                                                 <td>{item.partialCount}</td>
@@ -625,7 +626,7 @@ export default function ThongkePage() {
                     </div>
                 )}
             </div>
-        
+
         </>
     );
 }
