@@ -1156,7 +1156,7 @@ export default function Dichvupage() {
                                                       {serverItem.isActive ? (
                                                         <span className="badge bg-success">Hoạt động</span>
                                                       ) : (
-                                                        <span className="badge bg-danger">Đóng</span>
+                                                        <span className="badge bg-danger">Bảo trì</span>
                                                       )}
                                                       <br />
                                                       {serverItem.status ? (
@@ -1378,7 +1378,7 @@ export default function Dichvupage() {
                                   {serverItem.isActive ? (
                                     <span className="badge bg-success">Hoạt động</span>
                                   ) : (
-                                    <span className="badge bg-danger">Đóng</span>
+                                    <span className="badge bg-danger">Bảo trì</span>
                                   )}
                                 </li>
                               </ul>

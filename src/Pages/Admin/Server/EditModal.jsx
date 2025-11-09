@@ -436,7 +436,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       className="form-select form-select-lg"
                     >
                       <option value="true">🟢 Hoạt động</option>
-                      <option value="false">🔴 Đóng</option>
+                      <option value="false">🔴 Bảo trì</option>
                     </select>
                   </div>
 

@@ -489,7 +489,7 @@ export default function Ordernhanh() {
                         if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
                         return rate; // giữ nguyên nếu chỉ là số thường
                     })()}đ</span>
-                        <span className={`badge ms-1 ${s.isActive ? 'bg-success' : 'bg-danger'}`}>{s.isActive ? " Hoạt động" : " Không hoạt động"}</span>
+                        <span className={`badge ms-1 ${s.isActive ? 'bg-success' : 'bg-danger'}`}>{s.isActive ? " Hoạt động" : " Bảo trì"}</span>
                         {s.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}
                         {s.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
                     </span>
@@ -585,7 +585,7 @@ export default function Ordernhanh() {
                             return rate; // giữ nguyên nếu chỉ là số thường
                         })()}đ
                         </span>
-                        <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>{server.isActive ? " Hoạt động" : " Không hoạt động"}</span>
+                        <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>{server.isActive ? " Hoạt động" : " Bảo trì"}</span>
                         {server.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}
                         {server.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
                     </span>

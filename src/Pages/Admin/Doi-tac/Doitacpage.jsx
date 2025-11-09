@@ -49,7 +49,7 @@ export default function Doitacpage() {
         <div style="text-align:left">
           <p style="margin-bottom:8px;font-weight: bold;font-size: 18px">Thao tác này sẽ:</p>
           <ul style="padding-left:18px; margin:0 0 8px">
-            <li><b style="color:#dc3545">Đóng toàn bộ máy chủ</b> liên kết với đối tác này (không hoạt động).</li>
+            <li><b style="color:#dc3545">Đóng toàn bộ máy chủ</b> liên kết với đối tác này (Bảo trì).</li>
             <li><b style="color:#dc3545">Đơn hàng thuộc đối tác này sẽ không còn cập nhật trạng thái</b></li>
             <li>Hành động <b style="color:#dc3545">không thể hoàn tác</b>.</li>
           </ul>
