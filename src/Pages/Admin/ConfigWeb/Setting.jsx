@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { loadingg } from "@/JS/Loading";
+import Swal from "sweetalert2";
 
 // Suppress ResizeObserver errors
 const debounce = (func, wait) => {
@@ -71,6 +72,11 @@ const Setting = () => {
         ],
         viewluotban: false,
         autoactive: false,
+        autoremove: false, // Thêm trường autoremove
+        autoDeleteMonths: "", // Thêm trường autoDeleteMonths
+        deleteOrders: false, // Xóa đơn hàng
+        deleteUsers: false, // Xóa user không nạp tiền
+        deleteHistory: false, // Xóa lịch sử
         cuphap: "", // Thêm trường cuphap
         daily: "", // Thêm trường daily (đại lý)
         distributor: "", // Thêm trường distributor (nhà phân phối)
@@ -91,6 +97,11 @@ const Setting = () => {
                 distributor: config.data.distributor || "", // Lấy giá trị distributor từ API
                 viewluotban: config.data.viewluotban || false, // Lấy giá trị viewluotban từ API
                 autoactive: config.data.autoactive || false, // Lấy giá trị autoactive từ API
+                autoremove: config.data.autoremove || false, // Lấy giá trị autoremove từ API
+                autoDeleteMonths: config.data.autoDeleteMonths || "", // Lấy giá trị autoDeleteMonths từ API
+                deleteOrders: config.data.deleteOrders || false, // Xóa đơn hàng
+                deleteUsers: config.data.deleteUsers || false, // Xóa user không nạp tiền
+                deleteHistory: config.data.deleteHistory || false, // Xóa lịch sử
             });
         } catch (error) {
             toast.error("Không thể tải cấu hình website!");
@@ -122,6 +133,11 @@ const Setting = () => {
                 distributor: formData.distributor, // Gửi trường distributor lên API
                 viewluotban: formData.viewluotban, // Gửi trường viewluotban lên API
                 autoactive: formData.autoactive, // Gửi trường autoactive lên API
+                autoremove: formData.autoremove, // Gửi trường autoremove lên API
+                autoDeleteMonths: formData.autoDeleteMonths, // Gửi trường autoDeleteMonths lên API
+                deleteOrders: formData.deleteOrders, // Xóa đơn hàng
+                deleteUsers: formData.deleteUsers, // Xóa user không nạp tiền
+                deleteHistory: formData.deleteHistory, // Xóa lịch sử
             };
             await updateConfigWeb(sanitizedData, token);
             fetchConfig(); // Tải lại cấu hình sau khi cập nhật
@@ -359,7 +375,7 @@ const Setting = () => {
                                                     <option value="true">Hiển thị</option>
                                                 </select>
                                             </div>
-                                            <div className="mb-0">
+                                            <div className="mb-3">
                                                 <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
                                                     <i className="fas fa-sync-alt me-1 text-success"></i>
                                                     Trạng thái dịch vụ tự động theo nguồn
@@ -373,9 +389,9 @@ const Setting = () => {
                                                     <option value="true">Bật</option>
                                                 </select>
                                             </div>
-                                            <div className="mb-0">
+                                            <div className="mb-3">
                                                 <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fab fa-telegram me-2"></i>
+                                                    <i className="fab fa-telegram me-1"></i>
                                                     Link Bot Telegram
                                                 </label>
                                                 <input
@@ -386,9 +402,120 @@ const Setting = () => {
                                                     placeholder="https://t.me/xxxxxx_bot"
                                                 />
                                             </div>
-                                            <div className="card-body p-3">
-
+                                            <div className="mb-3">
+                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                    <i className="fas fa-trash-alt me-1 text-danger"></i>
+                                                    Tự động xóa dữ liệu cũ
+                                                </label>
+                                                <select
+                                                    className="form-select"
+                                                    value={formData.autoremove ? "true" : "false"}
+                                                    onChange={(e) => {
+                                                        const newValue = e.target.value === "true";
+                                                        if (newValue) {
+                                                            // Hiển thị cảnh báo khi bật
+                                                            Swal.fire({
+                                                                title: 'Bạn có chắc chắn muốn bật tính năng xóa tự động?',
+                                                                text: "Dữ liệu đã xóa sẽ KHÔNG THỂ KHÔI PHỤC!\n\nVui lòng cân nhắc kỹ trước khi bật tính năng này.",
+                                                                icon: 'warning',
+                                                                showCancelButton: true,
+                                                                confirmButtonColor: '#d33',
+                                                                cancelButtonColor: '#3085d6',
+                                                                confirmButtonText: 'Có, tôi chắc chắn!'
+                                                            }).then((result) => {
+                                                                if (result.isConfirmed) {
+                                                                    setFormData({ ...formData, autoremove: true });
+                                                                }
+                                                            });
+                                                        } else {
+                                                            setFormData({ ...formData, autoremove: false });
+                                                        }
+                                                    }}
+                                                >
+                                                    <option value="false">Tắt</option>
+                                                    <option value="true">Bật</option>
+                                                </select>
+                                                {formData.autoremove && (
+                                                    <div className="alert alert-warning mt-2 mb-0 py-2 px-3" role="alert" style={{ fontSize: '0.75rem' }}>
+                                                        <i className="fas fa-exclamation-triangle me-1"></i>
+                                                        <strong>Lưu ý:</strong> Dữ liệu đã xóa sẽ không thể khôi phục!
+                                                    </div>
+                                                )}
                                             </div>
+                                            {formData.autoremove && (
+                                                <div className="mb-0">
+                                                    <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                        <i className="fas fa-calendar-alt me-1 text-warning"></i>
+                                                        Thời gian xóa tự động
+                                                    </label>
+                                                    <div className="input-group mb-2">
+                                                        <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            value={formData.autoDeleteMonths}
+                                                            onChange={(e) => setFormData({ ...formData, autoDeleteMonths: e.target.value })}
+                                                            placeholder="3"
+                                                            min="1"
+                                                            max="12"
+                                                        />
+                                                        <span className="input-group-text">Tháng</span>
+                                                    </div>
+                                                    <small className="text-muted d-block mb-3" style={{ fontSize: '0.75rem' }}>
+                                                        <i className="fas fa-info-circle me-1"></i>
+                                                        Dữ liệu cũ hơn {formData.autoDeleteMonths || 3} tháng sẽ bị xóa tự động hằng ngày
+                                                    </small>
+
+                                                    {/* Tùy chọn xóa */}
+                                                    <div className="border rounded p-3" style={{ backgroundColor: '#f8f9fa' }}>
+                                                        <label className="form-label fw-semibold mb-2" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-list-check me-1 text-primary"></i>
+                                                            Chọn dữ liệu cần xóa
+                                                        </label>
+
+                                                        <div className="form-check mb-2">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                id="deleteOrders"
+                                                                checked={formData.deleteOrders}
+                                                                onChange={(e) => setFormData({ ...formData, deleteOrders: e.target.checked })}
+                                                            />
+                                                            <label className="form-check-label" htmlFor="deleteOrders" style={{ fontSize: '0.85rem' }}>
+                                                                <i className="fas fa-shopping-cart me-1 text-danger"></i>
+                                                                Xóa đơn hàng cũ
+                                                            </label>
+                                                        </div>
+
+                                                        <div className="form-check mb-2">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                id="deleteUsers"
+                                                                checked={formData.deleteUsers}
+                                                                onChange={(e) => setFormData({ ...formData, deleteUsers: e.target.checked })}
+                                                            />
+                                                            <label className="form-check-label" htmlFor="deleteUsers" style={{ fontSize: '0.85rem' }}>
+                                                                <i className="fas fa-user-times me-1 text-warning"></i>
+                                                                Xóa user không nạp tiền
+                                                            </label>
+                                                        </div>
+
+                                                        <div className="form-check mb-0">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                id="deleteHistory"
+                                                                checked={formData.deleteHistory}
+                                                                onChange={(e) => setFormData({ ...formData, deleteHistory: e.target.checked })}
+                                                            />
+                                                            <label className="form-check-label" htmlFor="deleteHistory" style={{ fontSize: '0.85rem' }}>
+                                                                <i className="fas fa-history me-1 text-info"></i>
+                                                                Xóa lịch sử hoạt động
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
