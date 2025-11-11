@@ -312,11 +312,11 @@ export const getServer = async (token, page, limit, search = "") => {
   // Xây dựng query string
   let queryString = "";
   if (page && limit) {
-    queryString = `?page=${page}&limit=${limit}`;
+    queryString = `page=${page}&limit=${limit}`;
   }
   if (search) queryString += `&search=${encodeURIComponent(search)}`;
 
-  const response = await fetch(`${API_BASE}/server${queryString}`, {
+  const response = await fetch(`${API_BASE}/server?${queryString}`, {
     method: "GET",
     headers: withNoStore({ Authorization: `Bearer ${token}` }),
     cache: "no-store",
