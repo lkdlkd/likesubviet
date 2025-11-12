@@ -30,6 +30,7 @@ import Banggia from "./Pages/Banggia/Banggia";
 import ConfigTelePage from "./Pages/Admin/Config-tele/ConfigTelePage";
 import Refund from "./Pages/Admin/Hoantien/Refund";
 import OrderAdmin from "./Pages/Admin/Donhang/OrderAdmin";
+import Webrieng from "./Pages/Webrieng/Webrieng";
 function App() {
   return (
     <AuthProvider>
@@ -85,6 +86,7 @@ function App() {
             <Route path="/order/:path" element={<Order />} />
             <Route path="/tai-lieu-api" element={<Tailieuapi />} />
             <Route path="/bang-gia" element={<Banggia />} />
+            <Route path="/tao-web-rieng" element={<Webrieng />} />
           </Route>
 
           {/* Routes cho Admin Layout */}

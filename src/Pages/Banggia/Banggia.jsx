@@ -57,7 +57,24 @@ const Banggia = () => {
             { value: '', label: 'Tất cả' },
             ...sorted.map((s) => ({
                 value: s.Magoi,
-                label: `${s.Magoi} - ${s.maychu} ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
+                label: (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className="font-semibold"> {s.logo && (
+                            <img src={s.logo} alt={s.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                        )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} <span style={{ lineHeight: "1.2", verticalAlign: "middle" }} dangerouslySetInnerHTML={{ __html: s.name }} /> <span className="badge bg-primary">{(() => {
+                                const rate = String(s.rate);
+                                if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
+                                if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
+                                return rate; // giữ nguyên nếu chỉ là số thường
+                            })()}đ
+                            </span>
+                            <span className={`badge ms-1 ${s.isActive ? 'bg-success' : 'bg-danger'}`}>{s.isActive ? " Hoạt động" : " Bảo trì"}</span>
+                            {s.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}
+                            {s.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
+                        </span>
+
+                    </div>
+                ),
 
                 // label: `${s.category ? `[${s.category}] ` : ''}${s.Magoi} - ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
                 ...s

@@ -519,6 +519,14 @@ function MenuUser({ user, categories, configWeb }) {
                                             </Link>
                                         </li>
                                         <li className="pc-item">
+                                            <Link to="/tao-web-rieng" className="pc-link"
+                                                onClick={() => handleNavigation()}
+                                                style={{ cursor: "pointer" }}
+                                            >
+                                                <span className="pc-mtext">Tạo Web Riêng</span>
+                                            </Link>
+                                        </li>
+                                        <li className="pc-item">
                                             <Link to="/bang-gia" className="pc-link"
                                                 onClick={() => handleNavigation()}
                                                 style={{ cursor: "pointer" }}
@@ -529,6 +537,7 @@ function MenuUser({ user, categories, configWeb }) {
                                                 <span className="pc-mtext">Bảng giá và cấp bậc</span>
                                             </Link>
                                         </li>
+
                                     </ul>
                                 )}
                             </li>
