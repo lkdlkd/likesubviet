@@ -104,7 +104,7 @@ const Webrieng = () => {
                     fontSize: "0.9rem"
                 }}>
                     <i className="fas fa-tag me-2"></i>
-                    <strong>Phí tạo:</strong> 100.000đ/1 Tháng
+                    <strong>Phí tạo:</strong> 100.000đ/1 Tháng ( Có thể thay đổi , liên hệ admin để biết thêm chi tiết )
                 </div>
             </motion.div>
 
