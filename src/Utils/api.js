@@ -436,12 +436,13 @@ export const addOrder = async (data, token) => {
   return handleResponse(response);
 };
 
-export const getOrders = async (token, page = 1, limit = 10, category = "", search = "", status = "") => {
+export const getOrders = async (token, page = 1, limit = 10, category = "", search = "", status = "" , orderTay = "") => {
   // Xây dựng query string thủ công
   let queryString = `?page=${page}&limit=${limit}`;
   if (category) queryString += `&category=${encodeURIComponent(category)}`;
   if (search) queryString += `&search=${encodeURIComponent(search)}`;
   if (status) queryString += `&status=${encodeURIComponent(status)}`;
+  if (orderTay) queryString += `&orderTay=${encodeURIComponent(orderTay)}`;
 
   const response = await fetch(`${API_BASE}/order${queryString}`, {
     method: "GET",

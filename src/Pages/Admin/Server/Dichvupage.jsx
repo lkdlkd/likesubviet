@@ -1220,6 +1220,13 @@ export default function Dichvupage() {
                                                         <span className="badge bg-secondary ms-1">OFF</span>
                                                       )}
                                                     </li>
+                                                    <li>
+                                                      <b>Đơn tay</b>: {serverItem.ordertay === true ? (
+                                                        <span className="badge bg-success ms-1">ON</span>
+                                                      ) : (
+                                                        <span className="badge bg-secondary ms-1">OFF</span>
+                                                      )}
+                                                    </li>
                                                   </ul>
                                                 </td>
                                                 <td style={{
@@ -1431,6 +1438,13 @@ export default function Dichvupage() {
                                 </li>
                                 <li>
                                   <b>Mua không check giá</b>: {serverItem.ischeck === true ? (
+                                    <span className="badge bg-success ms-1">ON</span>
+                                  ) : (
+                                    <span className="badge bg-secondary ms-1">OFF</span>
+                                  )}
+                                </li>
+                                <li>
+                                  <b>Đơn tay</b>: {serverItem.ordertay === true ? (
                                     <span className="badge bg-success ms-1">ON</span>
                                   ) : (
                                     <span className="badge bg-secondary ms-1">OFF</span>
