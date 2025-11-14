@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { loadingg } from "@/JS/Loading";
-import { min } from "moment";
 
 export default function Adddoitac({
   token,
@@ -15,9 +14,16 @@ export default function Adddoitac({
   onUpdate,
   onClose,
 }) {
-  // Lấy URL API cố định từ biến môi trường (ưu tiên REACT_APP_, fallback NEXT_PUBLIC_)
-  const ENV_ALLOWED = (process.env.REACT_APP_ALLOWED_API_URL || process.env.NEXT_PUBLIC_ALLOWED_API_URL || "").trim();
-  const ALLOWED_API_URL = `${ENV_ALLOWED}/api/v2` || null; // nếu không thiết lập biến môi trường thì bỏ giới hạn
+  const baseUrl = (
+    process.env.REACT_APP_ALLOWED_API_URL || process.env.NEXT_PUBLIC_ALLOWED_API_URL || ""
+  ).trim();
+
+  const ENV_ALLOWED = baseUrl
+    ? (baseUrl.endsWith('/') ? `${baseUrl}api/v2` : `${baseUrl}/api/v2`)
+    : ""; // nếu không có biến môi trường thì rỗng
+
+  const ALLOWED_API_URL = ENV_ALLOWED || null; // null nếu không giới hạn
+
   const [formData, setFormData] = useState({
     name: "",
     url_api: ALLOWED_API_URL || "",
