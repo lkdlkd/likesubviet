@@ -26,6 +26,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     isActive: true,
     ischeck: false,
     status: true,
+    originalRate: "",
     thutu: "",
   });
   const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
@@ -34,13 +35,13 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     type: "",
     Magoi: "",
     category: "",
-    originalRate: "",
     DomainSmm: "",
     serviceName: "",
     serviceId: "",
     isActive: true,
     status: true,
     thutu: "",
+    ordertay: false,
   });
 
   useEffect(() => {
@@ -97,6 +98,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       status: formData.status,
       thutu: formData.thutu,
       ischeck: formData.ischeck,
+      originalRate: formData.originalRate,
     };
 
     loadingg("Đang cập nhật dịch vụ...", true, 99999999);
@@ -405,10 +407,12 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                     </label>
                     <input
                       type="number"
-                      value={form.originalRate}
+                      name="originalRate"
+                      value={formData.originalRate}
+                      onChange={handleChange}
                       className="form-control form-control-lg bg-light"
-                      placeholder="Tự động"
-                      disabled
+                      placeholder="0.00"
+                      disabled={!formData.ordertay} // nếu ordertay = false thì disabled
                     />
                   </div>
                 </div>
