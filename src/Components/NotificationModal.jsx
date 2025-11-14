@@ -276,6 +276,7 @@ export default function NotificationModal({ notifications = [] }) {
                 onHide={handleDismiss}
                 backdrop="static"
                 keyboard={false}
+                size="lg"
                 className="modal-enhanced"
             >
                 <Modal.Header closeButton>
