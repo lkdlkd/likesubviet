@@ -454,7 +454,7 @@ export const getOrders = async (token, page = 1, limit = 10, category = "", sear
   if (category) queryString += `&category=${encodeURIComponent(category)}`;
   if (search) queryString += `&search=${encodeURIComponent(search)}`;
   if (status) queryString += `&status=${encodeURIComponent(status)}`;
-  if (orderTay) queryString += `&orderTay=${encodeURIComponent(orderTay)}`;
+  if (orderTay) queryString += `&ordertay=${encodeURIComponent(orderTay)}`;
 
   const response = await fetch(`${API_BASE}/order${queryString}`, {
     method: "GET",
