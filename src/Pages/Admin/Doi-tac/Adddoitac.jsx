@@ -37,6 +37,7 @@ export default function Adddoitac({
     autohoan: "on",
     status: "on",
     update_price: "on",
+    ordertay : false,
   });
   const [loading, setLoading] = useState(false);
 
@@ -50,6 +51,7 @@ export default function Adddoitac({
         phihoan: editingPartner.phihoan || 1000, // Mặc định là 1000 nếu không có
         autohoan: editingPartner.autohoan || "on",
         minbalance: editingPartner.minbalance || 100000,
+        ordertay: editingPartner.ordertay || false,
       });
     } else {
       setFormData({
@@ -65,6 +67,7 @@ export default function Adddoitac({
         status: "on",
         update_price: "on",
         minbalance: 100000,
+        ordertay : false,
       });
     }
   }, [editingPartner]);
@@ -142,6 +145,7 @@ export default function Adddoitac({
                       className="form-control form-control-lg border-2"
                       placeholder="doitac1, doitac2, ..."
                       required
+                      disabled={editingPartner?.ordertay || false}
                     />
                   </div>
 
