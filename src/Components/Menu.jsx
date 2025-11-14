@@ -11,6 +11,7 @@ function MenuUser({ user, categories, configWeb }) {
     const toggleMenu = (menuName) => {
         setActiveMenu((prevMenu) => (prevMenu === menuName ? null : menuName));
     };
+    const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
     const validCategories = categories?.filter(
         (category) => category?.platforms_id?._id
@@ -433,12 +434,13 @@ function MenuUser({ user, categories, configWeb }) {
                                                         <span className="pc-mtext">Thêm nền tảng</span>
                                                     </Link>
                                                 </li>
-                                                <li className="pc-item">
-                                                    <Link to="/admin/dich-vu" onClick={() => handleNavigation()} className="pc-link">
-                                                        <span className="pc-mtext">Thêm dịch vụ</span>
-                                                    </Link>
-                                                </li>
-
+                                                {!isAllowedApiUrl && (
+                                                    <li className="pc-item">
+                                                        <Link to="/admin/dich-vu" onClick={() => handleNavigation()} className="pc-link">
+                                                            <span className="pc-mtext">Thêm dịch vụ</span>
+                                                        </Link>
+                                                    </li>
+                                                )}
                                                 <li className="pc-item">
                                                     <Link to="/admin/server" onClick={() => handleNavigation()} className="pc-link">
                                                         <span className="pc-mtext">Thêm server</span>

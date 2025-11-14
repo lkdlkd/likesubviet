@@ -12,6 +12,7 @@ export default function PlatformsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState(null);
   const token = localStorage.getItem("token") || "";
+  const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
   const fetchPlatforms = async () => {
     try {
@@ -268,7 +269,7 @@ export default function PlatformsPage() {
           }
         `}
       </style>
-      
+
       <div className="platforms-container">
         <div className="row">
           <div className="col-md-12">
@@ -281,120 +282,124 @@ export default function PlatformsPage() {
                     </div>
                     <h2 className="platforms-main-title">Quản lý nền tảng</h2>
                   </div>
-                  <button
-                    className="btn platforms-add-btn"
-                    onClick={() => {
-                      // Ensure opening a fresh, empty form for adding
-                      setSelectedPlatform(null);
-                      setIsModalOpen(true);
-                    }}
-                  >
-                    <i className="fas fa-plus me-2"></i>
-                    Thêm Nền tảng
-                  </button>
+                  {!isAllowedApiUrl && (
+                    <button
+                      className="btn platforms-add-btn"
+                      onClick={() => {
+                        // Ensure opening a fresh, empty form for adding
+                        setSelectedPlatform(null);
+                        setIsModalOpen(true);
+                      }}
+                    >
+                      <i className="fas fa-plus me-2"></i>
+                      Thêm Nền tảng
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
-            
-            <div className="platforms-content-card">
-            <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>Thứ tự hiển thị</th>
-                  <th>Hành động</th>
-                  <th>Tên</th>
-                  <th>Logo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {platforms.length > 0 ? (
-                  platforms.map((platform, index) =>
-                    platform && platform._id ? (
-                      <tr key={platform._id}>
-                        <td>{platform.thutu}</td>
-                        <td>
-                          <div className="dropdown">
-                            <button
-                              className="btn btn-primary dropdown-toggle"
-                              type="button"
-                              data-bs-toggle="dropdown"
-                              aria-expanded="false"
-                            >
-                              Thao tác <i className="las la-angle-right ms-1"></i>
-                            </button>
-                            <ul className="dropdown-menu">
-                              <li>
-                                <button
-                                  className="dropdown-item text-primary"
-                                  onClick={() => {
-                                    if (platform && platform._id) {
-                                      setSelectedPlatform(platform);
-                                      setIsModalOpen(true);
-                                    } else {
-                                      //   console.error("Không thể sửa nền tảng: `_id` không tồn tại.");
-                                    }
-                                  }}
-                                >
-                                  Sửa
-                                </button>
-                              </li>
-                              <li>
-                                <button
-                                  className="dropdown-item text-danger"
-                                  onClick={() => {
-                                    if (platform && platform._id) {
-                                      handleDeletePlatform(platform._id);
-                                    } else {
-                                      //    console.error("Không thể xóa nền tảng: `_id` không tồn tại.");
-                                    }
-                                  }}
-                                >
-                                  Xóa
-                                </button>
-                              </li>
-                            </ul>
-                          </div>
-                        </td>
-                        <td>{platform.name}</td>
-                        <td>
-                          <img
-                            src={platform.logo}
-                            alt={platform.name}
-                            width={50}
-                            height={50}
-                            style={{ objectFit: "cover" }}
-                          />
-                        </td>
-                      </tr>
-                    ) : null
-                  )
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="text-center">
-                      Không có nền tảng nào.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
 
-            {isModalOpen && (
-              <PlatformModal
-                key={selectedPlatform?._id || 'new'}
-                platform={selectedPlatform || undefined}
-                onClose={() => {
-                  setIsModalOpen(false);
-                  setSelectedPlatform(null);
-                }}
-                onSave={(platformData) => {
-                  if (selectedPlatform && selectedPlatform._id) {
-                    handleUpdatePlatform(selectedPlatform._id, platformData);
-                  } else {
-                    handleAddPlatform(platformData);
-                  }
-                }}
-              />
-            )}
+            <div className="platforms-content-card">
+              <Table striped bordered hover responsive>
+                <thead>
+                  <tr>
+                    <th>Thứ tự hiển thị</th>
+                    <th>Hành động</th>
+                    <th>Tên</th>
+                    <th>Logo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {platforms.length > 0 ? (
+                    platforms.map((platform, index) =>
+                      platform && platform._id ? (
+                        <tr key={platform._id}>
+                          <td>{platform.thutu}</td>
+                          <td>
+                            <div className="dropdown">
+                              <button
+                                className="btn btn-primary dropdown-toggle"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                              >
+                                Thao tác <i className="las la-angle-right ms-1"></i>
+                              </button>
+                              <ul className="dropdown-menu">
+                                <li>
+                                  <button
+                                    className="dropdown-item text-primary"
+                                    onClick={() => {
+                                      if (platform && platform._id) {
+                                        setSelectedPlatform(platform);
+                                        setIsModalOpen(true);
+                                      } else {
+                                        //   console.error("Không thể sửa nền tảng: `_id` không tồn tại.");
+                                      }
+                                    }}
+                                  >
+                                    Sửa
+                                  </button>
+                                </li>
+                                {!isAllowedApiUrl && (
+                                  <li>
+                                    <button
+                                      className="dropdown-item text-danger"
+                                      onClick={() => {
+                                        if (platform && platform._id) {
+                                          handleDeletePlatform(platform._id);
+                                        } else {
+                                          //    console.error("Không thể xóa nền tảng: `_id` không tồn tại.");
+                                        }
+                                      }}
+                                    >
+                                      Xóa
+                                    </button>
+                                  </li>
+                                )}
+                              </ul>
+                            </div>
+                          </td>
+                          <td>{platform.name}</td>
+                          <td>
+                            <img
+                              src={platform.logo}
+                              alt={platform.name}
+                              width={50}
+                              height={50}
+                              style={{ objectFit: "cover" }}
+                            />
+                          </td>
+                        </tr>
+                      ) : null
+                    )
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="text-center">
+                        Không có nền tảng nào.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+
+              {isModalOpen && (
+                <PlatformModal
+                  key={selectedPlatform?._id || 'new'}
+                  platform={selectedPlatform || undefined}
+                  onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedPlatform(null);
+                  }}
+                  onSave={(platformData) => {
+                    if (selectedPlatform && selectedPlatform._id) {
+                      handleUpdatePlatform(selectedPlatform._id, platformData);
+                    } else {
+                      handleAddPlatform(platformData);
+                    }
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>

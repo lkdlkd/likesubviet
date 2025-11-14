@@ -767,10 +767,7 @@ export default function Adddichvu({
                           <option value="Sv6" />
                           <option value="Sv7" />
                         </datalist>
-                        <small className="text-success">
-                          <i className="fas fa-check-circle me-1"></i>
-                          Để trống sẽ tự động đặt "Manual"
-                        </small>
+                
                       </div>
                       <div className="col-12 mb-3">
                         <label className="form-label fw-bold">
@@ -1156,7 +1153,6 @@ export default function Adddichvu({
                   {formData.ordertay ? (
                     <div className="alert alert-info border-0">
                       <div className="d-flex align-items-start">
-                        <i className="fas fa-magic fs-4 me-3 mt-1 text-primary"></i>
                         <div className="w-100">
                           <h6 className="alert-heading mb-3">
                             <i className="fas fa-hand-paper me-2"></i>
@@ -1183,8 +1179,8 @@ export default function Adddichvu({
                               </div>
                             </div>
                             <div className="col-md-6">
-                              <div className="card bg-success bg-opacity-10 border-success border-opacity-25 mb-2">
-                                <div className="card-body p-2">
+                              <div className="card  bg-opacity-10 border-success border-opacity-25 mb-2">
+                                <div className="card-body">
                                   <small className="text-success d-block mb-1">
                                     <i className="fas fa-check-circle me-1"></i>
                                     Hệ thống tự động điền:
@@ -1192,8 +1188,7 @@ export default function Adddichvu({
                                   <ul className="mb-0 ps-3 text-success" style={{ fontSize: '0.9rem' }}>
                                     <li><strong>Service ID:</strong> <code>manual_XXXXXX</code></li>
                                     <li><strong>Domain SMM:</strong> Server mặc định</li>
-                                    <li><strong>Máy chủ:</strong> "Manual"</li>
-                                    <li><strong>Giá gốc:</strong> = Giá Thành Viên</li>
+                                    <li><strong>Giá gốc:</strong> = Giá Nhà Phân Phối</li>
                                     <li><strong>Service Name:</strong> = Tên dịch vụ</li>
                                   </ul>
                                 </div>
@@ -1201,7 +1196,7 @@ export default function Adddichvu({
                             </div>
                           </div>
 
-                          <div className="alert alert-warning border-0 mb-0 py-2">
+                          <div className="alert alert-warning border-0 mb-0 ">
                             <i className="fas fa-bolt me-2"></i>
                             <small>
                               <strong>Cách sử dụng:</strong>

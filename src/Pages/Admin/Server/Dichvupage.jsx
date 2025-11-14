@@ -1,6 +1,6 @@
 'use client';
 import { loadingg } from "@/JS/Loading";
-import { deleteServer, getAllSmmPartners, getServer, updatePartnerPrices } from "@/Utils/api";
+import { deleteServer, getAllSmmPartners, getServer, updatePartnerPrices, Dongbo } from "@/Utils/api";
 import { useEffect, useState } from "react";
 import Table from "react-bootstrap/Table";
 import { useOutletContext } from "react-router-dom";
@@ -41,6 +41,7 @@ export default function Dichvupage() {
   const [adjustDistributorPct, setAdjustDistributorPct] = useState(0);
 
   const token = localStorage.getItem("token") || "";
+  const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
   const fetchServers = async () => {
     try {
@@ -192,6 +193,32 @@ export default function Dichvupage() {
         fetchServers();
       } catch (error) {
         Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
+      } finally {
+        loadingg("Đang tải...", false);
+      }
+    }
+  };
+
+  const handleDongbo = async () => {
+    const result = await Swal.fire({
+      title: "Đồng bộ dịch vụ",
+      text: "Bạn có muốn đồng bộ dịch vụ từ nguồn?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Đồng bộ",
+      cancelButtonText: "Hủy",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        loadingg("Đang đồng bộ dịch vụ...", true, 9999999);
+        await Dongbo(token);
+        Swal.fire("Thành công!", "Đồng bộ dịch vụ thành công.", "success");
+        fetchServers();
+      } catch (error) {
+        Swal.fire("Lỗi!", "Có lỗi xảy ra khi đồng bộ dịch vụ.", "error");
       } finally {
         loadingg("Đang tải...", false);
       }
@@ -625,14 +652,25 @@ export default function Dichvupage() {
                 <div className="row mb-4">
                   <div className="col-12">
                     <div className="d-flex flex-wrap align-items-center" style={{ gap: "12px" }}>
-                      <button
-                        type="button"
-                        className="btn service-btn-primary"
-                        onClick={() => setShowAddModal(true)}
-                      >
-                        <i className="fas fa-plus me-2"></i>
-                        Thêm dịch vụ
-                      </button>
+                      {isAllowedApiUrl ? (
+                        <button
+                          type="button"
+                          className="btn service-btn-primary"
+                          onClick={handleDongbo}
+                        >
+                          <i className="fas fa-sync-alt me-2"></i>
+                          Đồng bộ
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn service-btn-primary"
+                          onClick={() => setShowAddModal(true)}
+                        >
+                          <i className="fas fa-plus me-2"></i>
+                          Thêm dịch vụ
+                        </button>
+                      )}
                       <button
                         type="button"
                         className={`btn service-btn-toggle`}
@@ -951,48 +989,49 @@ export default function Dichvupage() {
                   </select>
                 </div>
               </div>
-
-              <div className="d-flex justify-content-left mb-3">
-                <button
-                  className="btn service-btn-danger"
-                  onClick={async () => {
-                    if (selectedServers.length === 0) {
-                      Swal.fire("Thông báo", "Vui lòng chọn ít nhất một server để xóa.", "info");
-                      return;
-                    }
-
-                    const result = await Swal.fire({
-                      title: `Bạn có chắc chắn muốn xóa ${selectedServers.length} server đã chọn?`,
-                      text: "Hành động này không thể hoàn tác!",
-                      icon: "warning",
-                      showCancelButton: true,
-                      confirmButtonColor: "#d33",
-                      cancelButtonColor: "#3085d6",
-                      confirmButtonText: "Xóa",
-                      cancelButtonText: "Hủy",
-                    });
-
-                    if (result.isConfirmed) {
-                      try {
-                        loadingg("Đang xóa server đã chọn...", true, 9999999);
-                        await Promise.all(
-                          selectedServers.map((serverId) => deleteServer(serverId, token))
-                        );
-                        Swal.fire("Đã xóa!", "Các server đã được xóa thành công.", "success");
-                        setSelectedServers([]); // Xóa danh sách đã chọn
-                        fetchServers(); // Tải lại danh sách server
-                      } catch (error) {
-                        Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
-                      } finally {
-                        loadingg("Đang tải...", false);
+              {!isAllowedApiUrl && (
+                <div className="d-flex justify-content-left mb-3">
+                  <button
+                    className="btn service-btn-danger"
+                    onClick={async () => {
+                      if (selectedServers.length === 0) {
+                        Swal.fire("Thông báo", "Vui lòng chọn ít nhất một server để xóa.", "info");
+                        return;
                       }
-                    }
-                  }}
-                >
-                  <i className="fas fa-trash me-2"></i>
-                  Xóa server đã chọn
-                </button>
-              </div>
+
+                      const result = await Swal.fire({
+                        title: `Bạn có chắc chắn muốn xóa ${selectedServers.length} server đã chọn?`,
+                        text: "Hành động này không thể hoàn tác!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#d33",
+                        cancelButtonColor: "#3085d6",
+                        confirmButtonText: "Xóa",
+                        cancelButtonText: "Hủy",
+                      });
+
+                      if (result.isConfirmed) {
+                        try {
+                          loadingg("Đang xóa server đã chọn...", true, 9999999);
+                          await Promise.all(
+                            selectedServers.map((serverId) => deleteServer(serverId, token))
+                          );
+                          Swal.fire("Đã xóa!", "Các server đã được xóa thành công.", "success");
+                          setSelectedServers([]); // Xóa danh sách đã chọn
+                          fetchServers(); // Tải lại danh sách server
+                        } catch (error) {
+                          Swal.fire("Lỗi!", "Có lỗi xảy ra khi xóa server.", "error");
+                        } finally {
+                          loadingg("Đang tải...", false);
+                        }
+                      }
+                    }}
+                  >
+                    <i className="fas fa-trash me-2"></i>
+                    Xóa server đã chọn
+                  </button>
+                </div>
+              )}
               {/* Hiển thị dạng chọn nền tảng và accordion category khi ở chế độ hiện tất cả, dưới bảng tổng */}
               {quickAddMode && (
                 <div className="service-tabs-section">
@@ -1118,14 +1157,16 @@ export default function Dichvupage() {
                                                           Sửa
                                                         </button>
                                                       </li>
-                                                      <li>
-                                                        <button
-                                                          className="dropdown-item text-danger"
-                                                          onClick={() => handleDelete(serverItem._id || "")}
-                                                        >
-                                                          Xóa
-                                                        </button>
-                                                      </li>
+                                                      {!isAllowedApiUrl && (
+                                                        <li>
+                                                          <button
+                                                            className="dropdown-item text-danger"
+                                                            onClick={() => handleDelete(serverItem._id || "")}
+                                                          >
+                                                            Xóa
+                                                          </button>
+                                                        </li>
+                                                      )}
                                                     </ul>
                                                   </div>
                                                 </td>
@@ -1345,14 +1386,16 @@ export default function Dichvupage() {
                                       Sửa
                                     </button>
                                   </li>
-                                  <li>
-                                    <button
-                                      className="dropdown-item text-danger"
-                                      onClick={() => handleDelete(serverItem._id || "")}
-                                    >
-                                      Xóa
-                                    </button>
-                                  </li>
+                                  {!isAllowedApiUrl && (
+                                    <li>
+                                      <button
+                                        className="dropdown-item text-danger"
+                                        onClick={() => handleDelete(serverItem._id || "")}
+                                      >
+                                        Xóa
+                                      </button>
+                                    </li>
+                                  )}
                                 </ul>
                               </div>
                             </td>

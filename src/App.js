@@ -32,23 +32,25 @@ import Refund from "./Pages/Admin/Hoantien/Refund";
 import OrderAdmin from "./Pages/Admin/Donhang/OrderAdmin";
 import Webrieng from "./Pages/Webrieng/Webrieng";
 function App() {
+  const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
+
   return (
     <AuthProvider>
       <Router>
         <Routes>
           {/* Landing Page - hiển thị khi chưa có token */}
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
               <AuthContext.Consumer>
                 {({ auth }) =>
                   auth.token ? <Navigate to="/home" replace /> : <Langding />
                 }
               </AuthContext.Consumer>
-            } 
+            }
           />
           <Route path="/landing" element={<Langding />} />
-          
+
           {/* Routes không có Layout */}
           <Route path="/dang-nhap" element={<Login />} />
           <Route path="/dang-ky" element={<Register />} />
@@ -111,7 +113,9 @@ function App() {
             <Route path="/admin/bank-king" element={<BankingAdmin />} />
             <Route path="/admin/doitac" element={<Doitacpage />} />
             <Route path="/admin/nen-tang" element={<PlatformsPage />} />
-            <Route path="/admin/dich-vu" element={<CategoriesPage />} />
+            {!isAllowedApiUrl && (
+              <Route path="/admin/dich-vu" element={<CategoriesPage />} />
+            )}
             <Route path="/admin/server" element={<Dichvupage />} />
             <Route path="/admin/setting" element={<Setting />} />
             {/* <Route path="/admin/setting-thecao" element={<ConfigCard />} /> */}

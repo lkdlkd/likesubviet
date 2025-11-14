@@ -458,7 +458,7 @@ const Banggia = () => {
                                                                                         </td>
                                                                                         <td className="text-end" style={{ fontSize: "0.85rem" }}>
                                                                                             {(() => {
-                                                                                                const rate = String(server.rate);
+                                                                                                const rate = String(server.ratevip);
                                                                                                 if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
                                                                                                 if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
                                                                                                 return rate; // giữ nguyên nếu chỉ là số thường

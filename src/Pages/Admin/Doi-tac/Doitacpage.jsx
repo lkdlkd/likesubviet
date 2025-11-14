@@ -10,6 +10,7 @@ export default function Doitacpage() {
   const [editingPartner, setEditingPartner] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
   const token = localStorage.getItem("token") || "";
 
@@ -271,16 +272,18 @@ export default function Doitacpage() {
                     <i className="fas fa-handshake"></i>
                   </div>
                   <h2 className="partner-main-title">Danh Sách Đối Tác SMM</h2>
-                  <button
-                    className="btn partner-add-btn"
-                    onClick={() => {
-                      setIsAdding(true);
-                      setEditingPartner(null);
-                    }}
-                  >
-                    <i className="fas fa-plus me-2"></i>
-                    Thêm Đối Tác
-                  </button>
+                  {!isAllowedApiUrl && (
+                    <button
+                      className="btn partner-add-btn"
+                      onClick={() => {
+                        setIsAdding(true);
+                        setEditingPartner(null);
+                      }}
+                    >
+                      <i className="fas fa-plus me-2"></i>
+                      Thêm Đối Tác
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -366,20 +369,22 @@ export default function Doitacpage() {
                                         Sửa
                                       </button>
                                     </li>
-                                    <li>
-                                      <button
-                                        className="dropdown-item text-danger"
-                                        onClick={() => {
-                                          if (partner._id) {
-                                            handleDelete(partner._id);
-                                          } else {
-                                            //     console.error("Không thể xóa đối tác: `_id` không tồn tại.");
-                                          }
-                                        }}
-                                      >
-                                        Xóa
-                                      </button>
-                                    </li>
+                                    {!isAllowedApiUrl && (
+                                      <li>
+                                        <button
+                                          className="dropdown-item text-danger"
+                                          onClick={() => {
+                                            if (partner._id) {
+                                              handleDelete(partner._id);
+                                            } else {
+                                              //     console.error("Không thể xóa đối tác: `_id` không tồn tại.");
+                                            }
+                                          }}
+                                        >
+                                          Xóa
+                                        </button>
+                                      </li>
+                                    )}
                                   </ul>
                                 </div>
                               </td>

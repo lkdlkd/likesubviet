@@ -24,7 +24,7 @@ const orderTayOptions = [
 
 const OrderAdmin = () => {
   const { token, categories } = useOutletContext();
-
+  const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
   const [selectedType, setSelectedType] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -1365,6 +1365,8 @@ const OrderAdmin = () => {
                             value={form.start || ''}
                             onChange={handleChange}
                             placeholder="Nhập số bắt đầu..."
+                            disabled={isAllowedApiUrl}
+
                           />
                         </div>
                       </div>
@@ -1380,6 +1382,7 @@ const OrderAdmin = () => {
                             value={form.dachay || ''}
                             onChange={handleChange}
                             placeholder="Nhập số đã chạy..."
+                            disabled={isAllowedApiUrl}
                           />
                         </div>
                       </div>
@@ -1394,6 +1397,7 @@ const OrderAdmin = () => {
                             name="status"
                             value={form.status || ''}
                             onChange={handleChange}
+                            disabled={isAllowedApiUrl}
                           >
                             {statusOptions.map(opt => (
                               <option key={opt.value} value={opt.value}>{opt.label}</option>

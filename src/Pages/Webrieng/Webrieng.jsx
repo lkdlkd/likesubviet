@@ -262,8 +262,8 @@ const Webrieng = () => {
                                                 Quan trọng:
                                             </h6>
                                             <ul className="mb-0 ps-3 ps-md-4" style={{ fontSize: "0.85rem" }}>
-                                                <li>⚠️ Website cần tự thêm tất cả dịch vụ</li>
-                                                <li>⚠️ Admin chỉ setup Website, phần còn lại tự quản lý</li>
+                                                {/* <li>⚠️ Website cần tự thêm tất cả dịch vụ</li> */}
+                                                <li>⚠️ Admin chỉ setup Website và dịch vụ, phần còn lại tự quản lý</li>
                                                 <li>⚠️ Chuẩn bị domain và liên hệ admin</li>
                                             </ul>
                                         </div>

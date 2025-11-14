@@ -25,9 +25,10 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     cancel: "off",
     isActive: true,
     ischeck: false,
-    status : true, 
+    status: true,
     thutu: "",
   });
+  const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
   const [form, setForm] = useState({
     type: "",
@@ -38,7 +39,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     serviceName: "",
     serviceId: "",
     isActive: true,
-    status : true,
+    status: true,
     thutu: "",
   });
 
@@ -93,7 +94,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       refil: formData.refil,
       cancel: formData.cancel,
       isActive: formData.isActive,
-      status : formData.status,
+      status: formData.status,
       thutu: formData.thutu,
       ischeck: formData.ischeck,
     };
@@ -270,6 +271,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       className="form-control form-control-lg"
                       placeholder="Nhập tên dịch vụ"
                       required
+                      disabled={isAllowedApiUrl}
                     />
                   </div>
                   <div className="col-md-6">
@@ -285,6 +287,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       className="form-control form-control-lg"
                       placeholder="Nhập Service ID"
                       required
+                      disabled={isAllowedApiUrl}
                     />
                   </div>
                   <div className="col-md-6">
@@ -299,6 +302,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       onChange={handleChange}
                       className="form-control form-control-lg"
                       placeholder="Sv1, Sv2,..."
+                      disabled={isAllowedApiUrl}
                     />
                   </div>
                   <div className="col-12">
@@ -332,6 +336,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       className="form-control form-control-lg"
                       placeholder="0"
                       required
+                      disabled={isAllowedApiUrl}
                     />
                   </div>
                   <div className="col-md-3">
@@ -347,6 +352,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       className="form-control form-control-lg"
                       placeholder="0"
                       required
+                      disabled={isAllowedApiUrl}
                     />
                   </div>
                   <div className="col-md-3">
@@ -419,27 +425,28 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
               </div>
               <div className="card-body">
                 <div className="row g-3 mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label fw-bold">
-                      <i className="fas fa-toggle-on me-1 text-primary"></i>
-                      Trạng thái
-                    </label>
-                    <select
-                      name="isActive"
-                      value={formData.isActive ? "true" : "false"}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isActive: e.target.value === "true",
-                        })
-                      }
-                      className="form-select form-select-lg"
-                    >
-                      <option value="true">🟢 Hoạt động</option>
-                      <option value="false">🔴 Bảo trì</option>
-                    </select>
-                  </div>
-
+                  {!isAllowedApiUrl && (
+                    <div className="col-md-6">
+                      <label className="form-label fw-bold">
+                        <i className="fas fa-toggle-on me-1 text-primary"></i>
+                        Trạng thái
+                      </label>
+                      <select
+                        name="isActive"
+                        value={formData.isActive ? "true" : "false"}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            isActive: e.target.value === "true",
+                          })
+                        }
+                        className="form-select form-select-lg"
+                      >
+                        <option value="true">🟢 Hoạt động</option>
+                        <option value="false">🔴 Bảo trì</option>
+                      </select>
+                    </div>
+                  )}
                   <div className="col-md-6">
                     <label className="form-label fw-bold">
                       <i className="fas fa-toggle-on me-1 text-primary"></i>
@@ -460,54 +467,55 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       <option value="false">Ẩn</option>
                     </select>
                   </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label fw-bold">
-                      <i className="fas fa-money-bill-wave me-1 text-primary"></i>
-                      Mua không check giá (<b style={{fontSize : 15, color: 'red'}}> có thể bán lỗ </b>)
-                    </label>
-                    <select
-                      name="ischeck"
-                      value={formData.ischeck ? "true" : "false"}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          ischeck: e.target.value === "true",
-                        })
-                      }
-                      className="form-select form-select-lg"
-                    >
-                      <option value="true">🟢 Bật</option>
-                      <option value="false">🔴 Tắt</option>
-                    </select>
-                  </div>
-
-                </div>
-
-                <div className="row g-3">
-                  {[
-                    { key: 'getid', label: 'Get UID', icon: 'fas fa-user-tag', color: 'text-primary' },
-                    { key: 'comment', label: 'Comment', icon: 'fas fa-comment', color: 'text-info' },
-                    { key: 'refil', label: 'Bảo hành', icon: 'fas fa-shield-alt', color: 'text-success' },
-                    { key: 'cancel', label: 'Hủy đơn', icon: 'fas fa-times-circle', color: 'text-danger' }
-                  ].map((item) => (
-                    <div className="col-6 col-md-3" key={item.key}>
+                  {!isAllowedApiUrl && (
+                    <div className="col-md-6">
                       <label className="form-label fw-bold">
-                        <i className={`${item.icon} me-1 ${item.color}`}></i>
-                        {item.label}
+                        <i className="fas fa-money-bill-wave me-1 text-primary"></i>
+                        Mua không check giá (<b style={{ fontSize: 15, color: 'red' }}> có thể bán lỗ </b>)
                       </label>
                       <select
-                        name={item.key}
-                        value={formData[item.key]}
-                        onChange={handleChange}
+                        name="ischeck"
+                        value={formData.ischeck ? "true" : "false"}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            ischeck: e.target.value === "true",
+                          })
+                        }
                         className="form-select form-select-lg"
                       >
-                        <option value="on">🟢 Bật</option>
-                        <option value="off">🔴 Tắt</option>
+                        <option value="true">🟢 Bật</option>
+                        <option value="false">🔴 Tắt</option>
                       </select>
                     </div>
-                  ))}
+                  )}
                 </div>
+                {!isAllowedApiUrl && (
+                  <div className="row g-3">
+                    {[
+                      { key: 'getid', label: 'Get UID', icon: 'fas fa-user-tag', color: 'text-primary' },
+                      { key: 'comment', label: 'Comment', icon: 'fas fa-comment', color: 'text-info' },
+                      { key: 'refil', label: 'Bảo hành', icon: 'fas fa-shield-alt', color: 'text-success' },
+                      { key: 'cancel', label: 'Hủy đơn', icon: 'fas fa-times-circle', color: 'text-danger' }
+                    ].map((item) => (
+                      <div className="col-6 col-md-3" key={item.key}>
+                        <label className="form-label fw-bold">
+                          <i className={`${item.icon} me-1 ${item.color}`}></i>
+                          {item.label}
+                        </label>
+                        <select
+                          name={item.key}
+                          value={formData[item.key]}
+                          onChange={handleChange}
+                          className="form-select form-select-lg"
+                        >
+                          <option value="on">🟢 Bật</option>
+                          <option value="off">🔴 Tắt</option>
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

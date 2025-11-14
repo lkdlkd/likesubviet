@@ -17,7 +17,7 @@ export default function Adddoitac({
 }) {
   // Lấy URL API cố định từ biến môi trường (ưu tiên REACT_APP_, fallback NEXT_PUBLIC_)
   const ENV_ALLOWED = (process.env.REACT_APP_ALLOWED_API_URL || process.env.NEXT_PUBLIC_ALLOWED_API_URL || "").trim();
-  const ALLOWED_API_URL = ENV_ALLOWED || null; // nếu không thiết lập biến môi trường thì bỏ giới hạn
+  const ALLOWED_API_URL = `${ENV_ALLOWED}/api/v2` || null; // nếu không thiết lập biến môi trường thì bỏ giới hạn
   const [formData, setFormData] = useState({
     name: "",
     url_api: ALLOWED_API_URL || "",

@@ -39,6 +39,18 @@ export const adminApproveRefund = async (data, token) => {
   return handleResponse(response);
 };
 
+export async function Dongbo(token) {
+  const response = await fetch(`${API_BASE}/admin/sync-services`, {
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+}
+
 export const adminDeleteRefunds = async (data, token) => {
   const response = await fetch(`${API_BASE}/refund`, {
     method: "DELETE",
