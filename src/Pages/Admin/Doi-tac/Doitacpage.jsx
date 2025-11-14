@@ -29,6 +29,7 @@ export default function Doitacpage() {
   const fetchSmmPartners = async () => {
     try {
       loadingg("Đang tải danh sách đối tác...", true, 9999999);
+      setLoading(true);
       const partners = await getAllSmmPartners(token);
       setSmmPartners(partners);
       // await fetchBalancesForPartners(partners);
@@ -42,7 +43,7 @@ export default function Doitacpage() {
   useEffect(() => {
     fetchSmmPartners();
   }, [token]);
-
+  const WEBCON = !isAllowedApiUrl || (isAllowedApiUrl && smmPartners?.length === 0);
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "Xóa đối tác?",
@@ -272,13 +273,14 @@ export default function Doitacpage() {
                     <i className="fas fa-handshake"></i>
                   </div>
                   <h2 className="partner-main-title">Danh Sách Đối Tác SMM</h2>
-                  {!isAllowedApiUrl && (
+                  {WEBCON && (
                     <button
                       className="btn partner-add-btn"
                       onClick={() => {
                         setIsAdding(true);
                         setEditingPartner(null);
                       }}
+                      disabled={loading || !WEBCON}
                     >
                       <i className="fas fa-plus me-2"></i>
                       Thêm Đối Tác
