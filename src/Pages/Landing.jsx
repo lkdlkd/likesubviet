@@ -2512,6 +2512,7 @@ export default function Landing() {
                                                         { id: "status", label: "Order status" },
                                                         { id: "multistatus", label: "Multiple orders status" },
                                                         { id: "cancel", label: "Create Cancel" },
+                                                        { id: "refill", label: "Create Refill" },
                                                         { id: "balance", label: "Balance" },
                                                     ].map((tab, index) => (
                                                         <li className="nav-item" role="presentation" key={index}>
@@ -2900,6 +2901,55 @@ export default function Landing() {
                                                                 </>
                                                             ),
                                                         },
+                                                        {
+                                                            id: "refill",
+                                                            content: (
+                                                                <>
+                                                                    <Table responsive striped bordered className="align-middle mb-3" style={{
+                                                                        background: 'linear-gradient(45deg, #f8f9fa 0%, #ede7f6 100%)',
+                                                                        borderRadius: '8px',
+                                                                    }}>
+                                                                        <thead style={{
+                                                                            background: 'linear-gradient(135deg, #673ab7 0%, #512da8 100%)',
+                                                                            color: 'white'
+                                                                        }}>
+                                                                            <tr>
+                                                                                <td className="fw-semibold" data-lang="Parameters">
+                                                                                    Parameters
+                                                                                </td>
+                                                                                <td className="fw-semibold" data-lang="Description">
+                                                                                    Description
+                                                                                </td>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td style={{color: '#673ab7'}}>key</td>
+                                                                                <td>API Key</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td style={{color: '#673ab7'}}>action</td>
+                                                                                <td>"refill"</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td style={{color: '#673ab7'}}>order or orders</td>
+                                                                                <td>Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </Table>
+                                                                    <h6 className="fw-bold" style={{ color: '#673ab7' }}>Example response</h6>
+                                                                    <div className="rounded-3 p-3" style={{
+                                                                        background: 'linear-gradient(135deg, #e1bee7 0%, #ce93d8 100%)',
+                                                                        border: '1px solid #673ab7',
+                                                                        borderRadius: '12px'
+                                                                    }}>
+                                                                        <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>{`{
+    "refill": "1"
+}`}</pre>
+                                                                    </div>
+                                                                </>
+                                                            ),
+                                                        }
                                                     ].map((tab, index) => (
                                                         <div
                                                             key={tab.id}

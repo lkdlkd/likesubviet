@@ -49,7 +49,7 @@ function App() {
               </AuthContext.Consumer>
             }
           />
-          <Route path="/landing" element={<Langding />} />
+          {/* <Route path="/landing" element={<Langding />} /> */}
 
           {/* Routes không có Layout */}
           <Route path="/dang-nhap" element={<Login />} />

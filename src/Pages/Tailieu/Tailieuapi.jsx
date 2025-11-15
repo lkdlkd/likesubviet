@@ -48,7 +48,7 @@ export default function Tailieuapi() {
                                 { id: "status", label: "Order status" },
                                 { id: "multistatus", label: "Multiple orders status" },
                                 { id: "cancel", label: "Create Cancel" },
-                                // { id: "refill", label: "Refill order" },
+                                { id: "refill", label: "Create Refill" },
                                 { id: "balance", label: "Balance" },
                             ].map((tab, index) => (
                                 <li className="nav-item w-md-200px me-0" role="presentation" key={index}>
@@ -384,46 +384,46 @@ export default function Tailieuapi() {
                                         </>
                                     ),
                                 },
-//                                 {
-//                                     id: "refill",
-//                                     content: (
-//                                         <>
-//                                             <Table striped bordered hover>
-//                                                 <tbody>
-//                                                     <tr className="bg-light">
-//                                                         <td className="fw-bolder" data-lang="Parameters">
-//                                                             Parameters
-//                                                         </td>
-//                                                         <td className="fw-bolder" data-lang="Description">
-//                                                             Description
-//                                                         </td>
-//                                                     </tr>
-//                                                     <tr>
-//                                                         <td>key</td>
-//                                                         <td>API Key</td>
-//                                                     </tr>
-//                                                     <tr>
-//                                                         <td>action</td>
-//                                                         <td>"refill"</td>
-//                                                     </tr>
-//                                                     <tr>
-//                                                         <td>order</td>
-//                                                         <td>Order ID</td>
-//                                                     </tr>
-//                                                 </tbody>
-//                                             </Table>
-//                                             <h6 data-lang="Example response">Example response</h6>
-//                                             <div className="bg-light p-3">
-//                                                 <pre className="language-html mb-0">
-//                                                     {`
-// {
-//     "refill": "1"
-// }`}
-//                                                 </pre>
-//                                             </div>
-//                                         </>
-//                                     ),
-//                                 },
+                                {
+                                    id: "refill",
+                                    content: (
+                                        <>
+                                            <Table striped bordered hover>
+                                                <tbody>
+                                                    <tr className="bg-light">
+                                                        <td className="fw-bolder" data-lang="Parameters">
+                                                            Parameters
+                                                        </td>
+                                                        <td className="fw-bolder" data-lang="Description">
+                                                            Description
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>key</td>
+                                                        <td>API Key</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>action</td>
+                                                        <td>"refill"</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>order or orders</td>
+                                                        <td>Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
+                                                    </tr>
+                                                </tbody>
+                                            </Table>
+                                            <h6 data-lang="Example response">Example response</h6>
+                                            <div className="bg-light p-3">
+                                                <pre className="language-html mb-0">
+                                                    {`
+{
+    "refill": "1"
+}`}
+                                                </pre>
+                                            </div>
+                                        </>
+                                    ),
+                                },
                                 // Add other tabs similarly...
                             ].map((tab, index) => (
                                 <div
