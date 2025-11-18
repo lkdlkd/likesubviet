@@ -1,0 +1,159 @@
+<!-- Thông báo kiểu SMMS1.COM -->
+<style>
+    @keyframes slideUp {
+        from {
+            transform: translate(-50%, 30%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translate(-50%, -50%);
+            opacity: 1;
+        }
+    }
+
+    .smms1-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #000;
+        color: #fff;
+        border-radius: 20px;
+        box-shadow: 0 0 25px #a855f7;
+        width: 400px;
+        max-width: 90%;
+        z-index: 99999;
+        text-align: center;
+        padding: 25px 30px;
+        font-family: "Poppins", sans-serif;
+        display: none;
+        opacity: 0;
+    }
+
+    .smms1-popup.show {
+        display: block;
+        animation: slideUp 0.7s ease forwards;
+    }
+
+    .smms1-popup h2 {
+        font-size: 28px;
+        color: #c084fc;
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    .smms1-popup h3 {
+        color: gold;
+        letter-spacing: 2px;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .smms1-popup p {
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 8px 0;
+    }
+
+    .smms1-btn {
+        display: block;
+        width: 100%;
+        border: none;
+        margin: 6px 0;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .smms1-telegram {
+        background: linear-gradient(90deg, #8b5cf6, #6366f1);
+    }
+
+    .smms1-zalo {
+        background: linear-gradient(90deg, #3b82f6, #2563eb);
+    }
+
+    .smms1-website {
+        background: linear-gradient(90deg, #f87171, #ef4444);
+    }
+
+    .smms1-btn:hover {
+        opacity: 0.85;
+    }
+
+    .smms1-close {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        background: #ef4444;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .smms1-time {
+        display: inline-block;
+        background: #1f1f1f;
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 13px;
+        color: #d1d5db;
+        margin-bottom: 12px;
+        border: 1px solid #333;
+    }
+</style>
+
+<div class="smms1-popup" id="smms1Popup">
+    <button class="smms1-close" onclick="closePopup()">×</button>
+    <div class="smms1-time" id="vnTime">VN Time: --:--:--</div>
+    <h2>SMMS1.COM</h2>
+    <h3>📢 ANNOUNCEMENT 📢</h3>
+    <p>Welcome back! Check out our latest services and updates for the best experience on SMMS1.COM.</p>
+    <p>Always verify your links and contact support before placing an order to avoid delays.</p>
+
+    <button class="smms1-btn smms1-telegram" onclick="window.open('https://t.me/smms1', '_blank')">📱 Updates on
+        Telegram</button>
+    <button class="smms1-btn smms1-zalo" onclick="window.open('https://zalo.me/0123456789', '_blank')">💬 Chat Zalo:
+        0123456789</button>
+    <button class="smms1-btn smms1-website" onclick="window.open('https://smms1.com', '_blank')">🌐 Visit
+        SMMS1.COM</button>
+</div>
+
+<script>
+    function openPopup() {
+        const popup = document.getElementById("smms1Popup");
+        popup.classList.add("show");
+    }
+
+    function closePopup() {
+        const popup = document.getElementById("smms1Popup");
+        popup.style.display = "none";
+    }
+
+    function updateVNTime() {
+        const now = new Date();
+        const vnTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+        const hours = vnTime.getHours().toString().padStart(2, "0");
+        const minutes = vnTime.getMinutes().toString().padStart(2, "0");
+        const seconds = vnTime.getSeconds().toString().padStart(2, "0");
+        const ampm = hours >= 12 ? "PM" : "AM";
+        const displayHours = (hours % 12 || 12).toString().padStart(2, "0");
+        document.getElementById("vnTime").textContent = `VN Time: ${displayHours}:${minutes}:${seconds} ${ampm}`;
+    }
+
+    setInterval(updateVNTime, 1000);
+
+    window.onload = () => {
+        updateVNTime();
+        setTimeout(openPopup, 1200); // Hiện sau 1.2 giây với hiệu ứng trượt lên
+    };
+</script>

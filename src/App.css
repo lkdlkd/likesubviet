@@ -2,7 +2,11 @@
   height: 100vh;
   overflow-y: auto;
 } */
+.dynamic-html-container{
+    position: relative; /* hoặc absolute / fixed / sticky */
 
+  z-index: 10111;
+}
 .pc-sidebar .navbar-content {
   z-index: 9999;
   max-height: calc(100vh - 50px);

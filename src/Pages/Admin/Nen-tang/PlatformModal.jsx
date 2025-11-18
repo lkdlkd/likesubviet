@@ -15,6 +15,7 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     name: "",
     logo: "",
+    status: true,
     thutu: "",
   });
   // Đồng bộ hóa `formData` với `platform` khi `platform` thay đổi
@@ -24,12 +25,14 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
         name: platform.name || "",
         logo: platform.logo || "",
         thutu: platform.thutu || "",
+        status: platform.status !== undefined ? platform.status : true,
       });
     } else {
       setFormData({
         name: "",
         logo: "",
         thutu: "",
+        status: true,
       });
     }
   }, [platform]);
@@ -55,7 +58,7 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
       }
       await onSave(formData); // Gửi dữ liệu lên component cha (có thể là async)
       // Reset form data về rỗng sau khi lưu thành công
-      setFormData({ name: "", logo: "", thutu: "" });
+      setFormData({ name: "", logo: "", thutu: "" , status: true });
     } finally {
       loadingg("", false);
     }
@@ -112,7 +115,21 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
                       required
                     />
                   </div>
-
+                  <div className="mb-3">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-toggle-on me-1 text-primary"></i>
+                      Trạng thái <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-select form-select-lg border-2"
+                      value={formData.status ? "true" : "false"}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value === "true" })}
+                      required
+                    >
+                      <option value="true">Hoạt động</option>
+                      <option value="false">Đóng</option>
+                    </select>
+                  </div>
                   <div className="mb-3">
                     <label className="form-label fw-bold text-dark">
                       <i className="fas fa-image me-1 text-primary"></i>

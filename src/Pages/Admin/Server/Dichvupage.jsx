@@ -1569,6 +1569,9 @@ export default function Dichvupage() {
             onClose={() => setShowEditModal(false)} // Đóng modal
             initialData={selectedService} // Dữ liệu ban đầu của dịch vụ
             token={token} // Token để gọi API
+            categories={categories}
+            datasmm={smmPartners}
+
           />
         </div>
       </div>

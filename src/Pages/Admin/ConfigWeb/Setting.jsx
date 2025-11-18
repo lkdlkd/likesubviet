@@ -80,6 +80,8 @@ const Setting = () => {
         cuphap: "", // Thêm trường cuphap
         daily: "", // Thêm trường daily (đại lý)
         distributor: "", // Thêm trường distributor (nhà phân phối)
+        headerJs: "", // Mã JS header
+        footerJs: "", // Mã JS footer
     });
     const [loading, setLoading] = useState(false);
     const editorRef = useRef(null);
@@ -102,6 +104,8 @@ const Setting = () => {
                 deleteOrders: config.data.deleteOrders || false, // Xóa đơn hàng
                 deleteUsers: config.data.deleteUsers || false, // Xóa user không nạp tiền
                 deleteHistory: config.data.deleteHistory || false, // Xóa lịch sử
+                headerJs: config.data.headerJs || "", // Lấy giá trị headerJs từ API
+                footerJs: config.data.footerJs || "", // Lấy giá trị footerJs từ API
             });
         } catch (error) {
             toast.error("Không thể tải cấu hình website!");
@@ -138,6 +142,8 @@ const Setting = () => {
                 deleteOrders: formData.deleteOrders, // Xóa đơn hàng
                 deleteUsers: formData.deleteUsers, // Xóa user không nạp tiền
                 deleteHistory: formData.deleteHistory, // Xóa lịch sử
+                headerJs: formData.headerJs, // Gửi mã JS header lên API
+                footerJs: formData.footerJs, // Gửi mã JS footer lên API
             };
             await updateConfigWeb(sanitizedData, token);
             fetchConfig(); // Tải lại cấu hình sau khi cập nhật
@@ -331,9 +337,52 @@ const Setting = () => {
                                         </div>
                                     </div>
 
-                                    {/* Telegram */}
+                                    {/* Mã JavaScript */}
                                     <div className="card border-0 shadow-sm mb-3">
-
+                                        <div className="card-header bg-gradient-success text-white border-0 py-2">
+                                            <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
+                                                <i className="fas fa-code me-2"></i>
+                                                Mã JavaScript tùy chỉnh
+                                            </h6>
+                                        </div>
+                                        <div className="card-body p-3">
+                                            <div className="mb-3">
+                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                    <i className="fas fa-file-code me-1 text-success"></i>
+                                                    Mã JS Header
+                                                </label>
+                                                <textarea
+                                                    className="form-control font-monospace"
+                                                    rows="4"
+                                                    value={formData.headerJs}
+                                                    onChange={(e) => setFormData({ ...formData, headerJs: e.target.value })}
+                                                    placeholder="<script>&#10;  // Mã JS được chèn vào <head>&#10;</script>"
+                                                    style={{ fontSize: '0.85rem' }}
+                                                />
+                                                <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
+                                                    <i className="fas fa-info-circle me-1"></i>
+                                                    Mã này sẽ được chèn vào thẻ &lt;head&gt; (Analytics, Meta tags, etc.)
+                                                </small>
+                                            </div>
+                                            <div className="mb-0">
+                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                    <i className="fas fa-file-code me-1 text-info"></i>
+                                                    Mã JS Footer
+                                                </label>
+                                                <textarea
+                                                    className="form-control font-monospace"
+                                                    rows="4"
+                                                    value={formData.footerJs}
+                                                    onChange={(e) => setFormData({ ...formData, footerJs: e.target.value })}
+                                                    placeholder="<script>&#10;  // Mã JS được chèn trước </body>&#10;</script>"
+                                                    style={{ fontSize: '0.85rem' }}
+                                                />
+                                                <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
+                                                    <i className="fas fa-info-circle me-1"></i>
+                                                    Mã này sẽ được chèn trước thẻ đóng &lt;/body&gt; (Chatbox, Tracking, etc.)
+                                                </small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

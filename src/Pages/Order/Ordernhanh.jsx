@@ -370,6 +370,8 @@ export default function Ordernhanh() {
                 const res = await addOrder(payload, token);
                 if (res.success) {
                     loadingg("", false); // Đóng loading khi xong
+                    setRawLink("");
+                    setConvertedUID("");
                     await Swal.fire({
                         title: "Thành công",
                         text: "Mua dịch vụ thành công",

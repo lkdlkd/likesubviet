@@ -13,6 +13,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
     notes: "",
     modal_show: "",
     thutu: "",
+    status: true,
   });
 
   const [pathError, setPathError] = useState("");
@@ -89,6 +90,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
         notes: category.notes || "",
         modal_show: category.modal_show || "",
         thutu: category.thutu || "",
+        status: category.status !== undefined ? category.status : true,
       });
 
       // Kiểm tra path hiện có khi edit
@@ -106,6 +108,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
         notes: "",
         modal_show: "",
         thutu: 2,
+        status: true,
       });
     }
   }, [category]);
@@ -140,6 +143,7 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
       notes: "",
       modal_show: "",
       thutu: "",
+      status: true,
     });
   };
 
@@ -246,6 +250,19 @@ export default function CategoryModal({ category, platforms, onClose, onSave }) 
                       <strong>Quy tắc đường dẫn:</strong> Chỉ dùng chữ cái, số, dấu gạch ngang (-), gạch dưới (_).
                       Độ dài 3-50 ký tự. Không bắt đầu/kết thúc bằng dấu gạch.
                     </small>
+                  </div>
+                  <div className="md-3">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-toggle-on me-1 text-primary"></i>
+                      Trạng thái <span className="text-danger">*</span>
+                    </label>
+                    <select className="form-select form-select-lg border-2"
+                      value={formData.status ? "true" : "false"}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value === "true" })}
+                    >
+                      <option value="true">Hoạt động</option>
+                      <option value="false">Đóng</option>
+                    </select>
                   </div>
                 </div>
               </div>
