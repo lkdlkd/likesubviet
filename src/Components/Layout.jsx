@@ -7,7 +7,8 @@ import { Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 // import Widget from "./Widget";
 import Widget from "./Wingets";
-import DynamicHtml from "@/JS/DynamicHtml";
+import HeaderJs from "@/JS/HeaderJs";
+import FooterJs from "@/JS/FooterJs";
 // import MobileBottom from "./MobileBottom";
 import { loadingg } from "@/JS/Loading";
 const Layout = () => {
@@ -63,66 +64,6 @@ const Layout = () => {
         fetchData();
     }, [token]);
 
-
-    // useEffect(() => {
-    //     if (headerJs) {
-    //         // Tạo một div container để chứa HTML
-    //         const container = document.createElement("div");
-    //         container.innerHTML = headerJs;
-
-    //         // Xử lý các thẻ script
-    //         const scripts = container.querySelectorAll("script");
-    //         scripts.forEach((oldScript) => {
-    //             const newScript = document.createElement("script");
-    //             newScript.type = "text/javascript";
-    //             if (oldScript.src) {
-    //                 newScript.src = oldScript.src;
-    //             } else {
-    //                 newScript.text = oldScript.textContent;
-    //             }
-    //             oldScript.parentNode.replaceChild(newScript, oldScript);
-    //         });
-
-    //         // Append toàn bộ nội dung vào head
-    //         document.head.appendChild(container);
-
-    //         return () => {
-    //             // Cleanup khi component unmount
-    //             document.head.removeChild(container);
-    //         };
-    //     }
-    // }, [headerJs]);
-
-    // useEffect(() => {
-    //     if (footerJs) {
-    //         // Tạo một div container để chứa HTML
-    //         const container = document.createElement("div");
-    //         container.innerHTML = footerJs;
-
-    //         // Xử lý các thẻ script
-    //         const scripts = container.querySelectorAll("script");
-    //         scripts.forEach((oldScript) => {
-    //             const newScript = document.createElement("script");
-    //             newScript.type = "text/javascript";
-    //             if (oldScript.src) {
-    //                 newScript.src = oldScript.src;
-    //             } else {
-    //                 newScript.text = oldScript.textContent;
-    //             }
-    //             oldScript.parentNode.replaceChild(newScript, oldScript);
-    //         });
-
-    //         // Append toàn bộ nội dung vào body
-    //         document.body.appendChild(container);
-
-    //         return () => {
-    //             // Cleanup khi component unmount
-    //             document.body.removeChild(container);
-    //         };
-    //     }
-    // }, [footerJs]);
-
-
     const title = configWeb ? configWeb.title : "Hệ thống tăng tương tác MXH";
     const favicon = configWeb ? configWeb.favicon : "https://png.pngtree.com/png-clipart/20190520/original/pngtree-facebook-f-icon-png-image_3550243.jpg"; // Thay thế bằng URL favicon mặc định nếu không có
     const API_DOMAIN = window.location.origin; // Lấy tên miền hiện tại và thêm đường dẫn API
@@ -131,6 +72,9 @@ const Layout = () => {
     return (
         <>
             <Header user={user} />
+            {/* Header JS - inject vào <head> */}
+            <HeaderJs htmlString={headerJs} />
+
             <Helmet>
                 {/* Tối ưu tiêu đề */}
                 <title>{title}</title>
@@ -165,10 +109,8 @@ const Layout = () => {
                         "image": { favicon },
                     })}
                 </script>
-
             </Helmet>
             <Menu categories={categories} user={user} configWeb={configWeb} />
-            <DynamicHtml htmlString={headerJs} />
 
             <div className="pc-container">
                 <div className="pc-content">
@@ -176,7 +118,6 @@ const Layout = () => {
                     <Outlet context={{ configWeb, categories, token, user, notifications }} />
                 </div>
             </div>
-            <DynamicHtml htmlString={footerJs} />
 
             <footer className="pc-footer">
                 <div className="footer-wrapper container-fluid">
@@ -191,8 +132,11 @@ const Layout = () => {
                     </div>
                 </div>
             </footer>
+
             <Widget configWeb={configWeb} />
             <ToastContainer style={{ maxWidth: '70%', marginLeft: 'auto', marginRight: '0px' }} />
+            {/* Footer JS - inject trước </body> */}
+            <FooterJs htmlString={footerJs} />
             {/* <MobileBottom /> */}
         </>
     );

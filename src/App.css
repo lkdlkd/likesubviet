@@ -2,11 +2,13 @@
   height: 100vh;
   overflow-y: auto;
 } */
-.dynamic-html-container{
-    position: relative; /* hoặc absolute / fixed / sticky */
-
+.footer-html-wrapper {
+  /* đảm bảo hiển thị */
+  position: relative;
+  /* hoặc absolute / fixed / sticky */
   z-index: 10111;
 }
+
 .pc-sidebar .navbar-content {
   z-index: 9999;
   max-height: calc(100vh - 50px);
@@ -69,11 +71,13 @@
   font-weight: bold !important;
 
 }
- @media (max-width: 1200px) {
+
+@media (max-width: 1200px) {
   .kd {
     margin-top: 4px;
-  } 
+  }
 }
+
 #preloader {
   background-color: #fff;
   padding: 0;
@@ -117,6 +121,7 @@
     height: 0;
     opacity: 1;
   }
+
   100% {
     top: 0px;
     left: 0px;
@@ -135,25 +140,29 @@
   white-space: nowrap;
   animation: loader-label 1.15s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
 }
-.pc-sidebar .pc-navbar > .pc-item > .pc-link .pc-mtext {
-    transition: transform 0.3s ease, color 0.3s ease;
-    position: relative;
-    z-index: 1;
+
+.pc-sidebar .pc-navbar>.pc-item>.pc-link .pc-mtext {
+  transition: transform 0.3s ease, color 0.3s ease;
+  position: relative;
+  z-index: 1;
 }
-.pc-sidebar .pc-navbar > .pc-item:hover > .pc-link .pc-mtext {
-    transform: translateY(-2px);
-    color: rgba(70, 128, 255, 1);
+
+.pc-sidebar .pc-navbar>.pc-item:hover>.pc-link .pc-mtext {
+  transform: translateY(-2px);
+  color: rgba(70, 128, 255, 1);
 }
+
 .pc-submenu .pc-item .pc-link .pc-mtext {
-    transition: transform 0.3s ease, color 0.3s ease;
-    position: relative;
-    display: inline-block;
+  transition: transform 0.3s ease, color 0.3s ease;
+  position: relative;
+  display: inline-block;
 }
 
 .pc-submenu .pc-item:hover .pc-link .pc-mtext {
-    transform: translateY(-2px);
-    color: rgba(70, 128, 255, 1);
+  transform: translateY(-2px);
+  color: rgba(70, 128, 255, 1);
 }
+
 /*******************
 Preloader
 ********************/

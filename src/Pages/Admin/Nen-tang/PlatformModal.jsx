@@ -12,6 +12,8 @@ images.keys().forEach((key) => {
   }
 });
 const PlatformModal = ({ platform, onClose, onSave }) => {
+  const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
+
   const [formData, setFormData] = useState({
     name: "",
     logo: "",
@@ -58,7 +60,7 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
       }
       await onSave(formData); // Gửi dữ liệu lên component cha (có thể là async)
       // Reset form data về rỗng sau khi lưu thành công
-      setFormData({ name: "", logo: "", thutu: "" , status: true });
+      setFormData({ name: "", logo: "", thutu: "", status: true });
     } finally {
       loadingg("", false);
     }
@@ -98,6 +100,7 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
                       placeholder="1"
                       min={0}
                       required
+
                     />
                   </div>
 
@@ -113,6 +116,7 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="Facebook, TikTok, Instagram, ..."
                       required
+                      disabled={isAllowedApiUrl}
                     />
                   </div>
                   <div className="mb-3">
@@ -125,6 +129,7 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
                       value={formData.status ? "true" : "false"}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value === "true" })}
                       required
+                      disabled={isAllowedApiUrl}
                     >
                       <option value="true">Hoạt động</option>
                       <option value="false">Đóng</option>
@@ -199,8 +204,8 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
                       Click vào logo để chọn
                     </small>
                   </div>
-                  <div className="logo-gallery" style={{ 
-                    height: '400px', 
+                  <div className="logo-gallery" style={{
+                    height: '400px',
                     overflowY: 'auto',
                     overflowX: 'auto',
                     border: '2px solid #e9ecef',
@@ -249,15 +254,15 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
                               }
                             }}
                           >
-                            <img 
-                              src={url} 
-                              alt={platform} 
-                              style={{ 
-                                maxWidth: '35px', 
-                                maxHeight: '35px', 
+                            <img
+                              src={url}
+                              alt={platform}
+                              style={{
+                                maxWidth: '35px',
+                                maxHeight: '35px',
                                 objectFit: 'contain',
                                 marginBottom: '4px'
-                              }} 
+                              }}
                             />
                             {/* <div style={{ 
                               fontSize: '9px', 
@@ -290,8 +295,8 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
         </Modal.Body>
         <Modal.Footer className="bg-white border-0 px-4 py-3">
           <div className="d-flex justify-content-between w-100">
-            <Button 
-              variant="outline-secondary" 
+            <Button
+              variant="outline-secondary"
               onClick={onClose}
               className="px-4 py-2 fw-bold"
               style={{ minWidth: '120px' }}
@@ -299,8 +304,8 @@ const PlatformModal = ({ platform, onClose, onSave }) => {
               <i className="fas fa-times me-2"></i>
               Hủy
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               variant={platform ? "warning" : "success"}
               className="px-4 py-2 fw-bold shadow-sm"
               style={{ minWidth: '160px' }}

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { toast } from "react-toastify";
-
-export default function EditModal({ show, fetchServers, onClose, initialData, token }) {
+import Select from "react-select";
+export default function EditModal({ show, fetchServers, onClose, initialData, token, categories, datasmm }) {
   const [formData, setFormData] = useState({
     _id: "",
     name: "",
@@ -28,6 +28,10 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     status: true,
     originalRate: "",
     thutu: "",
+    category: "",
+    type: "",
+    DomainSmm: "",
+    ordertay: false,
   });
   const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
@@ -47,9 +51,56 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
   useEffect(() => {
     if (initialData) {
       setForm(initialData);
-      setFormData(initialData);
+
+      // Extract ObjectId from populated fields or find by name if string
+      let typeId = "";
+      let categoryId = "";
+      let domainId = "";
+
+      // Handle type (platform)
+      if (initialData.type) {
+        if (typeof initialData.type === 'object' && initialData.type._id) {
+          typeId = initialData.type._id;
+        } else if (typeof initialData.type === 'string') {
+          // Find platform by name
+          const platform = categories
+            .map(cat => cat.platforms_id)
+            .find(p => p && p.name === initialData.type);
+          typeId = platform?._id || "";
+        }
+      }
+
+      // Handle category
+      if (initialData.category) {
+        if (typeof initialData.category === 'object' && initialData.category._id) {
+          categoryId = initialData.category._id;
+        } else if (typeof initialData.category === 'string') {
+          // Find category by name
+          const cat = categories.find(c => c.name === initialData.category);
+          categoryId = cat?._id || "";
+        }
+      }
+
+      // Handle DomainSmm
+      if (initialData.DomainSmm) {
+        if (typeof initialData.DomainSmm === 'object' && initialData.DomainSmm._id) {
+          domainId = initialData.DomainSmm._id;
+        } else if (typeof initialData.DomainSmm === 'string') {
+          // Find domain by name
+          const domain = datasmm.find(d => d.name === initialData.DomainSmm);
+          domainId = domain?._id || "";
+        }
+      }
+
+      const processedData = {
+        ...initialData,
+        type: typeId,
+        category: categoryId,
+        DomainSmm: domainId,
+      };
+      setFormData(processedData);
     }
-  }, [initialData]);
+  }, [initialData, categories, datasmm]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,6 +114,65 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
           : value,
     });
   };
+
+  // Get unique platforms from categories
+  const uniquePlatforms = categories
+    .map((category) => category.platforms_id)
+    .filter(
+      (platform, index, self) =>
+        platform && index === self.findIndex((p) => p._id === platform._id)
+    );
+
+  // Filter categories based on selected type
+  const filteredCategories = categories.filter(
+    (category) => category.platforms_id?._id === formData.type
+  );
+
+  // Preserve category if still valid when changing platform
+  const handlePlatformChange = (option) => {
+    const newType = option ? option.value : "";
+    // Check if current category is still valid for new platform
+    const newFilteredCategories = categories.filter(
+      (category) => category.platforms_id?._id === newType
+    );
+    const validCategory = newFilteredCategories.some(cat => cat._id === formData.category);
+    setFormData({
+      ...formData,
+      type: newType,
+      category: validCategory ? formData.category : "",
+    });
+  };
+
+  // Create options for react-select
+  const platformOptions = uniquePlatforms.map((platform) => ({
+    value: platform._id,
+    label: platform.name,
+  }));
+
+  const categoryOptions = filteredCategories.map((category) => ({
+    value: category._id,
+    label: category.name,
+  }));
+
+  const domainOptions = datasmm
+    .filter(partner => !partner.ordertay)   // ⬅ Chỉ lấy partner không có ordertay = true
+    .map(partner => ({
+      value: partner._id,
+      label: partner.name,
+    }));
+
+  // Find selected options
+  const selectedPlatformOption = platformOptions.find(
+    (opt) => opt.value === formData.type
+  ) || null;
+
+  const selectedCategoryOption = categoryOptions.find(
+    (opt) => opt.value === formData.category
+  ) || null;
+
+  const selectedDomainOption = domainOptions.find(
+    (opt) => String(opt.value) === String(formData.DomainSmm)
+  ) || null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,7 +192,6 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       name: formData.name,
       description: formData.description,
       maychu: formData.maychu,
-      serviceId: formData.serviceId,
       min: formData.min || 0,
       max: formData.max || 0,
       rate: formData.rate || 0,
@@ -99,6 +208,10 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       thutu: formData.thutu,
       ischeck: formData.ischeck,
       originalRate: formData.originalRate,
+      type: formData.type,
+      category: formData.category,
+      DomainSmm: formData.DomainSmm,
+      serviceId: formData.serviceId,
     };
 
     loadingg("Đang cập nhật dịch vụ...", true, 99999999);
@@ -135,28 +248,44 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
               </div>
               <div className="card-body">
                 <div className="row g-3">
-                  <div className="col-md-6">
+                  <div className="col-md-6" style={{ zIndex: 20 }}>
                     <label className="form-label fw-bold">
                       <i className="fas fa-layer-group me-1 text-primary"></i>
-                      Nền tảng
+                      Nền tảng <span className="text-danger">*</span>
                     </label>
-                    <input
-                      type="text"
-                      value={form.type}
-                      className="form-control form-control-lg bg-light"
-                      disabled
+                    <Select
+                      options={platformOptions}
+                      value={selectedPlatformOption}
+                      onChange={handlePlatformChange}
+                      placeholder="Chọn nền tảng"
+                      isClearable
+                      classNamePrefix="react-select"
+                      menuPortalTarget={document.body}
+                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                      isDisabled={isAllowedApiUrl}
                     />
                   </div>
-                  <div className="col-md-6">
+                  <div className="col-md-6" style={{ zIndex: 19 }}>
                     <label className="form-label fw-bold">
                       <i className="fas fa-tags me-1 text-primary"></i>
-                      Dịch vụ
+                      Danh mục <span className="text-danger">*</span>
                     </label>
-                    <input
-                      type="text"
-                      value={form.category}
-                      className="form-control form-control-lg bg-light"
-                      disabled
+                    <Select
+                      options={categoryOptions}
+                      value={selectedCategoryOption}
+                      onChange={(option) => {
+                        setFormData({
+                          ...formData,
+                          category: option ? option.value : "",
+                        });
+                      }}
+                      placeholder="Chọn danh mục"
+                      isClearable
+                      // isDisabled={!formData.type}
+                      classNamePrefix="react-select"
+                      menuPortalTarget={document.body}
+                      styles={{ menuPortal: base => ({ ...base, zIndex: 9998 }) }}
+                      isDisabled={isAllowedApiUrl || !formData.type}
                     />
                   </div>
                 </div>
@@ -173,16 +302,36 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
               </div>
               <div className="card-body">
                 <div className="row g-3">
-                  <div className="col-md-6">
+                  <div className="col-md-6" style={{ zIndex: 18 }}>
                     <label className="form-label fw-bold">
                       <i className="fas fa-globe me-1 text-success"></i>
-                      Nguồn
+                      Nguồn <span className="text-danger">*</span>
                     </label>
-                    <input
-                      type="text"
-                      value={form.DomainSmm}
-                      className="form-control form-control-lg bg-light"
-                      disabled
+                    <Select
+                      options={
+                        formData.ordertay
+                          ? [{ value: form.DomainSmm, label: form.DomainSmm }]  // cố định domain cũ
+                          : domainOptions                                        // danh sách domain bình thường
+                      }
+                      value={
+                        formData.ordertay
+                          ? { value: form.DomainSmm, label: form.DomainSmm }     // hiển thị domain cũ
+                          : selectedDomainOption                                 // hoặc domain đã chọn
+                      }
+                      onChange={(option) => {
+                        if (!formData.ordertay) {                                // khi ordertay=true thì KHÔNG cho chọn
+                          setFormData({
+                            ...formData,
+                            DomainSmm: option ? option.value : "",
+                          });
+                        }
+                      }}
+                      placeholder="Chọn nguồn"
+                      isClearable={!formData.ordertay}                           // không cho clear nếu bị khóa
+                      classNamePrefix="react-select"
+                      menuPortalTarget={document.body}
+                      styles={{ menuPortal: base => ({ ...base, zIndex: 9997 }) }}
+                      isDisabled={isAllowedApiUrl || formData.ordertay}          // Disable nếu ordertay=true
                     />
                   </div>
                   <div className="col-md-6">
@@ -192,15 +341,20 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                     </label>
                     <input
                       type="text"
-                      value={form.serviceId}
+                      value={formData.serviceId}
                       className="form-control form-control-lg bg-light"
-                      disabled
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          serviceId: e.target.value,
+                        })
+                      }
+                      disabled={isAllowedApiUrl || formData.ordertay}
                     />
                   </div>
                 </div>
               </div>
             </div>
-
             {/* Service Information */}
             <div className="card border-0 shadow-sm mb-4">
               <div className="card-header bg-primary text-white">
@@ -218,7 +372,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                     </label>
                     <input
                       type="text"
-                      name="serviceId"
+                      name="Magoi"
                       value={form.Magoi}
                       className="form-control form-control-lg"
                       disabled
@@ -276,7 +430,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       disabled={isAllowedApiUrl}
                     />
                   </div>
-                  <div className="col-md-6">
+                  {/* <div className="col-md-6">
                     <label className="form-label fw-bold">
                       <i className="fas fa-hashtag me-1 text-info"></i>
                       Service ID <span className="text-danger">*</span>
@@ -291,7 +445,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       required
                       disabled={isAllowedApiUrl}
                     />
-                  </div>
+                  </div> */}
                   <div className="col-md-6">
                     <label className="form-label fw-bold">
                       <i className="fas fa-server me-1 text-info"></i>
@@ -412,7 +566,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                       onChange={handleChange}
                       className="form-control form-control-lg bg-light"
                       placeholder="0.00"
-                      disabled={!formData.ordertay} // nếu ordertay = false thì disabled
+                      disabled={!formData.ordertay || isAllowedApiUrl} // nếu ordertay = false thì disabled
                     />
                   </div>
                 </div>

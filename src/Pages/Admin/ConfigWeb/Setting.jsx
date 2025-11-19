@@ -343,13 +343,16 @@ const Setting = () => {
                                             <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
                                                 <i className="fas fa-code me-2"></i>
                                                 Mã JavaScript tùy chỉnh
+
                                             </h6>
+                                            <span className="text-danger">Cẩn thận với script có thể ảnh hưởng đến bảo mật website</span><br />
+                                            <span className="text-danger">KHÔNG BIẾT DÙNG TỐT NHẤT ĐỂ TRỐNG</span>
                                         </div>
                                         <div className="card-body p-3">
                                             <div className="mb-3">
                                                 <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
                                                     <i className="fas fa-file-code me-1 text-success"></i>
-                                                    Mã JS Header
+                                                    Script/HTML Header
                                                 </label>
                                                 <textarea
                                                     className="form-control font-monospace"
@@ -361,13 +364,14 @@ const Setting = () => {
                                                 />
                                                 <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
                                                     <i className="fas fa-info-circle me-1"></i>
-                                                    Mã này sẽ được chèn vào thẻ &lt;head&gt; (Analytics, Meta tags, etc.)
+                                                    Mã này sẽ được chèn vào thẻ &lt;head&gt; ( Link , Meta tags, Script.)
+
                                                 </small>
                                             </div>
                                             <div className="mb-0">
                                                 <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
                                                     <i className="fas fa-file-code me-1 text-info"></i>
-                                                    Mã JS Footer
+                                                    Script/HTML Footer
                                                 </label>
                                                 <textarea
                                                     className="form-control font-monospace"
@@ -379,7 +383,7 @@ const Setting = () => {
                                                 />
                                                 <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
                                                     <i className="fas fa-info-circle me-1"></i>
-                                                    Mã này sẽ được chèn trước thẻ đóng &lt;/body&gt; (Chatbox, Tracking, etc.)
+                                                    Mã này sẽ được chèn trước thẻ đóng &lt;/body&gt; (Chatbox, Tuyết rơi, v.v.)
                                                 </small>
                                             </div>
                                         </div>
