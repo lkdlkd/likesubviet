@@ -32,6 +32,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     type: "",
     DomainSmm: "",
     ordertay: false,
+    chietkhau: "",
   });
   const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
@@ -212,6 +213,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       category: formData.category,
       DomainSmm: formData.DomainSmm,
       serviceId: formData.serviceId,
+      chietkhau: formData.chietkhau,
     };
 
     loadingg("Đang cập nhật dịch vụ...", true, 99999999);
@@ -645,6 +647,23 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
                         <option value="true">🟢 Bật</option>
                         <option value="false">🔴 Tắt</option>
                       </select>
+                    </div>
+                  )}
+                  {!isAllowedApiUrl && (
+                    <div className="col-md-6">
+                      <label className="form-label fw-bold">
+                        <i className="fas fa-percentage me-1 text-primary"></i>
+                        Chiết khấu (%): 10 ⇒ đơn 1000 gửi nguồn 900; -10 ⇒ đơn 1000 gửi 1100.
+                      </label>
+                      <input
+                        type="number"
+                        name="chietkhau"
+                        value={formData.chietkhau}
+                        onChange={handleChange}
+                        className="form-control form-control-lg"
+                        placeholder="Nhập chiết khấu"
+                        disabled={formData.ordertay}
+                      />
                     </div>
                   )}
                 </div>

@@ -1268,6 +1268,9 @@ export default function Dichvupage() {
                                                         <span className="badge bg-secondary ms-1">OFF</span>
                                                       )}
                                                     </li>
+                                                    <li>
+                                                      <b>Chiết khấu (%)</b>: {serverItem.chietkhau}
+                                                    </li>
                                                   </ul>
                                                 </td>
                                                 <td style={{
@@ -1492,6 +1495,9 @@ export default function Dichvupage() {
                                   ) : (
                                     <span className="badge bg-secondary ms-1">OFF</span>
                                   )}
+                                </li>
+                                <li>
+                                  <b>Chiết khấu (%)</b>: {serverItem.chietkhau}
                                 </li>
                               </ul>
                             </td>
