@@ -784,7 +784,7 @@ export default function Ordernhanh() {
                                                 style={{ display: "block" }}
                                             >
                                                 <strong>
-                                                    Số lượng: <span id="quantity_limit">({min} ~ {max})</span>
+                                                    Số lượng: <span id="quantity_limit">({Number(min).toLocaleString("en-US")} ~ {Number(max).toLocaleString("en-US")})</span>
                                                 </strong>
                                                 <label htmlFor="comments" className="form-label">
                                                     <strong>Nội dung bình luận: </strong>
@@ -806,7 +806,7 @@ export default function Ordernhanh() {
                                             <div className="form-group mb-3 quantity" id="quantity_type">
                                                 <label htmlFor="quantity" className="form-label">
                                                     <strong>
-                                                        Số lượng: <span id="quantity_limit">({min} ~ {max})</span>
+                                                        Số lượng: <span id="quantity_limit">({Number(min).toLocaleString("en-US")} ~ {Number(max).toLocaleString("en-US")})</span>
                                                     </strong>
                                                 </label>
                                                 <input

@@ -37,7 +37,7 @@ export default function Adddoitac({
     autohoan: "on",
     status: "on",
     update_price: "on",
-    ordertay : false,
+    ordertay: false,
   });
   const [loading, setLoading] = useState(false);
 
@@ -52,11 +52,13 @@ export default function Adddoitac({
         autohoan: editingPartner.autohoan || "on",
         minbalance: editingPartner.minbalance || 100000,
         ordertay: editingPartner.ordertay || false,
+        tigia: ALLOWED_API_URL ? 25 : (editingPartner.tigia || ""),
       });
     } else {
       setFormData({
         name: "",
         url_api: ALLOWED_API_URL || "",
+        tigia: ALLOWED_API_URL ? 25 : "",
         api_token: "",
         price_update: "",
         price_updateVip: "",
@@ -67,7 +69,7 @@ export default function Adddoitac({
         status: "on",
         update_price: "on",
         minbalance: 100000,
-        ordertay : false,
+        ordertay: false,
       });
     }
   }, [editingPartner]);
@@ -76,6 +78,8 @@ export default function Adddoitac({
     const { name, value } = e.target;
     // Khi đã cấu hình ALLOWED_API_URL thì không cho phép thay đổi url_api
     if (ALLOWED_API_URL && name === "url_api") return;
+    if (ALLOWED_API_URL && name === "tigia") return; // ❗ Không cho sửa tỉ giá
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -255,6 +259,7 @@ export default function Adddoitac({
                         onChange={handleChange}
                         placeholder="VD: 25 , 25.5"
                         className="form-control border-2"
+                        readOnly={Boolean(ALLOWED_API_URL)}
                       />
                     </div>
                   </div>

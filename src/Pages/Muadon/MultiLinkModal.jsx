@@ -328,7 +328,7 @@ export default function MultiLinkModal({
                                 } else {
                                     return (
                                         <div className="form-group mb-3">
-                                            <label className="form-label text-dark">Số lượng: <span id="quantity_limit">({min} ~ {max})</span></label>
+                                            <label className="form-label text-dark">Số lượng: <span id="quantity_limit">({Number(min).toLocaleString("en-US")} ~ {Number(max).toLocaleString("en-US")})</span></label>
                                             <input
                                                 type="number"
                                                 className="form-control"
