@@ -63,7 +63,6 @@ export default function Adddoitac({
         price_update: "",
         price_updateVip: "",
         price_updateDistributor: "",
-        tigia: "",
         phihoan: 1000, // Mặc định là 1000
         autohoan: "on",
         status: "on",
@@ -88,6 +87,9 @@ export default function Adddoitac({
     setLoading(true);
     loadingg(editingPartner ? "Đang cập nhật đối tác..." : "Đang thêm đối tác...", true, 9999999);
     try {
+      if (ALLOWED_API_URL) {
+        formData.tigia = 25;
+      }
       // Nếu cấu hình biến môi trường, chỉ cho phép 1 URL API cụ thể
       const normalize = (u) => (u || "").trim().replace(/\/+$/, "");
       if (ALLOWED_API_URL && normalize(formData.url_api) !== normalize(ALLOWED_API_URL)) {
