@@ -53,51 +53,12 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
     if (initialData) {
       setForm(initialData);
 
-      // Extract ObjectId from populated fields or find by name if string
-      let typeId = "";
-      let categoryId = "";
-      let domainId = "";
-
-      // Handle type (platform)
-      if (initialData.type) {
-        if (typeof initialData.type === 'object' && initialData.type._id) {
-          typeId = initialData.type._id;
-        } else if (typeof initialData.type === 'string') {
-          // Find platform by name
-          const platform = categories
-            .map(cat => cat.platforms_id)
-            .find(p => p && p.name === initialData.type);
-          typeId = platform?._id || "";
-        }
-      }
-
-      // Handle category
-      if (initialData.category) {
-        if (typeof initialData.category === 'object' && initialData.category._id) {
-          categoryId = initialData.category._id;
-        } else if (typeof initialData.category === 'string') {
-          // Find category by name
-          const cat = categories.find(c => c.name === initialData.category);
-          categoryId = cat?._id || "";
-        }
-      }
-
-      // Handle DomainSmm
-      if (initialData.DomainSmm) {
-        if (typeof initialData.DomainSmm === 'object' && initialData.DomainSmm._id) {
-          domainId = initialData.DomainSmm._id;
-        } else if (typeof initialData.DomainSmm === 'string') {
-          // Find domain by name
-          const domain = datasmm.find(d => d.name === initialData.DomainSmm);
-          domainId = domain?._id || "";
-        }
-      }
-
+      // Use direct IDs from API response (typeId, categoryId, DomainSmmId)
       const processedData = {
         ...initialData,
-        type: typeId,
-        category: categoryId,
-        DomainSmm: domainId,
+        type: initialData.typeId || "",
+        category: initialData.categoryId || "",
+        DomainSmm: initialData.DomainSmmId || "",
       };
       setFormData(processedData);
     }
