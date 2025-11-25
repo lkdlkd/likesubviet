@@ -56,7 +56,7 @@ export default function Adddoitac({
       });
     } else {
       setFormData({
-        name: "",
+        name: ALLOWED_API_URL ? "webme" : "",
         url_api: ALLOWED_API_URL || "",
         tigia: ALLOWED_API_URL ? 25 : "",
         api_token: "",
@@ -78,7 +78,7 @@ export default function Adddoitac({
     // Khi đã cấu hình ALLOWED_API_URL thì không cho phép thay đổi url_api
     if (ALLOWED_API_URL && name === "url_api") return;
     if (ALLOWED_API_URL && name === "tigia") return; // ❗ Không cho sửa tỉ giá
-
+    if (ALLOWED_API_URL && name === "name") return; // ❗ Không cho sửa tên khi có ALLOWED_API_URL
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -89,6 +89,8 @@ export default function Adddoitac({
     try {
       if (ALLOWED_API_URL) {
         formData.tigia = 25;
+        formData.name = "webme";
+        formData.url_api = ALLOWED_API_URL;
       }
       // Nếu cấu hình biến môi trường, chỉ cho phép 1 URL API cụ thể
       const normalize = (u) => (u || "").trim().replace(/\/+$/, "");
@@ -152,6 +154,7 @@ export default function Adddoitac({
                       placeholder="doitac1, doitac2, ..."
                       required
                       disabled={editingPartner?.ordertay || false}
+                      readOnly={Boolean(ALLOWED_API_URL)}
                     />
                   </div>
 
@@ -190,6 +193,7 @@ export default function Adddoitac({
                       onChange={handleChange}
                       placeholder="token hoặc api key"
                       className="form-control form-control-lg border-2"
+                      required
                     />
                   </div>
                 </div>
@@ -219,6 +223,7 @@ export default function Adddoitac({
                         onChange={handleChange}
                         placeholder="10"
                         className="form-control border-2"
+                        required
                       />
                     </div>
                     <div className="col-6 mb-3">
@@ -233,6 +238,7 @@ export default function Adddoitac({
                         onChange={handleChange}
                         placeholder="10"
                         className="form-control border-2"
+                        required
                       />
                     </div>
                     <div className="col-6 mb-3">
@@ -247,6 +253,7 @@ export default function Adddoitac({
                         onChange={handleChange}
                         placeholder="10"
                         className="form-control border-2"
+                        required
                       />
                     </div>
                     <div className="col-6 mb-3">
@@ -262,6 +269,7 @@ export default function Adddoitac({
                         placeholder="VD: 25 , 25.5"
                         className="form-control border-2"
                         readOnly={Boolean(ALLOWED_API_URL)}
+                        required
                       />
                     </div>
                   </div>
