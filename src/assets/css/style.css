@@ -5067,8 +5067,8 @@ textarea.is-invalid.dataTable-input {
 }
 
 .badge {
-  --bs-badge-padding-x: 0.8em;
-  --bs-badge-padding-y: 0.45em;
+  --bs-badge-padding-x: 0.65em;
+  --bs-badge-padding-y: 0.35em;
   --bs-badge-font-size: 0.75em;
   --bs-badge-font-weight: 500;
   --bs-badge-color: #ffffff;

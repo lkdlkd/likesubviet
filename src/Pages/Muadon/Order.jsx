@@ -545,7 +545,7 @@ export default function Order() {
                                                     {filteredServers.map((server) => (
                                                         <div
                                                             key={server.Magoi}
-                                                            className="form-check mb-2 d-flex align-items-center gap-2 "
+                                                            className="form-check mb-1 d-flex align-items-center gap-2 "
                                                         >
                                                             <input
                                                                 id={`server-${server.Magoi}`}
@@ -562,25 +562,23 @@ export default function Order() {
                                                                     setQuantity(server.min); // Đặt giá trị mặc định cho quantity
                                                                 }}
                                                             />
+
                                                             <label className="form-check-label" htmlFor={`server-${server.Magoi}`}>
-                                                                <strong className="badge bg-info">[{server.Magoi}] </strong>
+                                                                <span className="badge bg-info">[{server.Magoi}]</span>
                                                                 {" - "}
                                                                 {server.maychu !== "" && server.maychu !== " " && server.maychu !== "   " && (
                                                                     <span className="badge bg-success ">{server.maychu} </span>
                                                                 )}
                                                                 {" "}
-                                                                <span
-                                                                    className="font-semibold"
+                                                                <span className="font-semibold"
                                                                     style={{
-                                                                        lineHeight: "1.2",
+                                                                        lineHeight: "1.3",
                                                                         verticalAlign: "middle"
                                                                     }}
                                                                     dangerouslySetInnerHTML={{ __html: server.name }}
                                                                 ></span>
                                                                 {" "}
-                                                                <span className="badge bg-primary ">
-                                                                    {/* {Number(server.rate).toLocaleString("en-US")}đ */}
-                                                                    {/* {server.rate}đ */}
+                                                                <span className="badge bg-primary mt-1">
                                                                     {(() => {
                                                                         const rate = String(server.rate);
                                                                         if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
@@ -588,16 +586,19 @@ export default function Order() {
                                                                         return rate; // giữ nguyên nếu chỉ là số thường
                                                                     })()}đ
                                                                 </span>
-                                                                <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
+                                                                {" "}
+                                                                <span className={`badge mt-1  ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
                                                                     {server.isActive ? "Hoạt động" : "Bảo trì"}
                                                                 </span>
+                                                                {" "}
                                                                 {server.refil === "on" && (
-                                                                    <span className="badge bg-success ms-1">Bảo hành</span>
+                                                                    <span className="badge bg-success mt-1">Bảo hành</span>
                                                                 )}
+                                                                {" "}
                                                                 {server.cancel === "on" && (
-                                                                    <span className="badge bg-warning ms-1">Có hủy hoàn</span>
+                                                                    <span className="badge bg-warning mt-1">Có hủy hoàn</span>
                                                                 )}
-
+                                                                {" "}
                                                                 {server.luotban !== undefined && server.luotban !== null && (() => {
                                                                     // Tìm lượt bán cao nhất trong tất cả servers
                                                                     const maxLuotban = Math.max(...servers.map(s => s.luotban || 0));
@@ -606,113 +607,18 @@ export default function Order() {
                                                                     return (
                                                                         <>
                                                                             {isTopSeller ? (
-                                                                                <span className="badge kd  bg-opacity-10 text-dark border border-success ms-1"
-                                                                                    style={{
-                                                                                        borderRadius: 12,
-                                                                                        fontSize: 12,
-                                                                                        fontWeight: "600",
-                                                                                        padding: "4px 10px"
-                                                                                    }}>
-                                                                                    <i className="bi bi-check-circle-fill me-1"></i>
+                                                                                <span className="font-semibold badge bg-opacity-10 text-dark border border-success mt-1">
                                                                                     🔥 Đã bán: {server.luotban.toLocaleString()}
                                                                                 </span>
-                                                                                // <span className="badge ms-1"
-                                                                                //     style={{
-                                                                                //         background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-                                                                                //         color: "#fff",
-                                                                                //         borderRadius: 15,
-                                                                                //         fontSize: 12,
-                                                                                //         fontWeight: "600",
-                                                                                //         padding: "5px 12px",
-                                                                                //         boxShadow: "0 2px 8px rgba(245, 87, 108, 0.4)"
-                                                                                //     }}>
-                                                                                //     🔥 Bán chạy nhất: {server.luotban.toLocaleString()}
-                                                                                // </span>
+
                                                                             ) : (
-                                                                                <span className="badge kd  bg-opacity-10 text-dark border border-success ms-1"
-                                                                                    style={{
-                                                                                        borderRadius: 12,
-                                                                                        fontSize: 12,
-                                                                                        fontWeight: "600",
-                                                                                        padding: "4px 10px"
-                                                                                    }}>
-                                                                                    <i className="bi bi-check-circle-fill me-1"></i>
+                                                                                <span className="font-semibold badge bg-opacity-10 text-dark border border-success mt-1">
                                                                                     Đã bán: {server.luotban.toLocaleString()}
                                                                                 </span>
                                                                             )}
                                                                         </>
                                                                     );
                                                                 })()}
-
-
-                                                                {/* {server.luotban !== undefined && server.luotban !== null && (
-                                                                    <span className="badge ms-1"
-                                                                        style={{
-                                                                            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                                                                            color: "#fff",
-                                                                            borderRadius: 15,
-                                                                            fontSize: 12,
-                                                                            fontWeight: "600",
-                                                                            padding: "5px 12px",
-                                                                            boxShadow: "0 2px 8px rgba(102, 126, 234, 0.3)"
-                                                                        }}>
-                                                                        🔥 {server.luotban.toLocaleString()} đã bán
-                                                                    </span>
-                                                                )}
-                                                                {server.luotban !== undefined && server.luotban !== null && (
-                                                                    <span className="badge bg-success bg-opacity-10 text-success border border-success ms-1"
-                                                                        style={{
-                                                                            borderRadius: 12,
-                                                                            fontSize: 12,
-                                                                            fontWeight: "600",
-                                                                            padding: "4px 10px"
-                                                                        }}>
-                                                                        <i className="bi bi-check-circle-fill me-1"></i>
-                                                                        Đã bán: {server.luotban.toLocaleString()}
-                                                                    </span>
-                                                                )}
-                                                                {server.luotban !== undefined && server.luotban !== null && (
-                                                                    <span className="badge ms-1"
-                                                                        style={{
-                                                                            background: "#f8f9fa",
-                                                                            color: "#495057",
-                                                                            border: "1px solid #dee2e6",
-                                                                            borderRadius: 50,
-                                                                            fontSize: 11,
-                                                                            fontWeight: "600",
-                                                                            padding: "5px 12px",
-                                                                            display: "inline-flex",
-                                                                            alignItems: "center",
-                                                                            gap: "6px"
-                                                                        }}>
-                                                                        <span style={{
-                                                                            width: 6,
-                                                                            height: 6,
-                                                                            borderRadius: "50%",
-                                                                            background: "#28a745",
-                                                                            display: "inline-block"
-                                                                        }}></span>
-                                                                        {server.luotban.toLocaleString()} đã bán
-                                                                    </span>
-                                                                )}
-                                                                {server.luotban !== undefined && server.luotban !== null && (
-                                                                    <span className="badge ms-1"
-                                                                        style={{
-                                                                            background: "#fff",
-                                                                            color: "#ee4d2d",
-                                                                            border: "1px solid #ee4d2d",
-                                                                            borderRadius: 2,
-                                                                            fontSize: 11,
-                                                                            fontWeight: "600",
-                                                                            padding: "3px 8px"
-                                                                        }}>
-                                                                        Đã bán {server.luotban.toLocaleString('vi-VN')}
-                                                                    </span>
-                                                                )} */}
-                                                                {/* <span className="custom-control-label">
-                                                        {" "}
-                                                        - ID server - {server.Magoi}
-                                                    </span> */}
                                                             </label>
                                                         </div>
                                                     ))}
