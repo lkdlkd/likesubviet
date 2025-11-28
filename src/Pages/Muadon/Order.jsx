@@ -578,7 +578,7 @@ export default function Order() {
                                                                     dangerouslySetInnerHTML={{ __html: server.name }}
                                                                 ></span>
                                                                 {" "}
-                                                                <span className="badge bg-primary mt-1">
+                                                                <span className="badge bg-primary ">
                                                                     {(() => {
                                                                         const rate = String(server.rate);
                                                                         if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
@@ -587,16 +587,16 @@ export default function Order() {
                                                                     })()}đ
                                                                 </span>
                                                                 {" "}
-                                                                <span className={`badge mt-1  ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
+                                                                <span className={`badge ${server.isActive ? 'bg-success' : 'bg-danger'}`}>
                                                                     {server.isActive ? "Hoạt động" : "Bảo trì"}
                                                                 </span>
                                                                 {" "}
                                                                 {server.refil === "on" && (
-                                                                    <span className="badge bg-success mt-1">Bảo hành</span>
+                                                                    <span className="badge bg-success ">Bảo hành</span>
                                                                 )}
                                                                 {" "}
                                                                 {server.cancel === "on" && (
-                                                                    <span className="badge bg-warning mt-1">Có hủy hoàn</span>
+                                                                    <span className="badge bg-warning ">Có hủy hoàn</span>
                                                                 )}
                                                                 {" "}
                                                                 {server.luotban !== undefined && server.luotban !== null && (() => {
@@ -607,12 +607,12 @@ export default function Order() {
                                                                     return (
                                                                         <>
                                                                             {isTopSeller ? (
-                                                                                <span className="font-semibold badge bg-opacity-10 text-dark border border-success mt-1">
+                                                                                <span className="font-semibold badge bg-opacity-10 text-dark border border-success ">
                                                                                     🔥 Đã bán: {server.luotban.toLocaleString()}
                                                                                 </span>
 
                                                                             ) : (
-                                                                                <span className="font-semibold badge bg-opacity-10 text-dark border border-success mt-1">
+                                                                                <span className="font-semibold badge bg-opacity-10 text-dark border border-success ">
                                                                                     Đã bán: {server.luotban.toLocaleString()}
                                                                                 </span>
                                                                             )}
