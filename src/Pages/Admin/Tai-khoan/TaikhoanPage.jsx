@@ -525,34 +525,6 @@ export default function TaikhoanPage() {
                             {user.capbac === "member" ? "Thành viên" : user?.capbac === "vip" ? "Đại lý" : user?.capbac === "distributor" ? "Nhà Phân Phối" : "Thành viên"}
                           </span>
                         </td>
-                        {/* <td>
-                      {user.role === "admin" ? (
-                        <span className="badge bg-danger">Quản trị viên</span>
-                      ) : (
-                        <span className="badge bg-primary">Người dùng</span>
-                      )}
-                    </td>
-                    <td>
-                      {user.status === "active" ? (
-                        <span className="badge bg-success">Hoạt động</span>
-                      ) : (
-                        <span className="badge bg-secondary">Không hoạt động</span>
-                      )}
-                    </td> */}
-                        {/* <td>
-                      <button
-                        className="btn btn-info btn-sm me-2"
-                        onClick={() => setEditingUser(user)}
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleDeleteUser(user._id)}
-                      >
-                        Xóa
-                      </button>
-                    </td> */}
                         <td>
                           {new Date(user.createdAt).toLocaleString("vi-VN", {
                             day: "2-digit",

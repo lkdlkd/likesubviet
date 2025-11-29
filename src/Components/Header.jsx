@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Logout from "./Logout";
+import { useTheme } from "@/Context/ThemeContext";
 
 // ================= Theme Handling (ported & adapted from themes.js) =================
 
@@ -8,9 +9,13 @@ import Logout from "./Logout";
 export default function Header({ user }) {
     const [showSearch, setShowSearch] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [showThemeMenu, setShowThemeMenu] = useState(false);
 
     const searchRef = useRef(null);
     const userMenuRef = useRef(null);
+    const themeMenuRef = useRef(null);
+
+    const { theme, setLightTheme, setDarkTheme, setDefaultTheme, isDark, isDefault } = useTheme();
 
     const handleActiveMenu = (e) => {
         e.stopPropagation();
@@ -41,6 +46,14 @@ export default function Header({ user }) {
                 !searchRef.current.contains(event.target)
             ) {
                 setShowSearch(false);
+            }
+
+            // Xử lý đóng theme menu
+            if (
+                themeMenuRef.current &&
+                !themeMenuRef.current.contains(event.target)
+            ) {
+                setShowThemeMenu(false);
             }
 
             // Tự động đóng sidebar trên mobile khi click bên ngoài
@@ -110,22 +123,46 @@ export default function Header({ user }) {
                 {/* [User Block] */}
                 <div className="ms-auto">
                     <ul>
-                        <li className="dropdown pc-h-item d-none d-md-inline-flex" ref={userMenuRef}>
+                        <li className="dropdown pc-h-item d-none d-md-inline-flex" ref={themeMenuRef}>
                         
                             <button
                                 type="button"
                                 className="pc-head-link dropdown-toggle arrow-none me-0 btn btn-link p-0 border-0"
-                                data-bs-toggle="dropdown"
+                                onClick={() => setShowThemeMenu(!showThemeMenu)}
                                 aria-haspopup="true"
-                                aria-expanded="false"
+                                aria-expanded={showThemeMenu}
+                                title={isDark ? "Chế độ tối" : "Chế độ sáng"}
                             >
-                                <i className="ph-duotone ph-sun-dim"></i>
+                                <i className={`ph-duotone ${isDark ? "ph-moon" : "ph-sun-dim"}`}></i>
                             </button>
-                            <div className="dropdown-menu dropdown-menu-end pc-h-dropdown">
-                                <button className="dropdown-item" type="button" > <i className="ph-duotone ph-moon"></i> <span>Dark</span></button>
-                                <button className="dropdown-item" type="button" > <i className="ph-duotone ph-sun-dim"></i> <span>Light</span></button>
-                                <button className="dropdown-item" type="button" > <i className="ph-duotone ph-cpu"></i> <span>Default</span></button>
-                            </div>
+                            {showThemeMenu && (
+                                <div className="dropdown-menu dropdown-menu-end pc-h-dropdown show" style={{ display: "block" }}>
+                                    <button 
+                                        className={`dropdown-item ${theme === "dark" ? "active" : ""}`} 
+                                        type="button" 
+                                        onClick={() => { setDarkTheme(); setShowThemeMenu(false); }}
+                                    >
+                                        <i className="ph-duotone ph-moon me-2"></i> 
+                                        <span>Dark</span>
+                                    </button>
+                                    <button 
+                                        className={`dropdown-item ${theme === "light" ? "active" : ""}`} 
+                                        type="button" 
+                                        onClick={() => { setLightTheme(); setShowThemeMenu(false); }}
+                                    >
+                                        <i className="ph-duotone ph-sun-dim me-2"></i> 
+                                        <span>Light</span>
+                                    </button>
+                                    <button 
+                                        className={`dropdown-item ${isDefault ? "active" : ""}`} 
+                                        type="button" 
+                                        onClick={() => { setDefaultTheme(); setShowThemeMenu(false); }}
+                                    >
+                                        <i className="ph-duotone ph-cpu me-2"></i> 
+                                        <span>Default</span>
+                                    </button>
+                                </div>
+                            )}
                         </li>
                         <li
                             className="dropdown pc-h-item header-user-profile"

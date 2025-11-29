@@ -1,6 +1,7 @@
 import React from "react";
 import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-dom";
 import { AuthProvider, AuthContext } from "@/Context/AuthContext";
+import { ThemeProvider } from "@/Context/ThemeContext";
 import Login from "@/Pages/Dang-nhap/Login";
 import Register from "@/Pages/Dang-Ky/Register";
 import Langding from "@/Pages/Landing";
@@ -35,8 +36,9 @@ function App() {
   const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
   return (
-    <AuthProvider>
-      <Router>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
         <Routes>
           {/* Landing Page - hiển thị khi chưa có token */}
           <Route
@@ -132,6 +134,7 @@ function App() {
         </Routes>
       </Router>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 export default App;

@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { getConfigTele, updateConfigTele } from "../../../Utils/api"; // Đường dẫn tới file chứa các hàm API
 import { loadingg } from "../../../JS/Loading"; // Giả sử bạn có hàm loadingg để hiển thị loading
-const token = localStorage.getItem("token");
 
 export default function ConfigTelePage() {
   const [config, setConfig] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const token = localStorage.getItem("token");
+
   const fetchConfig = async () => {
     setLoading(true);
     loadingg("Đang tải cấu hình...", true, 9999999);

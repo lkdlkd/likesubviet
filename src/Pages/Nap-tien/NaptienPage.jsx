@@ -307,28 +307,13 @@ export default function NaptienPage() {
                         </div>
                     </div>
                     <div className="col-md-12">
-                        <div className="card border-0 overflow-hidden" style={{background: 'linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)'}}>
-                            <div className="position-relative">
-                                {/* Decorative background pattern */}
-                                <div className="position-absolute w-100 h-100 opacity-10">
-                                    <svg width="100%" height="100%" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="100" cy="100" r="3" fill="white"/>
-                                        <circle cx="300" cy="150" r="2" fill="white"/>
-                                        <circle cx="200" cy="250" r="4" fill="white"/>
-                                        <circle cx="350" cy="300" r="2" fill="white"/>
-                                        <circle cx="50" cy="350" r="3" fill="white"/>
-                                    </svg>
+                        <div className="card promotion-banner mb-3">
+                            <div className="card-body text-center py-3">
+                                <div className="mb-2">
+                                    <i className="fas fa-tags text-primary" style={{fontSize: '2rem'}}></i>
                                 </div>
-                                
-                                <div className="card-body text-center py-3 position-relative">
-                                    <div className="mb-3">
-                                        <div className="d-inline-flex align-items-center justify-content-center bg-white bg-opacity-20 rounded-circle p-2 mb-2">
-                                            <i className="fas fa-tags text-white" style={{fontSize: '1.5rem'}}></i>
-                                        </div>
-                                        <h3 className="text-white fw-bold mb-1">CHƯƠNG TRÌNH KHUYẾN MÃI</h3>
-                                        <p className="text-white mb-0">Nạp tiền ngay để nhận ưu đãi</p>
-                                    </div>
-                                </div>
+                                <h4 className="fw-bold mb-1">CHƯƠNG TRÌNH KHUYẾN MÃI</h4>
+                                <p className="text-muted mb-0">Nạp tiền ngay để nhận ưu đãi</p>
                             </div>
                         </div>
 
@@ -336,180 +321,124 @@ export default function NaptienPage() {
                             {promotions.length > 0 ? (
                                 <div className="row">
                                     {promotions.map((promotion, index) => (
-                                        <div className="col-md-6" key={promotion._id || index}>
-                                            <div className="card border-0 shadow-lg overflow-hidden" 
-                                                 style={{borderRadius: '15px'}}>
-                                                
-                                                {/* Card Header with Gradient */}
-                                                <div className="card-header border-0 p-0 position-relative">
-                                                    <div style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '1rem'}}>
-                                                        <div className="row align-items-center">
-                                                            <div className="col-md-8">
-                                                                <div className="d-flex align-items-center mb-2">
-                                                                    <div className="bg-white bg-opacity-20 rounded-circle p-2 me-3">
-                                                                        <i className="fas fa-fire text-white" style={{fontSize: '1.2rem'}}></i>
-                                                                    </div>
-                                                                    <div>
-                                                                        <h5 className="text-white fw-bold mb-1">{promotion.name}</h5>
-                                                                        <small className="text-white-50">Chương trình khuyến mãi đặc biệt</small>
-                                                                    </div>
-                                                                </div>
+                                        <div className="col-md-6 mb-3" key={promotion._id || index}>
+                                            <div className="card promotion-card h-100">
+                                                {/* Card Header */}
+                                                <div className="card-header bg-primary text-white">
+                                                    <div className="d-flex justify-content-between align-items-center">
+                                                        <div className="d-flex align-items-center">
+                                                            <i className="fas fa-fire me-2"></i>
+                                                            <div>
+                                                                <h6 className="mb-0 fw-bold">{promotion.name}</h6>
+                                                                <div className="opacity-75">Khuyến mãi đặc biệt</div>
                                                             </div>
-                                                            <div className="col-md-4 text-md-end">
-                                                                <div className="bg-warning rounded-3 p-2 d-inline-block">
-                                                                    <div className="text-center">
-                                                                        <div className="fw-bold text-dark h4 mb-0">{promotion.percentBonus}%</div>
-                                                                        <small className="text-dark fw-semibold">BONUS</small>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                                        </div>
+                                                        <div className="badge bg-warning text-dark fs-6 px-3 py-2">
+                                                            +{promotion.percentBonus}%
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {/* Card Body */}
-                                                <div className="card-body p-3" style={{background: 'linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%)'}}>
+                                                <div className="card-body">
                                                     <div className="row g-3">
                                                         {/* Amount Section */}
-                                                        <div className="col-md-4">
-                                                            <div className="text-center p-3 bg-primary bg-opacity-10 rounded-3 h-100">
-                                                                <i className="fas fa-money-bill-wave text-primary mb-2" style={{fontSize: '1.8rem'}}></i>
-                                                                <h6 className="text-primary fw-bold mb-1">Nạp tối thiểu</h6>
-                                                                <h5 className="text-dark fw-bold mb-0">
-                                                                    {Number(promotion.minAmount || 0).toLocaleString("en-US")}
-                                                                </h5>
-                                                                <small className="text-muted fw-semibold">VNĐ</small>
+                                                        <div className="col-12">
+                                                            <div className="d-flex align-items-center p-3 rounded border">
+                                                                <i className="fas fa-money-bill-wave text-primary me-3" style={{fontSize: '1.5rem'}}></i>
+                                                                <div>
+                                                                    <div className="text-muted">Nạp tối thiểu</div>
+                                                                    <h5 className="mb-0 fw-bold">
+                                                                        {Number(promotion.minAmount || 0).toLocaleString("en-US")} <div className="text-muted">VNĐ</div>
+                                                                    </h5>
+                                                                </div>
                                                             </div>
                                                         </div>
 
                                                         {/* Time Section */}
-                                                        <div className="col-md-8">
-                                                            <div className="row g-2 h-100">
-                                                                {/* Start Time */}
-                                                                <div className="col-md-6">
-                                                                    <div className="bg-success bg-opacity-10 rounded-3 p-3 h-100">
-                                                                        <div className="d-flex align-items-center mb-2">
-                                                                            <div className="bg-success rounded-circle p-1 me-2">
-                                                                                <i className="fas fa-play text-white" style={{fontSize: '0.8rem'}}></i>
-                                                                            </div>
-                                                                            <h6 className="text-success fw-bold mb-0 small">Thời gian bắt đầu</h6>
-                                                                        </div>
-                                                                        <div className="text-dark">
-                                                                            <div className="d-flex align-items-center mb-1">
-                                                                                <i className="fas fa-calendar-alt text-success me-2" style={{fontSize: '0.9rem'}}></i>
-                                                                                <span className="fw-semibold small">
-                                                                                    {new Date(promotion.startTime).toLocaleDateString("vi-VN", {
-                                                                                        weekday: 'short',
-                                                                                        day: '2-digit',
-                                                                                        month: '2-digit',
-                                                                                        year: 'numeric'
-                                                                                    })}
-                                                                                </span>
-                                                                            </div>
-                                                                            <div className="d-flex align-items-center">
-                                                                                <i className="fas fa-clock text-success me-2" style={{fontSize: '0.9rem'}}></i>
-                                                                                <span className="fw-semibold small">
-                                                                                    {new Date(promotion.startTime).toLocaleTimeString("vi-VN", {
-                                                                                        hour: '2-digit',
-                                                                                        minute: '2-digit'
-                                                                                    })}
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
+                                                        <div className="col-6">
+                                                            <div className="p-2 rounded border">
+                                                                <div className="d-flex align-items-center mb-1">
+                                                                    <i className="fas fa-play-circle text-success me-2"></i>
+                                                                    <div className="fw-bold text-success">Bắt đầu</div>
                                                                 </div>
+                                                                <div className="d-block">
+                                                                    {new Date(promotion.startTime).toLocaleDateString("vi-VN")}
+                                                                </div>
+                                                                <div className="text-muted">
+                                                                    {new Date(promotion.startTime).toLocaleTimeString("vi-VN", {
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit'
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        </div>
 
-                                                                {/* End Time */}
-                                                                <div className="col-md-6">
-                                                                    <div className="bg-danger bg-opacity-10 rounded-3 p-3 h-100">
-                                                                        <div className="d-flex align-items-center mb-2">
-                                                                            <div className="bg-danger rounded-circle p-1 me-2">
-                                                                                <i className="fas fa-stop text-white" style={{fontSize: '0.8rem'}}></i>
-                                                                            </div>
-                                                                            <h6 className="text-danger fw-bold mb-0 small">Thời gian kết thúc</h6>
-                                                                        </div>
-                                                                        <div className="text-dark">
-                                                                            <div className="d-flex align-items-center mb-1">
-                                                                                <i className="fas fa-calendar-alt text-danger me-2" style={{fontSize: '0.9rem'}}></i>
-                                                                                <span className="fw-semibold small">
-                                                                                    {new Date(promotion.endTime).toLocaleDateString("vi-VN", {
-                                                                                        weekday: 'short',
-                                                                                        day: '2-digit',
-                                                                                        month: '2-digit',
-                                                                                        year: 'numeric'
-                                                                                    })}
-                                                                                </span>
-                                                                            </div>
-                                                                            <div className="d-flex align-items-center">
-                                                                                <i className="fas fa-clock text-danger me-2" style={{fontSize: '0.9rem'}}></i>
-                                                                                <span className="fw-semibold small">
-                                                                                    {new Date(promotion.endTime).toLocaleTimeString("vi-VN", {
-                                                                                        hour: '2-digit',
-                                                                                        minute: '2-digit'
-                                                                                    })}
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
+                                                        <div className="col-6">
+                                                            <div className="p-2 rounded border">
+                                                                <div className="d-flex align-items-center mb-1">
+                                                                    <i className="fas fa-stop-circle text-danger me-2"></i>
+                                                                    <div className="fw-bold text-danger">Kết thúc</div>
+                                                                </div>
+                                                                <div className="d-block">
+                                                                    {new Date(promotion.endTime).toLocaleDateString("vi-VN")}
+                                                                </div>
+                                                                <div className="text-muted">
+                                                                    {new Date(promotion.endTime).toLocaleTimeString("vi-VN", {
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit'
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Description */}
+                                                        {promotion.description && (
+                                                            <div className="col-12">
+                                                                <div className="p-2 rounded border bg-light">
+                                                                    <div className="d-flex">
+                                                                        <i className="fas fa-info-circle text-info me-2 mt-1"></i>
+                                                                        <div>{promotion.description}</div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
+                                                        )}
                                                     </div>
+                                                </div>
 
-                                                    {/* Description Section */}
-                                                    <div className="mt-3">
-                                                        <div className="bg-info bg-opacity-10 rounded-3 p-3">
-                                                            <div className="d-flex align-items-start">
-                                                                <div className="bg-info rounded-circle p-1 me-2 mt-1">
-                                                                    <i className="fas fa-info text-white" style={{fontSize: '0.8rem'}}></i>
-                                                                </div>
-                                                                <div className="flex-grow-1">
-                                                                    <h6 className="text-info fw-bold mb-1 small">Mô tả chương trình</h6>
-                                                                    <p className="text-dark mb-0 small">{promotion.description}</p>
-                                                                </div>
-                                                            </div>
+                                                {/* Card Footer */}
+                                                <div className="card-footer">
+                                                    <div className="d-flex justify-content-between align-items-center">
+                                                        <div className="text-muted">
+                                                            <i className="fas fa-check-circle text-success me-1"></i>
+                                                            Áp dụng mọi phương thức
                                                         </div>
-                                                    </div>
-
-                                                    {/* Status Footer */}
-                                                    <div className="mt-3 pt-2 border-top">
-                                                        <div className="d-flex justify-content-between align-items-center">
-                                                            <div className="d-flex align-items-center">
-                                                                <i className="fas fa-check-circle text-success me-2"></i>
-                                                                <span className="text-muted fw-semibold small">Áp dụng cho tất cả phương thức nạp tiền</span>
-                                                            </div>
-                                                            <div className="d-flex align-items-center">
-                                                                {(() => {
-                                                                    const now = new Date();
-                                                                    const startTime = new Date(promotion.startTime);
-                                                                    const endTime = new Date(promotion.endTime);
-                                                                    const isActive = now >= startTime && now <= endTime;
-                                                                    
-                                                                    if (isActive) {
-                                                                        return (
-                                                                            <div className="bg-success rounded-pill px-3 py-1">
-                                                                                <i className="fas fa-bolt text-white me-1" style={{fontSize: '0.8rem'}}></i>
-                                                                                <span className="text-white fw-bold small">Đang hoạt động</span>
-                                                                            </div>
-                                                                        );
-                                                                    } else if (now < startTime) {
-                                                                        return (
-                                                                            <div className="bg-warning rounded-pill px-3 py-1">
-                                                                                <i className="fas fa-clock text-dark me-1" style={{fontSize: '0.8rem'}}></i>
-                                                                                <span className="text-dark fw-bold small">Sắp diễn ra</span>
-                                                                            </div>
-                                                                        );
-                                                                    } else {
-                                                                        return (
-                                                                            <div className="bg-danger rounded-pill px-3 py-1">
-                                                                                <i className="fas fa-times text-white me-1" style={{fontSize: '0.8rem'}}></i>
-                                                                                <span className="text-white fw-bold small">Đã kết thúc</span>
-                                                                            </div>
-                                                                        );
-                                                                    }
-                                                                })()}
-                                                            </div>
-                                                        </div>
+                                                        {(() => {
+                                                            const now = new Date();
+                                                            const startTime = new Date(promotion.startTime);
+                                                            const endTime = new Date(promotion.endTime);
+                                                            const isActive = now >= startTime && now <= endTime;
+                                                            
+                                                            if (isActive) {
+                                                                return (
+                                                                    <span className="badge bg-success">
+                                                                        <i className="fas fa-bolt me-1"></i>Đang hoạt động
+                                                                    </span>
+                                                                );
+                                                            } else if (now < startTime) {
+                                                                return (
+                                                                    <span className="badge bg-warning text-dark">
+                                                                        <i className="fas fa-clock me-1"></i>Sắp diễn ra
+                                                                    </span>
+                                                                );
+                                                            } else {
+                                                                return (
+                                                                    <span className="badge bg-secondary">
+                                                                        <i className="fas fa-times me-1"></i>Đã kết thúc
+                                                                    </span>
+                                                                );
+                                                            }
+                                                        })()}
                                                     </div>
                                                 </div>
                                             </div>
@@ -517,27 +446,18 @@ export default function NaptienPage() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="card border-0 shadow-lg">
+                                <div className="card">
                                     <div className="card-body text-center py-4">
                                         <div className="mb-3">
-                                            <div className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center"
-                                                 style={{width: '80px', height: '80px'}}>
-                                                <i className="fas fa-gift-card text-muted" style={{fontSize: '2.5rem'}}></i>
-                                            </div>
+                                            <i className="fas fa-gift text-muted" style={{fontSize: '3rem'}}></i>
                                         </div>
-                                        <h5 className="text-dark fw-bold mb-2">Hiện tại chưa có khuyến mãi</h5>
-                                        <p className="text-muted mb-3" style={{maxWidth: '400px', margin: '0 auto'}}>
-                                            Chúng tôi đang chuẩn bị những chương trình khuyến mãi hấp dẫn. 
-                                            Hãy đăng ký nhận thông báo để không bỏ lỡ cơ hội!
+                                        <h5 className="fw-bold mb-2">Hiện tại chưa có khuyến mãi</h5>
+                                        <p className="text-muted mb-3">
+                                            Chúng tôi đang chuẩn bị những chương trình khuyến mãi hấp dẫn.
                                         </p>
-                                        <div className="d-flex flex-column flex-sm-row gap-2 justify-content-center">
-                                            <button className="btn btn-outline-primary rounded-pill px-4">
-                                                <i className="fas fa-sync-alt me-2"></i>Tải lại trang
-                                            </button>
-                                            <button className="btn btn-primary rounded-pill px-4">
-                                                <i className="fas fa-bell me-2"></i>Đăng ký thông báo
-                                            </button>
-                                        </div>
+                                        <button className="btn btn-outline-primary rounded-pill px-4" onClick={() => window.location.reload()}>
+                                            <i className="fas fa-sync-alt me-2"></i>Tải lại trang
+                                        </button>
                                     </div>
                                 </div>
                             )}
