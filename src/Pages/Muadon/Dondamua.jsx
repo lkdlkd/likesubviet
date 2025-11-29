@@ -311,26 +311,7 @@ const Dondamua = ({ category, showcmt }) => {
                                             options={statusOptions}
                                             placeholder="Chọn trạng thái"
                                             isClearable
-                                            styles={{
-                                                control: (provided, state) => ({
-                                                    ...provided,
-                                                    border: '1px solid #dee2e6',
-                                                    borderRadius: '8px',
-                                                    padding: '0.1rem 0.5rem',
-                                                    fontSize: '14px',
-                                                    boxShadow: state.isFocused ? '0 0 0 0.2rem rgba(102, 126, 234, 0.25)' : 'none',
-                                                    borderColor: state.isFocused ? '#667eea' : '#dee2e6',
-                                                    '&:hover': {
-                                                        borderColor: '#667eea'
-                                                    }
-                                                }),
-                                                option: (provided, state) => ({
-                                                    ...provided,
-                                                    backgroundColor: state.isFocused ? '#f8f9fa' : 'white',
-                                                    color: '#2c3e50',
-                                                    fontSize: '14px'
-                                                })
-                                            }}
+                                            classNamePrefix="react-select"
                                         />
                                     </div>
                                 </div>
