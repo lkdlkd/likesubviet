@@ -123,7 +123,7 @@ export default function Header({ user }) {
                 {/* [User Block] */}
                 <div className="ms-auto">
                     <ul>
-                        <li className="dropdown pc-h-item d-none d-md-inline-flex" ref={themeMenuRef}>
+                        <li className="dropdown pc-h-item" ref={themeMenuRef}>
                         
                             <button
                                 type="button"
