@@ -625,7 +625,6 @@ export default function Order() {
                                                     {servers.map((server, index) => (
                                                         selectedMagoi === server.Magoi && (
                                                             <div key={index} >
-
                                                                 <div className="alert text-white alert-info bg-info">
                                                                     <h6>
                                                                         Mã máy chủ: <span className="text-white">{server.Magoi}</span>
@@ -634,7 +633,7 @@ export default function Order() {
                                                                         Lưu ý :
                                                                     </h6>
                                                                     <div
-                                                                        dangerouslySetInnerHTML={{ __html: server.description }}
+                                                                        dangerouslySetInnerHTML={{ __html: server.description ? server.description.replace(/\\n/g, '<br>') : '' }}
                                                                     />
                                                                 </div>
                                                                 {/* <div className="alert text-white alert-info bg-info"> */}

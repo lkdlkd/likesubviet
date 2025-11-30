@@ -228,12 +228,18 @@ export default function Adddichvu({
               ratevip: VipRate,
               rateDistributor: DistributorRate,
               originalRate: service.rate * tigia,
+              description: finalFormData.description ? finalFormData.description.replace(/\n/g, '\\n') : "",
             };
             await createServer(payload, token);
           })
         );
       } else {
-        await createServer(finalFormData, token);
+        // Convert newlines to \n string when saving
+        const payloadData = {
+          ...finalFormData,
+          description: finalFormData.description ? finalFormData.description.replace(/\n/g, '\\n') : "",
+        };
+        await createServer(payloadData, token);
       }
       fetchServers(); // Tải lại danh sách dịch vụ sau khi thêm
       toast.success("Dịch vụ đã được thêm thành công!");

@@ -54,11 +54,13 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
       setForm(initialData);
 
       // Use direct IDs from API response (typeId, categoryId, DomainSmmId)
+      // Convert \n string to actual newlines for textarea display
       const processedData = {
         ...initialData,
         type: initialData.typeId || "",
         category: initialData.categoryId || "",
         DomainSmm: initialData.DomainSmmId || "",
+        description: initialData.description ? initialData.description.replace(/\\n/g, '\n') : "",
       };
       setFormData(processedData);
     }
@@ -152,7 +154,7 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
 
     const updatedData = {
       name: formData.name,
-      description: formData.description,
+      description: formData.description ? formData.description.replace(/\n/g, '\\n') : "",
       maychu: formData.maychu,
       min: formData.min || 0,
       max: formData.max || 0,

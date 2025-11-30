@@ -1,28 +1,38 @@
 import { useState, useEffect } from "react";
-import { deleteNotification } from "@/Utils/api";
+import { deleteNotification, getNotifications } from "@/Utils/api";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import Editthongbao from "./Editthongbao";
 import Addthongbao from "./Addthongbao";
 import Table from "react-bootstrap/Table";
-import { useOutletContext } from "react-router-dom";
 import { loadingg } from "@/JS/Loading";
 
 export default function Taothongbaopage() {
   const token = localStorage.getItem("token") || null;
 
-  const { notifications: initialNotifications } = useOutletContext();
   const [notification, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newlyAddedId, setNewlyAddedId] = useState(null);
   const [editingNotification, setEditingNotification] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false); // Trạng thái hiển thị modal thêm thông báo
 
-  useEffect(() => {
-    if (Array.isArray(initialNotifications)) {
-      setNotifications(initialNotifications);
+  const fectnotification = async () => {
+    setLoading(true);
+    loadingg("Đang tải dữ liệu...", 9999999);
+    try {
+      const data = await getNotifications(token);
+      setNotifications(data);
+    } catch (error) {
+      toast.error("Lỗi khi tải danh sách thông báo. Vui lòng thử lại!");
+    } finally {
+      setLoading(false);
+      loadingg("Đang tải...", false);
     }
-  }, [initialNotifications]);
+  };
+
+  useEffect(() => {
+    fectnotification();
+  }, []);
 
   // Hàm xử lý xóa thông báo
   const handleDelete = async (id) => {
@@ -42,7 +52,7 @@ export default function Taothongbaopage() {
         setLoading(true);
         loadingg("Đang xóa thông báo...", 9999999);
         await deleteNotification(id, token);
-        setNotifications((prev) => prev.filter((notification) => notification._id !== id));
+        fectnotification();
         toast.success("Thông báo đã bị xóa thành công!");
       }
     } catch (error) {
@@ -61,22 +71,6 @@ export default function Taothongbaopage() {
   // Đóng modal chỉnh sửa
   const closeEditModal = () => {
     setEditingNotification(null);
-  };
-
-  // Cập nhật thông báo sau khi chỉnh sửa
-  const handleUpdate = (updatedNotification) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
-        notification._id === updatedNotification._id ? updatedNotification : notification
-      )
-    );
-  };
-
-  // Thêm thông báo mới
-  const handleAdd = (newNotification) => {
-    setNotifications((prev) => [newNotification, ...prev]);
-    setNewlyAddedId(newNotification._id);
-    setTimeout(() => setNewlyAddedId(null), 3000); // Xóa highlight sau 3 giây
   };
 
   return (
@@ -479,7 +473,7 @@ export default function Taothongbaopage() {
           {showAddModal && (
             <Addthongbao
               token={token}
-              onAdd={handleAdd}
+              fectnotification={fectnotification}
               show={showAddModal}
               onClose={() => setShowAddModal(false)}
             />
@@ -491,7 +485,7 @@ export default function Taothongbaopage() {
               notification={editingNotification}
               token={token}
               onClose={closeEditModal}
-              onUpdate={handleUpdate}
+              fectnotification={fectnotification}
             />
           )}
         </div>
