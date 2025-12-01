@@ -17,8 +17,21 @@ export const Home = async (token) => {
 };
 
 // Refund APIs
-export const getRefunds = async (token, status) => {
-  const response = await fetch(`${API_BASE}/refund?status=${status}`, {
+export const getRefunds = async (token, status, page = 1, limit = 20, search = "", searchType = "madon") => {
+  const params = new URLSearchParams({
+    status: status,
+    page: page,
+    limit: limit,
+  });
+  if (search) {
+    if (searchType === "username") {
+      params.append("username", search);
+    } else {
+      params.append("madon", search);
+    }
+  }
+
+  const response = await fetch(`${API_BASE}/refund?${params.toString()}`, {
     method: "GET",
     headers: withNoStore({ Authorization: `Bearer ${token}` }),
     cache: "no-store",
@@ -448,7 +461,7 @@ export const addOrder = async (data, token) => {
   return handleResponse(response);
 };
 
-export const getOrders = async (token, page = 1, limit = 10, category = "", search = "", status = "" , orderTay = "") => {
+export const getOrders = async (token, page = 1, limit = 10, category = "", search = "", status = "", orderTay = "") => {
   // Xây dựng query string thủ công
   let queryString = `?page=${page}&limit=${limit}`;
   if (category) queryString += `&category=${encodeURIComponent(category)}`;

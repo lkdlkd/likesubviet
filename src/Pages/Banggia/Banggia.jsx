@@ -425,7 +425,7 @@ const Banggia = () => {
                                                             >
                                                                 <div className="accordion-body">
                                                                     <div className="table-responsive">
-                                                                        <Table bordered hover className="mb-0 table-centered table-sm">
+                                                                        <Table bordered hover responsive className="mb-0 table-centered table-sm">
                                                                             <thead>
                                                                                 <tr>
                                                                                     <th style={{ minWidth: "50px", width: "8%" }}>Id</th>

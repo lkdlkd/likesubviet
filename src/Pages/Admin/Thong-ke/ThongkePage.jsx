@@ -414,6 +414,80 @@ export default function ThongkePage() {
                             padding: 1rem;
                         }
                     }
+                    
+                    /* Total row styling */
+                    .stats-total-row {
+                        font-weight: bold;
+                        background: #f8f9fa !important;
+                    }
+                    
+                    /* Dark mode styles */
+                    [data-bs-theme="dark"] .stats-container {
+                        color: #e9ecef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-filters-section {
+                        background: linear-gradient(135deg, #1a1d21 0%, #23272b 100%) !important;
+                        border-color: #2d3339 !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-filters-title {
+                        color: #e9ecef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-form-control {
+                        background-color: #23272b !important;
+                        border-color: #3d4349 !important;
+                        color: #e9ecef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-details-card {
+                        background: #1a1d21 !important;
+                        border-color: #2d3339 !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-details-header {
+                        background: linear-gradient(135deg, #23272b 0%, #2d3339 100%) !important;
+                        border-color: #3d4349 !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-details-title {
+                        color: #e9ecef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-chart-card {
+                        background: #1a1d21 !important;
+                        border-color: #2d3339 !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-chart-card .card-header {
+                        background: linear-gradient(135deg, #23272b 0%, #2d3339 100%) !important;
+                        border-color: #3d4349 !important;
+                        color: #e9ecef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-total-row {
+                        background: #2d3339 !important;
+                        color: #e9ecef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-detail-info {
+                        background: linear-gradient(135deg, #23272b 0%, #2d3339 100%) !important;
+                        border-color: #3d4349 !important;
+                        color: #e9ecef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-value {
+                        color: #e9ecef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .stats-label {
+                        color: #adb5bd !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .form-label {
+                        color: #adb5bd !important;
+                    }
                 `}
             </style>
 
@@ -574,7 +648,7 @@ export default function ThongkePage() {
                             <div className="table-responsive" style={{ maxHeight: 400, overflowY: 'auto' }}>
                                 <Table striped bordered hover size="sm" className="mb-0">
                                     <thead>
-                                        <tr style={{ fontWeight: 'bold', background: '#f8f9fa' }}>
+                                        <tr className="stats-total-row">
                                             <td>#</td>
 
                                             <td colSpan={2}>Tổng</td>

@@ -345,6 +345,68 @@ export default function History() {
                             padding: 1rem;
                         }
                     }
+                    
+                    /* Row colors for plus/refund actions */
+                    .history-row-plus {
+                        background-color: #bcf0d6 !important;
+                    }
+                    
+                    .history-row-refund {
+                        background-color: #ffd6d6 !important;
+                    }
+                    
+                    /* Dark mode styles */
+                    [data-bs-theme="dark"] .history-row-plus {
+                        background-color: #1a4d2e !important;
+                        color: #a3e4bc !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .history-row-refund {
+                        background-color: #4d1a1a !important;
+                        color: #f5a3a3 !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .history-content-card {
+                        background: #1a1d21 !important;
+                        border-color: #2d3339 !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .history-controls-section {
+                        background: linear-gradient(135deg, #1a1d21 0%, #23272b 100%) !important;
+                        border-color: #2d3339 !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .history-form-control {
+                        background-color: #23272b !important;
+                        border-color: #3d4349 !important;
+                        color: #e9ecef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .history-table-container {
+                        background: #1a1d21 !important;
+                        border-color: #2d3339 !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .history-nav-pills {
+                        background: linear-gradient(135deg, #1a1d21 0%, #23272b 100%) !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .history-nav-pills .nav-link {
+                        color: #adb5bd !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .history-nav-pills .nav-link:hover {
+                        background: rgba(102, 126, 234, 0.2) !important;
+                        color: #8da4ef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .history-container {
+                        color: #e9ecef !important;
+                    }
+                    
+                    [data-bs-theme="dark"] .form-label {
+                        color: #adb5bd !important;
+                    }
                 `}
             </style>
 
@@ -502,16 +564,16 @@ export default function History() {
                                                                 actionText.includes("nạp tiền") ||
                                                                 actionText.includes("cộng tiền");
                                                             const isRefundAction = actionText.includes("hoàn tiền");
-                                                            let rowStyle = {};
+                                                            let rowClass = "";
                                                             if (isPlusAction) {
-                                                                rowStyle = { backgroundColor: "#bcf0d6" };
+                                                                rowClass = "history-row-plus";
                                                             } else if (isRefundAction) {
-                                                                rowStyle = { backgroundColor: "#ffd6d6" };
+                                                                rowClass = "history-row-refund";
                                                             }
                                                             return (
                                                                 <tr
                                                                     key={item._id}
-                                                                    style={rowStyle}
+                                                                    className={rowClass}
                                                                 >
                                                                     <td>{(page - 1) * limit + index + 1}</td>
                                                                     <td>{item.username}</td>

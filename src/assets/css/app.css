@@ -411,6 +411,76 @@
     color: #fff !important;
 }
 
+[data-bs-theme="dark"] .dropdown-item.active {
+    background-color: #667eea !important;
+    color: #fff !important;
+}
+
+/* Header Dropdown Dark Mode - specific overrides */
+[data-bs-theme="dark"] .pc-header .dropdown-menu,
+[data-bs-theme="dark"] .pc-header .pc-h-dropdown,
+[data-bs-theme="dark"] .pc-header .dropdown-user-profile {
+    background-color: #242526 !important;
+    border-color: #3e4042 !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+}
+
+[data-bs-theme="dark"] .pc-header .dropdown-header {
+    background-color: #2b3035 !important;
+    color: #e4e6eb !important;
+    border-bottom-color: #3e4042 !important;
+}
+
+[data-bs-theme="dark"] .pc-header .dropdown-header h5 {
+    color: #e4e6eb !important;
+}
+
+[data-bs-theme="dark"] .pc-header .dropdown-body {
+    background-color: #242526 !important;
+}
+
+[data-bs-theme="dark"] .pc-header .dropdown-item,
+[data-bs-theme="dark"] .pc-header .dropdown-user-profile .dropdown-item {
+    color: #e4e6eb !important;
+    background-color: transparent !important;
+}
+
+[data-bs-theme="dark"] .pc-header .dropdown-item:hover,
+[data-bs-theme="dark"] .pc-header .dropdown-item:focus,
+[data-bs-theme="dark"] .pc-header .dropdown-user-profile .dropdown-item:hover,
+[data-bs-theme="dark"] .pc-header .dropdown-user-profile .dropdown-item:focus {
+    background-color: #3a3b3c !important;
+    color: #fff !important;
+}
+
+[data-bs-theme="dark"] .pc-header .dropdown-item.active {
+    background: #2b3035 !important;
+    color: #fff !important;
+}
+
+[data-bs-theme="dark"] .pc-header .dropdown-item i,
+[data-bs-theme="dark"] .pc-header .dropdown-user-profile .dropdown-item i {
+    color: #8e9094 !important;
+}
+
+[data-bs-theme="dark"] .pc-header .dropdown-item:hover i,
+[data-bs-theme="dark"] .pc-header .dropdown-user-profile .dropdown-item:hover i {
+    color: #fff !important;
+}
+
+[data-bs-theme="dark"] .pc-header .text-span,
+[data-bs-theme="dark"] .pc-header .dropdown-user-profile .text-span {
+    color: #8e9094 !important;
+}
+
+[data-bs-theme="dark"] .pc-header .dropdown-user-profile h6 {
+    color: #e4e6eb !important;
+}
+
+[data-bs-theme="dark"] .pc-header .dropdown-user-profile hr {
+    border-color: #3e4042 !important;
+}
+
 [data-bs-theme="dark"] .dropdown-divider {
     border-top-color: var(--bs-border-color) !important;
 }
