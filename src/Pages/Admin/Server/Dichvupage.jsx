@@ -15,13 +15,13 @@ export default function Dichvupage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(20);
   const [selectedServers, setSelectedServers] = useState([]);
   const [pagination, setPagination] = useState({
     totalItems: 0,
     currentPage: 1,
     totalPages: 1,
-    pageSize: 10,
+    pageSize: 20,
   });
   const [showEditModal, setShowEditModal] = useState(false); // Trạng thái hiển thị modal chỉnh sửa
   const [selectedService, setSelectedService] = useState(null); // Dịch vụ được chọn để chỉnh sửa
@@ -40,6 +40,20 @@ export default function Dichvupage() {
   const [adjustAgentPct, setAdjustAgentPct] = useState(0);
   const [adjustDistributorPct, setAdjustDistributorPct] = useState(0);
 
+  // Filter states (pending - chưa áp dụng)
+  const [filterSource, setFilterSource] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterIsActive, setFilterIsActive] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+
+  // Applied filter states (đã áp dụng - dùng để gọi API)
+  const [appliedFilters, setAppliedFilters] = useState({
+    DomainSmm: "",
+    category: "",
+    isActive: "",
+    status: "",
+  });
+
   const token = localStorage.getItem("token") || "";
   const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
@@ -47,7 +61,7 @@ export default function Dichvupage() {
     try {
       loadingg("Đang tải...", true, 9999999);
       if (!quickAddMode) {
-        const response = await getServer(token, currentPage, limit, debouncedSearch);
+        const response = await getServer(token, currentPage, limit, debouncedSearch, appliedFilters);
         setServers(response.data || []);
         setPagination(response.pagination || {
           totalItems: 0,
@@ -56,7 +70,7 @@ export default function Dichvupage() {
           pageSize: limit,
         });
       } else {
-        const response = await getServer(token, undefined, undefined, debouncedSearch);
+        const response = await getServer(token, undefined, undefined, debouncedSearch, appliedFilters);
         setServers(response.data || []);
       }
     } catch (error) {
@@ -80,29 +94,6 @@ export default function Dichvupage() {
       // silent fail; dropdown will be empty
     }
   };
-
-  // const fetchCategories = async () => {
-  //   try {
-  //     loadingg("Đang tải danh sách danh mục...",true, 9999999);
-  //     const response = await getCategories(token);
-  //     let allCategories = [];
-  //     if (Array.isArray(response.platforms)) {
-  //       allCategories = response.platforms.flatMap(p => p.categories || []);
-  //     } else if (Array.isArray(response.data)) {
-  //       allCategories = response.data;
-  //     }
-  //     setCategories(allCategories);
-  //   } catch (error) {
-  //     Swal.fire({
-  //       title: "Lỗi",
-  //       text: "Không thể lấy danh sách danh mục.",
-  //       icon: "error",
-  //       confirmButtonText: "Xác nhận",
-  //     });
-  //   } finally {
-  //     loadingg(false);
-  //   }
-  // };
   useEffect(() => {
     if (cate && Array.isArray(cate)) {
       setCategories(cate);
@@ -113,7 +104,7 @@ export default function Dichvupage() {
   useEffect(() => {
     fetchServers();
     // fetchCategories();
-  }, [currentPage, limit, debouncedSearch, quickAddMode]);
+  }, [currentPage, limit, debouncedSearch, quickAddMode, appliedFilters]);
 
   useEffect(() => {
     fetchSmmPartners();
@@ -137,22 +128,26 @@ export default function Dichvupage() {
     }
   }, [selectedSmm, smmPartners]);
 
-  // Removed automatic debounced search - now using manual search button
-  const handleSearch = async () => {
+  // Áp dụng tìm kiếm và bộ lọc - gọi API
+  const handleSearchAndFilter = () => {
     setIsSearching(true);
     setDebouncedSearch(searchQuery);
-    setCurrentPage(1); // Đặt lại về trang đầu tiên khi tìm kiếm
-
-    // Wait a moment for the search to complete
+    setAppliedFilters({
+      DomainSmm: filterSource,
+      category: filterCategory,
+      isActive: filterIsActive,
+      status: filterStatus,
+    });
+    setCurrentPage(1);
     setTimeout(() => {
       setIsSearching(false);
     }, 500);
   };
 
+  // Xóa tìm kiếm
   const handleClearSearch = () => {
     setSearchQuery("");
     setDebouncedSearch("");
-    setCurrentPage(1);
   };
 
   const handlePrevPage = () => {
@@ -230,6 +225,37 @@ export default function Dichvupage() {
   const categoriesByType = selectedType
     ? Array.from(new Set(filteredServers.filter(s => s.type === selectedType).map(s => s.category)))
     : [];
+
+  // Lấy danh sách nguồn từ smmPartners và category từ categories (giữ _id và name)
+  const uniqueSources = smmPartners.filter(p => p._id && p.name);
+  const uniqueCategories = categories.filter(c => c._id && c.name);
+
+  // Xóa tất cả bộ lọc và tìm kiếm
+  const handleClearAll = () => {
+    setSearchQuery("");
+    setDebouncedSearch("");
+    setFilterSource("");
+    setFilterCategory("");
+    setFilterIsActive("");
+    setFilterStatus("");
+    setAppliedFilters({
+      DomainSmm: "",
+      category: "",
+      isActive: "",
+      status: "",
+    });
+    setCurrentPage(1);
+  };
+
+  // Kiểm tra có thay đổi nào chưa áp dụng không (bao gồm cả search và filter)
+  const hasPendingChanges = searchQuery !== debouncedSearch ||
+    filterSource !== appliedFilters.DomainSmm ||
+    filterCategory !== appliedFilters.category ||
+    filterIsActive !== appliedFilters.isActive ||
+    filterStatus !== appliedFilters.status;
+
+  // Kiểm tra có filter/search nào đang active (đã áp dụng) không
+  const hasActiveFilters = debouncedSearch || appliedFilters.DomainSmm || appliedFilters.category || appliedFilters.isActive !== "" || appliedFilters.status !== "";
 
   return (
     <>
@@ -921,74 +947,155 @@ export default function Dichvupage() {
                 }}
               />
 
-              <div className="row mb-3">
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold text-muted mb-2">Tìm kiếm:</label>
-                  <div className="input-group">
-                    <input
-                      className="form-control service-form-control"
-                      type="text"
-                      placeholder="Tìm kiếm theo Mã gói hoặc Service ID..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleSearch();
-                        }
-                      }}
-                    />
-                    <button
-                      className="btn service-btn-primary"
-                      type="button"
-                      onClick={handleSearch}
-                      disabled={isSearching}
-                      title="Tìm kiếm"
-                      style={{ height: "45px", marginBottom: "0" }}
-
-                    >
-                      {isSearching ? (
-                        <i className="fas fa-spinner fa-spin"></i>
-                      ) : (
-                        <i className="fas fa-search"></i>
-                      )}
-                    </button>
-                    {searchQuery && (
-                      <button
-                        className="btn btn-outline-secondary"
-                        type="button"
-                        onClick={handleClearSearch}
-                        title="Xóa tìm kiếm"
-                      >
-                        <i className="fas fa-times"></i>
-                      </button>
+              {/* Tìm kiếm và Bộ lọc gộp chung */}
+              <div className="card border-0 shadow-sm mb-3">
+                <div className="card-header bg-light py-2">
+                  <h6 className="mb-0">
+                    <i className="fas fa-search me-2"></i>
+                    Tìm kiếm và Lọc dữ liệu
+                    {hasPendingChanges && (
+                      <span className="badge bg-warning ms-2">Có thay đổi chưa áp dụng</span>
                     )}
+                  </h6>
+                </div>
+                <div className="card-body py-3">
+                  <div className="row g-3">
+                    {/* Tìm kiếm */}
+                    <div className="col-lg-4 col-md-6 col-sm-12">
+                      <label className="form-label fw-semibold text-muted mb-1">Tìm kiếm</label>
+                      <input
+                        className="form-control service-form-control"
+                        type="text"
+                        placeholder="Tìm theo Mã gói hoặc Service ID..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleSearchAndFilter();
+                          }
+                        }}
+                      />
+                    </div>
+
+                    {/* Nguồn */}
+                    <div className="col-lg-2 col-md-3 col-sm-6">
+                      <label className="form-label fw-semibold text-muted mb-1">Nguồn</label>
+                      <select
+                        className="form-select service-form-control"
+                        value={filterSource}
+                        onChange={(e) => setFilterSource(e.target.value)}
+                      >
+                        <option value="">-- Tất cả --</option>
+                        {uniqueSources.map((src) => (
+                          <option key={src._id} value={src._id}>{src.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Category */}
+                    <div className="col-lg-2 col-md-3 col-sm-6">
+                      <label className="form-label fw-semibold text-muted mb-1">Danh mục</label>
+                      <select
+                        className="form-select service-form-control"
+                        value={filterCategory}
+                        onChange={(e) => setFilterCategory(e.target.value)}
+                      >
+                        <option value="">-- Tất cả --</option>
+                        {uniqueCategories.map((cat) => (
+                          <option key={cat._id} value={cat._id}>{cat.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* isActive */}
+                    <div className="col-lg-2 col-md-3 col-sm-6">
+                      <label className="form-label fw-semibold text-muted mb-1">Trạng thái</label>
+                      <select
+                        className="form-select service-form-control"
+                        value={filterIsActive}
+                        onChange={(e) => setFilterIsActive(e.target.value)}
+                      >
+                        <option value="">-- Tất cả --</option>
+                        <option value="true">Hoạt động</option>
+                        <option value="false">Bảo trì</option>
+                      </select>
+                    </div>
+
+                    {/* Status */}
+                    <div className="col-lg-2 col-md-3 col-sm-6">
+                      <label className="form-label fw-semibold text-muted mb-1">Hiện/Ẩn</label>
+                      <select
+                        className="form-select service-form-control"
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                      >
+                        <option value="">-- Tất cả --</option>
+                        <option value="true">Hiển thị</option>
+                        <option value="false">Ẩn</option>
+                      </select>
+                    </div>
                   </div>
-                  {debouncedSearch && (
-                    <small className="text-muted mt-1 d-block">
-                      <i className="fas fa-search me-1"></i>
-                      Đang tìm kiếm: "{debouncedSearch}"
-                      {!quickAddMode && pagination.totalItems !== undefined && (
-                        <span className="ms-2">({pagination.totalItems} kết quả)</span>
-                      )}
-                      {quickAddMode && (
-                        <span className="ms-2">({filteredServers.length} kết quả)</span>
-                      )}
-                    </small>
+
+                  {/* Hàng nút và hiển thị */}
+                  <div className="row g-3 mt-2">
+                    {quickAddMode ? null : (
+                      <div className="col-lg-2 col-md-3 col-sm-6">
+                        <label className="form-label fw-semibold text-muted mb-1">Hiển thị</label>
+                        <select className="form-select service-form-control" value={limit} onChange={handleLimitChange}>
+                          <option value={20}>20 dòng</option>
+                          <option value={50}>50 dòng</option>
+                          <option value={100}>100 dòng</option>
+                          <option value={500}>500 dòng</option>
+                          <option value={1000}>1000 dòng</option>
+                          <option value={2000}>2000 dòng</option>
+                        </select>
+                      </div>
+                    )}
+
+                    <div className="col-lg-2 col-md-3 col-sm-6 d-flex align-items-end">
+                      <button
+                        className="btn service-btn-primary w-100"
+                        onClick={handleSearchAndFilter}
+                        disabled={isSearching}
+                        style={{ marginBottom: 0 }}
+                      >
+                        {isSearching ? (
+                          <><i className="fas fa-spinner fa-spin me-1"></i> Đang tìm...</>
+                        ) : (
+                          <><i className="fas fa-search me-1"></i> Tìm kiếm</>)}
+                      </button>
+                    </div>
+
+                    <div className="col-lg-2 col-md-3 col-sm-6 d-flex align-items-end">
+                      <button
+                        className="btn btn-outline-secondary w-100"
+                        onClick={handleClearAll}
+                        disabled={!hasActiveFilters && !hasPendingChanges}
+                      >
+                        <i className="fas fa-times me-1"></i>
+                        Xóa tất cả
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Hiển thị thông tin đang lọc */}
+                  {hasActiveFilters && (
+                    <div className="mt-3">
+                      <div className="text-muted">
+                        <i className="fas fa-info-circle me-1"></i>
+                        <strong>Đang áp dụng:</strong>
+                        {debouncedSearch && <span className="badge bg-primary ms-1">Tìm: "{debouncedSearch}"</span>}
+                        {appliedFilters.DomainSmm && <span className="badge bg-info ms-1">Nguồn: {uniqueSources.find(s => s._id === appliedFilters.DomainSmm)?.name || appliedFilters.DomainSmm}</span>}
+                        {appliedFilters.category && <span className="badge bg-info ms-1">Danh mục: {uniqueCategories.find(c => c._id === appliedFilters.category)?.name || appliedFilters.category}</span>}
+                        {appliedFilters.isActive !== "" && <span className="badge bg-info ms-1">Trạng thái: {appliedFilters.isActive === "true" ? "Hoạt động" : "Bảo trì"}</span>}
+                        {appliedFilters.status !== "" && <span className="badge bg-info ms-1">Hiện/Ẩn: {appliedFilters.status === "true" ? "Hiển thị" : "Ẩn"}</span>}
+                        <span className="badge bg-success ms-2">{servers.length} kết quả</span>
+                      </div>
+                    </div>
                   )}
                 </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold text-muted mb-2">Hiển thị:</label>
-                  <select className="form-select service-form-control" value={limit} onChange={handleLimitChange}>
-                    <option value={10}>10</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                    <option value={500}>500</option>
-                    <option value={1000}>1000</option>
-                    <option value={2000}>2000</option>
-
-                  </select>
-                </div>
               </div>
+
               {!isAllowedApiUrl && (
                 <div className="d-flex justify-content-left mb-3">
                   <button
@@ -1432,6 +1539,12 @@ export default function Dichvupage() {
                                     <span className="badge bg-success">Hoạt động</span>
                                   ) : (
                                     <span className="badge bg-danger">Bảo trì</span>
+                                  )}
+                                  <br />
+                                  {serverItem.status ? (
+                                    <span className="badge bg-success ms-1">Hiện</span>
+                                  ) : (
+                                    <span className="badge bg-danger ms-1">Ẩn</span>
                                   )}
                                 </li>
                               </ul>

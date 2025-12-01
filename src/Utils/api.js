@@ -333,15 +333,22 @@ export const getUserHistory = async (token, page = 1, limit = 10, orderId, searc
 };
 
 // Server
-export const getServer = async (token, page, limit, search = "") => {
+export const getServer = async (token, page, limit, search = "", filters = {}) => {
   // Xây dựng query string
-  let queryString = "";
+  const params = new URLSearchParams();
   if (page && limit) {
-    queryString = `page=${page}&limit=${limit}`;
+    params.append("page", page);
+    params.append("limit", limit);
   }
-  if (search) queryString += `&search=${encodeURIComponent(search)}`;
+  if (search) params.append("search", search);
+  
+  // Thêm các bộ lọc
+  if (filters.DomainSmm) params.append("DomainSmm", filters.DomainSmm);
+  if (filters.category) params.append("category", filters.category);
+  if (filters.isActive !== undefined && filters.isActive !== "") params.append("isActive", filters.isActive);
+  if (filters.status !== undefined && filters.status !== "") params.append("status", filters.status);
 
-  const response = await fetch(`${API_BASE}/server?${queryString}`, {
+  const response = await fetch(`${API_BASE}/server?${params.toString()}`, {
     method: "GET",
     headers: withNoStore({ Authorization: `Bearer ${token}` }),
     cache: "no-store",
