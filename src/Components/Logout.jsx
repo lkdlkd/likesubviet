@@ -13,6 +13,9 @@ export default function Logout() {
         // Xóa token từ cookie
         localStorage.removeItem("token"); // Xóa token khỏi localStorage
         localStorage.removeItem("notiModalLastClosed"); // Xóa token khỏi localStorage nếu có
+        localStorage.clear();
+        sessionStorage.clear();
+        // Cookies.remove("token");
         // Các cookie khác nếu cần
         // Cookies.remove("user");
 
