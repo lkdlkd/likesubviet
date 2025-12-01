@@ -408,7 +408,12 @@ export default function Tailieuapi() {
                                                     </tr>
                                                     <tr>
                                                         <td>order or orders</td>
-                                                        <td>Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
+                                                        <td style={{
+                                                            maxWidth: "570px",
+                                                            whiteSpace: "normal",
+                                                            wordWrap: "break-word",
+                                                            overflowWrap: "break-word",
+                                                        }}>Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
                                                     </tr>
                                                 </tbody>
                                             </Table>

@@ -8,6 +8,7 @@ const ConfigCard = () => {
     API_URLCARD: "",
     PARTNER_ID: "",
     PARTNER_KEY: "",
+    RATE: "",
   });
   const [loading, setLoading] = useState(false);
   const fetchConfigCard = async () => {
@@ -30,6 +31,10 @@ const ConfigCard = () => {
   // Xử lý khi submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.RATE < 1) {
+      toast.error("Chiết khấu không được nhỏ hơn 1");
+      return;
+    }
     setLoading(true);
     loadingg("Đang lưu cấu hình thẻ nạp...", true, 9999999);
     try {
@@ -118,6 +123,30 @@ const ConfigCard = () => {
                   setFormData({ ...formData, PARTNER_KEY: e.target.value })
                 }
                 placeholder="Nhập khóa đối tác"
+                style={{
+                  borderRadius: '8px',
+                  border: '1px solid #dee2e6',
+                  padding: '0.6rem 1rem',
+                  fontSize: '14px',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+            </div>
+
+            {/* RATE */}
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">
+                <i className="fas fa-percentage me-2 text-danger"></i>
+                Tăng chiết khấu so với nhà cung cấp
+              </label>
+              <input
+                type="number"
+                className="form-control"
+                value={formData.RATE}
+                onChange={(e) =>
+                  setFormData({ ...formData, RATE: e.target.value })
+                }
+                placeholder="Nhập chiết khấu không nhỏ hơn 1"
                 style={{
                   borderRadius: '8px',
                   border: '1px solid #dee2e6',

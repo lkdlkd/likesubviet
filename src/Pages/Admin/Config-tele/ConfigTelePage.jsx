@@ -328,7 +328,7 @@ export default function ConfigTelePage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="telegram-content-card">
               <div className="p-4">
                 <div className="telegram-info-card">
@@ -337,12 +337,12 @@ export default function ConfigTelePage() {
                     Hướng dẫn cấu hình Telegram Bot
                   </h6>
                   <p className="telegram-info-text">
-                    Để cấu hình Telegram Bot, bạn cần tạo bot thông qua @BotFather trên Telegram và lấy Bot Token. 
-                    Chat ID có thể lấy bằng cách gửi tin nhắn cho bot và truy cập 
+                    Để cấu hình Telegram Bot, bạn cần tạo bot thông qua @BotFather trên Telegram và lấy Bot Token.
+                    Chat ID có thể lấy bằng cách gửi tin nhắn cho bot và truy cập
                     <p>https://api.telegram.org/bot[BOT_TOKEN]/getUpdates</p>
                   </p>
                 </div>
-                
+
                 <form onSubmit={handleSubmit}>
                   {/* Section 1: Bot chính */}
                   <div className="telegram-section">
@@ -380,7 +380,7 @@ export default function ConfigTelePage() {
                         <div className="telegram-form-group">
                           <label className="telegram-form-label">
                             <i className="fas fa-comments"></i>
-                            Chat ID
+                            Chat ID nhóm thông báo đơn hàng
                           </label>
                           <div className="input-icon-wrapper">
                             <i className="fas fa-hashtag input-icon"></i>
@@ -390,15 +390,108 @@ export default function ConfigTelePage() {
                               name="chatId"
                               value={config.chatId || ""}
                               onChange={handleChange}
-                              placeholder="Nhập Chat ID nhận thông báo"
+                              placeholder="Nhập Chat ID nhận thông báo đơn hàng"
                             />
                           </div>
                           <div className="telegram-help-text">
                             <i className="fas fa-lightbulb"></i>
-                            ID của chat/group nhận thông báo từ bot
+                            ID của group nhận thông báo Đơn hàng từ bot
                           </div>
                         </div>
                       </div>
+                      <div className="col-md-6">
+                        <div className="telegram-form-group">
+                          <label className="telegram-form-label">
+                            <i className="fas fa-comments"></i>
+                            Chat ID nhóm thông báo đơn tay
+                          </label>
+                          <div className="input-icon-wrapper">
+                            <i className="fas fa-hashtag input-icon"></i>
+                            <input
+                              type="text"
+                              className="telegram-form-control input-with-icon"
+                              name="chatiddontay"
+                              value={config.chatiddontay || ""}
+                              onChange={handleChange}
+                              placeholder="Nhập Chat ID nhận thông báo đơn tay"
+                            />
+                          </div>
+                          <div className="telegram-help-text">
+                            <i className="fas fa-lightbulb"></i>
+                            ID của group nhận thông báo nhóm đơn tay từ bot
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="telegram-form-group">
+                          <label className="telegram-form-label">
+                            <i className="fas fa-comments"></i>
+                            Chat ID nhóm thông báo nạp tiền - hoàn tiền
+                          </label>
+                          <div className="input-icon-wrapper">
+                            <i className="fas fa-hashtag input-icon"></i>
+                            <input
+                              type="text"
+                              className="telegram-form-control input-with-icon"
+                              name="chatidnaptien"
+                              value={config.chatidnaptien || ""}
+                              onChange={handleChange}
+                              placeholder="Nhập Chat ID nhận thông báo nhóm nạp tiền - hoàn tiền"
+                            />
+                          </div>
+                          <div className="telegram-help-text">
+                            <i className="fas fa-lightbulb"></i>
+                            ID của group nhận thông báo nhóm nạp tiền - hoàn tiền từ bot
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="telegram-form-group">
+                          <label className="telegram-form-label">
+                            <i className="fas fa-comments"></i>
+                            Chat ID nhóm thay đổi giá gói ( tăng , giảm , đóng ,mở )
+                          </label>
+                          <div className="input-icon-wrapper">
+                            <i className="fas fa-hashtag input-icon"></i>
+                            <input
+                              type="text"
+                              className="telegram-form-control input-with-icon"
+                              name="chatidthaydoigoi"
+                              value={config.chatidthaydoigoi || ""}
+                              onChange={handleChange}
+                              placeholder="Nhập Chat ID nhận thông báo thay đổi giá gói"
+                            />
+                          </div>
+                          <div className="telegram-help-text">
+                            <i className="fas fa-lightbulb"></i>
+                            ID của group nhận thông báo thay đổi giá gói từ bot
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="telegram-form-group">
+                          <label className="telegram-form-label">
+                            <i className="fas fa-comments"></i>
+                            Chat ID nhóm cảnh báo số dư nguồn
+                          </label>
+                          <div className="input-icon-wrapper">
+                            <i className="fas fa-hashtag input-icon"></i>
+                            <input
+                              type="text"
+                              className="telegram-form-control input-with-icon"
+                              name="chatidsdnguon"
+                              value={config.chatidsdnguon || ""}
+                              onChange={handleChange}
+                              placeholder="Nhập Chat ID nhận thông báo nhóm cảnh báo số dư nguồn"
+                            />
+                          </div>
+                          <div className="telegram-help-text">
+                            <i className="fas fa-lightbulb"></i>
+                            ID của group nhận thông báo nhóm cảnh báo số dư nguồn từ bot
+                          </div>
+                        </div>
+                      </div>
+
                     </div>
                   </div>
 
@@ -438,9 +531,9 @@ export default function ConfigTelePage() {
                   </div>
 
                   <div className="d-flex justify-content-end">
-                    <button 
-                      type="submit" 
-                      className="telegram-submit-btn" 
+                    <button
+                      type="submit"
+                      className="telegram-submit-btn"
                       disabled={saving}
                     >
                       {saving ? (

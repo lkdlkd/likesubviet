@@ -12,22 +12,15 @@ export default function Napthecao({ cardData = [], token }) {
   });
   const [loading, setLoading] = useState(false);
 
-  // Tính toán danh sách telco và fees cao nhất
+  // Lấy danh sách telco duy nhất
   const telcoOptions = Array.from(
-    (cardData || [])
-      .filter((card) => card.telco && card.fees !== undefined) // Lọc các đối tượng hợp lệ
-      .reduce((map, card) => {
-        if (!map.has(card.telco) || map.get(card.telco) < card.fees) {
-          map.set(card.telco, card.fees);
-        }
-        return map;
-      }, new Map())
+    new Set((cardData || []).filter((card) => card.telco).map((card) => card.telco))
   );
 
-  // Lấy danh sách mệnh giá dựa trên loại thẻ đã chọn
+  // Lấy danh sách mệnh giá với chiết khấu tương ứng dựa trên loại thẻ đã chọn
   const valueOptions = (cardData || [])
     .filter((card) => card.telco === cardInfo.card_type)
-    .map((card) => card.value);
+    .map((card) => ({ value: card.value, fees: card.fees }));
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -327,10 +320,9 @@ export default function Napthecao({ cardData = [], token }) {
                       disabled={loading}
                     >
                       <option value="">Chọn loại thẻ</option>
-                      {telcoOptions.map(([telco, fees], index) => (
+                      {telcoOptions.map((telco, index) => (
                         <option key={index} value={telco} className="telco-option">
                           {telco}
-                          <span className="discount-badge"> Chiết khấu {fees}%</span>
                         </option>
                       ))}
                     </select>
@@ -353,9 +345,9 @@ export default function Napthecao({ cardData = [], token }) {
                       disabled={loading || !cardInfo.card_type}
                     >
                       <option value="">Chọn mệnh giá</option>
-                      {valueOptions.map((value, index) => (
-                        <option key={index} value={value} className="value-option">
-                          {value.toLocaleString("en-US")} đ - thực nhận {(value * (1 - telcoOptions.find(([telco]) => telco === cardInfo.card_type)[1] / 100)).toLocaleString("en-US")} đ
+                      {valueOptions.map((item, index) => (
+                        <option key={index} value={item.value} className="value-option">
+                          {item.value.toLocaleString("en-US")}đ - {item.fees}% - Thực nhận {(item.value * (1 - item.fees / 100)).toLocaleString("en-US")}đ
                         </option>
                       ))}
                     </select>
