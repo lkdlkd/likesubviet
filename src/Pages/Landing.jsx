@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login, register } from '@/Utils/api';
+import { login, register, getRecaptchaSiteKey } from '@/Utils/api';
 import { AuthContext } from '@/Context/AuthContext';
 import Table from "react-bootstrap/Table";
+import ReCAPTCHA from "react-google-recaptcha";
 export default function Landing() {
     // Modal states
     const [showAuthModal, setShowAuthModal] = useState(false);
@@ -27,6 +28,11 @@ export default function Landing() {
     const [success, setSuccess] = useState('');
     const [otpStep, setOtpStep] = useState(false);
     const [otp, setOtp] = useState('');
+    const [recaptchaToken, setRecaptchaToken] = useState('');
+    const [siteKey, setSiteKey] = useState('');
+    const [siteKeyLoading, setSiteKeyLoading] = useState(true);
+    const [recaptchaReady, setRecaptchaReady] = useState(false);
+    const recaptchaRef = useRef(null);
 
     const navigate = useNavigate();
     const { updateAuth } = useContext(AuthContext);
@@ -46,6 +52,11 @@ export default function Landing() {
         setSuccess('');
         setOtpStep(false);
         setOtp('');
+        setRecaptchaToken('');
+        setRecaptchaReady(false);
+        if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+        }
     };
 
     // Handle auth modal open/close
@@ -111,6 +122,13 @@ export default function Landing() {
             return;
         }
 
+        // Kiểm tra reCAPTCHA
+        if (!recaptchaToken) {
+            setError('Vui lòng xác nhận bạn không phải là người máy.');
+            setLoading(false);
+            return;
+        }
+
         // if (formData.password !== formData.confirmPassword) {
         //     setError('Mật khẩu xác nhận không khớp.');
         //     setLoading(false);
@@ -120,7 +138,8 @@ export default function Landing() {
         try {
             const data = await register({
                 username: formData.username,
-                password: formData.password
+                password: formData.password,
+                recaptchaToken: recaptchaToken
             });
             setSuccess(data.message || 'Đăng ký thành công!');
             setTimeout(() => {
@@ -129,6 +148,11 @@ export default function Landing() {
             }, 1500);
         } catch (err) {
             setError(err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+            // Reset reCAPTCHA khi có lỗi
+            setRecaptchaToken('');
+            if (recaptchaRef.current) {
+                recaptchaRef.current.reset();
+            }
         } finally {
             setLoading(false);
         }
@@ -141,9 +165,24 @@ export default function Landing() {
             setCopySuccess(label);
             setTimeout(() => setCopySuccess(''), 2000);
         } catch (err) {
-            console.error('Failed to copy: ', err);
         }
     };
+
+    // Lấy reCAPTCHA site key
+    useEffect(() => {
+        const fetchSiteKey = async () => {
+            try {
+                setSiteKeyLoading(true);
+                const data = await getRecaptchaSiteKey();
+                setSiteKey(data.siteKey);
+            } catch (err) {
+
+            } finally {
+                setSiteKeyLoading(false);
+            }
+        };
+        fetchSiteKey();
+    }, []);
 
     useEffect(() => {
         // Add custom CSS animations
@@ -1794,6 +1833,50 @@ export default function Landing() {
                                                         required
                                                     />
                                                 </div> */}
+                                                        <div className="mb-3">
+                                                            {siteKeyLoading ? (
+                                                                <div className="d-flex justify-content-center">
+                                                                    <div className="d-flex flex-column align-items-center py-3">
+                                                                        <div className="spinner-border spinner-border-sm text-primary mb-2" role="status">
+                                                                            <span className="visually-hidden">Loading...</span>
+                                                                        </div>
+                                                                        <small className="text-muted">Đang tải reCAPTCHA...</small>
+                                                                    </div>
+                                                                </div>
+                                                            ) : siteKey ? (
+                                                                <div className="d-flex justify-content-center position-relative" style={{ minHeight: '78px' }}>
+                                                                    {!recaptchaReady && (
+                                                                        <div
+                                                                            className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                                                                            style={{ zIndex: 10, backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
+                                                                        >
+                                                                            <div className="d-flex flex-column align-items-center">
+                                                                                <div className="spinner-border spinner-border-sm text-primary mb-2" role="status">
+                                                                                    <span className="visually-hidden">Loading...</span>
+                                                                                </div>
+                                                                                <small className="text-muted">Đang hiển thị reCAPTCHA...</small>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                    <div style={{
+                                                                        opacity: recaptchaReady ? 1 : 0,
+                                                                        transition: 'opacity 0.4s ease-in-out',
+                                                                        visibility: recaptchaReady ? 'visible' : 'hidden'
+                                                                    }}>
+                                                                        <ReCAPTCHA
+                                                                            ref={recaptchaRef}
+                                                                            sitekey={siteKey}
+                                                                            onChange={(token) => setRecaptchaToken(token || '')}
+                                                                            onExpired={() => setRecaptchaToken('')}
+                                                                            asyncScriptOnLoad={() => {
+                                                                                setTimeout(() => setRecaptchaReady(true), 100);
+                                                                            }}
+                                                                            hl="vi"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            ) : null}
+                                                        </div>
                                                         <button
                                                             type="submit"
                                                             className="btn auth-btn-primary w-100 text-white mb-3"
@@ -2924,15 +3007,15 @@ export default function Landing() {
                                                                         </thead>
                                                                         <tbody>
                                                                             <tr>
-                                                                                <td style={{color: '#673ab7'}}>key</td>
+                                                                                <td style={{ color: '#673ab7' }}>key</td>
                                                                                 <td>API Key</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td style={{color: '#673ab7'}}>action</td>
+                                                                                <td style={{ color: '#673ab7' }}>action</td>
                                                                                 <td>"refill"</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td style={{color: '#673ab7'}}>order or orders</td>
+                                                                                <td style={{ color: '#673ab7' }}>order or orders</td>
                                                                                 <td>Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
                                                                             </tr>
                                                                         </tbody>
@@ -3332,6 +3415,17 @@ export default function Landing() {
                                                 required
                                             />
                                         </div> */}
+                                        {siteKey && (
+                                            <div className="mb-3 d-flex justify-content-center">
+                                                <ReCAPTCHA
+                                                    ref={recaptchaRef}
+                                                    sitekey={siteKey}
+                                                    onChange={(token) => setRecaptchaToken(token || '')}
+                                                    onExpired={() => setRecaptchaToken('')}
+                                                    hl="vi"
+                                                />
+                                            </div>
+                                        )}
                                         <button
                                             type="submit"
                                             className="btn auth-btn-primary w-100 text-white"

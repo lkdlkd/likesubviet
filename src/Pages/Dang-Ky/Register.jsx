@@ -1,14 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "@/Utils/api"; // Gọi hàm register từ utils/api.js
-
+import { register, getRecaptchaSiteKey } from "@/Utils/api";
+import ReCAPTCHA from "react-google-recaptcha";
+import { Link } from "react-router-dom";
 export default function Register() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [recaptchaToken, setRecaptchaToken] = useState("");
+    const [siteKey, setSiteKey] = useState("");
+    const [siteKeyLoading, setSiteKeyLoading] = useState(true);
+    const [recaptchaReady, setRecaptchaReady] = useState(false);
+    const recaptchaRef = useRef(null);
     const navigate = useNavigate();
+
+    // Lấy site key từ backend
+    useEffect(() => {
+        const fetchSiteKey = async () => {
+            try {
+                setSiteKeyLoading(true);
+                const data = await getRecaptchaSiteKey();
+                setSiteKey(data.siteKey);
+            } catch (err) {
+                // console.error("Lỗi lấy reCAPTCHA site key:", err);
+            } finally {
+                setSiteKeyLoading(false);
+            }
+        };
+        fetchSiteKey();
+    }, []);
+
+    // Xử lý khi reCAPTCHA thay đổi
+    const handleRecaptchaChange = (token) => {
+        setRecaptchaToken(token || "");
+    };
+
+    // Reset reCAPTCHA
+    const resetRecaptcha = () => {
+        if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+        }
+        setRecaptchaToken("");
+    };
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -20,21 +55,29 @@ export default function Register() {
             setLoading(false);
             return;
         }
-        if (password !== confirmPassword) {
-            setError("Mật khẩu xác nhận không khớp.");
+        // if (password !== confirmPassword) {
+        //     setError("Mật khẩu xác nhận không khớp.");
+        //     setLoading(false);
+        //     return;
+        // }
+        // Kiểm tra reCAPTCHA
+        if (!recaptchaToken) {
+            setError("Vui lòng xác nhận bạn không phải là người máy.");
             setLoading(false);
             return;
         }
 
         try {
-            const data = await register({ username, password });
-            setError("",data.message || "Đăng ký thành công!"); // Hiển thị thông báo đăng ký thành công
+            const data = await register({ username, password, recaptchaToken });
+            setError("", data.message || "Đăng ký thành công!"); // Hiển thị thông báo đăng ký thành công
             setTimeout(() => {
                 navigate("/dang-nhap"); // Chuyển hướng về trang đăng nhập sau khi đăng ký thành công
-            }, 1000); // Thời gian chờ 1 giây để hiển thị thông báo
+            }, 2000); // Thời gian chờ 2 giây để hiển thị thông báo
         } catch (err) {
-           // console.error("Lỗi đăng ký:", err);
+            // console.error("Lỗi đăng ký:", err);
             setError(err.message || "Có lỗi xảy ra. Vui lòng thử lại.");
+            // Reset reCAPTCHA khi có lỗi
+            resetRecaptcha();
         } finally {
             setLoading(false);
         }
@@ -118,18 +161,48 @@ export default function Register() {
                                             />
                                         </div>
                                         <div className="col-12">
-                                            <label htmlFor="confirmPassword" className="form-label">
-                                                Xác nhận mật khẩu <span className="text-danger">*</span>
-                                            </label>
-                                            <input
-                                                className="form-control"
-                                                type="password"
-                                                name="confirmPassword"
-                                                value={confirmPassword}
-                                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                                placeholder="Xác nhận mật khẩu"
-                                                required
-                                            />
+                                            {siteKeyLoading ? (
+                                                <div className="d-flex justify-content-center">
+                                                    <div className="d-flex flex-column align-items-center py-3">
+                                                        <div className="spinner-border spinner-border-sm text-primary mb-2" role="status">
+                                                            <span className="visually-hidden">Loading...</span>
+                                                        </div>
+                                                        <small className="text-muted">Đang tải reCAPTCHA...</small>
+                                                    </div>
+                                                </div>
+                                            ) : siteKey ? (
+                                                <div className="d-flex justify-content-center position-relative" style={{ minHeight: '78px' }}>
+                                                    {!recaptchaReady && (
+                                                        <div 
+                                                            className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+                                                            style={{ zIndex: 10, backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
+                                                        >
+                                                            <div className="d-flex flex-column align-items-center">
+                                                                <div className="spinner-border spinner-border-sm text-primary mb-2" role="status">
+                                                                    <span className="visually-hidden">Loading...</span>
+                                                                </div>
+                                                                <small className="text-muted">Đang hiển thị reCAPTCHA...</small>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    <div style={{ 
+                                                        // opacity: recaptchaReady ? 1 : 0, 
+                                                        // transition: 'opacity 0.4s ease-in-out',
+                                                        // visibility: recaptchaReady ? 'visible' : 'hidden'
+                                                    }}>
+                                                        <ReCAPTCHA
+                                                            ref={recaptchaRef}
+                                                            sitekey={siteKey}
+                                                            onChange={handleRecaptchaChange}
+                                                            onExpired={() => setRecaptchaToken("")}
+                                                            asyncScriptOnLoad={() => {
+                                                                 setRecaptchaReady(true);
+                                                            }}
+                                                            hl="vi"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ) : null}
                                         </div>
                                         <div className="col-12">
                                             <div className="d-grid">
@@ -147,12 +220,12 @@ export default function Register() {
                                         </div>
                                         <div className="col-12">
                                             <div className="d-grid">
-                                                <a
+                                                <Link
                                                     className="btn btn-outline-primary btn-block"
-                                                    href="/dang-nhap"
+                                                    to="/dang-nhap"
                                                 >
                                                     Đã có tài khoản
-                                                </a>
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>

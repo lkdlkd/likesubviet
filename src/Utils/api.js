@@ -164,6 +164,15 @@ export const login = async (data) => {
   return handleResponse(response);
 };
 
+// Lấy reCAPTCHA site key
+export const getRecaptchaSiteKey = async () => {
+  const response = await fetch(`${API_BASE}/recaptcha-site-key`, {
+    method: "GET",
+    headers: withNoStore({}),
+  });
+  return handleResponse(response);
+};
+
 export const register = async (data) => {
   const response = await fetch(`${API_BASE}/register`, {
     method: "POST",

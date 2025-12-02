@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { login } from "@/Utils/api"; // API login gộp luôn 2FA (gửi thêm field token nếu là bước OTP)
 import { AuthContext } from "@/Context/AuthContext";
 import { loadingg } from "@/JS/Loading";
@@ -168,12 +168,12 @@ export default function Login() {
                       </div>
                       <div className="col-12">
                         <div className="d-grid">
-                          <a
+                          <Link
                             className="btn btn-outline-primary btn-block"
-                            href="/dang-ky"
+                            to="/dang-ky"
                           >
                             Chưa có tài khoản
-                          </a>
+                          </Link>
                         </div>
                       </div>
                     </div>
