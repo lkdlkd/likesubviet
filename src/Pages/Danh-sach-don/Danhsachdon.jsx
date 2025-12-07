@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
 import Select from "react-select";
 import { useOutletContext } from "react-router-dom";
-import { getOrders, refillOrder, cancelOrder } from "@/Utils/api";
+import { getOrders, refillOrder, cancelOrder, addOrder } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading"; // Giả sử bạn đã định nghĩa hàm loading trong file này
 
@@ -625,6 +625,78 @@ const Danhsachdon = () => {
                                                             >
                                                                 Copy
                                                             </button>
+                                                            {order.status === "Completed" && (
+                                                                <div className="mt-1">
+                                                                    <button
+                                                                        className="btn btn-sm btn-success"
+                                                                        onClick={async () => {
+                                                                            const confirm = await Swal.fire({
+                                                                                title: `Mua lại đơn #${order.Madon}?`,
+                                                                                html: `
+                                                                                    <div style="text-align: left; font-size: 15px; line-height: 1.6;">
+                                                                                        <div style="margin-bottom: 8px; font-size:16px;">
+                                                                                            <b style="color:#0d6efd;">Thông tin đơn hàng cũ:</b>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <b>Dịch vụ:</b> <span style="color:#333;">${order.Magoi} - ${order.namesv}</span>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <b>Link:</b> <span style="color:#333;">${order.link}</span>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <b>Số lượng:</b> <span style="color:#333;">${order.quantity}</span>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <b>Giá:</b> 
+                                                                                            <span style="color:green; font-weight:bold;">
+                                                                                                ${Number(order.rate).toLocaleString("vi-VN")} ( có thể thay đổi )
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <b>Tổng tiền:</b> 
+                                                                                            <span style="color:green; font-weight:bold;">
+                                                                                                ${Math.floor(Number(order.totalCost)).toLocaleString("en-US")} ( có thể thay đổi )
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <hr style="margin-top:12px; margin-bottom:12px; opacity:0.3;">
+                                                                                        <p style="margin:0; font-size:14px;">
+                                                                                            Bạn có chắc chắn muốn <b style="color:#dc3545;">mua lại</b> đơn này không?
+                                                                                        </p>
+                                                                                    </div>
+                                                                                `,
+                                                                                icon: "question",
+                                                                                showCancelButton: true,
+                                                                                confirmButtonText: "Xác nhận",
+                                                                                cancelButtonText: "Hủy"
+                                                                            });
+                                                                            if (!confirm.isConfirmed) return;
+                                                                            loadingg("Đang tạo đơn hàng mới...", true, 9999999);
+                                                                            try {
+                                                                                const orderData = {
+                                                                                    link: order.link,
+                                                                                    category: order.category,
+                                                                                    quantity: order.quantity,
+                                                                                    magoi: order.Magoi,
+                                                                                    note: order.note || "",
+                                                                                    comments: order.comments || "",
+                                                                                    ObjectLink: order.ObjectLink || order.link,
+                                                                                };
+                                                                                const result = await addOrder(orderData, token);
+                                                                                if (result.success) {
+                                                                                    toast.success(`Mua lại thành công! Mã đơn: ${result.orderId || result.order?.Madon || 'N/A'}`);
+                                                                                    fetchOrders();
+                                                                                }
+                                                                            } catch (err) {
+                                                                                toast.error(`Mua lại thất bại: ${err.message}`);
+                                                                            } finally {
+                                                                                loadingg("Đang tải...", false);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <i className="fas fa-redo me-2"></i>Mua lại
+                                                                    </button>
+                                                                </div>
+                                                            )}
                                                             <div className="dropdown-placeholder mt-1">
                                                                 <button
                                                                     className="btn btn-primary btn-sm"

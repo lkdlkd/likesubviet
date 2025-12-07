@@ -293,14 +293,13 @@ export default function Order() {
                 setScheduleTime("");
                 await Swal.fire({
                     title: "Thành công",
-                    text: res.message || (wasScheduledOrder ? "Đơn đã được hẹn giờ thành công" : "Mua dịch vụ thành công"),
+                    text: `${res.message}! Mã đơn: ${res.orderId || res.order?.Madon || 'N/A'}` || (wasScheduledOrder ? "Đơn đã được hẹn giờ thành công" : "Mua dịch vụ thành công"),
                     icon: "success",
                     confirmButtonText: "Xác nhận",
                 });
 
             } catch (error) {
                 loadingg("", false); // Đóng loading khi xong
-
                 await Swal.fire({
                     title: "Lỗi",
                     text: error.message || "Có lỗi xảy ra, vui lòng thử lại!",

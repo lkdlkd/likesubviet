@@ -185,6 +185,7 @@ const OrderAdmin = () => {
   };
   const handleUpdate = async () => {
     if (!selectedOrder) return;
+    loadingg("Đang cập nhật...", true, 9999999);
     try {
       await updateOrderStatus(selectedOrder.Madon, form, token);
       toast.success("Cập nhật trạng thái thành công!");
@@ -192,6 +193,8 @@ const OrderAdmin = () => {
       fetchOrders();
     } catch (err) {
       toast.error(`Lỗi khi cập nhật trạng thái! ${err.message}`);
+    } finally {
+      loadingg("Đang cập nhật...", false);
     }
   };
   let decoded = {};
