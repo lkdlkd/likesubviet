@@ -578,6 +578,18 @@ function MenuUser({ user, categories, configWeb }) {
                                     <span className="pc-mtext">Danh sách đơn</span>
                                 </Link>
                             </li>
+                            <li className="pc-item">
+                                <Link
+                                    onClick={() => handleNavigation()}
+                                    to="/scheduled"
+                                    style={{ cursor: "pointer" }}
+                                    className="pc-link">
+                                    <span className="pc-micon">
+                                        <img src="/img/Schedule-Time.png" className="wid-35" alt="Service Platform 1" />
+                                    </span>
+                                    <span className="pc-mtext">Lịch chạy đơn</span>
+                                </Link>
+                            </li>
                             <li className="pc-item pc-caption">
                                 <label>Danh Sách Dịch Vụ</label>
                             </li>

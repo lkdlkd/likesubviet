@@ -527,7 +527,7 @@ export default function History() {
                                                 <thead>
                                                     <tr>
                                                         <th>STT</th>
-                                                        <th>Username</th>
+                                                        {role === "admin" && <th>Username</th>}
                                                         <th>Mã đơn</th>
                                                         <th>Hành động</th>
                                                         <th>Link</th>
@@ -576,7 +576,7 @@ export default function History() {
                                                                     className={rowClass}
                                                                 >
                                                                     <td>{(page - 1) * limit + index + 1}</td>
-                                                                    <td>{item.username}</td>
+                                                                    {role === "admin" && <td>{item.username}</td>}
                                                                     <td>{item.madon}</td>
                                                                     <td style={{
                                                                         maxWidth: "250px",

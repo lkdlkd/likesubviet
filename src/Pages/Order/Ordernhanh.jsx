@@ -24,6 +24,8 @@ export default function Ordernhanh() {
     const [cmtqlt, setcomputedQty] = useState(0);
     const [ObjectLink, setObjectLink] = useState(""); // Lưu input gốc
     const [isConverting, setIsConverting] = useState(false);
+    const [isScheduledOrder, setIsScheduledOrder] = useState(false);
+    const [scheduleTime, setScheduleTime] = useState("");
     const token = localStorage.getItem("token");
     let decoded = {};
     if (token) {
@@ -34,6 +36,31 @@ export default function Ordernhanh() {
         }
     }
     const username = decoded.username;
+
+    const formatDateTimeLocal = (date) => {
+        if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+        const tzOffset = date.getTimezoneOffset() * 60000;
+        const localISOTime = new Date(date.getTime() - tzOffset).toISOString();
+        return localISOTime.slice(0, 16);
+    };
+
+    const minScheduleTime = useMemo(() => {
+        const minDate = new Date(Date.now() + 60 * 1000);
+        return formatDateTimeLocal(minDate);
+    }, []);
+
+    const handleScheduleToggle = (checked) => {
+        setIsScheduledOrder(checked);
+        if (checked) {
+            setScheduleTime((prev) => prev || formatDateTimeLocal(new Date(Date.now() + 5 * 60 * 1000)));
+        } else {
+            setScheduleTime("");
+        }
+    };
+
+    const handleScheduleTimeChange = (value) => {
+        setScheduleTime(value);
+    };
 
     // Cập nhật danh sách servers khi `server` thay đổi
     useEffect(() => {
@@ -340,11 +367,43 @@ export default function Ordernhanh() {
         );
         const qty =
             selectedService && selectedService.comment === "on" ? cmtqlt : quantity;
+        if (!qty || Number(qty) <= 0) {
+            Swal.fire({
+                title: "Lỗi",
+                text: "Vui lòng nhập số lượng hợp lệ.",
+                icon: "error",
+                confirmButtonText: "Xác nhận",
+            });
+            return;
+        }
+        if (isScheduledOrder) {
+            if (!scheduleTime) {
+                Swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng chọn thời gian hẹn giờ.",
+                    icon: "error",
+                    confirmButtonText: "Xác nhận",
+                });
+                return;
+            }
+            const scheduleDate = new Date(scheduleTime);
+            if (Number.isNaN(scheduleDate.getTime()) || scheduleDate <= new Date()) {
+                Swal.fire({
+                    title: "Lỗi",
+                    text: "Thời gian hẹn giờ phải lớn hơn thời điểm hiện tại.",
+                    icon: "error",
+                    confirmButtonText: "Xác nhận",
+                });
+                return;
+            }
+        }
         const confirmResult = await Swal.fire({
             title: "Xác nhận thanh toán",
-            text: `Bạn sẽ tăng ${qty} lượng với giá ${rate} đ. Tổng thanh toán: ${totalCost.toLocaleString(
-                "en-US"
-            )} VNĐ.`,
+            text: isScheduledOrder
+                ? `Bạn sẽ hẹn giờ mua ${qty} lượng với giá ${rate} đ. Tổng dự kiến: ${totalCost.toLocaleString("en-US")} VNĐ. Đơn sẽ chạy vào ${new Date(scheduleTime).toLocaleString("vi-VN")}.`
+                : `Bạn sẽ tăng ${qty} lượng với giá ${rate} đ. Tổng thanh toán: ${totalCost.toLocaleString(
+                    "en-US"
+                )} VNĐ.`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonText: "Xác nhận",
@@ -353,12 +412,15 @@ export default function Ordernhanh() {
         if (confirmResult.isConfirmed) {
             loadingg("Đang xử lý đơn hàng...", true, 9999999); // Hiển thị loading cho đến khi có response, không tự động tắt
             try {
+                const wasScheduledOrder = isScheduledOrder;
                 const payload = {
                     link: finalLink,
                     category: selectedCategory ? selectedCategory.value : "",
                     magoi: selectedMagoi,
                     note,
                     ObjectLink: ObjectLink, // Lưu input gốc
+                    isScheduled: isScheduledOrder,
+                    scheduleTime: isScheduledOrder ? scheduleTime : undefined,
                 };
                 if (selectedService && selectedService.comment === "on") {
                     payload.quantity = qty;
@@ -374,10 +436,12 @@ export default function Ordernhanh() {
                     setConvertedUID("");
                     await Swal.fire({
                         title: "Thành công",
-                        text: "Mua dịch vụ thành công",
+                        text: res.message || (wasScheduledOrder ? "Đơn đã được hẹn giờ thành công" : "Mua dịch vụ thành công"),
                         icon: "success",
                         confirmButtonText: "Xác nhận",
                     });
+                    setIsScheduledOrder(false);
+                    setScheduleTime("");
                 }
 
             } catch (error) {
@@ -825,6 +889,34 @@ export default function Ordernhanh() {
                                         );
                                     }
                                 })()}
+                                <div className="form-group mb-3 form-switch d-flex align-items-center gap-2">
+                                    <input
+                                        id="scheduleToggle"
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        checked={isScheduledOrder}
+                                        onChange={(e) => handleScheduleToggle(e.target.checked)}
+                                    />
+                                    <label className="form-check-label" htmlFor="scheduleToggle">
+                                        Hẹn giờ chạy đơn
+                                    </label>
+                                </div>
+                                {isScheduledOrder && (
+                                    <div className="form-group mb-3">
+                                        <label htmlFor="scheduleTime" className="form-label">
+                                            <strong>Thời gian hẹn giờ:</strong>
+                                        </label>
+                                        <input
+                                            id="scheduleTime"
+                                            type="datetime-local"
+                                            className="form-control"
+                                            value={scheduleTime}
+                                            min={minScheduleTime}
+                                            onChange={(e) => handleScheduleTimeChange(e.target.value)}
+                                        />
+                                        <small className="form-text text-muted">Thời gian phải lớn hơn hiện tại tối thiểu 1 phút.</small>
+                                    </div>
+                                )}
                                 <div className="form-group mb-3">
                                     <label htmlFor="note" className="form-label">
                                         <strong>Ghi chú:</strong>

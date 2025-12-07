@@ -76,7 +76,7 @@ export default function CategoriesPage() {
             //console.error("Lỗi khi lưu danh mục:", error);
             Swal.fire({
                 title: "Lỗi",
-                text:  `${error.message || "Không thể lưu danh mục."}`,
+                text: `${error.message || "Không thể lưu danh mục."}`,
                 icon: "error",
                 confirmButtonText: "Xác nhận",
             });
@@ -391,6 +391,7 @@ export default function CategoriesPage() {
                                                                         <th>Thao tác</th>
                                                                         <th>Tên</th>
                                                                         <th>Đường dẫn</th>
+                                                                        <th>Trạng thái</th>
                                                                         <th>Ghi chú</th>
                                                                         <th>Hiển thị Modal</th>
                                                                     </tr>
@@ -438,6 +439,7 @@ export default function CategoriesPage() {
                                                                             </td>
                                                                             <td>{category.name}</td>
                                                                             <td>{category.path}</td>
+                                                                            <td>{category.status ? <span className="badge bg-success">Hoạt động</span> : <span className="badge bg-danger">Không hoạt động</span>}</td>
                                                                             <td
                                                                                 style={{
                                                                                     maxWidth: "250px",

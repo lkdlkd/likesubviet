@@ -19,7 +19,6 @@ const Danhsachdon = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [limit, setLimit] = useState(10); // Số đơn hàng mỗi trang, mặc định là 10
     const [selectedStatus, setSelectedStatus] = useState(""); // Lưu trạng thái được chọn
-    const [selectedDomain, setSelectedDomain] = useState("");
 
     let decoded = {};
     if (token) {
@@ -584,7 +583,7 @@ const Danhsachdon = () => {
                                             <tr>
                                                 <th>Mã đơn</th>
                                                 <th>Thao tác</th>
-                                                <th>Username</th>
+                                                {userRole === "admin" && <th>Username</th>}
                                                 <th>Link</th>
                                                 <th>Server</th>
                                                 <th>Thông tin</th>
@@ -705,7 +704,7 @@ const Danhsachdon = () => {
                                                                 </ul>
                                                             </div>
                                                         </td>
-                                                        <td>{order.username}</td>
+                                                        {userRole === "admin" && <td>{order.username}</td>}
                                                         {/* <td
                                                     style={{
                                                         maxWidth: "250px",

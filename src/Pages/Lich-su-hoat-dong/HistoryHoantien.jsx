@@ -12,7 +12,7 @@ export default function HistoryHoantien() {
     const [totalPages, setTotalPages] = useState(1);
     // Responsive number of visible page buttons (desktop: 10, mobile: 4)
     const [maxVisible, setMaxVisible] = useState(4);
-
+    const userRole = user?.role || "user";
     useEffect(() => {
         const fetchRefundHistory = async () => {
             setLoading(true);
@@ -146,7 +146,7 @@ export default function HistoryHoantien() {
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Username</th>
+                                {userRole === "admin" && <th>Username</th>}
                                 <th>Mã đơn</th>
                                 <th>Tổng hoàn</th>
                                 <th>uid</th>
@@ -179,7 +179,7 @@ export default function HistoryHoantien() {
                                 data.map((item, idx) => (
                                     <tr key={item._id}>
                                         <td>{(page - 1) * limit + idx + 1}</td>
-                                        <td>{item.username}</td>
+                                        {userRole === "admin" && <td>{item.username}</td>}
                                         <td>{item.madon}</td>
                                         <td>{Math.floor(Number(item.tongtien)).toLocaleString("en-US")}</td>
                                         <td style={{

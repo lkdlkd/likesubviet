@@ -14,7 +14,7 @@ const Dondamua = ({ category, showcmt }) => {
             decoded = JSON.parse(atob(token.split(".")[1]));
         } catch (error) { }
     }
-    // const userRole = decoded?.role || "user";
+    const userRole = decoded?.role || "user";
     const username = decoded.username;
 
     const [searchTerm, setSearchTerm] = useState("");
@@ -343,7 +343,7 @@ const Dondamua = ({ category, showcmt }) => {
                                     <tr>
                                         <th>Mã đơn</th>
                                         <th>Thao tác</th>
-                                        <th>Username</th>
+                                        {userRole === "admin" && <th>Username</th>}
                                         <th>Link</th>
                                         <th>Server</th>
                                         <th>Thông tin</th>
@@ -466,7 +466,7 @@ const Dondamua = ({ category, showcmt }) => {
                                                         </ul>
                                                     </div>
                                                 </td>
-                                                <td>{order.username}</td>
+                                                {userRole === "admin" && <td>{order.username}</td>}
                                                 <td style={{
                                                     maxWidth: "250px",
                                                     whiteSpace: "normal",

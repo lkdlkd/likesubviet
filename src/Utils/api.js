@@ -102,6 +102,49 @@ export const cancelOrder = async (madon, token) => {
   return handleResponse(response);
 };
 
+export const getScheduledOrders = async (
+  token,
+  { page = 1, limit = 10, status } = {}
+) => {
+  const params = new URLSearchParams();
+  if (page) params.append("page", page);
+  if (limit) params.append("limit", limit);
+  if (status) params.append("status", status);
+
+  const queryString = params.toString();
+  const response = await fetch(
+    `${API_BASE}/scheduled-orders${queryString ? `?${queryString}` : ""}`,
+    {
+      method: "GET",
+      headers: withNoStore({ Authorization: `Bearer ${token}` }),
+      cache: "no-store",
+    }
+  );
+  return handleResponse(response);
+};
+
+export const rescheduleScheduledOrder = async (id, scheduleTime, token) => {
+  const response = await fetch(`${API_BASE}/scheduled-orders/${id}/reschedule`, {
+    method: "PATCH",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }),
+    body: JSON.stringify({ scheduleTime }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+export const cancelScheduledOrder = async (id, token) => {
+  const response = await fetch(`${API_BASE}/scheduled-orders/${id}`, {
+    method: "DELETE",
+    headers: withNoStore({ Authorization: `Bearer ${token}` }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
 // Helper để thêm header Cache-Control
 const withNoStore = (headers = {}) => ({
   ...headers,

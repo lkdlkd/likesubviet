@@ -307,6 +307,7 @@ export default function PlatformsPage() {
                     <th>Hành động</th>
                     <th>Tên</th>
                     <th>Logo</th>
+                    <th>Trạng thái</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -370,12 +371,19 @@ export default function PlatformsPage() {
                               style={{ objectFit: "cover" }}
                             />
                           </td>
+                          <td>
+                            {platform.status ? (
+                              <span className="badge bg-success">Hoạt động</span>
+                            ) : (
+                              <span className="badge bg-danger">Không hoạt động</span>
+                            )}
+                          </td>
                         </tr>
                       ) : null
                     )
                   ) : (
                     <tr>
-                      <td colSpan={4} className="text-center">
+                      <td colSpan={6} className="text-center">
                         Không có nền tảng nào.
                       </td>
                     </tr>

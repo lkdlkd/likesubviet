@@ -32,6 +32,7 @@ import ConfigTelePage from "./Pages/Admin/Config-tele/ConfigTelePage";
 import Refund from "./Pages/Admin/Hoantien/Refund";
 import OrderAdmin from "./Pages/Admin/Donhang/OrderAdmin";
 import Webrieng from "./Pages/Webrieng/Webrieng";
+import ScheduledOrders from "./Pages/Muadon/ScheduledOrders";
 function App() {
   const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
@@ -87,6 +88,7 @@ function App() {
             <Route path="/lich-su-hoat-dong" element={<HistoryPage />} />
             <Route path="/order" element={<Ordernhanh />} />
             <Route path="/danh-sach-don" element={<Danhsachdon />} />
+            <Route path="/scheduled" element={<ScheduledOrders />} />
             <Route path="/order/:path" element={<Order />} />
             <Route path="/tai-lieu-api" element={<Tailieuapi />} />
             <Route path="/bang-gia" element={<Banggia />} />
