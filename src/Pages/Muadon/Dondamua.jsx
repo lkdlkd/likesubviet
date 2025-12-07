@@ -394,37 +394,44 @@ const Dondamua = ({ category, showcmt }) => {
                                                                     const confirm = await Swal.fire({
                                                                         title: `Mua lại đơn #${order.Madon}?`,
                                                                         html: `
-                                                                            <div style="text-align: left; font-size: 15px; line-height: 1.6;">
-                                                                                <div style="margin-bottom: 8px; font-size:16px;">
-                                                                                    <b style="color:#0d6efd;">Thông tin đơn hàng cũ:</b>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <b>Dịch vụ:</b> <span style="color:#333;">${order.Magoi} - ${order.namesv}</span>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <b>Link:</b> <span style="color:#333;">${order.link}</span>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <b>Số lượng:</b> <span style="color:#333;">${order.quantity}</span>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <b>Giá:</b> 
-                                                                                    <span style="color:green; font-weight:bold;">
-                                                                                        ${Number(order.rate).toLocaleString("vi-VN")} ( có thể thay đổi )
-                                                                                    </span>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <b>Tổng tiền:</b> 
-                                                                                    <span style="color:green; font-weight:bold;">
-                                                                                        ${Math.floor(Number(order.totalCost)).toLocaleString("en-US")} ( có thể thay đổi )
-                                                                                    </span>
-                                                                                </div>
-                                                                                <hr style="margin-top:12px; margin-bottom:12px; opacity:0.3;">
-                                                                                <p style="margin:0; font-size:14px;">
-                                                                                    Bạn có chắc chắn muốn <b style="color:#dc3545;">mua lại</b> đơn này không?
-                                                                                </p>
-                                                                            </div>
-                                                                        `,
+                                                                                    <div style="text-align: left; font-size: 15px; line-height: 1.6; color: var(--swal-text);">
+                                                                                        <div style="margin-bottom: 8px; font-size:16px;">
+                                                                                            <b style="color:#0d6efd;">Thông tin đơn hàng cũ:</b>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <b>Dịch vụ:</b> <span style="color: var(--swal-text);">${order.Magoi} - ${order.namesv}</span>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <b>Link:</b> <span style="color: var(--swal-text);">  
+                                                                                            <a
+                                                                                                href=${order.ObjectLink}
+                                                                                                target="_blank"
+                                                                                                rel="noopener noreferrer"
+                                                                                            >
+                                                                                                ${order.link}
+                                                                                            </a></span>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <b>Số lượng:</b> <span style="color: var(--swal-text);">${order.quantity}</span>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <b>Giá:</b> 
+                                                                                            <span style="color:green; font-weight:bold;">
+                                                                                                ${Number(order.rate).toLocaleString("vi-VN")} ( có thể thay đổi )
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <b>Tổng tiền:</b> 
+                                                                                            <span style="color:green; font-weight:bold;">
+                                                                                                ${Math.floor(Number(order.totalCost)).toLocaleString("en-US")} ( có thể thay đổi )
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <hr style="margin-top:12px; margin-bottom:12px; opacity:0.3;">
+                                                                                        <p style="margin:0; font-size:14px;">
+                                                                                            Bạn có chắc chắn muốn <b style="color:#dc3545;">mua lại</b> đơn này không?
+                                                                                        </p>
+                                                                                    </div>
+                                                                                `,
                                                                         icon: "question",
                                                                         showCancelButton: true,
                                                                         confirmButtonText: "Xác nhận",

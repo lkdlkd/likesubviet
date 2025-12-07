@@ -633,18 +633,25 @@ const Danhsachdon = () => {
                                                                             const confirm = await Swal.fire({
                                                                                 title: `Mua lại đơn #${order.Madon}?`,
                                                                                 html: `
-                                                                                    <div style="text-align: left; font-size: 15px; line-height: 1.6;">
+                                                                                    <div style="text-align: left; font-size: 15px; line-height: 1.6; color: var(--swal-text);">
                                                                                         <div style="margin-bottom: 8px; font-size:16px;">
                                                                                             <b style="color:#0d6efd;">Thông tin đơn hàng cũ:</b>
                                                                                         </div>
                                                                                         <div>
-                                                                                            <b>Dịch vụ:</b> <span style="color:#333;">${order.Magoi} - ${order.namesv}</span>
+                                                                                            <b>Dịch vụ:</b> <span style="color: var(--swal-text);">${order.Magoi} - ${order.namesv}</span>
                                                                                         </div>
                                                                                         <div>
-                                                                                            <b>Link:</b> <span style="color:#333;">${order.link}</span>
+                                                                                            <b>Link:</b> <span style="color: var(--swal-text);">  
+                                                                                            <a
+                                                                                                href=${order.ObjectLink}
+                                                                                                target="_blank"
+                                                                                                rel="noopener noreferrer"
+                                                                                            >
+                                                                                                ${order.link}
+                                                                                            </a></span>
                                                                                         </div>
                                                                                         <div>
-                                                                                            <b>Số lượng:</b> <span style="color:#333;">${order.quantity}</span>
+                                                                                            <b>Số lượng:</b> <span style="color: var(--swal-text);">${order.quantity}</span>
                                                                                         </div>
                                                                                         <div>
                                                                                             <b>Giá:</b> 
