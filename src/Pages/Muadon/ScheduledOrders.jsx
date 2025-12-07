@@ -490,10 +490,10 @@ const ScheduledOrders = () => {
                         </select>
                       </div>
                     </div>
-                    <div className="col-md-12 col-lg-4 d-flex align-items-end justify-content-lg-end">
+                    <div className="col-md-12 col-lg-4 d-flex align-items-center justify-content-lg-end">
                       <button
                         type="button"
-                        className="btn btn-primary d-flex align-items-center justify-content-center w-100"
+                        className="btn btn-primary d-flex align-items-center justify-content-center w-100 mt-1"
                         onClick={refreshList}
                         disabled={loading}
                       >
