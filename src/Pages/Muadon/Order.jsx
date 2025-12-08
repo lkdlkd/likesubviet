@@ -293,7 +293,7 @@ export default function Order() {
                 setScheduleTime("");
                 await Swal.fire({
                     title: "Thành công",
-                    text: `${res.message}! Mã đơn: ${res.orderId || res.order?.Madon || 'N/A'}` || (wasScheduledOrder ? "Đơn đã được hẹn giờ thành công" : "Mua dịch vụ thành công"),
+                    text: `${res.message}! ${wasScheduledOrder ? "" : `Mã đơn: ${res.orderId || res.order?.Madon || 'N/A'}`}` || (wasScheduledOrder ? "Đơn đã được hẹn giờ thành công" : "Mua dịch vụ thành công"),
                     icon: "success",
                     confirmButtonText: "Xác nhận",
                 });
