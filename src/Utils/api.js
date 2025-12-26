@@ -393,7 +393,7 @@ export const getServer = async (token, page, limit, search = "", filters = {}) =
     params.append("limit", limit);
   }
   if (search) params.append("search", search);
-  
+
   // Thêm các bộ lọc
   if (filters.DomainSmm) params.append("DomainSmm", filters.DomainSmm);
   if (filters.category) params.append("category", filters.category);
@@ -808,7 +808,13 @@ export const getServerByTypeAndCategory = async (category = "", token) => {
   return handleResponse(response);
 };
 
-
+export const getConfigWebLogo = async () => {
+  const response = await fetch(`${API_BASE}/configweblogo`, {
+    method: "GET",
+    cache: "no-store",
+  });
+  return handleResponse(response); // Xử lý phản hồi từ API
+}
 export const getConfigWeb = async (token) => {
   const response = await fetch(`${API_BASE}/configweb`, {
     method: "GET",

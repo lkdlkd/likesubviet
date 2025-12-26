@@ -1,28 +1,144 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useContext, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { login, register, getRecaptchaSiteKey } from '@/Utils/api';
 import { AuthContext } from '@/Context/AuthContext';
-import Table from "react-bootstrap/Table";
 import ReCAPTCHA from "react-google-recaptcha";
+import { getConfigWebLogo } from '@/Utils/api';
+
+// Custom hook for scroll reveal animation
+const useScrollReveal = (options = {}) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsVisible(true);
+                observer.unobserve(entry.target);
+            }
+        }, { threshold: options.threshold || 0.1, rootMargin: options.rootMargin || '0px' });
+
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, [options.threshold, options.rootMargin]);
+
+    return [ref, isVisible];
+};
+
+// Custom hook for count-up animation
+const useCountUp = (endValue, duration = 2000, isVisible = true) => {
+    const [count, setCount] = useState(0);
+    const countRef = useRef(null);
+    const hasAnimated = useRef(false);
+
+    useEffect(() => {
+        if (!isVisible || hasAnimated.current) return;
+        hasAnimated.current = true;
+
+        // Parse the end value (handle formats like "44K+", "5K+", "300%", "35M+")
+        let numericValue = 0;
+        let suffix = '';
+        const match = String(endValue).match(/^([\d.]+)([KMk%+]*)/);
+        if (match) {
+            numericValue = parseFloat(match[1]);
+            suffix = match[2] || '';
+        }
+
+        const startTime = performance.now();
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Easing function for smooth animation
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+            const currentValue = numericValue * easeOutQuart;
+
+            setCount(currentValue);
+
+            if (progress < 1) {
+                countRef.current = requestAnimationFrame(animate);
+            }
+        };
+        countRef.current = requestAnimationFrame(animate);
+
+        return () => {
+            if (countRef.current) cancelAnimationFrame(countRef.current);
+        };
+    }, [endValue, duration, isVisible]);
+
+    // Format the count value
+    const formatValue = (val) => {
+        const match = String(endValue).match(/^([\d.]+)([KMk%+]*)/);
+        const suffix = match ? match[2] : '';
+        const numericEnd = match ? parseFloat(match[1]) : 0;
+
+        if (suffix.includes('K') || suffix.includes('k')) {
+            return Math.floor(val) + 'K+';
+        } else if (suffix.includes('M')) {
+            return Math.floor(val) + 'M+';
+        } else if (suffix.includes('%')) {
+            return Math.floor(val) + '%';
+        }
+        return Math.floor(val) + (suffix || '');
+    };
+
+    return formatValue(count);
+};
+
+// Animated Count Component
+const AnimatedCount = ({ value, duration = 2000 }) => {
+    const [ref, isVisible] = useScrollReveal({ threshold: 0.3 });
+    const animatedValue = useCountUp(value, duration, isVisible);
+
+    return (
+        <span ref={ref} className="gradient-text rainbow-text" style={{ fontSize: '48px', fontWeight: 800, marginBottom: '12px', display: 'inline-block' }}>
+            {animatedValue}
+        </span>
+    );
+};
+
+// Rainbow Text Component
+const RainbowText = ({ children, style = {} }) => {
+    return (
+        <span className="rainbow-text" style={style}>
+            {children}
+        </span>
+    );
+};
+
+// Scroll Reveal Wrapper Component
+const ScrollReveal = ({ children, delay = 0, direction = 'up' }) => {
+    const [ref, isVisible] = useScrollReveal({ threshold: 0.1 });
+
+    const getTransform = () => {
+        switch (direction) {
+            case 'left': return 'translateX(-50px)';
+            case 'right': return 'translateX(50px)';
+            case 'down': return 'translateY(-50px)';
+            default: return 'translateY(50px)';
+        }
+    };
+
+    return (
+        <div
+            ref={ref}
+            style={{
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translate(0)' : getTransform(),
+                transition: `all 0.8s cubic-bezier(0.4, 0, 0.2, 1) ${delay}s`,
+            }}
+        >
+            {children}
+        </div>
+    );
+};
 export default function Landing() {
-    // Modal states
-    // const [showAuthModal, setShowAuthModal] = useState(false);
-    const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
-    const API_DOMAIN = window.location.origin; // Lấy tên miền hiện tại và thêm đường dẫn API
-    const Domain = API_DOMAIN.replace(/^https?:\/\//, ""); // Bỏ https:// hoặc http://
-
-    // Section visibility states
-    const [showApiDocs, setShowApiDocs] = useState(false);
-    const [activeSection, setActiveSection] = useState('home'); // 'home', 'api', 'docs'
-    const [activeApiTab, setActiveApiTab] = useState('services'); // Track active API tab
-    const [copySuccess, setCopySuccess] = useState(''); // Track copy feedback
-
-    // Form states
-    const [formData, setFormData] = useState({
-        username: '',
-        password: '',
-        confirmPassword: ''
-    });
+    const [authMode, setAuthMode] = useState('login');
+    const API_DOMAIN = window.location.origin;
+    const Domain = API_DOMAIN.replace(/^https?:\/\//, "");
+    const API_URL = `${process.env.REACT_APP_API_BASE}/api/v2`;
+    const [activeSection, setActiveSection] = useState('home');
+    const [activeApiTab, setActiveApiTab] = useState('services');
+    const [formData, setFormData] = useState({ username: '', password: '', confirmPassword: '' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -31,3160 +147,1085 @@ export default function Landing() {
     const [recaptchaToken, setRecaptchaToken] = useState('');
     const [siteKey, setSiteKey] = useState('');
     const [siteKeyLoading, setSiteKeyLoading] = useState(true);
+    const [copySuccess, setCopySuccess] = useState('');
+    const [activeFaq, setActiveFaq] = useState(null);
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const recaptchaRef = useRef(null);
-
     const navigate = useNavigate();
     const { updateAuth } = useContext(AuthContext);
+    const [config, setConfig] = useState(null);
 
-    // Handle form input changes
-    const handleInputChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
-
-    // Reset form
-    const resetForm = () => {
-        setFormData({ username: '', password: '', confirmPassword: '' });
-        setError('');
-        setSuccess('');
-        setOtpStep(false);
-        setOtp('');
-        setRecaptchaToken('');
-        if (recaptchaRef.current) {
-            recaptchaRef.current.reset();
-        }
-    };
-
-    // // Handle auth modal open/close
-    // const openAuthModal = (mode) => {
-    //     setAuthMode(mode);
-    //     setShowAuthModal(true);
-    //     resetForm();
-    // };
-
-    // const closeAuthModal = () => {
-    //     setShowAuthModal(false);
-    //     resetForm();
-    // };
-
-    // Handle login
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        setSuccess('');
-
-        try {
-            const payload = {
-                username: formData.username,
-                password: formData.password
-            };
-            if (otpStep) payload.token = otp;
-
-            const data = await login(payload);
-
-            if (data.twoFactorRequired && !otpStep) {
-                setOtpStep(true);
-                setSuccess('Nhập mã 2FA để tiếp tục.');
-                return;
-            }
-
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                updateAuth({ token: data.token, role: data.role });
-                setSuccess('Đăng nhập thành công!');
-                setTimeout(() => {
-                    navigate('/home');
-                }, 1000);
-            }
-        } catch (err) {
-            setError(err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Handle register
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        setSuccess('');
-
-        if (formData.username.length > 100) {
-            setError('Tên tài khoản không được dài hơn 100 ký tự.');
-            setLoading(false);
-            return;
-        }
-
-        // Kiểm tra reCAPTCHA
-        if (!recaptchaToken) {
-            setError('Vui lòng xác nhận bạn không phải là người máy.');
-            setLoading(false);
-            return;
-        }
-
-        // if (formData.password !== formData.confirmPassword) {
-        //     setError('Mật khẩu xác nhận không khớp.');
-        //     setLoading(false);
-        //     return;
-        // }
-
-        try {
-            const data = await register({
-                username: formData.username,
-                password: formData.password,
-                recaptchaToken: recaptchaToken
-            });
-            setSuccess(data.message || 'Đăng ký thành công!');
-            setTimeout(() => {
-                setAuthMode('login');
-                resetForm();
-            }, 1500);
-        } catch (err) {
-            setError(err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
-            // Reset reCAPTCHA khi có lỗi
-            setRecaptchaToken('');
-            if (recaptchaRef.current) {
-                recaptchaRef.current.reset();
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Handle copy with feedback
-    const handleCopy = async (text, label = 'Code') => {
-        try {
-            await navigator.clipboard.writeText(text);
-            setCopySuccess(label);
-            setTimeout(() => setCopySuccess(''), 2000);
-        } catch (err) {
-            // console.error('Failed to copy: ', err);
-        }
-    };
-
-    // Lấy reCAPTCHA site key
+    // Fetch config and recaptcha site key only once
     useEffect(() => {
-        const fetchSiteKey = async () => {
+        const fetchInitialData = async () => {
             try {
                 setSiteKeyLoading(true);
-                const data = await getRecaptchaSiteKey();
-                setSiteKey(data.siteKey);
+                const [configData, recaptchaData] = await Promise.all([
+                    getConfigWebLogo(),
+                    getRecaptchaSiteKey()
+                ]);
+                setConfig(configData.data);
+                setSiteKey(recaptchaData.siteKey);
             } catch (err) {
-
+                // console.error('Error fetching initial data:', err);
             } finally {
                 setSiteKeyLoading(false);
             }
         };
-        fetchSiteKey();
+        fetchInitialData();
     }, []);
 
+    // Mouse tracking for glow effect
     useEffect(() => {
-        // Add custom CSS animations
-        const style = document.createElement('style');
-        style.textContent = `
-            /* CSS Reset & Base Styles */
-            * {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
+        const handleMouseMove = (e) => {
+            setMousePos({ x: e.clientX, y: e.clientY });
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, []);
 
-            /* Design System Variables */
-            :root {
-                --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-                --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-                --glass-bg: rgba(255, 255, 255, 0.1);
-                --glass-border: rgba(255, 255, 255, 0.2);
-                --text-primary: #2d3748;
-                --text-secondary: #4a5568;
-                --text-muted: #718096;
-                --border-radius: 12px;
-                --border-radius-lg: 16px;
-                --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-                --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-                --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
-                --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
-                --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                --transition-fast: all 0.15s ease;
-                --transition-slow: all 0.5s ease;
-                --spacing-xs: 0.25rem;
-                --spacing-sm: 0.5rem;
-                --spacing-md: 1rem;
-                --spacing-lg: 1.5rem;
-                --spacing-xl: 2rem;
-                --spacing-2xl: 3rem;
-                --spacing-3xl: 4rem;
-                --z-dropdown: 1000;
-                --z-sticky: 1020;
-                --z-fixed: 1030;
-                --z-modal-backdrop: 1040;
-                --z-modal: 1050;
-                --z-popover: 1060;
-                --z-tooltip: 1070;
-            }
+    const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+    const resetForm = () => { setFormData({ username: '', password: '', confirmPassword: '' }); setError(''); setSuccess(''); setOtpStep(false); setOtp(''); setRecaptchaToken(''); if (recaptchaRef.current) recaptchaRef.current.reset(); };
+    const handleCopy = async (text) => { try { await navigator.clipboard.writeText(text); setCopySuccess('Đã copy!'); setTimeout(() => setCopySuccess(''), 2000); } catch (err) { } };
 
-            /* Dark Mode Support */
-            @media (prefers-color-scheme: dark) {
-                :root {
-                    --text-primary: #f7fafc;
-                    --text-secondary: #e2e8f0;
-                    --text-muted: #a0aec0;
-                    --glass-bg: rgba(0, 0, 0, 0.2);
-                    --glass-border: rgba(255, 255, 255, 0.1);
+    const handleLogin = async (e) => {
+        e.preventDefault(); setLoading(true); setError(''); setSuccess('');
+        try {
+            const payload = { username: formData.username, password: formData.password };
+            if (otpStep) payload.token = otp;
+            const data = await login(payload);
+            if (data.twoFactorRequired && !otpStep) { setOtpStep(true); setSuccess('Nhập mã 2FA để tiếp tục.'); return; }
+            if (data.token) { localStorage.setItem('token', data.token); updateAuth({ token: data.token, role: data.role }); setSuccess('Đăng nhập thành công!'); setTimeout(() => navigate('/home'), 1000); }
+        } catch (err) { setError(err.message || 'Có lỗi xảy ra.'); } finally { setLoading(false); }
+    };
+
+    const handleRegister = async (e) => {
+        e.preventDefault(); setLoading(true); setError(''); setSuccess('');
+        if (formData.username.length > 100) { setError('Tên tài khoản không được dài hơn 100 ký tự.'); setLoading(false); return; }
+        if (!recaptchaToken) { setError('Vui lòng xác nhận bạn không phải là người máy.'); setLoading(false); return; }
+        try { const data = await register({ username: formData.username, password: formData.password, recaptchaToken }); setSuccess(data.message || 'Đăng ký thành công!'); setTimeout(() => { setAuthMode('login'); resetForm(); }, 1500); }
+        catch (err) { setError(err.message || 'Có lỗi xảy ra.'); setRecaptchaToken(''); if (recaptchaRef.current) recaptchaRef.current.reset(); } finally { setLoading(false); }
+    };
+
+    const stats = [
+        { value: '44K+', label: 'Đơn Hoàn Thành' },
+        { value: '5K+', label: 'Khách Hàng Đã Sử Dụng' },
+        { value: '300%', label: 'Dịch Vụ Mới' },
+        { value: '100%', label: 'Độ Tin Cậy' },
+    ];
+
+    const features = [
+        { text: 'Chúng tôi mang đến các giải pháp tăng tương tác an toàn – hiệu quả, giúp đẩy mạnh hiển thị, tối ưu thuật toán và tăng độ phủ tự nhiên cho thương hiệu cũng như nhà sáng tạo nội dung.' },
+        { text: 'Hơn 5.000+ khách hàng đã tin dùng dịch vụ để tăng tương tác và cải thiện hiệu suất nội dung mỗi ngày.' },
+        { text: 'Giải pháp được tối ưu theo thuật toán thực tế, giúp video dễ lên xu hướng, fanpage tăng reach tự nhiên và kênh social phát triển ổn định bền vững.' },
+    ];
+
+    const testimonials = [
+        { name: 'Quỳnh Aka', role: 'Nữ TikToker', text: 'Dịch vụ rất uy tín, giúp mình duy trì tương tác và tăng view đều mỗi ngày.', img: '/img/Quynhaka.png' },
+        { name: 'Sơn Tùng MTP', role: 'Ca Sĩ', text: 'Dịch vụ tăng tương tác thật sự tuyệt vời. Fanpage của tôi tăng hơn 300% lượt tương tác chỉ sau 2 tuần.', img: '/img/sontung.png' },
+        { name: 'Tun Phạm', role: 'Content Creator', text: 'Từ khi dùng dịch vụ, kênh TikTok của mình tăng follow tự nhiên và lượng tương tác tốt hơn hẳn.', img: '/img/TunPham.png' },
+    ];
+
+    const faqs = [
+        { q: '1. Dịch vụ tăng tương tác gồm những gì?', a: 'Chúng tôi cung cấp các dịch vụ tăng like, follow, comment, share, view cho Facebook, TikTok, Instagram và YouTube. Tất cả đều xử lý tự động, nhanh và đảm bảo an toàn cho tài khoản.' },
+        { q: '2. Tăng tương tác có an toàn cho tài khoản không?', a: 'Dịch vụ chạy theo thuật toán tự nhiên, không yêu cầu mật khẩu, không ảnh hưởng độ an toàn của tài khoản. Hệ thống tối ưu để hạn chế tối đa rủi ro.' },
+        { q: '3. Bao lâu thì đơn tăng tương tác hoàn thành?', a: 'Thời gian xử lý tùy dịch vụ: các đơn nhỏ chạy trong vài phút, đơn lớn có thể 5–30 phút. Một số dịch vụ đặc biệt có thể lâu hơn.' },
+        { q: '4. Có cần cung cấp mật khẩu tài khoản không?', a: 'Không. Bạn chỉ cần cung cấp link bài viết hoặc link tài khoản. Hệ thống hoàn toàn tự động nên không bao giờ yêu cầu mật khẩu.' },
+        { q: '5. Dịch vụ có bảo hành không?', a: 'Có. Các dịch vụ đều có bảo hành theo từng loại, đảm bảo tương tác không bị tụt ngoài phạm vi cho phép. Nếu có lỗi, hệ thống tự động hỗ trợ hoàn trả hoặc bổ sung.' },
+    ];
+
+    const platforms = [
+        { img: '/img/facebook.gif', name: 'Facebook' },
+        { img: '/img/tiktok.gif', name: 'TikTok' },
+        { img: '/img/instagram.gif', name: 'Instagram' },
+        { img: '/img/youtube.gif', name: 'YouTube' },
+        { img: '/img/tele.gif', name: 'Telegram' },
+        { img: '/img/x.gif', name: 'X' },
+    ];
+
+    const apiTabs = [
+        { id: 'services', label: 'Services' }, { id: 'add', label: 'Add Order' }, { id: 'status', label: 'Order Status' },
+        { id: 'multistatus', label: 'Multiple Status' }, { id: 'cancel', label: 'Cancel' }, { id: 'refill', label: 'Refill' }, { id: 'balance', label: 'Balance' },
+    ];
+
+    const apiContent = {
+        services: { params: [['key', 'API Key'], ['action', '"services"']], response: `[\n  {\n    "service": 1,\n    "name": "Sv5 ( Sub Việt )",\n    "type": "Default",\n    "platform": "Facebook",\n    "category": "Follow Facebook",\n    "rate": "0.90",\n    "min": "50",\n    "max": "10000",\n    "refill": true,\n    "cancel": true\n  }\n]` },
+        add: { params: [['key', 'API Key'], ['action', '"add"'], ['service', 'Service ID'], ['link', 'Link'], ['quantity', 'Số lượng cần order'], ['comments', 'Comments (chỉ cho Custom Comments)']], response: `{\n  "order": 99999\n}` },
+        status: { params: [['key', 'API Key'], ['action', '"status"'], ['order', 'Order ID']], response: `{\n  "charge": "2.5",\n  "start_count": "168",\n  "status": "Completed",\n  "remains": "-2",\n  "currency": "USD"\n}`, note: 'Status: Pending, Processing, In progress, Completed, Partial, Canceled' },
+        multistatus: { params: [['key', 'API Key'], ['action', '"status"'], ['orders', 'Order IDs cách nhau bởi dấu phẩy (vd: 123,456,789) (Limit 100)']], response: `{\n  "123": {\n    "charge": "0.27819",\n    "start_count": "3572",\n    "status": "Partial",\n    "remains": "157",\n    "currency": "USD"\n  },\n  "456": { \n    "error": "Incorrect order ID" \n  }\n}` },
+        cancel: { params: [['key', 'API Key'], ['action', '"cancel"'], ['orders', 'Order IDs cách nhau bởi dấu phẩy (Limit 100)']], response: `[\n  {\n    "order": 9,\n    "cancel": {\n      "error": "Incorrect order ID"\n    }\n  },\n  {\n    "order": 2,\n    "cancel": 1\n  }\n]` },
+        refill: { params: [['key', 'API Key'], ['action', '"refill"'], ['orders', 'Order IDs cách nhau bởi dấu phẩy (Limit 100)']], response: `{\n  "refill": "1"\n}` },
+        balance: { params: [['key', 'API Key'], ['action', '"balance"']], response: `{\n  "balance": "343423",\n  "currency": "USD"\n}` },
+    };
+
+    // Color palette
+    const colors = {
+        bg: '#0a0a0a',
+        card: 'rgba(20, 20, 20, 0.8)',
+        border: 'rgba(255, 255, 255, 0.1)',
+        text: '#ffffff',
+        textSecondary: '#b0b0b0',
+        textMuted: '#808080',
+        accent: '#ff4444',
+        accentLight: '#ff6b6b',
+        accentGlow: 'rgba(255, 68, 68, 0.3)',
+    };
+
+    return (
+        <div style={{ fontFamily: "'Inter', sans-serif", backgroundColor: colors.bg, color: colors.text, minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                html { scroll-behavior: smooth; }
+                
+                /* Cursor Glow Effect */
+                .cursor-glow {
+                    position: fixed;
+                    width: 400px;
+                    height: 400px;
+                    border-radius: 50%;
+                    background: radial-gradient(circle, rgba(255, 68, 68, 0.15) 0%, transparent 70%);
+                    pointer-events: none;
+                    z-index: 2;
+                    transform: translate(-50%, -50%);
+                    transition: opacity 0.3s ease;
                 }
-            }
-
-            /* High Contrast Mode Support */
-            @media (prefers-contrast: high) {
-                :root {
-                    --glass-bg: rgba(255, 255, 255, 0.95);
-                    --glass-border: rgba(0, 0, 0, 0.5);
-                    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-                    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
-                    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+                
+                .grid-bg { 
+                    position: fixed; inset: 0; 
+                    background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), 
+                                      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); 
+                    background-size: 60px 60px; 
+                    pointer-events: none; z-index: 0; 
+                    animation: gridMove 20s linear infinite;
                 }
-            }
-
-            /* Typography Scale */
-            .text-xs { font-size: 0.75rem; line-height: 1rem; }
-            .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-            .text-base { font-size: 1rem; line-height: 1.5rem; }
-            .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-            .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-            .text-2xl { font-size: 1.5rem; line-height: 2rem; }
-            .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-            .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
-            .text-5xl { font-size: 3rem; line-height: 1; }
-
-            /* Spacing Utilities */
-            .space-y-2 > * + * { margin-top: var(--spacing-sm); }
-            .space-y-4 > * + * { margin-top: var(--spacing-md); }
-            .space-y-6 > * + * { margin-top: var(--spacing-lg); }
-            .space-y-8 > * + * { margin-top: var(--spacing-xl); }
-
-            /* Animation Library */
-            @keyframes fadeInUp {
-                from {
+                @keyframes gridMove {
+                    0% { transform: translate(0, 0); }
+                    100% { transform: translate(60px, 60px); }
+                }
+                
+                .glow-border { 
+                    position: fixed; inset: 0; pointer-events: none; z-index: 1; 
+                    box-shadow: inset 0 0 200px rgba(255, 68, 68, 0.05), inset 0 0 400px rgba(100, 100, 255, 0.02); 
+                }
+                
+                /* Animated Gradient Text */
+                .gradient-text { 
+                    background: linear-gradient(135deg, #ff6b6b 0%, #ff4444 25%, #ff8888 50%, #ff4444 75%, #ff6b6b 100%); 
+                    background-size: 200% 200%;
+                    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+                    animation: gradientShift 3s ease infinite;
+                }
+                @keyframes gradientShift {
+                    0%, 100% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                }
+                
+                /* Rainbow Text Animation - Color Cycling Effect */
+                .rainbow-text {
+                    background: linear-gradient(
+                        90deg,
+                        #ff0000,
+                        #ff4500 ,
+                        #ff8c00 ,
+                        #ff1493 ,
+                        #ff0000 ,
+                        #ff4500 
+                    );
+                    background-size: 300% 100%;
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    animation: rainbowFlow 6s ease-in-out infinite;
+                }
+                @keyframes rainbowFlow {
+                    0% { background-position: 0% 50%; }
+                    100% { background-position: 300% 50%; }
+                }
+                
+                /* Scroll Reveal Animation */
+                .scroll-reveal {
                     opacity: 0;
-                    transform: translateY(30px);
+                    transform: translateY(50px);
+                    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-                to {
+                .scroll-reveal.visible {
                     opacity: 1;
                     transform: translateY(0);
                 }
-            }
-
-            @keyframes fadeInLeft {
-                from {
+                .scroll-reveal-left {
                     opacity: 0;
-                    transform: translateX(-30px);
+                    transform: translateX(-50px);
+                    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-                to {
+                .scroll-reveal-left.visible {
                     opacity: 1;
                     transform: translateX(0);
                 }
-            }
-
-            @keyframes fadeInRight {
-                from {
+                .scroll-reveal-right {
                     opacity: 0;
-                    transform: translateX(30px);
+                    transform: translateX(50px);
+                    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-                to {
+                .scroll-reveal-right.visible {
                     opacity: 1;
                     transform: translateX(0);
                 }
-            }
-
-            @keyframes fadeInScale {
-                from {
+                
+                /* Count Up Number Animation */
+                .count-up {
+                    display: inline-block;
+                    transition: all 0.3s ease;
+                }
+                .count-up:hover {
+                    transform: scale(1.1);
+                    text-shadow: 0 0 30px rgba(255, 68, 68, 0.5);
+                }
+                
+                /* Glass Card with Shine Effect */
+                .glass-card { 
+                    background: rgba(25, 25, 25, 0.9); 
+                    backdrop-filter: blur(20px); 
+                    border: 1px solid rgba(255, 255, 255, 0.08); 
+                    border-radius: 20px; 
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    position: relative;
+                    overflow: hidden;
+                }
+                .glass-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0; left: -100%;
+                    width: 100%; height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+                    transition: left 0.5s ease;
+                }
+                .glass-card:hover::before {
+                    left: 100%;
+                }
+                .glass-card:hover { 
+                    border-color: rgba(255, 68, 68, 0.5); 
+                    transform: translateY(-8px) scale(1.02); 
+                    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 68, 68, 0.1); 
+                }
+                
+                /* Stat Card with Pulse */
+                .stat-card { 
+                    background: linear-gradient(145deg, rgba(255, 68, 68, 0.08) 0%, rgba(20, 20, 20, 0.95) 100%); 
+                    border: 1px solid rgba(255, 68, 68, 0.15); 
+                    border-radius: 20px; 
+                    position: relative; 
+                    overflow: hidden;
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+                .stat-card:hover {
+                    border-color: rgba(255, 68, 68, 0.6);
+                    transform: translateY(-6px) scale(1.03);
+                    box-shadow: 0 20px 50px rgba(255, 68, 68, 0.15);
+                }
+                .stat-card::after { 
+                    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; 
+                    background: linear-gradient(90deg, #ff4444, #ff6b6b, #ff4444);
+                    background-size: 200% 100%;
+                    animation: shimmer 2s linear infinite;
+                }
+                @keyframes shimmer {
+                    0% { background-position: 200% 0; }
+                    100% { background-position: -200% 0; }
+                }
+                
+                /* Button with Ripple Effect */
+                .btn-primary { 
+                    background: linear-gradient(135deg, #ff4444, #cc3333); 
+                    color: white; padding: 16px 36px; border-radius: 14px; 
+                    font-weight: 600; font-size: 15px; border: none; cursor: pointer; 
+                    display: inline-flex; align-items: center; gap: 10px; 
+                    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+                    box-shadow: 0 4px 20px rgba(255, 68, 68, 0.4); 
+                    text-decoration: none;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .btn-primary::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%; left: 50%;
+                    width: 0; height: 0;
+                    background: rgba(255,255,255,0.3);
+                    border-radius: 50%;
+                    transform: translate(-50%, -50%);
+                    transition: width 0.6s ease, height 0.6s ease;
+                }
+                .btn-primary:hover::after {
+                    width: 300px; height: 300px;
+                }
+                .btn-primary:hover { 
+                    transform: translateY(-4px) scale(1.05); 
+                    box-shadow: 0 12px 50px rgba(255, 68, 68, 0.7); 
+                }
+                .btn-primary:active {
+                    transform: translateY(-2px) scale(1.02);
+                }
+                
+                .btn-secondary { 
+                    background: rgba(255,255,255,0.05); 
+                    border: 1px solid rgba(255,255,255,0.15); 
+                    color: white; padding: 16px 36px; border-radius: 14px; 
+                    font-weight: 600; font-size: 15px; cursor: pointer; 
+                    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+                    text-decoration: none;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .btn-secondary::before {
+                    content: '';
+                    position: absolute;
+                    top: 0; left: -100%;
+                    width: 100%; height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                    transition: left 0.5s ease;
+                }
+                .btn-secondary:hover::before {
+                    left: 100%;
+                }
+                .btn-secondary:hover { 
+                    background: rgba(255,255,255,0.12); 
+                    border-color: rgba(255,255,255,0.4); 
+                    transform: translateY(-3px) scale(1.02);
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                }
+                
+                /* Floating Badge */
+                .badge { 
+                    display: inline-flex; align-items: center; gap: 8px; 
+                    padding: 10px 20px; 
+                    background: rgba(255, 68, 68, 0.1); 
+                    border: 1px solid rgba(255, 68, 68, 0.25); 
+                    border-radius: 50px; 
+                    font-size: 13px; font-weight: 600;
+                    color: #ff6b6b; 
+                    text-transform: uppercase; letter-spacing: 1.5px;
+                    animation: float 3s ease-in-out infinite;
+                }
+                @keyframes float {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-5px); }
+                }
+                
+                /* Testimonial Card with Glow */
+                .testimonial-card { 
+                    background: linear-gradient(145deg, rgba(255, 68, 68, 0.06) 0%, rgba(100, 100, 255, 0.04) 50%, rgba(20, 20, 20, 0.95) 100%); 
+                    backdrop-filter: blur(20px); 
+                    border: 1px solid rgba(255,255,255,0.08); 
+                    border-radius: 24px; padding: 32px; 
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    position: relative;
+                }
+                .testimonial-card::before {
+                    content: '';
+                    position: absolute;
+                    inset: -2px;
+                    border-radius: 26px;
+                    background: linear-gradient(135deg, rgba(255,68,68,0.3), rgba(100,100,255,0.2), rgba(255,68,68,0.3));
+                    z-index: -1;
                     opacity: 0;
-                    transform: scale(0.95);
+                    transition: opacity 0.3s ease;
                 }
-                to {
+                .testimonial-card:hover::before {
                     opacity: 1;
-                    transform: scale(1);
                 }
-            }
-
-            @keyframes pulse {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-                100% { transform: scale(1); }
-            }
-
-            @keyframes float {
-                0%, 100% { transform: translateY(0px); }
-                50% { transform: translateY(-10px); }
-            }
-
-            @keyframes shimmer {
-                0% { transform: translateX(-100%); }
-                100% { transform: translateX(100%); }
-            }
-            /* Component Styles */
-            .glass-card {
-                background: var(--glass-bg);
-                backdrop-filter: blur(20px);
-                border: 1px solid var(--glass-border);
-                border-radius: var(--border-radius-lg);
-                box-shadow: var(--shadow-lg);
-            }
-
-            .gradient-text {
-                background: var(--primary-gradient);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }
-
-            .btn-primary-gradient {
-                background: var(--primary-gradient);
-                border: none;
-                color: white;
-                transition: var(--transition);
-                position: relative;
-                overflow: hidden;
-            }
-
-            .btn-primary-gradient::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-                transition: left 0.5s;
-            }
-
-            .btn-primary-gradient:hover::before {
-                left: 100%;
-            }
-
-            .btn-primary-gradient:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            }
-
-            /* Enhanced Animations */
-            .animate-on-scroll {
-                opacity: 0;
-                transform: translateY(20px);
-                transition: var(--transition);
-            }
-
-            .animate-on-scroll.visible {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            .hover-lift {
-                transition: var(--transition);
-            }
-
-            .hover-lift:hover {
-                transform: translateY(-4px);
-                box-shadow: var(--shadow-xl);
-            }
-
-            /* Loading States */
-            .loading-skeleton {
-                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-                background-size: 200% 100%;
-                animation: loading 1.5s infinite;
-            }
-
-            @keyframes loading {
-                0% { background-position: 200% 0; }
-                100% { background-position: -200% 0; }
-            }
-
-      @keyframes slideInScale {
-        from {
-          opacity: 0;
-          transform: scale(0.8);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-
-      .fade-in-up {
-        animation: fadeInUp 0.8s ease-out forwards;
-      }
-
-      .fade-in-left {
-        animation: fadeInLeft 0.8s ease-out forwards;
-      }
-
-      .fade-in-right {
-        animation: fadeInRight 0.8s ease-out forwards;
-      }
-
-      .slide-in-scale {
-        animation: slideInScale 0.6s ease-out forwards;
-      }
-
-      .hover-lift {
-        transition: all 0.3s ease;
-      }
-
-      .hover-lift:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
-      }
-
-      .btn-gradient {
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        border: none;
-        transition: all 0.3s ease;
-      }
-
-      .btn-gradient:hover {
-        background: linear-gradient(45deg, #764ba2, #667eea);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-      }
-
-      .feature-icon {
-        transition: all 0.3s ease;
-      }
-
-      .feature-icon:hover {
-        animation: pulse 1s infinite;
-      }
-
-      .floating {
-        animation: float 3s ease-in-out infinite;
-      }
-
-      .parallax-bg {
-        background-attachment: fixed;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-      }
-
-      .gradient-text {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .glass-effect {
-        backdrop-filter: blur(20px);
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-      }
-
-      .stats-counter {
-        font-weight: 700;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      /* Intersection Observer Animation Classes */
-      .animate-on-scroll {
-        opacity: 0;
-        transform: translateY(50px);
-        transition: all 0.8s ease-out;
-      }
-
-      .animate-on-scroll.animated {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .hero-particles {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        z-index: 1;
-      }
-
-      .particle {
-        position: absolute;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        animation: floatParticle 20s infinite linear;
-      }
-
-      @keyframes floatParticle {
-        0% {
-          transform: translateY(100vh) rotate(0deg);
-          opacity: 0;
-        }
-        10% {
-          opacity: 1;
-        }
-        90% {
-          opacity: 1;
-        }
-        100% {
-          transform: translateY(-100px) rotate(360deg);
-          opacity: 0;
-        }
-      }
-
-      /* Auth Modal Styles */
-      .auth-modal {
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(10px);
-      }
-
-      .auth-modal-content {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 20px;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-      }
-
-      .auth-tab {
-        border: none;
-        background: transparent;
-        color: #6c757d;
-        padding: 12px 24px;
-        border-radius: 15px;
-        transition: all 0.3s ease;
-        font-weight: 500;
-      }
-
-      .auth-tab.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-      }
-
-      .auth-form-control {
-        border: 2px solid rgba(102, 126, 234, 0.1);
-        border-radius: 12px;
-        padding: 12px 16px;
-        transition: all 0.3s ease;
-        background: rgba(255, 255, 255, 0.8);
-      }
-
-      .auth-form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        background: white;
-      }
-
-      .auth-btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-      }
-
-      .auth-btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-      }
-
-      .fade-modal {
-        animation: fadeInModal 0.3s ease-out;
-      }
-
-      @keyframes fadeInModal {
-        from {
-          opacity: 0;
-          transform: scale(0.9);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-
-      /* Header Navigation Styles */
-      .navbar-custom {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        z-index: 1000;
-        padding: 0.5rem 0;
-      }
-
-      .navbar-custom.scrolled {
-        background: rgba(255, 255, 255, 0.98);
-        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
-      }
-
-      @media (max-width: 768px) {
-        .navbar-custom {
-          padding: 0.75rem 0;
-        }
-        
-        .navbar-collapse {
-          background: rgba(255, 255, 255, 0.98);
-          backdrop-filter: blur(20px);
-          border-radius: 12px;
-          margin-top: 1rem;
-          padding: 1rem;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-      }
-
-      .navbar-brand-custom {
-        font-weight: 800;
-        font-size: 1.5rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        text-decoration: none;
-        transition: all 0.3s ease;
-      }
-
-      .navbar-brand-custom:hover {
-        transform: scale(1.05);
-      }
-
-      .nav-btn {
-        background: transparent;
-        border: 2px solid transparent;
-        border-radius: 12px;
-        padding: 8px 20px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        color: #6c757d;
-        font-size: 0.9rem;
-      }
-
-      @media (max-width: 768px) {
-        .nav-btn {
-          width: 100%;
-          justify-content: center;
-          margin-bottom: 0.5rem;
-          padding: 12px 20px;
-          font-size: 1rem;
-        }
-        
-        .navbar-nav {
-          gap: 0 !important;
-        }
-        
-        .vr {
-          display: none !important;
-        }
-      }
-
-      .nav-btn:hover {
-        color: #667eea;
-        border-color: rgba(102, 126, 234, 0.3);
-        background: rgba(102, 126, 234, 0.1);
-        transform: translateY(-2px);
-      }
-
-      .nav-btn.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-color: transparent;
-      }
-
-      .nav-btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-      }
-
-      .nav-btn-primary:hover {
-        color: white;
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-      }
-
-      .nav-btn-outline {
-        border-color: #667eea;
-        color: #667eea;
-      }
-
-      .section-container {
-        min-height: calc(100vh - 80px);
-        transition: all 0.5s ease;
-      }
-
-      .section-hidden {
-        display: none;
-      }
-
-      .section-visible {
-        display: block;
-        animation: fadeInSection 0.5s ease-out;
-      }
-
-      @keyframes fadeInSection {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      /* Mobile Optimizations */
-      @media (max-width: 768px) {
-        .hero-section {
-          min-height: 100vh !important;
-          padding-top: 2rem;
-        }
-        
-        .hero-section .container {
-          padding-top: 2rem !important;
-        }
-        
-        .hero-section .row {
-          min-height: auto !important;
-        }
-        
-        .display-5 {
-          font-size: 2rem !important;
-        }
-        
-        .lead {
-          font-size: 1rem !important;
-        }
-        
-        .auth-form-card {
-          max-width: 100% !important;
-          margin: 2rem 0 !important;
-        }
-        
-        .floating-decorations {
-          display: none;
-        }
-        
-        .btn-lg {
-          padding: 0.75rem 1.5rem;
-          font-size: 1rem;
-        }
-        
-        .badge.bg-light.bg-opacity-10 {
-          margin-bottom: 0.5rem;
-          display: block;
-          width: fit-content;
-        }
-      }
-
-      @media (max-width: 576px) {
-        .display-5 {
-          font-size: 1.75rem !important;
-          line-height: 1.3;
-        }
-        
-        .hero-section {
-          padding-top: 1rem;
-        }
-        
-        .auth-form-card {
-          margin: 1rem 0 !important;
-        }
-        
-        .btn-lg {
-          padding: 0.6rem 1.2rem;
-          font-size: 0.9rem;
-        }
-      }
-    `;
-        document.head.appendChild(style);
-
-        // Intersection Observer for scroll animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animated');
-                }
-            });
-        }, observerOptions);
-
-        // Observe all elements with animate-on-scroll class
-        setTimeout(() => {
-            document.querySelectorAll('.animate-on-scroll').forEach(el => {
-                observer.observe(el);
-            });
-        }, 100);
-
-        // Create floating particles
-        const createParticles = () => {
-            const heroSection = document.querySelector('.hero-particles');
-            if (heroSection) {
-                for (let i = 0; i < 15; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    particle.style.left = Math.random() * 100 + '%';
-                    particle.style.width = particle.style.height = Math.random() * 10 + 5 + 'px';
-                    particle.style.animationDelay = Math.random() * 20 + 's';
-                    particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-                    heroSection.appendChild(particle);
-                }
-            }
-        };
-
-        setTimeout(createParticles, 100);
-
-        return () => {
-            document.head.removeChild(style);
-            observer.disconnect();
-        };
-    }, []);
-
-    // Enhanced styles and animations
-    useEffect(() => {
-        // Add floating animation keyframes
-        const floatingKeyframes = `
-            @keyframes floatAPI {
-                0%, 100% { transform: translateY(0px) rotate(0deg); }
-                33% { transform: translateY(-10px) rotate(1deg); }
-                66% { transform: translateY(5px) rotate(-1deg); }
-            }
-            @keyframes shimmer {
-                0% { background-position: -200px 0; }
-                100% { background-position: calc(200px + 100%) 0; }
-            }
-            @keyframes pulse {
-                0%, 100% { transform: scale(1); opacity: 1; }
-                50% { transform: scale(1.05); opacity: 0.8; }
-            }
-            @keyframes slideInUp {
-                0% { transform: translateY(30px); opacity: 0; }
-                100% { transform: translateY(0); opacity: 1; }
-            }
-            @keyframes glow {
-                0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
-                50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.6), 0 0 40px rgba(118, 75, 162, 0.4); }
-            }
-        `;
-
-        // Add keyframes to document
-        let styleSheet = document.getElementById('api-animations');
-        if (!styleSheet) {
-            styleSheet = document.createElement('style');
-            styleSheet.id = 'api-animations';
-            styleSheet.textContent = floatingKeyframes;
-            document.head.appendChild(styleSheet);
-        }
-        const enhancedStyle = document.createElement('style');
-        enhancedStyle.textContent = `
-            /* Enhanced Landing Page Optimizations */
-            .hero-section {
-                background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #9b59b6 100%);
-                position: relative;
-                overflow: hidden;
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-            }
-            
-            .hero-section::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: 
-                    radial-gradient(circle at 20% 80%, rgba(52, 152, 219, 0.2) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(155, 89, 182, 0.15) 0%, transparent 50%);
-                pointer-events: none;
-            }
-
-            /* Enhanced Text Contrast */
-            .hero-section .text-white {
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-                color: #ffffff !important;
-            }
-            
-            .hero-section .lead {
-                color: rgba(255, 255, 255, 0.95) !important;
-                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-            }
-
-            /* Enhanced Button Animations */
-            .btn-warning {
-                background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%) !important;
-                border: none !important;
-                color: #ffffff !important;
-                font-weight: 600 !important;
-                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-            }
-            
-            .btn-warning:hover {
-                background: linear-gradient(135deg, #e67e22 0%, #d35400 100%) !important;
-                animation: pulse-glow 0.6s ease-in-out;
-                color: #ffffff !important;
-            }
-            
-            @keyframes pulse-glow {
-                0% { box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4); }
-                50% { box-shadow: 0 8px 30px rgba(243, 156, 18, 0.7); }
-                100% { box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4); }
-            }
-
-            /* Glass Effect Enhancement */
-            .glass-effect {
-                background: rgba(255, 255, 255, 0.25) !important;
-                backdrop-filter: blur(15px);
-                border: 2px solid rgba(255, 255, 255, 0.3) !important;
-                transition: all 0.3s ease;
-                color: #ffffff !important;
-                font-weight: 500;
-                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-            }
-            
-            .glass-effect:hover {
-                background: rgba(255, 255, 255, 0.35) !important;
-                border-color: rgba(255, 255, 255, 0.5) !important;
-                transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-                color: #ffffff !important;
-            }
-
-            /* Enhanced Cards */
-            .feature-card {
-                transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-                border: 2px solid rgba(255, 255, 255, 0.2);
-                background: rgba(255, 255, 255, 0.1);
-                backdrop-filter: blur(10px);
-            }
-            
-            .feature-card:hover {
-                transform: translateY(-10px);
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-                border-color: rgba(255, 255, 255, 0.4);
-                background: rgba(255, 255, 255, 0.15);
-            }
-            
-            .feature-card .text-white {
-                color: #ffffff !important;
-                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-            }
-            
-            .feature-card .text-muted {
-                color: rgba(255, 255, 255, 0.8) !important;
-            }
-
-            /* Enhanced Mobile Responsive */
-            @media (max-width: 768px) {
-                .hero-section {
-                    min-height: 100vh;
-                    padding: 2rem 0;
+                .testimonial-card:hover { 
+                    border-color: transparent; 
+                    transform: translateY(-8px) rotateX(2deg) rotateY(-2deg); 
+                    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
                 }
                 
-                .hero-section .display-2 {
-                    font-size: 2.5rem !important;
-                    line-height: 1.2;
+                /* FAQ with Smooth Expand */
+                .faq-item { 
+                    background: rgba(20, 20, 20, 0.8); 
+                    border: 1px solid rgba(255,255,255,0.06); 
+                    border-radius: 16px; margin-bottom: 16px; 
+                    overflow: hidden; 
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+                .faq-item:hover {
+                    border-color: rgba(255, 68, 68, 0.2);
+                    transform: translateX(5px);
+                }
+                .faq-item.active { 
+                    border-color: rgba(255, 68, 68, 0.5); 
+                    background: rgba(255, 68, 68, 0.08);
+                    box-shadow: 0 10px 40px rgba(255, 68, 68, 0.1);
+                }
+                .faq-q { 
+                    padding: 24px 28px; cursor: pointer; 
+                    display: flex; justify-content: space-between; align-items: center; 
+                    font-weight: 600; font-size: 16px; color: #ffffff;
+                    transition: background 0.3s ease;
+                }
+                .faq-q:hover {
+                    background: rgba(255,255,255,0.02);
+                }
+                .faq-a { 
+                    padding: 0 28px 24px; 
+                    color: #b0b0b0; 
+                    line-height: 1.8; font-size: 15px;
+                    animation: fadeSlideIn 0.3s ease;
+                }
+                @keyframes fadeSlideIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
                 
-                .hero-section .lead {
-                    font-size: 1rem !important;
+                /* Input with Glow Focus */
+                .input { 
+                    background: rgba(255,255,255,0.04); 
+                    border: 1px solid rgba(255,255,255,0.1); 
+                    border-radius: 14px; padding: 16px 20px; 
+                    color: white; width: 100%; outline: none; 
+                    font-size: 15px; 
+                    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+                .input:focus { 
+                    border-color: rgba(255, 68, 68, 0.6); 
+                    box-shadow: 0 0 0 4px rgba(255, 68, 68, 0.1), 0 0 40px rgba(255, 68, 68, 0.15); 
+                    background: rgba(255,255,255,0.08);
+                    transform: scale(1.01);
+                }
+                .input::placeholder { color: #666666; }
+                
+                /* Page Animations */
+                @keyframes fadeIn { 
+                    from { opacity: 0; transform: translateY(40px); } 
+                    to { opacity: 1; transform: translateY(0); } 
+                }
+                .animate-fade-in { animation: fadeIn 1s ease forwards; }
+                
+                /* Staggered animations for children */
+                .stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+                .stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+                .stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+                .stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+                .stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+                .stagger-animation > *:nth-child(6) { animation-delay: 0.6s; }
+                
+                .tab-btn { 
+                    padding: 14px 18px; background: transparent; border: none; 
+                    color: #808080; cursor: pointer; border-radius: 10px; 
+                    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+                    font-weight: 500; font-size: 14px;
+                    text-align: left; width: 100%;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .tab-btn::before {
+                    content: '';
+                    position: absolute;
+                    left: 0; top: 0; bottom: 0;
+                    width: 3px;
+                    background: #ff4444;
+                    transform: scaleY(0);
+                    transition: transform 0.3s ease;
+                }
+                .tab-btn:hover { 
+                    background: rgba(255,255,255,0.05); 
+                    color: #ffffff;
+                    padding-left: 22px;
+                }
+                .tab-btn:hover::before {
+                    transform: scaleY(1);
+                }
+                .tab-btn.active { 
+                    background: linear-gradient(135deg, #ff4444, #cc3333); 
+                    color: white;
+                    transform: scale(1.02);
+                    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
                 }
                 
-                .feature-card {
-                    margin-bottom: 1.5rem;
+                /* Platform images with bounce */
+                .platform-img { 
+                    width: 90px; height: 90px; object-fit: contain; 
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+                    filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
+                    animation: platformFloat 4s ease-in-out infinite;
+                }
+                .platform-img:nth-child(1) { animation-delay: 0s; }
+                .platform-img:nth-child(2) { animation-delay: 0.5s; }
+                .platform-img:nth-child(3) { animation-delay: 1s; }
+                .platform-img:nth-child(4) { animation-delay: 1.5s; }
+                .platform-img:nth-child(5) { animation-delay: 2s; }
+                .platform-img:nth-child(6) { animation-delay: 2.5s; }
+                @keyframes platformFloat {
+                    0%, 100% { transform: translateY(0) rotate(0deg); }
+                    50% { transform: translateY(-8px) rotate(3deg); }
+                }
+                .platform-img:hover { 
+                    transform: scale(1.25) translateY(-10px) rotate(-5deg); 
+                    filter: drop-shadow(0 15px 30px rgba(255, 68, 68, 0.3));
                 }
                 
-                .navbar-custom .navbar-collapse {
-                    background: rgba(0, 0, 0, 0.95);
-                    backdrop-filter: blur(20px);
-                    border-radius: 10px;
-                    margin-top: 1rem;
-                    padding: 1rem;
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                /* Typing cursor effect */
+                .typing-cursor::after {
+                    content: '|';
+                    animation: blink 1s infinite;
+                    color: #ff4444;
                 }
-            }
-
-            /* Enhanced Section Transitions */
-            .section-container {
-                transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-            }
-            
-            .section-visible {
-                opacity: 1;
-                transform: translateX(0);
-                pointer-events: all;
-            }
-            
-            .section-hidden {
-                opacity: 0;
-                transform: translateX(100%);
-                pointer-events: none;
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                z-index: -1;
-            }
-
-            /* Performance Optimizations */
-            * {
-                will-change: auto;
-            }
-            
-            .hero-section,
-            .section-container,
-            .feature-card,
-            .social-link {
-                will-change: transform;
-            }
-
-            /* Enhanced Navbar */
-            .navbar-custom {
-                background: rgba(0, 0, 0, 0.1);
-                backdrop-filter: blur(10px);
-                transition: all 0.3s ease;
-            }
-
-            /* API Tab Animations */
-            .tab-content-item {
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .tab-content-item.active {
-                opacity: 1 !important;
-                visibility: visible !important;
-                transform: translateY(0) !important;
-            }
-
-            /* Enhanced Tab Hover Effects */
-            .nav-pills .nav-link {
-                position: relative;
-                overflow: hidden;
-            }
-
-            .nav-pills .nav-link::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-                transition: left 0.5s;
-            }
-
-            .nav-pills .nav-link:hover::before {
-                left: 100%;
-            }
-
-            /* Smooth scroll behavior */
-            html {
-                scroll-behavior: smooth;
-            }
-
-            /* Code block animations */
-            pre {
-                position: relative;
-            }
-
-            .copy-success {
-                animation: copyFeedback 0.3s ease-out;
-            }
-
-            @keyframes copyFeedback {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-                100% { transform: scale(1); }
-            }
-
-            /* Mobile-First Responsive Design */
-            @media (max-width: 640px) {
-                :root {
-                    --spacing-xs: 0.125rem;
-                    --spacing-sm: 0.25rem;
-                    --spacing-md: 0.75rem;
-                    --spacing-lg: 1rem;
-                    --spacing-xl: 1.5rem;
-                    --spacing-2xl: 2rem;
+                @keyframes blink {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0; }
                 }
                 
-                .container {
-                    padding-left: 1rem !important;
-                    padding-right: 1rem !important;
+                /* Scroll indicator */
+                .scroll-indicator {
+                    position: absolute;
+                    bottom: 40px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    animation: bounce 2s infinite;
+                }
+                @keyframes bounce {
+                    0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+                    40% { transform: translateX(-50%) translateY(-15px); }
+                    60% { transform: translateX(-50%) translateY(-8px); }
                 }
                 
-                .text-4xl { font-size: 1.875rem; line-height: 2.25rem; }
-                .text-3xl { font-size: 1.5rem; line-height: 2rem; }
-                .text-2xl { font-size: 1.25rem; line-height: 1.75rem; }
-                
-                .btn-lg {
-                    font-size: 0.875rem !important;
-                    padding: 0.75rem 1.5rem !important;
-                    min-height: 44px;
+                /* Tablet */
+                @media (max-width: 1024px) {
+                    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+                    .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
+                    .testimonials-grid { grid-template-columns: repeat(2, 1fr) !important; }
                 }
                 
-                .nav-pills .nav-link {
-                    font-size: 0.8125rem !important;
-                    padding: 0.625rem 0.875rem !important;
-                    min-height: 44px;
+                /* Mobile */
+                @media (max-width: 768px) {
+                    .hero-grid { grid-template-columns: 1fr !important; text-align: center; }
+                    .hero-content { align-items: center !important; }
+                    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; }
+                    .features-grid { grid-template-columns: 1fr !important; }
+                    .testimonials-grid { grid-template-columns: 1fr !important; }
+                    .api-layout { flex-direction: column !important; }
+                    .api-sidebar { 
+                        display: grid !important;
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        gap: 10px !important; 
+                        padding-bottom: 20px;
+                        width: 100%;
+                    }
+                    .logo{
+                        margin: 0 auto !important;
+                        height: 60px !important;
+                    }
+                    .api-sidebar .tab-btn { 
+                        white-space: normal !important; 
+                        padding: 12px 16px !important; 
+                        text-align: center;
+                        width: 100% !important;
+                        font-size: 14px !important;
+                    }
+                    .platforms-row { flex-wrap: wrap !important; justify-content: center !important; gap: 16px !important; }
+                    .nav-buttons { display: none !important; }
+                    .platform-img { width: 60px !important; height: 60px !important; }
+                    .cursor-glow { display: none; }
+                    .badge { font-size: 11px !important; padding: 8px 14px !important; }
+                    .glass-card { padding: 24px !important; border-radius: 16px !important; }
+                    .stat-card { padding: 24px 16px !important; }
+                    .testimonial-card { padding: 24px !important; }
+                    .faq-q { padding: 18px 20px !important; font-size: 14px !important; }
+                    .faq-a { padding: 0 20px 18px !important; font-size: 14px !important; }
+                    .btn-primary, .btn-secondary { 
+                        padding: 14px 28px !important; 
+                        font-size: 14px !important;
+                        width: 100%;
+                        justify-content: center;
+                    }
+                    section { padding-left: 16px !important; padding-right: 16px !important; }
+                    h1 { font-size: 28px !important; }
+                    h2 { font-size: 22px !important; }
                 }
                 
-                .table-responsive {
-                    border-radius: var(--border-radius);
-                    border: 1px solid rgba(0,0,0,0.1);
-                    overflow-x: auto;
-                    -webkit-overflow-scrolling: touch;
+                /* Small Mobile */
+                @media (max-width: 480px) {
+                    .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+                    .stat-card { padding: 20px 12px !important; }
+                    .stat-card .gradient-text { font-size: 32px !important; }
+                    .platform-img { width: 50px !important; height: 50px !important; }
+                    .platforms-row { gap: 12px !important; }
+                    h1 { font-size: 24px !important; line-height: 1.3 !important; }
+                    h2 { font-size: 20px !important; }
+                    p { font-size: 14px !important; }
+                    .badge { font-size: 10px !important; padding: 6px 12px !important; letter-spacing: 1px !important; }
+                    .glass-card { padding: 20px !important; }
+                    .tab-btn { font-size: 12px !important; padding: 8px 12px !important; }
+                    pre { font-size: 11px !important; padding: 16px !important; }
+                    table { font-size: 13px !important; }
+                    td, th { padding: 10px 12px !important; }
                 }
                 
-                .tab-content {
-                    min-height: 400px !important;
+                /* Mobile Menu */
+                .mobile-menu-btn {
+                    display: none;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 8px;
+                    z-index: 101;
                 }
-                
-                pre {
-                    font-size: 0.6875rem !important;
-                    line-height: 1.2 !important;
-                    overflow-x: auto;
-                    -webkit-overflow-scrolling: touch;
+                .mobile-menu-btn span {
+                    display: block;
+                    width: 24px;
+                    height: 2px;
+                    background: #fff;
+                    margin: 6px 0;
+                    transition: all 0.3s ease;
                 }
-                
-                .glass-card {
-                    margin: var(--spacing-sm);
-                    border-radius: var(--border-radius);
-                    padding: var(--spacing-md) !important;
+                .mobile-menu-btn.active span:nth-child(1) {
+                    transform: rotate(45deg) translate(6px, 6px);
                 }
-                
-                .hero-section {
-                    min-height: 100vh;
-                    padding-top: 80px;
+                .mobile-menu-btn.active span:nth-child(2) {
+                    opacity: 0;
                 }
-                
-                .card-body {
-                    padding: 1rem !important;
+                .mobile-menu-btn.active span:nth-child(3) {
+                    transform: rotate(-45deg) translate(6px, -6px);
                 }
-            }
-
-            @media (max-width: 768px) {
-                .d-lg-flex {
-                    flex-direction: column !important;
+                .mobile-menu {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(10, 10, 10, 0.98);
+                    z-index: 99;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 20px;
+                    opacity: 0;
+                    visibility: hidden;
+                    transition: all 0.3s ease;
                 }
-                
-                .nav-pills {
-                    min-width: 100% !important;
-                    margin-bottom: var(--spacing-lg) !important;
+                .mobile-menu.open {
+                    opacity: 1;
+                    visibility: visible;
                 }
-                
-                .nav-pills .nav-link {
-                    justify-content: center !important;
+                .mobile-menu a, .mobile-menu button {
+                    font-size: 20px;
+                    color: #fff;
+                    text-decoration: none;
+                    padding: 16px 32px;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    transition: color 0.2s;
                 }
-                
-                .api-docs-section .container {
-                    padding-left: var(--spacing-md) !important;
-                    padding-right: var(--spacing-md) !important;
+                .mobile-menu a:hover, .mobile-menu button:hover {
+                    color: #ff4444;
                 }
-                
-                .modal-dialog {
-                    margin: 0.5rem;
+                .nav-links { display: flex; align-items: center; gap: 8px; }
+                @media (max-width: 768px) {
+                    .mobile-menu-btn { display: block; }
+                    .nav-links { display: none; }
                 }
-                
-                .modal-content {
-                    border-radius: var(--border-radius);
-                }
-            }
+            `}</style>
 
-            /* Tablet Breakpoint */
-            @media (min-width: 641px) and (max-width: 1024px) {
-                .text-4xl { font-size: 2rem; line-height: 2.5rem; }
-                .text-3xl { font-size: 1.75rem; line-height: 2.25rem; }
+            {/* Background Effects */}
+            <div className="grid-bg"></div>
+            <div className="glow-border"></div>
 
-                .container {
-                    max-width: 90% !important;
-                }
-            }
+            {/* Cursor Glow Effect */}
+            <div className="cursor-glow" style={{ left: mousePos.x, top: mousePos.y }}></div>
 
-            /* Touch Device Optimizations */
-            @media (hover: none) and (pointer: coarse) {
-                .btn,
-                .nav-link,
-                button,
-                a[role="button"] {
-                    min-height: 44px;
-                    min-width: 44px;
-                    padding: 0.625rem 1rem;
-                }
-                .hover-lift:active {
-                    transform: scale(0.98);
-                }
-                
-                .btn-primary-gradient:active {
-                    transform: scale(0.98);
-                }
-            }
-
-            /* Enhanced Accessibility */
-            .btn:focus,
-            .nav-link:focus,
-            button:focus,
-            a:focus,
-            input:focus,
-            textarea:focus,
-            select:focus {
-                outline: 3px solid #667eea;
-                outline-offset: 2px;
-                box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
-            }
-
-            .btn:focus:not(:focus-visible),
-            .nav-link:focus:not(:focus-visible),
-            button:focus:not(:focus-visible) {
-                outline: none;
-                box-shadow: none;
-            }
-
-            /* Skip to main content link */
-            .skip-to-main {
-                position: absolute;
-                left: -9999px;
-                z-index: 9999;
-                padding: 1rem 1.5rem;
-                background-color: white;
-                color: #667eea;
-                text-decoration: none;
-                border-radius: 0.5rem;
-                font-weight: 600;
-            }
-
-            .skip-to-main:focus {
-                left: 50%;
-                transform: translateX(-50%);
-                top: 1rem;
-            }
-
-            /* Screen Reader Only */
-            .sr-only {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                padding: 0;
-                margin: -1px;
-                overflow: hidden;
-                clip: rect(0, 0, 0, 0);
-                white-space: nowrap;
-                border-width: 0;
-            }
-
-            /* Accessibility Improvements */
-            @media (prefers-reduced-motion: reduce) {
-                *,
-                *::before,
-                *::after {
-                    animation-duration: 0.01ms !important;
-                    animation-iteration-count: 1 !important;
-                    transition-duration: 0.01ms !important;
-                    scroll-behavior: auto !important;
-                }
-                
-                .animate-on-scroll {
-                    opacity: 1 !important;
-                    transform: none !important;
-                }
-            }
-
-            /* High Contrast Mode Support */
-            @media (prefers-contrast: high) {
-                :root {
-                    --glass-bg: rgba(255, 255, 255, 0.95);
-                    --glass-border: rgba(0, 0, 0, 0.5);
-                    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-                    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
-                    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
-                }
-                
-                .btn,
-                .nav-link {
-                    border: 2px solid currentColor;
-                }
-            }
-
-            /* Dark Mode Support */
-            @media (prefers-color-scheme: dark) {
-                :root {
-                    --text-primary: #f7fafc;
-                    --text-secondary: #e2e8f0;
-                    --text-muted: #a0aec0;
-                    --glass-bg: rgba(0, 0, 0, 0.4);
-                    --glass-border: rgba(255, 255, 255, 0.1);
-                }
-                
-                .card,
-                .modal-content {
-                    background-color: rgba(30, 30, 30, 0.95);
-                    color: #f7fafc;
-                }
-            }
-
-            /* Performance Optimizations */
-            .glass-card,
-            .btn-primary-gradient,
-            .hover-lift {
-                will-change: transform;
-                backface-visibility: hidden;
-                -webkit-font-smoothing: antialiased;
-                transform: translateZ(0);
-            }
-
-            /* Prevent layout shift */
-            img,
-            video,
-            iframe {
-                max-width: 100%;
-                height: auto;
-                display: block;
-            }
-
-            /* Smooth scrolling */
-            html {
-                scroll-behavior: smooth;
-            }
-
-            @media (prefers-reduced-motion: reduce) {
-                html {
-                    scroll-behavior: auto;
-                }
-            }
-
-            /* Loading states */
-            .loading {
-                pointer-events: none;
-                opacity: 0.6;
-                cursor: wait;
-            }
-
-            /* Print styles */
-            @media print {
-                .navbar,
-                .btn,
-                .modal,
-                .floating-decorations {
-                    display: none !important;
-                }
-                
-                .container {
-                    max-width: 100% !important;
-                }
-                
-                * {
-                    background: white !important;
-                    color: black !important;
-                }
-            }
-        `;
-        document.head.appendChild(enhancedStyle);
-
-        // Enhanced scroll effect for navbar
-        const handleScroll = () => {
-            const navbar = document.querySelector('.navbar-custom');
-            if (navbar) {
-                if (window.scrollY > 100) {
-                    navbar.style.background = 'rgba(0, 0, 0, 0.95)';
-                    navbar.style.backdropFilter = 'blur(20px)';
-                    navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.1)';
-                } else {
-                    navbar.style.background = 'rgba(0, 0, 0, 0.1)';
-                    navbar.style.backdropFilter = 'blur(10px)';
-                    navbar.style.boxShadow = 'none';
-                }
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-
-        return () => {
-            document.head.removeChild(enhancedStyle);
-            window.removeEventListener('scroll', handleScroll);
-        };
-    }, []);
-
-    return (
-        <>
-            {/* Header Navigation */}
-            <nav className="navbar navbar-expand-lg navbar-custom fixed-top">
-                <div className="container">
-                    <a
-                        href="#"
-                        className="navbar-brand-custom"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            setActiveSection('home');
-                            setShowApiDocs(false);
-                        }}
-                    >
-                        <i className="fas fa-crown me-2"></i>
-                        {Domain}
-                    </a>
-
-                    <button
-                        className="navbar-toggler border-0"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbarNav"
-                    >
-                        <i className="fas fa-bars text-primary"></i>
-                    </button>
-
-                    <div className="collapse navbar-collapse" id="navbarNav">
-                        <div className="navbar-nav ms-auto d-flex align-items-center gap-2">
-                            <button
-                                className={`nav-btn ${activeSection === 'home' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setActiveSection('home');
-                                    setShowApiDocs(false);
-                                }}
-                            >
-                                <i className="fas fa-home"></i>
-                                Trang chủ
-                            </button>
-
-                            <button
-                                className={`nav-btn ${activeSection === 'api' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setActiveSection('api');
-                                    setShowApiDocs(true);
-                                }}
-                            >
-                                <i className="fas fa-code"></i>
-                                API Docs
-                            </button>
-
-                            <div className="vr mx-2 d-none d-lg-block"></div>
-
-                            <button
-                                className="nav-btn nav-btn-outline"
-                                onClick={() => navigate('/dang-nhap')}
-                            >
-                                <i className="fas fa-sign-in-alt"></i>
-                                Đăng nhập
-                            </button>
-
-                            <button
-                                className="nav-btn nav-btn-primary"
-                                onClick={() => navigate('/dang-ky')}
-                            >
-                                <i className="fas fa-user-plus"></i>
-                                Đăng ký
-                            </button>
-                        </div>
+            {/* Header */}
+            <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: '16px 0', background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => { setActiveSection('home'); setMobileMenuOpen(false); }}>
+                        {config?.logo ? (
+                            <img src={config.logo} className="logo" alt="Logo" style={{ height: '70px', width: 'auto', objectFit: 'contain' }} />
+                        ) : (
+                            <>
+                                <span style={{ fontSize: '28px' }}>⚡</span>
+                                <span style={{ fontWeight: 700, fontSize: '20px', color: '#ffffff' }}>{Domain}</span>
+                            </>
+                        )}
                     </div>
-                </div>
-            </nav>
 
-            {/* Main Content */}
-            <div style={{ paddingTop: '80px' }}>
-                {/* Home Section */}
-                <div className={`section-container ${activeSection === 'home' ? 'section-visible' : 'section-hidden'}`}>
-                    {/* Hero Section */}
-                    <section className="hero-section bg-primary text-white position-relative" style={{
-                        minHeight: '70vh',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        overflow: 'hidden'
-                    }}>
-                        <div className="hero-particles"></div>
-                        <div className="container position-relative py-3 py-md-5" style={{ zIndex: 2 }}>
-                            <div className="row align-items-center" style={{ minHeight: '60vh' }}>
-                                <div className="col-lg-6 fade-in-left">
-                                    <div className="badge bg-light text-primary px-3 py-2 rounded-pill mb-3 d-inline-block shadow-sm">
-                                        <i className="fas fa-crown me-2"></i>
-                                        #1 SMM Panel Vietnam
-                                    </div>
-                                    <h1 className="display-5 fw-bold mb-3 lh-sm">
-                                        Tăng Hiệu Quả
-                                        <span className="text-light d-block">Social Media</span>
-                                        <span className="text-light">Với SMM Panel Hàng Đầu</span>
-                                    </h1>
-                                    <p className="lead mb-4 opacity-90 fs-6">
-                                        Dịch vụ tăng follower, like, view, comment chất lượng cao cho Facebook, Instagram, TikTok, YouTube và nhiều nền tảng khác.
-                                    </p>
-                                    <div className="d-flex gap-2 gap-md-3 flex-wrap mb-4">
-                                        <button
-                                            onClick={() => navigate('/dang-ky')}
-                                            className="btn btn-warning btn-lg px-4 px-md-5 py-3 rounded-pill fw-bold text-dark shadow-lg"
-                                            style={{
-                                                background: 'linear-gradient(135deg, #ffd700 0%, #ffed4a 100%)',
-                                                border: 'none',
-                                                transform: 'translateY(0)',
-                                                transition: 'all 0.3s ease'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.target.style.transform = 'translateY(-2px)';
-                                                e.target.style.boxShadow = '0 8px 25px rgba(255, 215, 0, 0.4)';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.target.style.transform = 'translateY(0)';
-                                                e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
-                                            }}
-                                        >
-                                            <i className="fas fa-rocket me-2"></i>
-                                            <span className="d-none d-md-inline">Bắt Đầu Ngay</span>
-                                            <span className="d-md-none">Bắt Đầu</span>
-                                        </button>
-                                        {/* <Link to="/bang-gia" className="btn btn-outline-light btn-lg px-3 px-md-4 py-3 rounded-pill glass-effect">
-                                    <i className="fas fa-list me-2"></i>
-                                    <span className="d-none d-md-inline">Xem Bảng Giá</span>
-                                    <span className="d-md-none">Bảng Giá</span>
-                                </Link> */}
-                                        <button
-                                            onClick={() => setActiveSection('api')}
-                                            className="btn btn-outline-light btn-lg px-3 px-md-4 py-3 rounded-pill glass-effect"
-                                        >
-                                            <i className="fas fa-code me-2"></i>
-                                            <span className="d-none d-md-inline">API Docs</span>
-                                            <span className="d-md-none">API</span>
-                                        </button>
-                                    </div>
-                                    <div className="d-flex align-items-center gap-2 gap-md-3 flex-wrap">
-                                        <div className="d-flex align-items-center badge bg-light bg-opacity-10 px-2 px-md-3 py-2 rounded-pill">
-                                            <i className="fas fa-check-circle text-success me-2"></i>
-                                            <span className="small">Miễn phí đăng ký</span>
-                                        </div>
-                                        <div className="d-flex align-items-center badge bg-light bg-opacity-10 px-2 px-md-3 py-2 rounded-pill">
-                                            <i className="fas fa-shield-alt text-info me-2"></i>
-                                            <span className="small">Bảo mật cao</span>
-                                        </div>
-                                        <div className="d-flex align-items-center badge bg-light bg-opacity-10 px-2 px-md-3 py-2 rounded-pill">
-                                            <i className="fas fa-bolt text-warning me-2"></i>
-                                            <span className="small">Hoàn thành nhanh</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-6 text-center fade-in-right mt-4 mt-lg-0">
-                                    <div className="position-relative">
-                                        <div className="card border-0 shadow-lg rounded-4 overflow-hidden auth-form-card" style={{ maxWidth: '400px', margin: '0 auto' }}>
-                                            <div className="card-header bg-gradient text-white p-3 btn-gradient">
-                                                <div className="d-flex justify-content-center">
-                                                    <div className="w-100 d-flex" style={{ gap: '2px' }}>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setAuthMode('login');
-                                                                resetForm();
-                                                            }}
-                                                            style={{
-                                                                flex: '1',
-                                                                backgroundColor: authMode === 'login' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'rgba(255,255,255,0.15)',
-                                                                background: authMode === 'login' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'rgba(255,255,255,0.15)',
-                                                                color: authMode === 'login' ? 'white' : 'black',
-                                                                border: authMode === 'login' ? '2px solid rgba(102, 126, 234, 0.8)' : '2px solid rgba(255,255,255,0.3)',
-                                                                borderRadius: '8px 0 0 8px',
-                                                                padding: '12px 16px',
-                                                                fontWeight: authMode === 'login' ? '600' : '500',
-                                                                fontSize: '14px',
-                                                                transition: 'all 0.3s ease',
-                                                                cursor: 'pointer',
-                                                                outline: 'none',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                textShadow: authMode === 'login' ? '0 1px 2px rgba(0,0,0,0.2)' : '1px 1px 2px rgba(0,0,0,0.3)',
-                                                                boxShadow: authMode === 'login' ? '0 4px 15px rgba(102, 126, 234, 0.4)' : 'none'
-                                                            }}
-                                                        >
-                                                            <i className="fas fa-sign-in-alt me-2"></i>
-                                                            Đăng nhập
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setAuthMode('register');
-                                                                resetForm();
-                                                            }}
-                                                            style={{
-                                                                flex: '1',
-                                                                backgroundColor: authMode === 'register' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'rgba(255,255,255,0.15)',
-                                                                background: authMode === 'register' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'rgba(255,255,255,0.15)',
-                                                                color: authMode === 'register' ? 'white' : 'black',
-                                                                border: authMode === 'register' ? '2px solid rgba(102, 126, 234, 0.8)' : '2px solid rgba(255,255,255,0.3)',
-                                                                borderRadius: '0 8px 8px 0',
-                                                                padding: '12px 16px',
-                                                                fontWeight: authMode === 'register' ? '600' : '500',
-                                                                fontSize: '14px',
-                                                                transition: 'all 0.3s ease',
-                                                                cursor: 'pointer',
-                                                                outline: 'none',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                textShadow: authMode === 'register' ? '0 1px 2px rgba(0,0,0,0.2)' : '1px 1px 2px rgba(0,0,0,0.3)',
-                                                                boxShadow: authMode === 'register' ? '0 4px 15px rgba(245, 87, 108, 0.4)' : 'none'
-                                                            }}
-                                                        >
-                                                            <i className="fas fa-user-plus me-2"></i>
-                                                            Đăng ký
-                                                        </button>
-                                                    </div>
+                    {/* Desktop Nav */}
+                    <nav className="nav-links">
+                        <button onClick={() => setActiveSection('home')} style={{ background: 'none', border: 'none', color: activeSection === 'home' ? '#ff4444' : '#b0b0b0', padding: '12px 18px', cursor: 'pointer', fontWeight: 600, fontSize: '15px', transition: 'color 0.2s' }}>Trang Chủ</button>
+                        <button onClick={() => setActiveSection('api')} style={{ background: 'none', border: 'none', color: activeSection === 'api' ? '#ff4444' : '#b0b0b0', padding: '12px 18px', cursor: 'pointer', fontWeight: 600, fontSize: '15px', transition: 'color 0.2s' }}>API</button>
+                        <div className="nav-buttons" style={{ display: 'flex', gap: '12px', marginLeft: '20px' }}>
+                            <button onClick={() => navigate('/dang-nhap')} className="btn-secondary" style={{ padding: '12px 24px' }}>Đăng Nhập</button>
+                            <button onClick={() => navigate('/dang-ky')} className="btn-primary" style={{ padding: '12px 24px' }}>Đăng Ký</button>
+                        </div>
+                    </nav>
+
+                    {/* Mobile Menu Button */}
+                    <button className={`mobile-menu-btn ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </header>
+
+            {/* Mobile Menu Overlay */}
+            <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+                <button onClick={() => { setActiveSection('home'); setMobileMenuOpen(false); }} style={{ color: activeSection === 'home' ? '#ff4444' : '#fff' }}>Trang Chủ</button>
+                <button onClick={() => { setActiveSection('api'); setMobileMenuOpen(false); }} style={{ color: activeSection === 'api' ? '#ff4444' : '#fff' }}>API</button>
+                <button onClick={() => { navigate('/dang-nhap'); setMobileMenuOpen(false); }}>Đăng Nhập</button>
+                <button onClick={() => { navigate('/dang-ky'); setMobileMenuOpen(false); }} style={{ color: '#ff4444' }}>Đăng Ký</button>
+            </div>
+
+            <main style={{ position: 'relative', zIndex: 10, paddingTop: '80px' }}>
+                {activeSection === 'home' && (
+                    <div className="animate-fade-in">
+                        {/* Hero Section */}
+                        <section style={{ minHeight: 'calc(100vh - 80px)', display: 'flex', alignItems: 'center', padding: '40px 24px' }}>
+                            <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+                                <div className="hero-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '60px', alignItems: 'center' }}>
+                                    {/* Left - Content */}
+                                    <div className="hero-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                        <h1 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 800, lineHeight: 1.15, marginBottom: '16px', color: '#ffffff', textAlign: 'left' }}>
+                                            Hệ Thống Dịch Vụ Mạng Xã Hội Hàng Đầu Việt Nam
+                                        </h1>
+                                        <h2 style={{ fontSize: 'clamp(22px, 3vw, 36px)', fontWeight: 700, marginBottom: '24px', textAlign: 'left' }}>
+                                            <span className="rainbow-text">SMMPANEL - Social Media Marketing</span>
+                                        </h2>
+                                        <p style={{ fontSize: '17px', color: '#b0b0b0', lineHeight: 1.8, marginBottom: '32px', textAlign: 'left' }}>
+                                            <strong style={{ color: '#ffffff' }}>{Domain || 'SMMPANEL'}</strong> là nhà cung cấp dịch vụ Facebook & TikTok & Instagram hàng đầu tại Việt Nam!! Cùng rất nhiều dịch vụ nền tảng khác giá tốt.
+                                        </p>
+                                        <p style={{ color: '#808080', marginBottom: '24px', fontSize: '14px', fontWeight: 500, letterSpacing: '0.5px' }}>Cung Cấp Hầu Hết Các Nền Tảng Trên Thị Trường</p>
+                                        <div className="platforms-row" style={{ display: 'flex', gap: '24px', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap' }}>
+                                            {platforms.map((p, i) => (
+                                                <div key={i} style={{ textAlign: 'center' }}>
+                                                    <img src={p.img} alt={p.name} className="platform-img" style={{ width: '60px', height: '60px' }} />
                                                 </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Right - Auth Form */}
+                                    <div className="glass-card" style={{ padding: '32px' }}>
+                                        <div style={{ display: 'flex', marginBottom: '24px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '4px' }}>
+                                            <button
+                                                onClick={() => { setAuthMode('login'); resetForm(); }}
+                                                style={{
+                                                    flex: 1, padding: '14px', border: 'none', borderRadius: '10px', cursor: 'pointer',
+                                                    fontWeight: 600, fontSize: '15px',
+                                                    background: authMode === 'login' ? 'linear-gradient(135deg, #ff4444, #cc3333)' : 'transparent',
+                                                    color: authMode === 'login' ? 'white' : 'rgba(255,255,255,0.5)',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                            >
+                                                Đăng Nhập
+                                            </button>
+                                            <button
+                                                onClick={() => { setAuthMode('register'); resetForm(); }}
+                                                style={{
+                                                    flex: 1, padding: '14px', border: 'none', borderRadius: '10px', cursor: 'pointer',
+                                                    fontWeight: 600, fontSize: '15px',
+                                                    background: authMode === 'register' ? 'linear-gradient(135deg, #ff4444, #cc3333)' : 'transparent',
+                                                    color: authMode === 'register' ? 'white' : 'rgba(255,255,255,0.5)',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                            >
+                                                Đăng Ký
+                                            </button>
+                                        </div>
+
+                                        {error && (
+                                            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', padding: '14px', marginBottom: '16px', color: '#ff6b6b', fontSize: '14px' }}>
+                                                ⚠️ {error}
+                                            </div>
+                                        )}
+                                        {success && (
+                                            <div style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', borderRadius: '12px', padding: '14px', marginBottom: '16px', color: '#4ade80', fontSize: '14px' }}>
+                                                ✅ {success}
+                                            </div>
+                                        )}
+
+                                        <form onSubmit={authMode === 'login' ? handleLogin : handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '8px', color: '#a0a0a0', fontSize: '14px', fontWeight: 500 }}>Tên đăng nhập</label>
+                                                <input
+                                                    type="text"
+                                                    name="username"
+                                                    placeholder="Nhập tên đăng nhập"
+                                                    value={formData.username}
+                                                    onChange={handleInputChange}
+                                                    className="input"
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '8px', color: '#a0a0a0', fontSize: '14px', fontWeight: 500 }}>Mật khẩu</label>
+                                                <input
+                                                    type="password"
+                                                    name="password"
+                                                    placeholder="Nhập mật khẩu"
+                                                    value={formData.password}
+                                                    onChange={handleInputChange}
+                                                    className="input"
+                                                    required
+                                                />
                                             </div>
 
-                                            <div className="card-body p-4">
-                                                {(error || success) && (
-                                                    <div
-                                                        className={`alert ${error ? 'alert-danger' : 'alert-success'} alert-dismissible fade show position-relative`}
-                                                        style={{ paddingRight: '3rem' }}
-                                                    >
-                                                        {error || success}
-                                                        <button
-                                                            type="button"
-                                                            className="btn-close position-absolute"
-                                                            style={{
-                                                                top: '50%',
-                                                                right: '0px',
-                                                                transform: 'translateY(-50%)',
-                                                                zIndex: 1,
-                                                                width: '1rem',
-                                                                height: '1rem'
-                                                            }}
-                                                            onClick={() => {
-                                                                setError('');
-                                                                setSuccess('');
-                                                            }}
-                                                        ></button>
-                                                    </div>
-                                                )}
-
-                                                {authMode === 'login' && (
-                                                    <>
-                                                        {!otpStep ? (
-                                                            <form onSubmit={handleLogin}>
-                                                                <div className="mb-3">
-                                                                    <label className="form-label fw-semibold">
-                                                                        <i className="fas fa-user me-2 text-primary"></i>
-                                                                        Tên tài khoản
-                                                                    </label>
-                                                                    <input
-                                                                        type="text"
-                                                                        name="username"
-                                                                        className="form-control auth-form-control"
-                                                                        value={formData.username}
-                                                                        onChange={handleInputChange}
-                                                                        placeholder="Nhập tên tài khoản"
-                                                                        required
-                                                                        autoComplete="username"
-                                                                    />
-                                                                </div>
-                                                                <div className="mb-4">
-                                                                    <label className="form-label fw-semibold">
-                                                                        <i className="fas fa-lock me-2 text-primary"></i>
-                                                                        Mật khẩu
-                                                                    </label>
-                                                                    <input
-                                                                        type="password"
-                                                                        name="password"
-                                                                        className="form-control auth-form-control"
-                                                                        value={formData.password}
-                                                                        onChange={handleInputChange}
-                                                                        placeholder="Nhập mật khẩu"
-                                                                        required
-                                                                        autoComplete="current-password"
-                                                                    />
-                                                                </div>
-                                                                <button
-                                                                    type="submit"
-                                                                    className="btn auth-btn-primary w-100 text-white mb-3"
-                                                                    disabled={loading}
-                                                                >
-                                                                    {loading ? (
-                                                                        <>
-                                                                            <span className="spinner-border spinner-border-sm me-2"></span>
-                                                                            Đang xử lý...
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <i className="fas fa-sign-in-alt me-2"></i>
-                                                                            Đăng nhập
-                                                                        </>
-                                                                    )}
-                                                                </button>
-                                                                <div className="text-center">
-                                                                    <small className="text-muted">
-                                                                        Chưa có tài khoản?{' '}
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btn btn-link p-0 text-decoration-none small"
-                                                                            onClick={() => {
-                                                                                setAuthMode('register');
-                                                                                resetForm();
-                                                                            }}
-                                                                        >
-                                                                            Đăng ký ngay
-                                                                        </button>
-                                                                    </small>
-                                                                </div>
-                                                            </form>
-                                                        ) : (
-                                                            <form onSubmit={handleLogin}>
-                                                                <div className="text-center mb-4">
-                                                                    <i className="fas fa-shield-alt fa-3x text-primary mb-3"></i>
-                                                                    <h6>Xác thực 2FA</h6>
-                                                                    <p className="text-muted small">Nhập mã 6 số từ ứng dụng xác thực</p>
-                                                                </div>
-                                                                <div className="mb-4">
-                                                                    <input
-                                                                        type="text"
-                                                                        className="form-control auth-form-control text-center fs-5"
-                                                                        value={otp}
-                                                                        onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                                                                        placeholder="000000"
-                                                                        maxLength={6}
-                                                                        required
-                                                                        autoFocus
-                                                                    />
-                                                                    <small className="text-muted d-block text-center mt-1">Mã đổi mỗi 30 giây</small>
-                                                                </div>
-                                                                <div className="d-flex gap-2">
-                                                                    <button
-                                                                        type="button"
-                                                                        className="btn btn-outline-secondary btn-sm"
-                                                                        onClick={() => {
-                                                                            setOtpStep(false);
-                                                                            setOtp('');
-                                                                            setError('');
-                                                                            setSuccess('');
-                                                                        }}
-                                                                        disabled={loading}
-                                                                    >
-                                                                        Quay lại
-                                                                    </button>
-                                                                    <button
-                                                                        type="submit"
-                                                                        className="btn auth-btn-primary flex-grow-1 text-white btn-sm"
-                                                                        disabled={loading || otp.length !== 6}
-                                                                    >
-                                                                        {loading ? 'Đang xác thực...' : 'Xác thực'}
-                                                                    </button>
-                                                                </div>
-                                                            </form>
-                                                        )}
-                                                    </>
-                                                )}
-
-                                                {authMode === 'register' && (
-                                                    <form onSubmit={handleRegister}>
-                                                        <div className="mb-3">
-                                                            <label className="form-label fw-semibold">
-                                                                <i className="fas fa-user me-2 text-primary"></i>
-                                                                Tên tài khoản
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                name="username"
-                                                                className="form-control auth-form-control"
-                                                                value={formData.username}
-                                                                onChange={handleInputChange}
-                                                                placeholder="Nhập tên tài khoản"
-                                                                required
-                                                            />
-                                                        </div>
-                                                        <div className="mb-3">
-                                                            <label className="form-label fw-semibold">
-                                                                <i className="fas fa-lock me-2 text-primary"></i>
-                                                                Mật khẩu
-                                                            </label>
-                                                            <input
-                                                                type="password"
-                                                                name="password"
-                                                                className="form-control auth-form-control"
-                                                                value={formData.password}
-                                                                onChange={handleInputChange}
-                                                                placeholder="Nhập mật khẩu"
-                                                                required
-                                                            />
-                                                        </div>
-                                                        {/* <div className="mb-4">
-                                                    <label className="form-label fw-semibold">
-                                                        <i className="fas fa-lock me-2 text-primary"></i>
-                                                        Xác nhận mật khẩu
-                                                    </label>
+                                            {otpStep && (
+                                                <div>
+                                                    <label style={{ display: 'block', marginBottom: '8px', color: '#a0a0a0', fontSize: '14px', fontWeight: 500 }}>Mã 2FA</label>
                                                     <input
-                                                        type="password"
-                                                        name="confirmPassword"
-                                                        className="form-control auth-form-control"
-                                                        value={formData.confirmPassword}
-                                                        onChange={handleInputChange}
-                                                        placeholder="Nhập lại mật khẩu"
+                                                        type="text"
+                                                        placeholder="Nhập mã 2FA từ app"
+                                                        value={otp}
+                                                        onChange={(e) => setOtp(e.target.value)}
+                                                        className="input"
                                                         required
                                                     />
-                                                </div> */}
-                                                        <div className="mb-3">
-                                                            {siteKeyLoading ? (
-                                                                <div className="d-flex justify-content-center">
-                                                                    <div className="d-flex flex-column align-items-center py-3">
-                                                                        <div className="spinner-border spinner-border-sm text-primary mb-2" role="status">
-                                                                            <span className="visually-hidden">Loading...</span>
-                                                                        </div>
-                                                                        <small className="text-muted">Đang tải reCAPTCHA...</small>
-                                                                    </div>
-                                                                </div>
-                                                            ) : siteKey ? (
-                                                                <div className="d-flex justify-content-center">
-                                                                    <ReCAPTCHA
-                                                                        ref={recaptchaRef}
-                                                                        sitekey={siteKey}
-                                                                        onChange={(token) => setRecaptchaToken(token || '')}
-                                                                        onExpired={() => setRecaptchaToken('')}
-                                                                        hl="vi"
-                                                                    />
-                                                                </div>
-                                                            ) : null}
-                                                        </div>
-                                                        <button
-                                                            type="submit"
-                                                            className="btn auth-btn-primary w-100 text-white mb-3"
-                                                            disabled={loading}
-                                                        >
-                                                            {loading ? (
-                                                                <>
-                                                                    <span className="spinner-border spinner-border-sm me-2"></span>
-                                                                    Đang xử lý...
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <i className="fas fa-user-plus me-2"></i>
-                                                                    Đăng ký
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                        <div className="text-center">
-                                                            <small className="text-muted">
-                                                                Đã có tài khoản?{' '}
-                                                                <button
-                                                                    type="button"
-                                                                    className="btn btn-link p-0 text-decoration-none small"
-                                                                    onClick={() => {
-                                                                        setAuthMode('login');
-                                                                        resetForm();
-                                                                    }}
-                                                                >
-                                                                    Đăng nhập ngay
-                                                                </button>
-                                                            </small>
-                                                        </div>
-                                                    </form>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Floating Elements */}
-                                        <div className="floating-decorations position-absolute d-none d-lg-block" style={{ top: '10%', right: '-8%', animation: 'float 3s ease-in-out infinite' }}>
-                                            <div className="bg-light bg-opacity-20 rounded-circle p-3 backdrop-blur shadow-sm">
-                                                <i className="fas fa-shield-alt text-success fa-lg"></i>
-                                            </div>
-                                        </div>
-                                        <div className="floating-decorations position-absolute d-none d-lg-block" style={{ bottom: '20%', left: '-8%', animation: 'float 4s ease-in-out infinite reverse' }}>
-                                            <div className="bg-light bg-opacity-20 rounded-circle p-3 backdrop-blur shadow-sm">
-                                                <i className="fas fa-rocket text-primary fa-lg"></i>
-                                            </div>
-                                        </div>
-                                        <div className="floating-decorations position-absolute d-none d-xl-block" style={{ top: '50%', right: '-12%', animation: 'float 5s ease-in-out infinite' }}>
-                                            <div className="bg-gradient rounded-pill px-3 py-2 small fw-bold shadow-sm btn-gradient text-white">
-                                                <i className="fas fa-users me-1"></i>
-                                                50K+ Users
-                                            </div>
-                                        </div>
-                                        <div className="floating-decorations position-absolute d-none d-xl-block" style={{ bottom: '10%', right: '-10%', animation: 'float 3.5s ease-in-out infinite reverse' }}>
-                                            <div className="bg-warning text-dark px-3 py-2 rounded-pill small fw-bold shadow-sm">
-                                                <i className="fas fa-star me-1"></i>
-                                                4.9 Rating
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Features Section */}
-                    <section className="features-section py-5 bg-light position-relative">
-                        <div className="container">
-                            <div className="row text-center mb-5 animate-on-scroll">
-                                <div className="col-12">
-                                    <div className="badge bg-primary text-white px-3 py-2 rounded-pill mb-3 d-inline-block">
-                                        <i className="fas fa-gem me-2"></i>
-                                        Tính Năng Nổi Bật
-                                    </div>
-                                    <h2 className="display-5 fw-bold mb-3">Tại Sao Chọn Chúng Tôi?</h2>
-                                    <p className="lead text-muted">Chúng tôi cung cấp dịch vụ SMM chất lượng cao với giá cả cạnh tranh</p>
-                                </div>
-                            </div>
-                            <div className="row g-4">
-                                <div className="col-lg-4 col-md-6 animate-on-scroll">
-                                    <div className="card h-100 border-0 shadow-sm hover-lift" style={{ borderRadius: '20px' }}>
-                                        <div className="card-body text-center p-4">
-                                            <div className="feature-icon mb-3 position-relative">
-                                                <div className="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px' }}>
-                                                    <i className="fas fa-bolt fa-2x text-primary"></i>
                                                 </div>
-                                            </div>
-                                            <h5 className="card-title fw-bold">Hoàn Thành Nhanh Chóng</h5>
-                                            <p className="card-text text-muted">
-                                                Đơn hàng được xử lý và hoàn thành trong vòng vài phút đến vài giờ
+                                            )}
+
+                                            {authMode === 'register' && !siteKeyLoading && siteKey && (
+                                                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                                                    <ReCAPTCHA
+                                                        ref={recaptchaRef}
+                                                        sitekey={siteKey}
+                                                        theme="dark"
+                                                        onChange={(token) => setRecaptchaToken(token)}
+                                                        onExpired={() => setRecaptchaToken('')}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            <button
+                                                type="submit"
+                                                disabled={loading}
+                                                className="btn-primary"
+                                                style={{ width: '100%', justifyContent: 'center', marginTop: '8px', opacity: loading ? 0.7 : 1, padding: '16px' }}
+                                            >
+                                                {loading ? '⏳ Đang xử lý...' : (authMode === 'login' ? '🔐 Đăng Nhập' : '📝 Đăng Ký')}
+                                            </button>
+                                        </form>
+
+                                        {authMode === 'login' && (
+                                            <p style={{ textAlign: 'center', marginTop: '20px', color: '#808080', fontSize: '14px' }}>
+                                                Chưa có tài khoản? <span onClick={() => { setAuthMode('register'); resetForm(); }} style={{ color: '#ff4444', cursor: 'pointer', fontWeight: 600 }}>Đăng ký ngay</span>
                                             </p>
-                                            <div className="progress mt-3" style={{ height: '4px' }}>
-                                                <div className="progress-bar bg-primary" style={{ width: '95%' }}></div>
-                                            </div>
-                                            <small className="text-muted">95% đơn hàng hoàn thành trong 1 giờ</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-4 col-md-6 animate-on-scroll">
-                                    <div className="card h-100 border-0 shadow-sm hover-lift" style={{ borderRadius: '20px' }}>
-                                        <div className="card-body text-center p-4">
-                                            <div className="feature-icon mb-3">
-                                                <div className="bg-success bg-opacity-10 rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px' }}>
-                                                    <i className="fas fa-shield-alt fa-2x text-success"></i>
-                                                </div>
-                                            </div>
-                                            <h5 className="card-title fw-bold">Chất Lượng Cao</h5>
-                                            <p className="card-text text-muted">
-                                                Tất cả dịch vụ đều có chất lượng cao, tài khoản thật, không drop
+                                        )}
+                                        {authMode === 'register' && (
+                                            <p style={{ textAlign: 'center', marginTop: '20px', color: '#808080', fontSize: '14px' }}>
+                                                Đã có tài khoản? <span onClick={() => { setAuthMode('login'); resetForm(); }} style={{ color: '#ff4444', cursor: 'pointer', fontWeight: 600 }}>Đăng nhập</span>
                                             </p>
-                                            <div className="progress mt-3" style={{ height: '4px' }}>
-                                                <div className="progress-bar bg-success" style={{ width: '98%' }}></div>
-                                            </div>
-                                            <small className="text-muted">98% tài khoản real không drop</small>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
-                                <div className="col-lg-4 col-md-6 animate-on-scroll">
-                                    <div className="card h-100 border-0 shadow-sm hover-lift" style={{ borderRadius: '20px' }}>
-                                        <div className="card-body text-center p-4">
-                                            <div className="feature-icon mb-3">
-                                                <div className="bg-info bg-opacity-10 rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px' }}>
-                                                    <i className="fas fa-headset fa-2x text-info"></i>
-                                                </div>
+                            </div>
+                        </section>
+
+                        {/* About / Stats Section */}
+                        <section style={{ padding: '10px 24px', background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 100%)' }}>
+                            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                                <ScrollReveal>
+                                    <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                                        <div className="badge" style={{ marginBottom: '20px' }}>✦ Về Chúng Tôi ✦</div>
+                                        <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 700, lineHeight: 1.4, color: '#ffffff' }}>
+                                            Giải pháp tăng tương tác mạng xã hội <span className="rainbow-text">nhanh, an toàn và hiệu quả</span>
+                                            <br />cho Facebook, TikTok, Instagram và YouTube
+                                        </h2>
+                                    </div>
+                                </ScrollReveal>
+                                <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '28px' }}>
+                                    {stats.map((stat, i) => (
+                                        <ScrollReveal key={i} delay={i * 0.1}>
+                                            <div className="stat-card" style={{ padding: '40px 24px', textAlign: 'center' }}>
+                                                <AnimatedCount value={stat.value} duration={2000} />
+                                                <div style={{ color: '#b0b0b0', fontSize: '15px', fontWeight: 500 }}>{stat.label}</div>
                                             </div>
-                                            <h5 className="card-title fw-bold">Hỗ Trợ 24/7</h5>
-                                            <p className="card-text text-muted">
-                                                Đội ngũ hỗ trợ khách hàng chuyên nghiệp sẵn sàng phục vụ 24/7
-                                            </p>
-                                            <div className="d-flex justify-content-center gap-2 mt-3">
-                                                <span className="badge bg-info">Facebook</span>
-                                                <span className="badge bg-info">Telegram</span>
-                                                <span className="badge bg-info">Zalo</span>
+                                        </ScrollReveal>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Features Section */}
+                        <section style={{ padding: '100px 24px' }}>
+                            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                                <ScrollReveal>
+                                    <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                                        <div className="badge" style={{ marginBottom: '20px' }}>✦ Hiệu Quả Thực Tế ✦</div>
+                                        <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 700, marginBottom: '20px', color: '#ffffff' }}>
+                                            Mang lại <span className="rainbow-text">kết quả rõ ràng</span> giúp tăng trưởng mạnh mẽ
+                                        </h2>
+                                        <p style={{ fontSize: '18px', color: '#b0b0b0' }}>
+                                            Tăng tương tác người dùng trên Facebook – TikTok – Instagram.
+                                        </p>
+                                    </div>
+                                </ScrollReveal>
+                                <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '28px' }}>
+                                    {features.map((f, i) => (
+                                        <ScrollReveal key={i} delay={i * 0.15}>
+                                            <div className="glass-card" style={{ padding: '36px' }}>
+                                                <div style={{ width: '56px', height: '56px', background: 'linear-gradient(135deg, #ff4444, #ff6b6b)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', fontSize: '26px', color: 'white' }}>✓</div>
+                                                <p style={{ color: '#c0c0c0', fontSize: '16px', lineHeight: 1.9 }}>{f.text}</p>
                                             </div>
+                                        </ScrollReveal>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Testimonials Section */}
+                        <section style={{ padding: '100px 24px', background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 100%)' }}>
+                            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                                <ScrollReveal>
+                                    <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                                        <div className="badge" style={{ marginBottom: '20px' }}>✦ Khách hàng nói gì? ✦</div>
+                                        <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 700, marginBottom: '20px', color: '#ffffff' }}>
+                                            Hơn <span className="rainbow-text">5.000+ creator & doanh nghiệp</span> tin tưởng dịch vụ Tăng Tương Tác
+                                        </h2>
+                                        <p style={{ fontSize: '17px', color: '#a0a0a0', maxWidth: '750px', margin: '0 auto' }}>
+                                            Chúng tôi giúp bạn tăng tương tác thật, tối ưu thuật toán và mở rộng độ phủ thương hiệu trên Facebook, TikTok, Instagram và YouTube.
+                                        </p>
+                                    </div>
+                                </ScrollReveal>
+
+                                <ScrollReveal delay={0.2}>
+                                    <div style={{ display: 'flex', gap: '60px', justifyContent: 'center', marginBottom: '60px', flexWrap: 'wrap' }}>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <AnimatedCount value="5k+" duration={2000} />
+                                            <div style={{ color: '#a0a0a0', fontSize: '16px', fontWeight: 500 }}>Khách hàng hài lòng</div>
+                                        </div>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <AnimatedCount value="35M+" duration={2500} />
+                                            <div style={{ color: '#a0a0a0', fontSize: '16px', fontWeight: 500 }}>Lượt tương tác đã tạo ra</div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="col-lg-4 col-md-6 animate-on-scroll">
-                                    <div className="card h-100 border-0 shadow-sm hover-lift" style={{ borderRadius: '20px' }}>
-                                        <div className="card-body text-center p-4">
-                                            <div className="feature-icon mb-3">
-                                                <div className="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px' }}>
-                                                    <i className="fas fa-dollar-sign fa-2x text-warning"></i>
+                                </ScrollReveal>
+
+                                <div className="testimonials-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '28px' }}>
+                                    {testimonials.map((t, i) => (
+                                        <ScrollReveal key={i} delay={i * 0.15}>
+                                            <div className="testimonial-card">
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+                                                    <img style={{ width: '56px', height: '56px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px' }} src={t.img} alt="" />
+                                                    <div>
+                                                        <div style={{ fontWeight: 700, fontSize: '17px', color: '#ffffff' }}>{t.name}</div>
+                                                        <div style={{ fontSize: '14px', color: '#808080' }}>{t.role}</div>
+                                                    </div>
                                                 </div>
+                                                <p style={{ color: '#c0c0c0', lineHeight: 1.8, fontSize: '15px' }}>"{t.text}"</p>
                                             </div>
-                                            <h5 className="card-title fw-bold">Giá Cả Cạnh Tranh</h5>
-                                            <p className="card-text text-muted">
-                                                Giá thành rẻ nhất thị trường với chất lượng dịch vụ tốt nhất
-                                            </p>
-                                            <div className="text-center mt-3">
-                                                <span className="h5 text-warning fw-bold">Tiết kiệm đến 60%</span>
-                                                <br />
-                                                <small className="text-muted">So với đối thủ</small>
-                                            </div>
-                                        </div>
+                                        </ScrollReveal>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* FAQ Section */}
+                        <section style={{ padding: '100px 24px' }}>
+                            <div style={{ maxWidth: '850px', margin: '0 auto' }}>
+                                <ScrollReveal>
+                                    <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                                        <div className="badge" style={{ marginBottom: '20px' }}>✦ Câu hỏi thường gặp ✦</div>
+                                        <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 700, marginBottom: '20px', color: '#ffffff' }}>
+                                            Giải đáp thắc mắc về dịch vụ <span className="rainbow-text">tăng tương tác mạng xã hội</span>
+                                        </h2>
+                                        <button onClick={() => navigate('/home')} className="btn-primary" style={{ marginTop: '20px' }}>Truy Cập Ngay</button>
                                     </div>
-                                </div>
-                                <div className="col-lg-4 col-md-6 animate-on-scroll">
-                                    <div className="card h-100 border-0 shadow-sm hover-lift" style={{ borderRadius: '20px' }}>
-                                        <div className="card-body text-center p-4">
-                                            <div className="feature-icon mb-3">
-                                                <div className="bg-danger bg-opacity-10 rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px' }}>
-                                                    <i className="fas fa-lock fa-2x text-danger"></i>
-                                                </div>
+                                </ScrollReveal>
+                                {faqs.map((faq, i) => (
+                                    <ScrollReveal key={i} delay={i * 0.1}>
+                                        <div className={`faq-item ${activeFaq === i ? 'active' : ''}`}>
+                                            <div className="faq-q" onClick={() => setActiveFaq(activeFaq === i ? null : i)}>
+                                                <span>{faq.q}</span>
+                                                <span style={{ color: '#ff4444', fontSize: '24px', fontWeight: 700 }}>{activeFaq === i ? '−' : '+'}</span>
                                             </div>
-                                            <h5 className="card-title fw-bold">Bảo Mật An Toàn</h5>
-                                            <p className="card-text text-muted">
-                                                Thông tin khách hàng được bảo mật tuyệt đối, không lưu trữ mật khẩu
-                                            </p>
-                                            <div className="d-flex justify-content-center gap-2 mt-3">
-                                                <i className="fas fa-shield-alt text-danger"></i>
-                                                <span className="text-muted small">SSL 256-bit encryption</span>
-                                            </div>
+                                            {activeFaq === i && <div className="faq-a">{faq.a}</div>}
                                         </div>
+                                    </ScrollReveal>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* CTA Section */}
+                        <section style={{ padding: '100px 24px' }}>
+                            <div style={{ maxWidth: '850px', margin: '0 auto' }}>
+                                <ScrollReveal>
+                                    <div className="glass-card" style={{ padding: '64px 48px', textAlign: 'center', background: 'linear-gradient(145deg, rgba(255, 68, 68, 0.08) 0%, rgba(100, 100, 255, 0.05) 100%)' }}>
+                                        <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 700, marginBottom: '20px', color: '#ffffff' }}>
+                                            <span className="rainbow-text">Sẵn sàng tăng trưởng ngay hôm nay?</span>
+                                        </h2>
+                                        <p style={{ color: '#a0a0a0', marginBottom: '36px', fontSize: '18px', lineHeight: 1.7 }}>Tạo tài khoản miễn phí, thêm số dư sau – bắt đầu trong 60 giây.</p>
+                                        <button onClick={() => navigate('/dang-ky')} className="btn-primary" style={{ fontSize: '17px', padding: '20px 56px' }}>🚀 Tạo Tài Khoản Ngay</button>
                                     </div>
+                                </ScrollReveal>
+                            </div>
+                        </section>
+                    </div>
+                )}
+
+                {/* API Docs Section */}
+                {activeSection === 'api' && (
+                    <div className="animate-fade-in" style={{ padding: '60px 24px' }}>
+                        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+                                <div className="badge" style={{ marginBottom: '20px' }}>✦ API DOCUMENTATION ✦</div>
+                                <h1 style={{ fontSize: 'clamp(32px, 4vw, 48px)', fontWeight: 700, color: '#ffffff' }}><span className="gradient-text">API</span> Documentation</h1>
+                            </div>
+
+                            <div className="glass-card" style={{ padding: '28px', marginBottom: '36px' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <tbody>
+                                        <tr><td style={{ padding: '16px 20px', color: '#808080', borderBottom: '1px solid rgba(255,255,255,0.05)', fontWeight: 500 }}>API URL</td><td style={{ padding: '16px 20px', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.05)', wordBreak: 'break-all', color: '#ffffff' }}>{API_URL}</td></tr>
+                                        <tr><td style={{ padding: '16px 20px', color: '#808080', borderBottom: '1px solid rgba(255,255,255,0.05)', fontWeight: 500 }}>API Key</td><td style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><span style={{ color: '#ff4444', cursor: 'pointer', fontWeight: 600 }} onClick={() => navigate('/profile')}>Đăng nhập để lấy API Key →</span></td></tr>
+                                        <tr><td style={{ padding: '16px 20px', color: '#808080', borderBottom: '1px solid rgba(255,255,255,0.05)', fontWeight: 500 }}>HTTP Method</td><td style={{ padding: '16px 20px', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#ffffff' }}>POST</td></tr>
+                                        <tr><td style={{ padding: '16px 20px', color: '#808080', borderBottom: '1px solid rgba(255,255,255,0.05)', fontWeight: 500 }}>Content-Type</td><td style={{ padding: '16px 20px', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#ffffff' }}>application/json</td></tr>
+                                        <tr><td style={{ padding: '16px 20px', color: '#808080', fontWeight: 500 }}>Response</td><td style={{ padding: '16px 20px', fontWeight: 600, color: '#ffffff' }}>JSON</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="api-layout" style={{ display: 'flex', gap: '28px' }}>
+                                <div className="api-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '200px' }}>
+                                    {apiTabs.map((tab) => (<button key={tab.id} onClick={() => setActiveApiTab(tab.id)} className={`tab-btn ${activeApiTab === tab.id ? 'active' : ''}`}>{tab.label}</button>))}
                                 </div>
-                                <div className="col-lg-4 col-md-6 animate-on-scroll">
-                                    <div className="card h-100 border-0 shadow-sm hover-lift" style={{ borderRadius: '20px' }}>
-                                        <div className="card-body text-center p-4">
-                                            <div className="feature-icon mb-3">
-                                                <div className="bg-secondary bg-opacity-10 rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px' }}>
-                                                    <i className="fas fa-redo fa-2x text-secondary"></i>
-                                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div className="glass-card" style={{ padding: '32px' }}>
+                                        <h3 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '24px', textTransform: 'capitalize', color: '#ffffff' }}>{activeApiTab.replace('multistatus', 'Multiple Orders Status')}</h3>
+                                        <div style={{ marginBottom: '28px' }}>
+                                            <h4 style={{ color: '#808080', fontSize: '13px', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 600 }}>Parameters</h4>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <thead><tr><th style={{ padding: '14px 16px', textAlign: 'left', background: 'rgba(255,255,255,0.03)', borderRadius: '10px 0 0 10px', color: '#a0a0a0', fontWeight: 600 }}>Parameter</th><th style={{ padding: '14px 16px', textAlign: 'left', background: 'rgba(255,255,255,0.03)', borderRadius: '0 10px 10px 0', color: '#a0a0a0', fontWeight: 600 }}>Description</th></tr></thead>
+                                                <tbody>{apiContent[activeApiTab]?.params.map(([param, desc], i) => (<tr key={i}><td style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontFamily: 'monospace', color: '#ff6b6b', fontWeight: 500 }}>{param}</td><td style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#a0a0a0' }}>{desc}</td></tr>))}</tbody>
+                                            </table>
+                                        </div>
+                                        <div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                                <h4 style={{ color: '#808080', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 600 }}>Example Response</h4>
+                                                <button onClick={() => handleCopy(apiContent[activeApiTab]?.response)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', padding: '8px 16px', borderRadius: '8px', color: copySuccess ? '#4ade80' : '#a0a0a0', cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}>{copySuccess || 'Copy'}</button>
                                             </div>
-                                            <h5 className="card-title fw-bold">Bảo Hành Refill</h5>
-                                            <p className="card-text text-muted">
-                                                Cam kết bảo hành refill trong thời gian nhất định nếu số lượng bị giảm
-                                            </p>
-                                            <div className="text-center mt-3">
-                                                <span className="badge bg-success">30 ngày bảo hành</span>
-                                            </div>
+                                            <pre style={{ background: 'rgba(0,0,0,0.5)', padding: '24px', borderRadius: '14px', overflow: 'auto', fontSize: '14px', color: '#67e8f9', lineHeight: 1.7, border: '1px solid rgba(255,255,255,0.05)' }}>{apiContent[activeApiTab]?.response}</pre>
+                                            {apiContent[activeApiTab]?.note && <p style={{ color: '#808080', fontSize: '14px', marginTop: '16px' }}>📌 {apiContent[activeApiTab].note}</p>}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </section>
+                    </div>
+                )}
+            </main>
 
-                    {/* Services Section */}
-                    <section className="services-section py-5" style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
-                        <div className="container">
-                            <div className="row text-center mb-5 animate-on-scroll">
-                                <div className="col-12">
-                                    <div className="badge bg-gradient text-white px-3 py-2 rounded-pill mb-3 d-inline-block btn-gradient">
-                                        <i className="fas fa-star me-2"></i>
-                                        Dịch Vụ Phổ Biến
-                                    </div>
-                                    <h2 className="display-5 fw-bold mb-3">Dịch Vụ Của Chúng Tôi</h2>
-                                    <p className="lead text-muted">Cung cấp dịch vụ SMM cho tất cả các nền tảng mạng xã hội phổ biến</p>
-                                </div>
-                            </div>
-                            <div className="row g-4">
-                                <div className="col-lg-3 col-md-6 animate-on-scroll">
-                                    <div className="card border-0 shadow-sm h-100 hover-lift position-relative overflow-hidden" style={{ borderRadius: '20px' }}>
-                                        <div className="position-absolute top-0 end-0 bg-primary text-white px-2 py-1 rounded-bottom-start">
-                                            <small>Hot</small>
-                                        </div>
-                                        <div className="card-body text-center p-4">
-                                            <div className="mb-4">
-                                                <img src="/img/facebook.gif" alt="Facebook" className="floating rounded-circle d-inline-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px' }} />
-                                            </div>
-                                            <h5 className="card-title fw-bold">Facebook</h5>
-                                            <p className="card-text text-muted mb-3">Like, Follow, Comment, Share, View Video</p>
-                                            <div className="d-flex justify-content-center gap-1 mb-3">
-                                                <span className="badge bg-primary bg-opacity-10 text-primary">Like</span>
-                                                <span className="badge bg-primary bg-opacity-10 text-primary">Follow</span>
-                                                <span className="badge bg-primary bg-opacity-10 text-primary">Share</span>
-                                            </div>
-                                            <div className="text-center">
-                                                <small className="text-success fw-bold">
-                                                    <i className="fas fa-check-circle me-1"></i>
-                                                    100+ Dịch vụ
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 animate-on-scroll">
-                                    <div className="card border-0 shadow-sm h-100 hover-lift position-relative overflow-hidden" style={{ borderRadius: '20px' }}>
-                                        <div className="position-absolute top-0 end-0 bg-success text-white px-2 py-1 rounded-bottom-start">
-                                            <small>New</small>
-                                        </div>
-                                        <div className="card-body text-center p-4">
-                                            <div className="mb-4">
-                                                <img src="/img/instagram.gif" alt="Instagram" className="floating rounded-circle d-inline-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', animationDelay: '0.5s' }} />
-                                            </div>
-                                            <h5 className="card-title fw-bold">Instagram</h5>
-                                            <p className="card-text text-muted mb-3">Follower, Like, Comment, View, Story</p>
-                                            <div className="d-flex justify-content-center gap-1 mb-3">
-                                                <span className="badge bg-danger bg-opacity-10 text-danger">Follower</span>
-                                                <span className="badge bg-danger bg-opacity-10 text-danger">Like</span>
-                                                <span className="badge bg-danger bg-opacity-10 text-danger">View</span>
-                                            </div>
-                                            <div className="text-center">
-                                                <small className="text-success fw-bold">
-                                                    <i className="fas fa-check-circle me-1"></i>
-                                                    80+ Dịch vụ
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 animate-on-scroll">
-                                    <div className="card border-0 shadow-sm h-100 hover-lift position-relative overflow-hidden" style={{ borderRadius: '20px' }}>
-                                        <div className="position-absolute top-0 end-0 bg-warning text-dark px-2 py-1 rounded-bottom-start">
-                                            <small>Trend</small>
-                                        </div>
-                                        <div className="card-body text-center p-4">
-                                            <div className="mb-4">
-                                                <img src="/img/tiktok.gif" alt="TikTok" className="floating rounded-circle d-inline-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', animationDelay: '1s' }} />
-                                            </div>
-                                            <h5 className="card-title fw-bold">TikTok</h5>
-                                            <p className="card-text text-muted mb-3">Follower, Like, View, Comment, Share</p>
-                                            <div className="d-flex justify-content-center gap-1 mb-3">
-                                                <span className="badge bg-dark bg-opacity-10 text-dark">Follower</span>
-                                                <span className="badge bg-dark bg-opacity-10 text-dark">Like</span>
-                                                <span className="badge bg-dark bg-opacity-10 text-dark">View</span>
-                                            </div>
-                                            <div className="text-center">
-                                                <small className="text-success fw-bold">
-                                                    <i className="fas fa-check-circle me-1"></i>
-                                                    60+ Dịch vụ
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 animate-on-scroll">
-                                    <div className="card border-0 shadow-sm h-100 hover-lift position-relative overflow-hidden" style={{ borderRadius: '20px' }}>
-                                        <div className="position-absolute top-0 end-0 bg-info text-white px-2 py-1 rounded-bottom-start">
-                                            <small>Pro</small>
-                                        </div>
-                                        <div className="card-body text-center p-4">
-                                            <div className="mb-4">
-                                                <img src="/img/youtube.gif" alt="YouTube" className="floating rounded-circle d-inline-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', animationDelay: '1s' }} />
-                                            </div>
-                                            <h5 className="card-title fw-bold">YouTube</h5>
-                                            <p className="card-text text-muted mb-3">Subscribe, Like, View, Comment</p>
-                                            <div className="d-flex justify-content-center gap-1 mb-3">
-                                                <span className="badge bg-danger bg-opacity-10 text-danger">Subscribe</span>
-                                                <span className="badge bg-danger bg-opacity-10 text-danger">Like</span>
-                                                <span className="badge bg-danger bg-opacity-10 text-danger">View</span>
-                                            </div>
-                                            <div className="text-center">
-                                                <small className="text-success fw-bold">
-                                                    <i className="fas fa-check-circle me-1"></i>
-                                                    50+ Dịch vụ
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Stats Section */}
-                    <section className="stats-section py-5 position-relative overflow-hidden" style={{
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    }}>
-                        <div className="position-absolute top-0 start-0 w-100 h-100 opacity-10">
-                            <div className="position-absolute" style={{ top: '10%', left: '10%', width: '100px', height: '100px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', animation: 'float 4s ease-in-out infinite' }}></div>
-                            <div className="position-absolute" style={{ top: '60%', right: '15%', width: '150px', height: '150px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%', animation: 'float 6s ease-in-out infinite reverse' }}></div>
-                            <div className="position-absolute" style={{ bottom: '20%', left: '20%', width: '80px', height: '80px', background: 'rgba(255,255,255,0.08)', borderRadius: '50%', animation: 'float 5s ease-in-out infinite' }}></div>
-                        </div>
-                        <div className="container position-relative">
-                            <div className="row text-center text-white">
-                                <div className="col-lg-3 col-md-6 mb-4 animate-on-scroll">
-                                    <div className="stat-item glass-effect rounded-4 p-4 h-100">
-                                        <div className="mb-3">
-                                            <i className="fas fa-users fa-3x mb-3 opacity-75"></i>
-                                        </div>
-                                        <h2 className="display-4 fw-bold stats-counter mb-2 text-white">50K+</h2>
-                                        <p className="lead mb-0">Khách Hàng Hài Lòng</p>
-                                        <div className="progress mt-3" style={{ height: '3px' }}>
-                                            <div className="progress-bar bg-light" style={{ width: '88%' }}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 mb-4 animate-on-scroll">
-                                    <div className="stat-item glass-effect rounded-4 p-4 h-100">
-                                        <div className="mb-3">
-                                            <i className="fas fa-shopping-cart fa-3x mb-3 opacity-75"></i>
-                                        </div>
-                                        <h2 className="display-4 fw-bold stats-counter mb-2 text-white">1M+</h2>
-                                        <p className="lead mb-0">Đơn Hàng Hoàn Thành</p>
-                                        <div className="progress mt-3" style={{ height: '3px' }}>
-                                            <div className="progress-bar bg-light" style={{ width: '95%' }}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 mb-4 animate-on-scroll">
-                                    <div className="stat-item glass-effect rounded-4 p-4 h-100">
-                                        <div className="mb-3">
-                                            <i className="fas fa-cogs fa-3x mb-3 opacity-75"></i>
-                                        </div>
-                                        <h2 className="display-4 fw-bold stats-counter mb-2 text-white">100+</h2>
-                                        <p className="lead mb-0">Dịch Vụ Đa Dạng</p>
-                                        <div className="progress mt-3" style={{ height: '3px' }}>
-                                            <div className="progress-bar bg-light" style={{ width: '100%' }}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 mb-4 animate-on-scroll">
-                                    <div className="stat-item glass-effect rounded-4 p-4 h-100">
-                                        <div className="mb-3">
-                                            <i className="fas fa-clock fa-3x mb-3 opacity-75"></i>
-                                        </div>
-                                        <h2 className="display-4 fw-bold stats-counter mb-2 text-white">24/7</h2>
-                                        <p className="lead mb-0">Hỗ Trợ Khách Hàng</p>
-                                        <div className="d-flex justify-content-center mt-3">
-                                            <span className="badge bg-light text-dark">Online</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* How It Works Section */}
-                    <section className="how-it-works-section py-5 bg-light position-relative">
-                        <div className="container">
-                            <div className="row text-center mb-5 animate-on-scroll">
-                                <div className="col-12">
-                                    <div className="badge bg-gradient text-white px-3 py-2 rounded-pill mb-3 d-inline-block btn-gradient">
-                                        <i className="fas fa-lightbulb me-2"></i>
-                                        Quy Trình Đơn Giản
-                                    </div>
-                                    <h2 className="display-5 fw-bold mb-3">Cách Thức Hoạt Động</h2>
-                                    <p className="lead text-muted">Chỉ với 4 bước đơn giản, bạn có thể tăng tương tác cho tài khoản của mình</p>
-                                </div>
-                            </div>
-                            <div className="row g-4 position-relative">
-                                {/* Connection Lines */}
-                                {/* <div className="position-absolute top-50 start-0 w-100 d-none d-lg-block" style={{ height: '2px', background: 'linear-gradient(90deg, transparent 8%, #667eea 25%, #764ba2 75%, transparent 92%)', zIndex: 1 }}></div> */}
-
-                                <div className="col-lg-3 col-md-6 animate-on-scroll">
-                                    <div className="text-center position-relative" style={{ zIndex: 2 }}>
-                                        <div className="step-icon mb-4 position-relative">
-                                            <div className="rounded-circle text-white d-flex align-items-center justify-content-center mx-auto shadow-lg position-relative" style={{
-                                                width: '100px',
-                                                height: '100px',
-                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                border: '4px solid white'
-                                            }}>
-                                                <span className="h2 mb-0 fw-bold">1</span>
-                                                <div className="position-absolute top-0 start-0 w-100 h-100 rounded-circle animate-ping" style={{ background: 'rgba(102, 126, 234, 0.3)', animationDuration: '2s' }}></div>
-                                            </div>
-                                        </div>
-                                        <div className="bg-white p-4 rounded-4 shadow-sm hover-lift">
-                                            <i className="fas fa-user-plus text-primary fa-2x mb-3"></i>
-                                            <h5 className="fw-bold mb-3">Đăng Ký Tài Khoản</h5>
-                                            <p className="text-muted mb-0">Tạo tài khoản miễn phí chỉ trong vài giây với email của bạn</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 animate-on-scroll">
-                                    <div className="text-center position-relative" style={{ zIndex: 2 }}>
-                                        <div className="step-icon mb-4">
-                                            <div className="rounded-circle text-white d-flex align-items-center justify-content-center mx-auto shadow-lg" style={{
-                                                width: '100px',
-                                                height: '100px',
-                                                background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
-                                                border: '4px solid white'
-                                            }}>
-                                                <span className="h2 mb-0 fw-bold">2</span>
-                                            </div>
-                                        </div>
-                                        <div className="bg-white p-4 rounded-4 shadow-sm hover-lift">
-                                            <i className="fas fa-credit-card text-success fa-2x mb-3"></i>
-                                            <h5 className="fw-bold mb-3">Nạp Tiền</h5>
-                                            <p className="text-muted mb-0">Nạp tiền vào tài khoản qua nhiều phương thức thanh toán an toàn</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 animate-on-scroll">
-                                    <div className="text-center position-relative" style={{ zIndex: 2 }}>
-                                        <div className="step-icon mb-4">
-                                            <div className="rounded-circle text-white d-flex align-items-center justify-content-center mx-auto shadow-lg" style={{
-                                                width: '100px',
-                                                height: '100px',
-                                                background: 'linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%)',
-                                                border: '4px solid white'
-                                            }}>
-                                                <span className="h2 mb-0 fw-bold">3</span>
-                                            </div>
-                                        </div>
-                                        <div className="bg-white p-4 rounded-4 shadow-sm hover-lift">
-                                            <i className="fas fa-shopping-bag text-info fa-2x mb-3"></i>
-                                            <h5 className="fw-bold mb-3">Chọn Dịch Vụ</h5>
-                                            <p className="text-muted mb-0">Lựa chọn dịch vụ phù hợp với nhu cầu và ngân sách của bạn</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 animate-on-scroll">
-                                    <div className="text-center position-relative" style={{ zIndex: 2 }}>
-                                        <div className="step-icon mb-4">
-                                            <div className="rounded-circle text-white d-flex align-items-center justify-content-center mx-auto shadow-lg" style={{
-                                                width: '100px',
-                                                height: '100px',
-                                                background: 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)',
-                                                border: '4px solid white'
-                                            }}>
-                                                <span className="h2 mb-0 fw-bold">4</span>
-                                            </div>
-                                        </div>
-                                        <div className="bg-white p-4 rounded-4 shadow-sm hover-lift">
-                                            <i className="fas fa-chart-line text-warning fa-2x mb-3"></i>
-                                            <h5 className="fw-bold mb-3">Nhận Kết Quả</h5>
-                                            <p className="text-muted mb-0">Theo dõi đơn hàng và nhận kết quả chất lượng cao</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* CTA Section */}
-                    <section className="cta-section py-5 position-relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                        <div className="position-absolute top-0 start-0 w-100 h-100">
-                            <div className="position-absolute animate-ping" style={{ top: '20%', left: '10%', width: '20px', height: '20px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', animationDuration: '3s' }}></div>
-                            <div className="position-absolute animate-ping" style={{ top: '60%', right: '20%', width: '15px', height: '15px', background: 'rgba(255,255,255,0.08)', borderRadius: '50%', animationDuration: '4s' }}></div>
-                            <div className="position-absolute animate-ping" style={{ bottom: '30%', left: '30%', width: '25px', height: '25px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%', animationDuration: '5s' }}></div>
-                        </div>
-                        <div className="container position-relative">
-                            <div className="row text-center text-white animate-on-scroll">
-                                <div className="col-12">
-                                    <div className="mb-4">
-                                        <i className="fas fa-rocket fa-4x mb-4 floating opacity-75"></i>
-                                    </div>
-                                    <h2 className="display-5 fw-bold mb-4">Sẵn Sàng Tăng Tương Tác?</h2>
-                                    <p className="lead mb-5 opacity-90">
-                                        Hãy bắt đầu ngay hôm nay và trải nghiệm dịch vụ SMM Panel tốt nhất! <br />
-                                        Tham gia cùng hàng nghìn khách hàng đã tin tưởng chúng tôi.
-                                    </p>
-                                    <div className="d-flex gap-3 justify-content-center flex-wrap mb-4">
-                                        <button
-                                            onClick={() => navigate('/dang-ky')}
-                                            className="btn btn-light btn-lg px-5 py-3 rounded-pill shadow-lg hover-lift"
-                                        >
-                                            <i className="fas fa-user-plus me-2"></i>
-                                            Đăng Ký Miễn Phí
-                                        </button>
-                                        <button
-                                            onClick={() => navigate('/dang-nhap')}
-                                            className="btn btn-outline-light btn-lg px-5 py-3 rounded-pill glass-effect hover-lift"
-                                        >
-                                            <i className="fas fa-sign-in-alt me-2"></i>
-                                            Đăng Nhập
-                                        </button>
-                                    </div>
-                                    <div className="row mt-5">
-                                        <div className="col-md-4 mb-3">
-                                            <div className="glass-effect rounded-3 p-3">
-                                                <i className="fas fa-gift fa-2x mb-2"></i>
-                                                <h6 className="fw-bold">Bonus 10%</h6>
-                                                <small>Cho khách hàng mới</small>
-                                            </div>
-                                        </div>
-                                        <div className="col-md-4 mb-3">
-                                            <div className="glass-effect rounded-3 p-3">
-                                                <i className="fas fa-handshake fa-2x mb-2"></i>
-                                                <h6 className="fw-bold">Hỗ trợ tận tình</h6>
-                                                <small>Đội ngũ chuyên nghiệp</small>
-                                            </div>
-                                        </div>
-                                        <div className="col-md-4 mb-3">
-                                            <div className="glass-effect rounded-3 p-3">
-                                                <i className="fas fa-medal fa-2x mb-2"></i>
-                                                <h6 className="fw-bold">Chất lượng #1</h6>
-                                                <small>Dịch vụ tốt nhất VN</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div> {/* End Home Section */}
-
-                {/* API Documentation Section */}
-                <div className={`section-container ${activeSection === 'api' ? 'section-visible' : 'section-hidden'}`}>
-                    <section className="api-docs-section py-5" style={{
-                        minHeight: '100vh',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }}>
-                        {/* Animated Background Elements */}
-                        <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: `
-                                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.4) 0%, transparent 60%),
-                                radial-gradient(circle at 80% 20%, rgba(240, 147, 251, 0.3) 0%, transparent 60%),
-                                radial-gradient(circle at 40% 40%, rgba(118, 75, 162, 0.3) 0%, transparent 60%),
-                                radial-gradient(circle at 60% 60%, rgba(255, 255, 255, 0.1) 0%, transparent 50%)
-                            `,
-                            animation: 'floatAPI 8s ease-in-out infinite'
-                        }}></div>
-
-                        {/* Floating Particles */}
-                        {[...Array(6)].map((_, i) => (
-                            <div
-                                key={i}
-                                style={{
-                                    position: 'absolute',
-                                    width: '4px',
-                                    height: '4px',
-                                    background: 'rgba(255, 255, 255, 0.6)',
-                                    borderRadius: '50%',
-                                    left: `${20 + i * 15}%`,
-                                    top: `${30 + i * 10}%`,
-                                    animation: `floatAPI ${4 + i}s ease-in-out infinite`,
-                                    animationDelay: `${i * 0.5}s`
-                                }}
-                            />
-                        ))}
-
-                        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-                            <div className="row text-center mb-5 animate-on-scroll">
-                                <div className="col-12">
-                                    <div className="badge text-white px-4 py-3 rounded-pill mb-4 d-inline-block" style={{
-                                        background: 'rgba(255, 255, 255, 0.2)',
-                                        backdropFilter: 'blur(10px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        animation: 'pulse 2s ease-in-out infinite',
-                                        transition: 'all 0.3s ease',
-                                        cursor: 'pointer',
-                                        position: 'relative',
-                                        overflow: 'hidden'
-                                    }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'scale(1.1)';
-                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
-                                            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.5)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'scale(1)';
-                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                                            e.currentTarget.style.boxShadow = 'none';
-                                        }}>
-                                        <i className="fas fa-code me-2"></i>
-                                        API Documentation
-                                    </div>
-                                    <h2 className="display-4 fw-bold mb-3 text-white" style={{
-                                        // animation: 'slideInUp 1s ease-out',
-                                        // background: 'linear-gradient(45deg, #ffffff 0%, #f0f8ff 50%, #ffffff 100%)',
-                                        // backgroundSize: '200% 100%',
-                                        // WebkitBackgroundClip: 'text',
-                                        // WebkitTextFillColor: 'transparent',
-                                        // backgroundClip: 'text',
-                                        // animation: 'shimmer 3s ease-in-out infinite, slideInUp 1s ease-out'
-                                    }}>Tích Hợp API Dễ Dàng</h2>
-                                    <p className="lead text-white opacity-90">Sử dụng API để tự động hóa việc đặt hàng và quản lý dịch vụ SMM</p>
-                                </div>
-                            </div>
-
-                            <div className="row">
-                                <div className="col-12">
-                                    <div className="card border-0 shadow-lg rounded-4 overflow-hidden" style={{
-                                        background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%)',
-                                        backdropFilter: 'blur(20px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        animation: 'slideInUp 0.8s ease-out, glow 3s ease-in-out infinite',
-                                        transition: 'all 0.3s ease',
-                                        transform: 'translateZ(0)'
-                                    }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(-5px) scale(1.02)';
-                                            e.currentTarget.style.boxShadow = '0 20px 40px rgba(102, 126, 234, 0.2)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                                            e.currentTarget.style.boxShadow = '';
-                                        }}>
-                                        <div className="card-header bg-transparent border-0 py-4 px-4 px-md-5">
-                                            <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-                                                <div>
-                                                    <h5 className="fw-bold mb-1 text-primary">
-                                                        <i className="fas fa-server me-2"></i>
-                                                        SMM Panel API v2
-                                                    </h5>
-                                                    <p className="mb-0 text-muted">RESTful API cho tự động hóa dịch vụ SMM</p>
-                                                </div>
-                                                <span className="badge bg-primary bg-opacity-10 text-primary fw-semibold px-3 py-2 mt-3 mt-md-0">
-                                                    <i className="fas fa-shield-alt me-2"></i>
-                                                    Secure
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="card-body px-4 px-md-5 pb-5">
-                                            <div className="mb-5">
-                                                <h5 className="fw-bold mb-3">API Overview</h5>
-                                                <div className="table-responsive">
-                                                    <Table striped bordered className="align-middle mb-0" style={{
-                                                        background: 'linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%)'
-                                                    }}>
-                                                        <tbody style={{ '& tr': { transition: 'all 0.2s ease' } }}>
-                                                            <tr
-                                                                style={{ transition: 'all 0.2s ease' }}
-                                                                onMouseEnter={(e) => {
-                                                                    e.currentTarget.style.background = 'linear-gradient(45deg, #e3f2fd 0%, #bbdefb 100%)';
-                                                                    e.currentTarget.style.transform = 'scale(1.02)';
-                                                                }}
-                                                                onMouseLeave={(e) => {
-                                                                    e.currentTarget.style.background = '';
-                                                                    e.currentTarget.style.transform = 'scale(1)';
-                                                                }}
-                                                            >
-                                                                <td className="fw-semibold text-muted">API URL</td>
-                                                                <td className="fw-bold text-break">{process.env.REACT_APP_API_BASE ? `${process.env.REACT_APP_API_BASE}/api/v2` : `${API_DOMAIN}/api/v2`}</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td className="fw-semibold text-muted">API Key</td>
-                                                                <td className="fw-bold">
-                                                                    <button type="button" className="btn btn-primary btn-sm rounded-pill px-4" onClick={() => navigate('/dang-nhap')}>
-                                                                        <i className="fas fa-key me-2"></i>
-                                                                        Lấy tại đây
-                                                                    </button>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td className="fw-semibold text-muted">HTTP Method</td>
-                                                                <td className="fw-bold">POST</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td className="fw-semibold text-muted">Content-Type</td>
-                                                                <td className="fw-bold">application/json</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td className="fw-semibold text-muted">Response</td>
-                                                                <td className="fw-bold">JSON</td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </Table>
-                                                </div>
-                                            </div>
-
-                                            <div className="d-flex flex-column flex-md-row">
-                                                <ul className="nav nav-pills border-0 flex-row flex-md-column me-md-4 mb-3 mb-md-0 gap-2" role="tablist" style={{
-                                                    background: 'linear-gradient(145deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
-                                                    backdropFilter: 'blur(10px)',
-                                                    borderRadius: '12px',
-                                                    padding: '8px'
-                                                }}>
-                                                    {[
-                                                        { id: "services", label: "Services" },
-                                                        { id: "add", label: "Add order" },
-                                                        { id: "status", label: "Order status" },
-                                                        { id: "multistatus", label: "Multiple orders status" },
-                                                        { id: "cancel", label: "Create Cancel" },
-                                                        { id: "refill", label: "Create Refill" },
-                                                        { id: "balance", label: "Balance" },
-                                                    ].map((tab, index) => (
-                                                        <li className="nav-item" role="presentation" key={index}>
-                                                            <button
-                                                                type="button"
-                                                                className={`nav-link ${activeApiTab === tab.id ? 'active' : ''}`}
-                                                                onClick={() => setActiveApiTab(tab.id)}
-                                                                role="tab"
-                                                                style={{
-                                                                    background: activeApiTab === tab.id
-                                                                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                                                                        : 'rgba(255, 255, 255, 0.1)',
-                                                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                                    color: activeApiTab === tab.id ? 'white' : '#667eea',
-                                                                    fontWeight: '600',
-                                                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                                                    backdropFilter: 'blur(10px)',
-                                                                    transform: 'translateZ(0)',
-                                                                    position: 'relative',
-                                                                    overflow: 'hidden'
-                                                                }}
-                                                                onMouseEnter={(e) => {
-                                                                    if (activeApiTab !== tab.id) {
-                                                                        e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0.2, #764ba2 0.8)';
-                                                                        e.currentTarget.style.color = 'white';
-                                                                        e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
-                                                                        e.currentTarget.style.boxShadow = '0 5px 15px rgba(102, 126, 234, 0.4)';
-                                                                    }
-                                                                }}
-                                                                onMouseLeave={(e) => {
-                                                                    if (activeApiTab !== tab.id) {
-                                                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                                                                        e.currentTarget.style.color = '#667eea';
-                                                                        e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                                                                        e.currentTarget.style.boxShadow = 'none';
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {tab.label}
-                                                            </button>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-
-                                                <div className="tab-content w-100">
-                                                    {[
-                                                        {
-                                                            id: "services",
-                                                            content: (
-                                                                <>
-                                                                    <Table responsive striped bordered className="align-middle mb-3" style={{
-                                                                        background: 'linear-gradient(45deg, #f8f9fa 0%, #e3f2fd 100%)',
-                                                                        borderRadius: '8px',
-                                                                        overflow: 'hidden'
-                                                                    }}>
-                                                                        <thead style={{
-                                                                            background: 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)',
-                                                                            color: 'white',
-                                                                            position: 'relative',
-                                                                            overflow: 'hidden'
-                                                                        }}
-                                                                            onMouseEnter={(e) => {
-                                                                                e.currentTarget.style.background = 'linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%)';
-                                                                            }}
-                                                                            onMouseLeave={(e) => {
-                                                                                e.currentTarget.style.background = 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)';
-                                                                            }}>
-                                                                            <tr>
-                                                                                <th className="fw-semibold">Parameters</th>
-                                                                                <th className="fw-semibold">Description</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#2196f3' }}>key</td>
-                                                                                <td>API Key</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#2196f3' }}>action</td>
-                                                                                <td>"services"</td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </Table>
-                                                                    <h6 className="fw-bold" style={{ color: '#2196f3' }}>Example response</h6>
-                                                                    <div className="rounded-3 p-3" style={{
-                                                                        background: 'linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%)',
-                                                                        border: '1px solid #4caf50',
-                                                                        borderRadius: '12px'
-                                                                    }}>
-                                                                        <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>{`[
-    {
-        "service": 1,
-        "name": "Sv5 ( Sub Việt ) ( Tài nguyên clone + via )",
-        "type": "Default",
-        "platform": "Facebook",
-        "category": "Follow Facebook",
-        "rate": "0.90",
-        "min": "50",
-        "max": "10000",
-        "refill": true,
-        "cancel": true
-    },
-    {
-        "service": 2,
-        "name": "Sv2 ( CMT TIKTOK VN )",
-        "type": "Custom Comments",
-        "platform": "Tiktok",
-        "category": "Comments Tiktok",
-        "rate": "8",
-        "min": "10",
-        "max": "1500",
-        "refill": false,
-        "cancel": true
-    }
-]`}</pre>
-                                                                    </div>
-                                                                </>
-                                                            ),
-                                                        },
-                                                        {
-                                                            id: "add",
-                                                            content: (
-                                                                <>
-                                                                    <Table responsive striped bordered className="align-middle mb-3" style={{
-                                                                        background: 'linear-gradient(45deg, #f8f9fa 0%, #fff3e0 100%)',
-                                                                        borderRadius: '8px',
-                                                                        overflow: 'hidden'
-                                                                    }}>
-                                                                        <thead style={{
-                                                                            background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
-                                                                            color: 'white'
-                                                                        }}>
-                                                                            <tr>
-                                                                                <th className="fw-semibold">Parameters</th>
-                                                                                <th className="fw-semibold">Description</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>key</td>
-                                                                                <td>API Key</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>action</td>
-                                                                                <td>"add"</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>service</td>
-                                                                                <td>Service ID</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>link</td>
-                                                                                <td>Link</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>quantity</td>
-                                                                                <td>Needed quantity</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#ff9800' }}>comments</td>
-                                                                                <td className="text-break">Comments (Only for Custom Comments service)</td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </Table>
-                                                                    <h6 className="fw-bold" style={{ color: '#ff9800' }}>Example response</h6>
-                                                                    <div className="rounded-3 p-3" style={{
-                                                                        background: 'linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%)',
-                                                                        border: '1px solid #ff9800',
-                                                                        borderRadius: '12px'
-                                                                    }}>
-                                                                        <pre className="mb-0 small">{`{
-  "order": 99999
-}`}</pre>
-                                                                    </div>
-                                                                </>
-                                                            ),
-                                                        },
-                                                        {
-                                                            id: "status",
-                                                            content: (
-                                                                <>
-                                                                    <Table responsive striped bordered className="align-middle mb-3" style={{
-                                                                        background: 'linear-gradient(45deg, #f8f9fa 0%, #e8f5e8 100%)',
-                                                                        borderRadius: '8px',
-                                                                        overflow: 'hidden'
-                                                                    }}>
-                                                                        <thead style={{
-                                                                            background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
-                                                                            color: 'white'
-                                                                        }}>
-                                                                            <tr>
-                                                                                <th className="fw-semibold">Parameters</th>
-                                                                                <th className="fw-semibold">Description</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#4caf50' }}>key</td>
-                                                                                <td>API Key</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#4caf50' }}>action</td>
-                                                                                <td>"status"</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#4caf50' }}>order</td>
-                                                                                <td>Order ID</td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </Table>
-                                                                    <h6 className="fw-bold" style={{ color: '#4caf50' }}>Example response</h6>
-                                                                    <div className="rounded-3 p-3" style={{
-                                                                        background: 'linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%)',
-                                                                        border: '1px solid #4caf50',
-                                                                        borderRadius: '12px'
-                                                                    }}>
-                                                                        <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>{`{
-    "charge": "2.5",
-    "start_count": "168",
-    "status": "Completed",
-    "remains": "-2",
-    "currency": "USD"
-}`}</pre>
-                                                                    </div>
-                                                                    <small className="d-block mt-3 text-muted">Status: Pending, Processing, In progress, Completed, Partial, Canceled</small>
-                                                                </>
-                                                            ),
-                                                        },
-                                                        {
-                                                            id: "multistatus",
-                                                            content: (
-                                                                <>
-                                                                    <Table responsive striped bordered className="align-middle mb-3" style={{
-                                                                        background: 'linear-gradient(45deg, #f8f9fa 0%, #fce4ec 100%)',
-                                                                        borderRadius: '8px',
-                                                                        overflow: 'hidden'
-                                                                    }}>
-                                                                        <thead style={{
-                                                                            background: 'linear-gradient(135deg, #e91e63 0%, #c2185b 100%)',
-                                                                            color: 'white'
-                                                                        }}>
-                                                                            <tr>
-                                                                                <th className="fw-semibold">Parameters</th>
-                                                                                <th className="fw-semibold">Description</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#e91e63' }}>key</td>
-                                                                                <td>API Key</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#e91e63' }}>action</td>
-                                                                                <td>"status"</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#e91e63' }}>orders</td>
-                                                                                <td className="text-break">Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </Table>
-                                                                    <h6 className="fw-bold" style={{ color: '#e91e63' }}>Example response</h6>
-                                                                    <div className="rounded-3 p-3" style={{
-                                                                        background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%)',
-                                                                        border: '1px solid #e91e63',
-                                                                        borderRadius: '12px'
-                                                                    }}>
-                                                                        <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>{`{
-    "123": {
-        "charge": "0.27819",
-        "start_count": "3572",
-        "status": "Partial",
-        "remains": "157",
-        "currency": "USD"
-    },
-    "456": {
-        "error": "Incorrect order ID"
-    },
-    "789": {
-        "charge": "1.44219",
-        "start_count": "234",
-        "status": "In progress",
-        "remains": "10",
-        "currency": "USD"
-    }
-}`}</pre>
-                                                                    </div>
-                                                                </>
-                                                            ),
-                                                        },
-                                                        {
-                                                            id: "balance",
-                                                            content: (
-                                                                <>
-                                                                    <Table responsive striped bordered className="align-middle mb-3" style={{
-                                                                        background: 'linear-gradient(45deg, #f8f9fa 0%, #e1f5fe 100%)',
-                                                                        borderRadius: '8px',
-                                                                        overflow: 'hidden'
-                                                                    }}>
-                                                                        <thead style={{
-                                                                            background: 'linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)',
-                                                                            color: 'white'
-                                                                        }}>
-                                                                            <tr>
-                                                                                <th className="fw-semibold">Parameters</th>
-                                                                                <th className="fw-semibold">Description</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#00bcd4' }}>key</td>
-                                                                                <td>API Key</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#00bcd4' }}>action</td>
-                                                                                <td>"balance"</td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </Table>
-                                                                    <h6 className="fw-bold" style={{ color: '#00bcd4' }}>Example response</h6>
-                                                                    <div className="rounded-3 p-3" style={{
-                                                                        background: 'linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%)',
-                                                                        border: '1px solid #00bcd4',
-                                                                        borderRadius: '12px'
-                                                                    }}>
-                                                                        <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>{`{
-    "balance": "343423",
-    "currency": "USD"
-}`}</pre>
-                                                                    </div>
-                                                                </>
-                                                            ),
-                                                        },
-                                                        {
-                                                            id: "cancel",
-                                                            content: (
-                                                                <>
-                                                                    <Table responsive striped bordered className="align-middle mb-3" style={{
-                                                                        background: 'linear-gradient(45deg, #f8f9fa 0%, #ffebee 100%)',
-                                                                        borderRadius: '8px',
-                                                                        overflow: 'hidden'
-                                                                    }}>
-                                                                        <thead style={{
-                                                                            background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
-                                                                            color: 'white'
-                                                                        }}>
-                                                                            <tr>
-                                                                                <th className="fw-semibold">Parameters</th>
-                                                                                <th className="fw-semibold">Description</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#f44336' }}>key</td>
-                                                                                <td>API Key</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#f44336' }}>action</td>
-                                                                                <td>"cancel"</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" style={{ color: '#f44336' }}>orders or order</td>
-                                                                                <td className="text-break">Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </Table>
-                                                                    <h6 className="fw-bold" style={{ color: '#f44336' }}>Example response</h6>
-                                                                    <div className="rounded-3 p-3" style={{
-                                                                        background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
-                                                                        border: '1px solid #f44336',
-                                                                        borderRadius: '12px'
-                                                                    }}>
-                                                                        <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>{`[
-    {
-        "order": 9,
-        "cancel": {
-            "error": "Incorrect order ID"
-        }
-    },
-    {
-        "order": 2,
-        "cancel": 1
-    }
-]`}</pre>
-                                                                    </div>
-                                                                </>
-                                                            ),
-                                                        },
-                                                        {
-                                                            id: "refill",
-                                                            content: (
-                                                                <>
-                                                                    <Table responsive striped bordered className="align-middle mb-3" style={{
-                                                                        background: 'linear-gradient(45deg, #f8f9fa 0%, #ede7f6 100%)',
-                                                                        borderRadius: '8px',
-                                                                    }}>
-                                                                        <thead style={{
-                                                                            background: 'linear-gradient(135deg, #673ab7 0%, #512da8 100%)',
-                                                                            color: 'white'
-                                                                        }}>
-                                                                            <tr>
-                                                                                <td className="fw-semibold" data-lang="Parameters">
-                                                                                    Parameters
-                                                                                </td>
-                                                                                <td className="fw-semibold" data-lang="Description">
-                                                                                    Description
-                                                                                </td>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td style={{color: '#673ab7'}}>key</td>
-                                                                                <td>API Key</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td style={{color: '#673ab7'}}>action</td>
-                                                                                <td>"refill"</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td style={{color: '#673ab7'}}>order or orders</td>
-                                                                                <td>Order IDs separated by comma (E.g: 123,456,789) (Limit 100)</td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </Table>
-                                                                    <h6 className="fw-bold" style={{ color: '#673ab7' }}>Example response</h6>
-                                                                    <div className="rounded-3 p-3" style={{
-                                                                        background: 'linear-gradient(135deg, #e1bee7 0%, #ce93d8 100%)',
-                                                                        border: '1px solid #673ab7',
-                                                                        borderRadius: '12px'
-                                                                    }}>
-                                                                        <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>{`{
-    "refill": "1"
-}`}</pre>
-                                                                    </div>
-                                                                </>
-                                                            ),
-                                                        }
-                                                    ].map((tab, index) => (
-                                                        <div
-                                                            key={tab.id}
-                                                            className={`tab-pane fade ${activeApiTab === tab.id ? 'show active' : ''}`}
-                                                            role="tabpanel"
-                                                            style={{
-                                                                animation: activeApiTab === tab.id ? 'slideInUp 0.5s ease-out' : 'none',
-                                                                transform: activeApiTab === tab.id ? 'translateY(0)' : 'translateY(20px)',
-                                                                opacity: activeApiTab === tab.id ? 1 : 0,
-                                                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                                                            }}
-                                                        >
-                                                            {tab.content}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-5 pt-4 border-top">
-                                                <div className="d-flex gap-3 flex-wrap justify-content-center">
-                                                    <Link
-                                                        to="/tai-lieu-api"
-                                                        className="btn btn-primary btn-lg rounded-pill px-4"
-                                                        style={{
-                                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                                            position: 'relative',
-                                                            overflow: 'hidden'
-                                                        }}
-                                                        onMouseEnter={(e) => {
-                                                            e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
-                                                            e.currentTarget.style.boxShadow = '0 10px 30px rgba(13, 110, 253, 0.4)';
-                                                            e.currentTarget.style.background = 'linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)';
-                                                        }}
-                                                        onMouseLeave={(e) => {
-                                                            e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                                                            e.currentTarget.style.boxShadow = 'none';
-                                                            e.currentTarget.style.background = '';
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-book me-2"></i>
-                                                        Xem tài liệu đầy đủ
-                                                    </Link>
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-outline-primary btn-lg rounded-pill px-4"
-                                                        onClick={() => navigate('/dang-ky')}
-                                                        style={{
-                                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                                            position: 'relative',
-                                                            overflow: 'hidden'
-                                                        }}
-                                                        onMouseEnter={(e) => {
-                                                            e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
-                                                            e.currentTarget.style.boxShadow = '0 10px 30px rgba(13, 110, 253, 0.3)';
-                                                            e.currentTarget.style.background = 'linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)';
-                                                            e.currentTarget.style.color = 'white';
-                                                            e.currentTarget.style.borderColor = 'transparent';
-                                                        }}
-                                                        onMouseLeave={(e) => {
-                                                            e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                                                            e.currentTarget.style.boxShadow = 'none';
-                                                            e.currentTarget.style.background = '';
-                                                            e.currentTarget.style.color = '';
-                                                            e.currentTarget.style.borderColor = '';
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-user-plus me-2"></i>
-                                                        Tạo tài khoản để sử dụng API
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            {/* API Features */}
-                            <div className="row mt-5">
-                                <div className="col-lg-3 col-md-6 mb-4 animate-on-scroll">
-                                    <div className="text-center p-4 rounded-4" style={{
-                                        background: 'rgba(255, 255, 255, 0.1)',
-                                        backdropFilter: 'blur(10px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        cursor: 'pointer'
-                                    }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(-10px) scale(1.05)';
-                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                                            e.currentTarget.style.boxShadow = '0 20px 40px rgba(102, 126, 234, 0.3)';
-                                            e.currentTarget.style.animation = 'pulse 1.5s ease-in-out infinite';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                                            e.currentTarget.style.boxShadow = 'none';
-                                            e.currentTarget.style.animation = 'none';
-                                        }}>
-                                        <div className="rounded-circle p-4 d-inline-flex mb-3" style={{
-                                            width: '80px',
-                                            height: '80px',
-                                            background: 'rgba(255, 255, 255, 0.2)',
-                                            backdropFilter: 'blur(10px)'
-                                        }}>
-                                            <i className="fas fa-bolt text-white fa-2x"></i>
-                                        </div>
-                                        <h6 className="fw-bold text-white mb-2">Tốc Độ Cao</h6>
-                                        <small className="text-white opacity-90">Response time &lt; 100ms</small>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 mb-4 animate-on-scroll">
-                                    <div className="text-center p-4 rounded-4" style={{
-                                        background: 'rgba(255, 255, 255, 0.1)',
-                                        backdropFilter: 'blur(10px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        transition: 'all 0.3s ease'
-                                    }}>
-                                        <div className="rounded-circle p-4 d-inline-flex mb-3" style={{
-                                            width: '80px',
-                                            height: '80px',
-                                            background: 'rgba(255, 255, 255, 0.2)',
-                                            backdropFilter: 'blur(10px)'
-                                        }}>
-                                            <i className="fas fa-shield-alt text-white fa-2x"></i>
-                                        </div>
-                                        <h6 className="fw-bold text-white mb-2">Bảo Mật</h6>
-                                        <small className="text-white opacity-90">SSL encryption & API key</small>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 mb-4 animate-on-scroll">
-                                    <div className="text-center p-4 rounded-4" style={{
-                                        background: 'rgba(255, 255, 255, 0.1)',
-                                        backdropFilter: 'blur(10px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        transition: 'all 0.3s ease'
-                                    }}>
-                                        <div className="rounded-circle p-4 d-inline-flex mb-3" style={{
-                                            width: '80px',
-                                            height: '80px',
-                                            background: 'rgba(255, 255, 255, 0.2)',
-                                            backdropFilter: 'blur(10px)'
-                                        }}>
-                                            <i className="fas fa-sync text-white fa-2x"></i>
-                                        </div>
-                                        <h6 className="fw-bold text-white mb-2">Real-time</h6>
-                                        <small className="text-white opacity-90">Cập nhật trạng thái tức thì</small>
-                                    </div>
-                                </div>
-                                <div className="col-lg-3 col-md-6 mb-4 animate-on-scroll">
-                                    <div className="text-center p-4 rounded-4" style={{
-                                        background: 'rgba(255, 255, 255, 0.1)',
-                                        backdropFilter: 'blur(10px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        transition: 'all 0.3s ease'
-                                    }}>
-                                        <div className="rounded-circle p-4 d-inline-flex mb-3" style={{
-                                            width: '80px',
-                                            height: '80px',
-                                            background: 'rgba(255, 255, 255, 0.2)',
-                                            backdropFilter: 'blur(10px)'
-                                        }}>
-                                            <i className="fas fa-code text-white fa-2x"></i>
-                                        </div>
-                                        <h6 className="fw-bold text-white mb-2">RESTful</h6>
-                                        <small className="text-white opacity-90">Dễ tích hợp với mọi ngôn ngữ</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+            {/* Footer */}
+            <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '50px 24px', marginTop: '60px', position: 'relative', zIndex: 10 }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+                    <p style={{ color: '#606060', fontSize: '14px' }}>© 2025 {Domain || 'SMMPANEL'}. All rights reserved.</p>
+                    <div style={{ display: 'flex', gap: '32px' }}>
+                        <a href="#" style={{ color: '#808080', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}>Điều Khoản</a>
+                        <a href="#" style={{ color: '#808080', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}>Chính Sách</a>
+                        <a href="#" style={{ color: '#808080', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}>Liên Hệ</a>
+                    </div>
                 </div>
-            </div> {/* End Main Content */}
-
-            {/* Auth Modal */}
-           
-        </>
+            </footer>
+        </div>
     );
 }

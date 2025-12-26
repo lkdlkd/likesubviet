@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useOutletContext } from "react-router-dom";
 
 const Webrieng = () => {
-    const {configWeb} = useOutletContext();
+    const { configWeb } = useOutletContext();
     const lienhe = configWeb?.lienhe;
 
     const steps = [
@@ -67,11 +67,11 @@ const Webrieng = () => {
 
     const handleContactAdmin = () => {
         // Tìm liên hệ admin từ configWeb
-        const adminContact = lienhe?.find(contact => 
-            contact.type?.toLowerCase().includes('zalo') || 
+        const adminContact = lienhe?.find(contact =>
+            contact.type?.toLowerCase().includes('zalo') ||
             contact.type?.toLowerCase().includes('admin')
         );
-        
+
         if (adminContact?.value) {
             window.open(adminContact.value, '_blank');
             toast.info("Đang mở link liên hệ admin...");
@@ -124,7 +124,7 @@ const Webrieng = () => {
                                     }}
                                 >
                                     <div className="card-body p-3 p-md-4">
-                                        <div 
+                                        <div
                                             className="rounded-circle d-inline-flex align-items-center justify-content-center mb-2 mb-md-3"
                                             style={{
                                                 width: "50px",
@@ -356,8 +356,8 @@ const Webrieng = () => {
                                                             }}
                                                         >
                                                             {contact.logolienhe && (
-                                                                <img 
-                                                                    src={contact.logolienhe} 
+                                                                <img
+                                                                    src={contact.logolienhe}
                                                                     alt={contact.type}
                                                                     style={{ width: "20px", height: "20px", marginRight: "8px" }}
                                                                 />
