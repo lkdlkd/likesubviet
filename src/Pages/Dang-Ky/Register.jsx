@@ -9,6 +9,7 @@ export default function Register() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const [recaptchaToken, setRecaptchaToken] = useState("");
     const [siteKey, setSiteKey] = useState("");
     const [siteKeyLoading, setSiteKeyLoading] = useState(true);
@@ -69,7 +70,7 @@ export default function Register() {
 
         try {
             const data = await register({ username, password, recaptchaToken });
-            setError("", data.message || "Đăng ký thành công!"); // Hiển thị thông báo đăng ký thành công
+            setSuccess(data.message || "Đăng ký thành công!"); // Hiển thị thông báo đăng ký thành công
             setTimeout(() => {
                 navigate("/dang-nhap"); // Chuyển hướng về trang đăng nhập sau khi đăng ký thành công
             }, 2000); // Thời gian chờ 2 giây để hiển thị thông báo
@@ -114,6 +115,20 @@ export default function Register() {
                                         <div className="mb-5">
                                             <h2 className="text-center text-primary">Đăng ký</h2>
                                         </div>
+                                        {success && (
+                                            <div
+                                                className="alert alert-success alert-dismissible fade show"
+                                                role="alert"
+                                            >
+                                                {success}
+                                                <button
+                                                    type="button"
+                                                    className="btn-close"
+                                                    aria-label="Close"
+                                                    onClick={() => setSuccess("")}
+                                                ></button>
+                                            </div>
+                                        )}
                                         {error && (
                                             <div
                                                 className="alert alert-danger alert-dismissible fade show"
@@ -173,8 +188,8 @@ export default function Register() {
                                             ) : siteKey ? (
                                                 <div className="d-flex justify-content-center position-relative" style={{ minHeight: '78px' }}>
                                                     {!recaptchaReady && (
-                                                        <div 
-                                                            className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+                                                        <div
+                                                            className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
                                                             style={{ zIndex: 10, backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
                                                         >
                                                             <div className="d-flex flex-column align-items-center">
@@ -185,7 +200,7 @@ export default function Register() {
                                                             </div>
                                                         </div>
                                                     )}
-                                                    <div style={{ 
+                                                    <div style={{
                                                         // opacity: recaptchaReady ? 1 : 0, 
                                                         // transition: 'opacity 0.4s ease-in-out',
                                                         // visibility: recaptchaReady ? 'visible' : 'hidden'
@@ -196,7 +211,7 @@ export default function Register() {
                                                             onChange={handleRecaptchaChange}
                                                             onExpired={() => setRecaptchaToken("")}
                                                             asyncScriptOnLoad={() => {
-                                                                 setRecaptchaReady(true);
+                                                                setRecaptchaReady(true);
                                                             }}
                                                             hl="vi"
                                                         />

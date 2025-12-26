@@ -204,7 +204,7 @@ export default function Landing() {
         e.preventDefault(); setLoading(true); setError(''); setSuccess('');
         if (formData.username.length > 100) { setError('Tên tài khoản không được dài hơn 100 ký tự.'); setLoading(false); return; }
         if (!recaptchaToken) { setError('Vui lòng xác nhận bạn không phải là người máy.'); setLoading(false); return; }
-        try { const data = await register({ username: formData.username, password: formData.password, recaptchaToken }); setSuccess(data.message || 'Đăng ký thành công!'); setTimeout(() => { setAuthMode('login'); resetForm(); }, 1500); }
+        try { const data = await register({ username: formData.username, password: formData.password, recaptchaToken }); setSuccess(data.message || 'Đăng ký thành công!'); setTimeout(() => { setAuthMode('login'); resetForm(); }, 2000); }
         catch (err) { setError(err.message || 'Có lỗi xảy ra.'); setRecaptchaToken(''); if (recaptchaRef.current) recaptchaRef.current.reset(); } finally { setLoading(false); }
     };
 
