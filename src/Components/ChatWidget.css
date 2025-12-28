@@ -49,36 +49,8 @@
     }
 }
 
-/* Custom Scrollbar for Modal Body */
-.modal-body::-webkit-scrollbar {
-    width: 8px;
-}
 
-.modal-body::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
 
-.modal-body::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 10px;
-}
-
-.modal-body::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .modal-dialog {
-        max-width: 95% !important;
-        margin: 1rem;
-    }
-    
-    .modal-content {
-        height: 90vh !important;
-    }
-}
 
 @media (max-width: 576px) {
     .chat-widget {
@@ -91,14 +63,4 @@
         height: 50px;
     }
     
-    .modal-dialog {
-        max-width: 100% !important;
-        margin: 0;
-        height: 100vh;
-    }
-    
-    .modal-content {
-        height: 100vh !important;
-        border-radius: 0 !important;
-    }
 }
