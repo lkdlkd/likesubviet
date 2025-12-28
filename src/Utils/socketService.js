@@ -5,7 +5,7 @@ let socket = null;
 // Khởi tạo kết nối Socket.IO
 export const initSocketConnection = (username) => {
   // Lấy URL backend từ env hoặc config
-  const SOCKET_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const SOCKET_URL = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
   
   if (!socket) {
     socket = io(SOCKET_URL, {
