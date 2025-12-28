@@ -33,6 +33,7 @@ import Refund from "./Pages/Admin/Hoantien/Refund";
 import OrderAdmin from "./Pages/Admin/Donhang/OrderAdmin";
 import Webrieng from "./Pages/Webrieng/Webrieng";
 import ScheduledOrders from "./Pages/Muadon/ScheduledOrders";
+import AdminChat from "./Pages/Admin/Chat/AdminChat";
 function App() {
   const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
@@ -128,6 +129,7 @@ function App() {
             <Route path="/admin/config-tele" element={<ConfigTelePage />} />
             <Route path="/admin/refund" element={<Refund />} />
             <Route path="/admin/orders" element={<OrderAdmin />} />
+            <Route path="/admin/chat" element={<AdminChat />} />
           </Route>
 
           {/* 404 Not Found */}

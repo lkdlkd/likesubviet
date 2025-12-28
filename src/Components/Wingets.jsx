@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
+import ChatWidget from "./ChatWidget";
 
 // Floating contacts widget: renders a Bitrix-style button with expandable social links
 // Props: { configWeb?: { lienhe?: Array<{ type?: string; value: string; label?: string; logolienhe?: string }> } }
-const Wingets = ({ configWeb }) => {
+const Wingets = ({ configWeb, username }) => {
     const lienhe = Array.isArray(configWeb?.lienhe) ? configWeb.lienhe : [];
     const [open, setOpen] = useState(false);
+    const [chatOpen, setChatOpen] = useState(false);
     const items = useMemo(() => lienhe, [lienhe]);
 
     // Contacts that have a logo available
@@ -30,6 +32,10 @@ const Wingets = ({ configWeb }) => {
     const close = (e) => {
         e?.stopPropagation?.();
         setOpen(false);
+    };
+
+    const handleSupportClick = () => {
+        setChatOpen(true);
     };
 
     if (!logoContacts || logoContacts.length === 0) return null;
@@ -112,20 +118,16 @@ const Wingets = ({ configWeb }) => {
                 {/* Support label under the main button */}
 
             </div>
-            {/* <div
-                className="b24-widget-support-label"
-                style={{
-                    // marginTop: 10,
-                    marginBottom: 30,
-                    marginRight: 20,
-                    fontSize: 15,
-                    color: "#008eecff",
-                    lineHeight: 1.2,
-                    userSelect: "none",
-                }}
-            >
-                Hỗ trợ
-            </div> */}
+            {/* Chat Widget - Render outside the b24 wrapper */}
+            <div>
+                {username && (
+                    <ChatWidget
+                        username={username}
+                        externalOpen={chatOpen}
+                        onExternalToggle={setChatOpen}
+                    />
+                )}
+            </div>
         </div >
     );
 };

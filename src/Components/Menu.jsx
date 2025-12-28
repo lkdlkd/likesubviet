@@ -353,6 +353,11 @@ function MenuUser({ user, categories, configWeb }) {
                                                     </Link>
                                                 </li>
                                                 <li className="pc-item">
+                                                    <Link to="/admin/chat" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Chat hỗ trợ</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
                                                     <Link to="/admin/khuyen-mai" onClick={() => handleNavigation()} className="pc-link">
                                                         <span className="pc-mtext">Cài đặt khuyễn mãi</span>
                                                     </Link>

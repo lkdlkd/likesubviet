@@ -1,10 +1,12 @@
 import Header from "@/Components/Header";
 import Menu from "@/Components/Menu";
 import { getCategories, getConfigWeb, getMe, getNotifications } from "@/Utils/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Helmet } from 'react-helmet-async';
 import { Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import useSocketNotification from '../hooks/useSocketNotification';
+import Swal from "sweetalert2";
 // import Widget from "./Widget";
 import Widget from "./Wingets";
 import HeaderJs from "@/JS/HeaderJs";
@@ -20,6 +22,35 @@ const Layout = () => {
     const [footerJs, setFooterJs] = useState("");
     const token = localStorage.getItem("token") || null;
 
+    // Xử lý nạp tiền: hiển thị thông báo + cập nhật số dư
+    const handleDepositSuccess = useCallback((data) => {
+        Swal.fire({
+            title: data.message,
+            icon: "success",
+            confirmButtonText: "Xác nhận",
+        });
+        // Cập nhật balance trong state user
+        setUser((prevUser) => ({
+            ...prevUser,
+            balance: data.newBalance,
+        }));
+    }, []);
+
+    // Xử lý mua đơn: chỉ cập nhật số dư, không hiển thị thông báo
+    const handleOrderSuccess = useCallback((data) => {
+        // Chỉ cập nhật balance trong state user
+        setUser((prevUser) => ({
+            ...prevUser,
+            balance: data.newBalance,
+        }));
+    }, []);
+
+    // Kích hoạt realtime notifications (hook đã gộp chung)
+    useSocketNotification({
+        username: user?.username,
+        onDeposit: handleDepositSuccess,
+        onOrder: handleOrderSuccess,
+    });
     useEffect(() => {
         const fetchData = async () => {
             loadingg("Vui lòng chờ...", true, 9999999); // Hiển thị loading khi bắt đầu fetch
@@ -133,7 +164,7 @@ const Layout = () => {
                 </div>
             </footer>
 
-            <Widget configWeb={configWeb} />
+            <Widget configWeb={configWeb} username={user?.username} />
             <ToastContainer style={{ maxWidth: '70%', marginLeft: 'auto', marginRight: '0px' }} />
             {/* Footer JS - inject trước </body> */}
             <FooterJs htmlString={footerJs} />
