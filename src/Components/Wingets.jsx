@@ -43,7 +43,10 @@ const Wingets = ({ configWeb, username }) => {
     return (
         <div >
             <div className={`b24-widget-button-shadow ${open ? "b24-widget-button-show" : ""}`} onClick={close} />
-            <div className={`b24-widget-button-wrapper b24-widget-button-position-bottom-right b24-widget-button-visible ${open ? "b24-widget-button-bottom" : ""}`}>
+            <div 
+                className={`b24-widget-button-wrapper b24-widget-button-position-bottom-right b24-widget-button-visible ${open ? "b24-widget-button-bottom" : ""}`}
+                style={{ display: chatOpen ? 'none' : 'block' }}
+            >
                 <div className={`b24-widget-button-social ${open ? "b24-widget-button-show" : "b24-widget-button-hide"}`}>
                     {logoContacts.map((contact, index) => (
                         <a

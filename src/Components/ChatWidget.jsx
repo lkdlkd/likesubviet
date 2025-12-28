@@ -164,7 +164,7 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
     return (
         <>
             {/* Chat Button */}
-            <div className="chat-widget">
+            <div className="chat-widget" style={{ display: isOpen ? 'none' : 'block' }}>
                 <button style={{
                     marginRight: "20px",
                     marginBottom: "50px"
