@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, register, getRecaptchaSiteKey } from '@/Utils/api';
+import { login, register, getRecaptchaSiteKey, setStoredToken } from '@/Utils/api';
 import { AuthContext } from '@/Context/AuthContext';
 import ReCAPTCHA from "react-google-recaptcha";
 import { getConfigWebLogo } from '@/Utils/api';
@@ -159,16 +159,25 @@ export default function Landing() {
     // Fetch config and recaptcha site key only once
     useEffect(() => {
         const fetchInitialData = async () => {
+            setSiteKeyLoading(true);
+
+            // Fetch config logo (không quan trọng, lỗi không ảnh hưởng)
+            getConfigWebLogo()
+                .then(configData => {
+                    if (configData?.data) {
+                        setConfig(configData.data);
+                    }
+                })
+                .catch(err => {
+                    // console.warn('Logo load failed (non-critical):', err.message);
+                });
+
+            // Fetch recaptcha site key (quan trọng)
             try {
-                setSiteKeyLoading(true);
-                const [configData, recaptchaData] = await Promise.all([
-                    getConfigWebLogo(),
-                    getRecaptchaSiteKey()
-                ]);
-                setConfig(configData.data);
+                const recaptchaData = await getRecaptchaSiteKey();
                 setSiteKey(recaptchaData.siteKey);
             } catch (err) {
-                // console.error('Error fetching initial data:', err);
+                // console.error('Error fetching recaptcha site key:', err);
             } finally {
                 setSiteKeyLoading(false);
             }
@@ -196,7 +205,10 @@ export default function Landing() {
             if (otpStep) payload.token = otp;
             const data = await login(payload);
             if (data.twoFactorRequired && !otpStep) { setOtpStep(true); setSuccess('Nhập mã 2FA để tiếp tục.'); return; }
-            if (data.token) { localStorage.setItem('token', data.token); updateAuth({ token: data.token, role: data.role }); setSuccess('Đăng nhập thành công!'); setTimeout(() => navigate('/home'), 1000); }
+            if (data.token) {
+                setStoredToken(data.token); // Lưu access token
+                updateAuth({ token: data.token, role: data.role }); setSuccess('Đăng nhập thành công!'); setTimeout(() => navigate('/home'), 1000);
+            }
         } catch (err) { setError(err.message || 'Có lỗi xảy ra.'); } finally { setLoading(false); }
     };
 

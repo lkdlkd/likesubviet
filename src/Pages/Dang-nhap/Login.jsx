@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "@/Utils/api"; // API login gộp luôn 2FA (gửi thêm field token nếu là bước OTP)
+import { login, setStoredToken } from "@/Utils/api"; // API login gộp luôn 2FA (gửi thêm field token nếu là bước OTP)
 import { AuthContext } from "@/Context/AuthContext";
 import { loadingg } from "@/JS/Loading";
 export default function Login() {
@@ -18,11 +18,12 @@ export default function Login() {
     Quy trình backend (đã cung cấp):
     - POST /login với { username, password }
         + Nếu user có twoFactorEnabled: trả về 200 { twoFactorRequired: true, message: 'Yêu cầu mã 2FA' }
-        + Nếu user không bật 2FA: trả về { token, role, username, twoFactorEnabled }
+        + Nếu user không bật 2FA: trả về { token, role, username, twoFactorEnabled, expiresIn }
     - Gửi lại POST /login lần 2 thêm field token (mã OTP 6 số) cùng username & password
-        + Nếu OTP đúng: trả về { token, role, username, twoFactorEnabled }
+        + Nếu OTP đúng: trả về { token, role, username, twoFactorEnabled, expiresIn }
         + Nếu sai: 401 { error: 'Mã 2FA không chính xác' }
     Frontend: Giữ username/password, chỉ thêm otp vào field token ở lần gọi thứ 2.
+    Refresh token được lưu trong httpOnly cookie bởi server.
   */
 
   const performLogin = async ({ includeOtp = false } = {}) => {
@@ -41,11 +42,10 @@ export default function Login() {
       }
 
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        setStoredToken(data.token); // Lưu access token
         updateAuth({ token: data.token, role: data.role });
         setInfo("Đăng nhập thành công!");
         navigate("/home");
-        // setTimeout(() => navigate("/home"), 800);
       } else {
         setError("Đăng nhập thất bại");
       }

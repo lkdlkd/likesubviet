@@ -1,9 +1,10 @@
 import React, { createContext, useState } from 'react';
+import { getStoredToken } from '@/Utils/api';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const token = localStorage.getItem("token");
+  const token = getStoredToken();
 
   let decoded = {};
   if (token) {

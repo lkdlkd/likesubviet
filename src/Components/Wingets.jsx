@@ -94,9 +94,9 @@ const Wingets = ({ configWeb, username }) => {
                         }}
                         style={{ cursor: "pointer" }} >
 
-                        <div class="b24-widget-button-pulse b24-widget-button-pulse-animate"></div>
-                        <div class="b24-widget-button-inner-block">
-                            <div class="b24-widget-button-icon-container">
+                        <div className="b24-widget-button-pulse b24-widget-button-pulse-animate"></div>
+                        <div className="b24-widget-button-inner-block">
+                            <div className="b24-widget-button-icon-container">
                                 <div className="b24-widget-button-inner-item b24-widget-button-icon-animation" style={{ position: "relative" }}>
                                     <span className="b24-pulse-from-img" />
                                     <img
