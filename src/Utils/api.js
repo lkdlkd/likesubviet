@@ -234,16 +234,20 @@ const fetchWithAuth = async (url, options = {}) => {
     },
   });
 
-  // Nếu nhận 401, backend sẽ tự động refresh token qua cookie
-  // Nếu refresh thất bại, redirect to login
-  if (response.status === 401) {
-    const data = await response.json().catch(() => ({}));
-    if (data.error === "Token không hợp lệ hoặc đã hết hạn") {
-      // Session thực sự hết hạn, redirect
+  // Nếu nhận 401/404, kiểm tra các lỗi cần logout
+  if (response.status === 401 || response.status === 404) {
+    const data = await response.clone().json().catch(() => ({}));
+    const logoutErrors = [
+      "Token không hợp lệ hoặc đã hết hạn",
+      "Không có token, truy cập bị từ chối",
+      "Người dùng không tồn tại",
+      "Tài khoản của bạn đã bị khóa"
+    ];
+    if (logoutErrors.includes(data.error)) {
       localStorage.clear();
       sessionStorage.clear();
       window.location.href = "/dang-nhap";
-      throw new Error("Session expired");
+      throw new Error(data.error);
     }
   }
 

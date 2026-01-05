@@ -75,16 +75,16 @@ const Layout = () => {
                 setHeaderJs(configwebdata.data.headerJs || "");
                 setFooterJs(configwebdata.data.footerJs || "");
             } catch (error) {
-                if (
-                    error.message === "Người dùng không tồn tại" ||
-                    error.message === "401" ||
-                    error.status === 401 ||
-                    error.message === "Token không hợp lệ hoặc đã hết hạn"
-                ) {
+                // Các lỗi cần logout (đồng bộ với backend authenticate.js)
+                const logoutErrors = [
+                    "Token không hợp lệ hoặc đã hết hạn",
+                    "Không có token, truy cập bị từ chối",
+                    "Người dùng không tồn tại",
+                    "Tài khoản của bạn đã bị khóa"
+                ];
+                if (logoutErrors.includes(error.message)) {
                     localStorage.clear();
                     sessionStorage.clear();
-                    // Nếu người dùng không tồn tại, trả về 401, hoặc token không hợp lệ/hết hạn thì đăng xuất
-                    localStorage.removeItem("token");
                     window.location.href = "/dang-nhap";
                 }
             }
