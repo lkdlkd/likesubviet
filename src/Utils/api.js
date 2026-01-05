@@ -65,14 +65,70 @@ export const refreshAccessToken = async () => {
   }
 };
 
-// Wrapper cho fetch với cookie authentication
+// ==================== SIGNATURE GENERATION ====================
+// Đọc cookie theo tên
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
+// Tạo random nonce để chống replay attack
+function generateNonce() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+// Tạo HMAC signature sử dụng Web Crypto API
+async function createSignature(payload, sessionKey) {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(sessionKey);
+  const messageData = encoder.encode(payload);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+
+  const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+  return Array.from(new Uint8Array(signatureBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+// Wrapper cho fetch với cookie authentication và signature
 const fetchWithAuth = async (url, options = {}) => {
+  // Tạo signature headers nếu có sessionKey
+  const sessionKey = getCookie('sessionKey');
+  let signatureHeaders = {};
+
+  if (sessionKey) {
+    const timestamp = Date.now().toString();
+    const nonce = generateNonce();
+
+    // Lấy path từ URL (bỏ phần domain và /api prefix)
+    const urlPath = new URL(url).pathname.replace('/api', '');
+    const method = options.method || 'GET';
+
+    // Payload: timestamp:method:path:nonce
+    const payload = `${timestamp}:${method}:${urlPath}:${nonce}`;
+    const signature = await createSignature(payload, sessionKey);
+
+    signatureHeaders = {
+      'X-Timestamp': timestamp,
+      'X-Signature': signature,
+      'X-Nonce': nonce,
+    };
+  }
+
   // Token tự động gửi qua httpOnly cookie, không cần logic phức tạp
   const response = await fetch(url, {
     ...options,
     credentials: "include", // Gửi cookies tự động (accessToken + refreshToken)
     headers: {
       ...options.headers,
+      ...signatureHeaders,
     },
   });
 
@@ -226,12 +282,13 @@ export const cancelScheduledOrder = async (id, token) => {
   return handleResponse(response);
 };
 
+// ==================== END SIGNATURE GENERATION ====================
+
 // Helper để thêm header Cache-Control
 const withNoStore = (headers = {}) => ({
   ...headers,
   "Cache-Control": "no-store",
-  'X-Client-Domain': window.location.host, // Gửi domain của frontend
-
+  'X-Client-Domain': window.location.host,
 });
 // Helper để xử lý response
 const handleResponse = async (response) => {

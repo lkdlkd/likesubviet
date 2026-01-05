@@ -3,17 +3,50 @@ import { getStoredToken, isTokenExpired, refreshAccessToken } from './api';
 
 const API_URL = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
 
+// ==================== SIGNATURE GENERATION ====================
+// Đọc cookie theo tên
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+// Tạo random nonce để chống replay attack
+function generateNonce() {
+    return Array.from(crypto.getRandomValues(new Uint8Array(16)))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+}
+
+// Tạo HMAC signature sử dụng Web Crypto API
+async function createSignature(payload, sessionKey) {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(sessionKey);
+    const messageData = encoder.encode(payload);
+
+    const cryptoKey = await crypto.subtle.importKey(
+        'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    );
+
+    const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+    return Array.from(new Uint8Array(signatureBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+}
+// ==================== END SIGNATURE GENERATION ====================
+
 // Tạo axios instance với interceptor cho auto refresh token
 const axiosInstance = axios.create({
     baseURL: API_URL,
     withCredentials: true, // Gửi cookie
 });
 
-// Request interceptor - thêm token vào mỗi request
+// Request interceptor - thêm token và signature vào mỗi request
 axiosInstance.interceptors.request.use(
     async (config) => {
         let token = getStoredToken();
-        
+
         // Kiểm tra và refresh token nếu cần
         if (token && isTokenExpired(token)) {
             try {
@@ -24,10 +57,30 @@ axiosInstance.interceptors.request.use(
                 return Promise.reject(new Error('Session expired'));
             }
         }
-        
+
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // Thêm signature headers nếu có sessionKey
+        const sessionKey = getCookie('sessionKey');
+        if (sessionKey) {
+            const timestamp = Date.now().toString();
+            const nonce = generateNonce();
+
+            // Lấy path từ URL (bỏ /api prefix)
+            const urlPath = config.url.replace('/api', '');
+            const method = config.method?.toUpperCase() || 'GET';
+
+            // Payload: timestamp:method:path:nonce
+            const payload = `${timestamp}:${method}:${urlPath}:${nonce}`;
+            const signature = await createSignature(payload, sessionKey);
+
+            config.headers['X-Timestamp'] = timestamp;
+            config.headers['X-Signature'] = signature;
+            config.headers['X-Nonce'] = nonce;
+        }
+
         return config;
     },
     (error) => Promise.reject(error)
@@ -38,10 +91,10 @@ axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        
+
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
-            
+
             try {
                 const token = await refreshAccessToken();
                 originalRequest.headers.Authorization = `Bearer ${token}`;
@@ -51,7 +104,7 @@ axiosInstance.interceptors.response.use(
                 return Promise.reject(error);
             }
         }
-        
+
         return Promise.reject(error);
     }
 );
