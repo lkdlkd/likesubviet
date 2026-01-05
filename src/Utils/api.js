@@ -37,8 +37,73 @@ export const isTokenExpired = (token) => {
   }
 };
 
+// ==================== AUTO REFRESH TOKEN SYSTEM ====================
+let refreshTimer = null;
+let isRefreshing = false;
+
+// Lấy thời gian còn lại trước khi token hết hạn (ms)
+const getTokenExpiryTime = (token) => {
+  if (!token) return 0;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const exp = payload.exp * 1000;
+    return exp - Date.now();
+  } catch {
+    return 0;
+  }
+};
+
+// Đặt timer để tự động refresh token trước khi hết hạn
+export const scheduleTokenRefresh = (token) => {
+  // Xóa timer cũ nếu có
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+
+  const timeUntilExpiry = getTokenExpiryTime(token);
+  const refreshTime = timeUntilExpiry - 60000;
+
+  if (refreshTime > 0) {
+    refreshTimer = setTimeout(async () => {
+      if (!isRefreshing) {
+        try {
+          await refreshAccessToken();
+        } catch (error) {
+        }
+      }
+    }, refreshTime);
+  }
+};
+
+// Dừng auto-refresh (dùng khi logout)
+export const stopTokenRefresh = () => {
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+};
+
 // Refresh access token (chỉ dùng để update localStorage cho AuthContext)
 export const refreshAccessToken = async () => {
+  if (isRefreshing) {
+    // Đang refresh, chờ kết quả
+    return new Promise((resolve, reject) => {
+      const checkRefresh = setInterval(() => {
+        if (!isRefreshing) {
+          clearInterval(checkRefresh);
+          const token = getStoredToken();
+          if (token && !isTokenExpired(token)) {
+            resolve(token);
+          } else {
+            reject(new Error('Refresh failed'));
+          }
+        }
+      }, 100);
+    });
+  }
+
+  isRefreshing = true;
   try {
     const response = await fetch(`${API_BASE}/auth/refresh`, {
       method: "POST",
@@ -60,15 +125,37 @@ export const refreshAccessToken = async () => {
     if (data.sessionKey) {
       setSessionKey(data.sessionKey);
     }
+
+    // Đặt timer cho lần refresh tiếp theo
+    scheduleTokenRefresh(data.token);
+
     return data.token;
   } catch (error) {
     setStoredToken(null);
     setSessionKey(null);
+    stopTokenRefresh();
     localStorage.clear();
     sessionStorage.clear();
     throw error;
+  } finally {
+    isRefreshing = false;
   }
 };
+
+// Khởi động auto-refresh khi page load (nếu đã có token)
+const initAutoRefresh = () => {
+  const token = getStoredToken();
+  if (token) {
+    if (isTokenExpired(token)) {
+      refreshAccessToken().catch(() => { });
+    } else {
+      scheduleTokenRefresh(token);
+    }
+  }
+};
+
+// Tự động khởi động khi module được load
+initAutoRefresh();
 
 // ==================== SIGNATURE GENERATION ====================
 // SessionKey được lưu trong localStorage (vì cross-origin không đọc được cookie)
@@ -359,11 +446,25 @@ export const login = async (data) => {
     }),
     body: JSON.stringify(data),
   });
-  return handleResponse(response);
+  const result = await handleResponse(response);
+
+  // Sau khi login thành công, lưu token và schedule auto-refresh
+  if (result.token) {
+    setStoredToken(result.token);
+    if (result.sessionKey) {
+      setSessionKey(result.sessionKey);
+    }
+    scheduleTokenRefresh(result.token);
+  }
+
+  return result;
 };
 
 // Logout - Backend sẽ xóa cookies, frontend chỉ clear localStorage
 export const logout = async () => {
+  // Dừng auto-refresh timer
+  stopTokenRefresh();
+
   try {
     await fetch(`${API_BASE}/auth/logout`, {
       method: "POST",
@@ -371,7 +472,7 @@ export const logout = async () => {
       headers: withNoStore({}),
     });
   } catch (e) {
-    console.error("Logout error:", e);
+
   }
   // Clear localStorage/sessionStorage
   localStorage.clear();
