@@ -88,7 +88,7 @@ const AdminChat = () => {
                 loadChatList();
             }
         } catch (error) {
-            console.error('Error loading chat detail:', error);
+
         } finally {
             setLoading(false);
         }
@@ -106,7 +106,7 @@ const AdminChat = () => {
                 setTotalMessages(response.data.totalMessages || 0);
             }
         } catch (error) {
-            console.error('Error loading more messages:', error);
+
         } finally {
             setLoadingMore(false);
         }
@@ -125,8 +125,7 @@ const AdminChat = () => {
                 setNewMessage('');
             }
         } catch (error) {
-            console.error('Error sending message:', error);
-            alert('Không thể gửi tin nhắn. Vui lòng thử lại.');
+
         } finally {
             setIsSending(false);
         }
@@ -150,8 +149,7 @@ const AdminChat = () => {
                 loadChatList();
             }
         } catch (error) {
-            console.error('Error deleting chat:', error);
-            alert('Không thể xóa chat. Vui lòng thử lại.');
+
         }
     };
 

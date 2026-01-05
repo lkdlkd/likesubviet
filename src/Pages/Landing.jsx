@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, register, getRecaptchaSiteKey, setStoredToken } from '@/Utils/api';
+import { login, register, getRecaptchaSiteKey, setStoredToken, setSessionKey } from '@/Utils/api';
 import { AuthContext } from '@/Context/AuthContext';
 import ReCAPTCHA from "react-google-recaptcha";
 import { getConfigWebLogo } from '@/Utils/api';
@@ -207,6 +207,7 @@ export default function Landing() {
             if (data.twoFactorRequired && !otpStep) { setOtpStep(true); setSuccess('Nhập mã 2FA để tiếp tục.'); return; }
             if (data.token) {
                 setStoredToken(data.token); // Lưu access token
+                if (data.sessionKey) setSessionKey(data.sessionKey); // 🔥 Lưu sessionKey cho cross-origin
                 updateAuth({ token: data.token, role: data.role }); setSuccess('Đăng nhập thành công!'); setTimeout(() => navigate('/home'), 1000);
             }
         } catch (err) { setError(err.message || 'Có lỗi xảy ra.'); } finally { setLoading(false); }

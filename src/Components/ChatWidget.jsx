@@ -54,7 +54,7 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
                 setUnreadCount(response.data.unreadCount);
             }
         } catch (error) {
-            console.error('Error fetching unread count:', error);
+
         }
     }, []);
 
@@ -105,7 +105,7 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
                 setUnreadCount(0);
             }
         } catch (error) {
-            console.error('Error loading chat:', error);
+
         } finally {
             setLoading(false);
         }
@@ -122,7 +122,7 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
                 setTotalMessages(response.data.totalMessages || 0);
             }
         } catch (error) {
-            console.error('Error loading more messages:', error);
+
         } finally {
             setLoadingMore(false);
         }
@@ -140,8 +140,8 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
                 setNewMessage('');
             }
         } catch (error) {
-            console.error('Error sending message:', error);
-            alert('Không thể gửi tin nhắn. Vui lòng thử lại.');
+
+
         } finally {
             setIsSending(false);
         }

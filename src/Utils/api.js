@@ -54,11 +54,16 @@ export const refreshAccessToken = async () => {
     }
 
     const data = await response.json();
-    // Lưu vào localStorage chỉ để AuthContext decode role/username
+    // Lưu vào localStorage để AuthContext decode role/username
     setStoredToken(data.token);
+    // Lưu sessionKey cho cross-origin signature
+    if (data.sessionKey) {
+      setSessionKey(data.sessionKey);
+    }
     return data.token;
   } catch (error) {
     setStoredToken(null);
+    setSessionKey(null);
     localStorage.clear();
     sessionStorage.clear();
     throw error;
@@ -66,7 +71,17 @@ export const refreshAccessToken = async () => {
 };
 
 // ==================== SIGNATURE GENERATION ====================
-// Đọc cookie theo tên
+// SessionKey được lưu trong localStorage (vì cross-origin không đọc được cookie)
+export const getSessionKey = () => localStorage.getItem('sessionKey');
+export const setSessionKey = (key) => {
+  if (key) {
+    localStorage.setItem('sessionKey', key);
+  } else {
+    localStorage.removeItem('sessionKey');
+  }
+};
+
+// Đọc cookie theo tên (backup, không dùng cho sessionKey cross-origin)
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -99,8 +114,8 @@ async function createSignature(payload, sessionKey) {
 
 // Wrapper cho fetch với cookie authentication và signature
 const fetchWithAuth = async (url, options = {}) => {
-  // Tạo signature headers nếu có sessionKey
-  const sessionKey = getCookie('sessionKey');
+  // Tạo signature headers nếu có sessionKey (đọc từ localStorage cho cross-origin)
+  const sessionKey = getSessionKey();
   let signatureHeaders = {};
 
   if (sessionKey) {

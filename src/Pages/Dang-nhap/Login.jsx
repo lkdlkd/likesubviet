@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login, setStoredToken } from "@/Utils/api"; // API login gộp luôn 2FA (gửi thêm field token nếu là bước OTP)
+import { login, setStoredToken, setSessionKey } from "@/Utils/api"; // API login gộp luôn 2FA (gửi thêm field token nếu là bước OTP)
 import { AuthContext } from "@/Context/AuthContext";
 import { loadingg } from "@/JS/Loading";
 export default function Login() {
@@ -43,6 +43,7 @@ export default function Login() {
 
       if (data.token) {
         setStoredToken(data.token); // Lưu access token
+        if (data.sessionKey) setSessionKey(data.sessionKey); // 🔥 Lưu sessionKey cho cross-origin
         updateAuth({ token: data.token, role: data.role });
         setInfo("Đăng nhập thành công!");
         navigate("/home");
