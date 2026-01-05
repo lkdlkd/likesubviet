@@ -54,14 +54,14 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
                 setUnreadCount(response.data.unreadCount);
             }
         } catch (error) {
-
+            console.error('Error fetching unread count:', error);
         }
     }, []);
 
     useEffect(() => {
         if (username) {
             fetchUnreadCount();
-            const interval = setInterval(fetchUnreadCount, 60000); // 1 minutes check once
+            const interval = setInterval(fetchUnreadCount, 30000); // 30s check once
             return () => clearInterval(interval);
         }
     }, [username, fetchUnreadCount]);
@@ -75,7 +75,7 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
 
                     // Nếu chat đang mở, đánh dấu đã đọc
                     if (isOpen && data.senderRole === 'admin') {
-                        markChatAsRead(username);
+                        markChatAsRead(username).catch(console.error);
                         setUnreadCount(0);
                     } else if (!isOpen) {
                         setUnreadCount(prev => prev + 1);
@@ -105,7 +105,7 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
                 setUnreadCount(0);
             }
         } catch (error) {
-
+            console.error('Error loading chat:', error);
         } finally {
             setLoading(false);
         }
@@ -122,7 +122,7 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
                 setTotalMessages(response.data.totalMessages || 0);
             }
         } catch (error) {
-
+            console.error('Error loading more messages:', error);
         } finally {
             setLoadingMore(false);
         }
@@ -140,7 +140,8 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
                 setNewMessage('');
             }
         } catch (error) {
-
+            console.error('Error sending message:', error);
+            alert('Không thể gửi tin nhắn. Vui lòng thử lại.');
         } finally {
             setIsSending(false);
         }

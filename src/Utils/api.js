@@ -9,30 +9,14 @@ export async function getBankList() {
 const API_BASE = `${process.env.REACT_APP_API_BASE}/api`;
 
 // ==================== TOKEN MANAGEMENT ====================
-let isRefreshing = false;
-let refreshSubscribers = [];
+// NOTE: Token được lưu trong httpOnly cookies và tự động gửi bởi browser
+// localStorage CHỈ dùng để lưu token copy cho UI decode role/username
+// KHÔNG BAO GIỜ dùng localStorage token để authenticate requests
 
-// Thêm subscriber để đợi refresh token hoàn thành
-const subscribeTokenRefresh = (callback) => {
-  refreshSubscribers.push(callback);
-};
-
-// Thông báo cho tất cả subscribers khi có token mới
-const onTokenRefreshed = (token) => {
-  refreshSubscribers.forEach((callback) => callback(token));
-  refreshSubscribers = [];
-};
-
-// Thông báo lỗi cho tất cả subscribers
-const onRefreshError = (error) => {
-  refreshSubscribers.forEach((callback) => callback(null, error));
-  refreshSubscribers = [];
-};
-
-// Lấy token từ localStorage
+// Lấy token từ localStorage (CHỈ để UI decode role/username, KHÔNG dùng để authenticate)
 export const getStoredToken = () => localStorage.getItem("token");
 
-// Lưu token vào localStorage
+// Lưu token vào localStorage (CHỈ để UI decode role/username, KHÔNG dùng để authenticate)
 export const setStoredToken = (token) => {
   if (token) {
     localStorage.setItem("token", token);
@@ -41,7 +25,7 @@ export const setStoredToken = (token) => {
   }
 };
 
-// Kiểm tra token có hết hạn không (với buffer 1 phút)
+// Kiểm tra token có hết hạn không (CHỈ dùng cho UI check, backend tự động validate cookie)
 export const isTokenExpired = (token) => {
   if (!token) return true;
   try {
@@ -53,12 +37,12 @@ export const isTokenExpired = (token) => {
   }
 };
 
-// Refresh access token
+// Refresh access token (chỉ dùng để update localStorage cho AuthContext)
 export const refreshAccessToken = async () => {
   try {
     const response = await fetch(`${API_BASE}/auth/refresh`, {
       method: "POST",
-      credentials: "include", // Gửi cookie
+      credentials: "include", // Backend tự động đọc refreshToken cookie và set accessToken cookie mới
       headers: {
         "Content-Type": "application/json",
         "Cache-Control": "no-store",
@@ -70,71 +54,36 @@ export const refreshAccessToken = async () => {
     }
 
     const data = await response.json();
+    // Lưu vào localStorage chỉ để AuthContext decode role/username
     setStoredToken(data.token);
     return data.token;
   } catch (error) {
-    // Xóa token và chuyển về trang login
     setStoredToken(null);
+    localStorage.clear();
+    sessionStorage.clear();
     throw error;
   }
 };
 
-// Wrapper cho fetch với auto refresh token
+// Wrapper cho fetch với cookie authentication
 const fetchWithAuth = async (url, options = {}) => {
-  let token = getStoredToken();
-  
-  // Kiểm tra và refresh token nếu cần
-  if (token && isTokenExpired(token)) {
-    if (!isRefreshing) {
-      isRefreshing = true;
-      try {
-        token = await refreshAccessToken();
-        onTokenRefreshed(token);
-      } catch (error) {
-        onRefreshError(error);
-        isRefreshing = false;
-        throw error;
-      }
-      isRefreshing = false;
-    } else {
-      // Đợi refresh token hoàn thành
-      token = await new Promise((resolve, reject) => {
-        subscribeTokenRefresh((newToken, error) => {
-          if (error) reject(error);
-          else resolve(newToken);
-        });
-      });
-    }
-  }
-
-  // Thực hiện request với token mới
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+  // Token tự động gửi qua httpOnly cookie, không cần logic phức tạp
   const response = await fetch(url, {
     ...options,
-    credentials: "include", // Gửi cookie
+    credentials: "include", // Gửi cookies tự động (accessToken + refreshToken)
     headers: {
       ...options.headers,
-      ...authHeaders,
     },
   });
 
-  // Nếu nhận 401, thử refresh token một lần nữa
-  if (response.status === 401 && token) {
-    try {
-      const newToken = await refreshAccessToken();
-      setStoredToken(newToken);
-      
-      // Retry request với token mới
-      return fetch(url, {
-        ...options,
-        credentials: "include",
-        headers: {
-          ...options.headers,
-          Authorization: `Bearer ${newToken}`,
-        },
-      });
-    } catch {
-      // Refresh thất bại, redirect to login
+  // Nếu nhận 401, backend sẽ tự động refresh token qua cookie
+  // Nếu refresh thất bại, redirect to login
+  if (response.status === 401) {
+    const data = await response.json().catch(() => ({}));
+    if (data.error === "Token không hợp lệ hoặc đã hết hạn") {
+      // Session thực sự hết hạn, redirect
+      localStorage.clear();
+      sessionStorage.clear();
       window.location.href = "/dang-nhap";
       throw new Error("Session expired");
     }
@@ -309,6 +258,7 @@ const handleResponse = async (response) => {
 };
 
 // Auth
+// Login - Backend trả về token trong response body (để UI decode) VÀ set cookies (để authenticate)
 export const login = async (data) => {
   // Lấy IP của người dùng (hỗ trợ cả IPv4 và IPv6)
   let userIP = "";
@@ -330,7 +280,7 @@ export const login = async (data) => {
 
   const response = await fetch(`${API_BASE}/login`, {
     method: "POST",
-    credentials: "include", // Nhận cookie từ server
+    credentials: "include", // Nhận cookies từ server (refreshToken + accessToken)
     headers: withNoStore({
       "Content-Type": "application/json",
       "X-User-IP": userIP // Gửi IP thật của người dùng
@@ -340,19 +290,18 @@ export const login = async (data) => {
   return handleResponse(response);
 };
 
-// Logout - gọi API để xóa refresh token
+// Logout - Backend sẽ xóa cookies, frontend chỉ clear localStorage
 export const logout = async () => {
   try {
     await fetch(`${API_BASE}/auth/logout`, {
       method: "POST",
-      credentials: "include", // Gửi cookie
+      credentials: "include", // Backend sẽ clear cả 2 cookies (accessToken + refreshToken)
       headers: withNoStore({}),
     });
   } catch (e) {
-    // Ignore error
+    console.error("Logout error:", e);
   }
-  setStoredToken(null);
-  localStorage.removeItem("notiModalLastClosed");
+  // Clear localStorage/sessionStorage
   localStorage.clear();
   sessionStorage.clear();
 };
@@ -363,7 +312,7 @@ export const logoutAll = async () => {
     method: "POST",
     headers: withNoStore({}),
   });
-  setStoredToken(null);
+  // Clear localStorage/sessionStorage
   localStorage.clear();
   sessionStorage.clear();
   return handleResponse(response);
@@ -381,6 +330,7 @@ export const getRecaptchaSiteKey = async () => {
 export const register = async (data) => {
   const response = await fetch(`${API_BASE}/register`, {
     method: "POST",
+    credentials: "include", // Support cookies nếu sau này cần
     headers: withNoStore({ "Content-Type": "application/json" }),
     body: JSON.stringify(data),
   });
