@@ -199,47 +199,86 @@ async function createSignature(payload, sessionKey) {
     .join('');
 }
 
-// Wrapper cho fetch với cookie authentication và signature
-const fetchWithAuth = async (url, options = {}) => {
-  // Tạo signature headers nếu có sessionKey (đọc từ localStorage cho cross-origin)
+// Helper để tạo signature headers (tách riêng để dùng cho retry)
+const generateSignatureHeaders = async (url, method) => {
   const sessionKey = getSessionKey();
-  let signatureHeaders = {};
+  if (!sessionKey) return {};
 
-  if (sessionKey) {
-    const timestamp = Date.now().toString();
-    const nonce = generateNonce();
+  const timestamp = Date.now().toString();
+  const nonce = generateNonce();
+  const urlPath = new URL(url).pathname.replace('/api', '');
+  const payload = `${timestamp}:${method}:${urlPath}:${nonce}`;
+  const signature = await createSignature(payload, sessionKey);
 
-    // Lấy path từ URL (bỏ phần domain và /api prefix)
-    const urlPath = new URL(url).pathname.replace('/api', '');
-    const method = options.method || 'GET';
+  return {
+    'X-Timestamp': timestamp,
+    'X-Signature': signature,
+    'X-Nonce': nonce,
+  };
+};
 
-    // Payload: timestamp:method:path:nonce
-    const payload = `${timestamp}:${method}:${urlPath}:${nonce}`;
-    const signature = await createSignature(payload, sessionKey);
+// Wrapper cho fetch với cookie authentication, signature và AUTO-RETRY
+const fetchWithAuth = async (url, options = {}, _isRetry = false) => {
+  const method = options.method || 'GET';
+  const signatureHeaders = await generateSignatureHeaders(url, method);
 
-    signatureHeaders = {
-      'X-Timestamp': timestamp,
-      'X-Signature': signature,
-      'X-Nonce': nonce,
-    };
-  }
-
-  // Token tự động gửi qua httpOnly cookie, không cần logic phức tạp
   const response = await fetch(url, {
     ...options,
-    credentials: "include", // Gửi cookies tự động (accessToken + refreshToken)
+    credentials: "include",
     headers: {
       ...options.headers,
       ...signatureHeaders,
     },
   });
 
-  // Nếu nhận 401/404, kiểm tra các lỗi cần logout
-  if (response.status === 401 || response.status === 404) {
+  // =============== AUTO-RETRY LOGIC ===============
+  // Nếu nhận 401/403 và chưa retry, thử refresh token rồi retry request
+  if ((response.status === 401 || response.status === 403) && !_isRetry) {
     const data = await response.clone().json().catch(() => ({}));
-    const logoutErrors = [
+
+    // Các lỗi có thể retry bằng refresh token
+    const retryableErrors = [
       "Token không hợp lệ hoặc đã hết hạn",
       "Không có token, truy cập bị từ chối",
+      "Không hợp lệ",           // Signature không khớp (sessionKey cũ)
+      "Thiếu thông tin xác thực", // Thiếu signature headers
+    ];
+
+    // Các lỗi cần logout ngay (không retry)
+    const immediateLogoutErrors = [
+      "Người dùng không tồn tại",
+      "Tài khoản của bạn đã bị khóa"
+    ];
+
+    if (immediateLogoutErrors.includes(data.error) || immediateLogoutErrors.includes(data.message)) {
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = "/dang-nhap";
+      throw new Error(data.error || data.message);
+    }
+
+    // Kiểm tra lỗi có thể retry
+    const errorMsg = data.error || data.message || '';
+    if (retryableErrors.includes(errorMsg)) {
+      try {
+        // Thử refresh token (sẽ lấy token mới + sessionKey mới)
+        await refreshAccessToken();
+        // Retry request với credentials mới (đệ quy với _isRetry = true)
+        return fetchWithAuth(url, options, true);
+      } catch (refreshError) {
+        // Refresh thất bại → logout
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = "/dang-nhap";
+        throw new Error(errorMsg || "Phiên đăng nhập hết hạn");
+      }
+    }
+  }
+
+  // Xử lý 404 với lỗi cần logout (không retry vì đây là lỗi logic, không phải token)
+  if (response.status === 404) {
+    const data = await response.clone().json().catch(() => ({}));
+    const logoutErrors = [
       "Người dùng không tồn tại",
       "Tài khoản của bạn đã bị khóa"
     ];

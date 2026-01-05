@@ -75,7 +75,7 @@ const ChatWidget = ({ username, externalOpen, onExternalToggle }) => {
 
                     // Nếu chat đang mở, đánh dấu đã đọc
                     if (isOpen && data.senderRole === 'admin') {
-                        markChatAsRead(username).catch(console.error);
+                        markChatAsRead(username);
                         setUnreadCount(0);
                     } else if (!isOpen) {
                         setUnreadCount(prev => prev + 1);
