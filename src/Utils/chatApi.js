@@ -1,17 +1,9 @@
 import axios from 'axios';
-import { getStoredToken, isTokenExpired, refreshAccessToken } from './api';
+import { getStoredToken, isTokenExpired, refreshAccessToken, getSessionKey } from './api';
 
 const API_URL = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
 
 // ==================== SIGNATURE GENERATION ====================
-// Đọc cookie theo tên
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-}
-
 // Tạo random nonce để chống replay attack
 function generateNonce() {
     return Array.from(crypto.getRandomValues(new Uint8Array(16)))
@@ -62,8 +54,8 @@ axiosInstance.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
 
-        // Thêm signature headers nếu có sessionKey
-        const sessionKey = getCookie('sessionKey');
+        // Thêm signature headers nếu có sessionKey (đọc từ localStorage cho cross-origin)
+        const sessionKey = getSessionKey();
         if (sessionKey) {
             const timestamp = Date.now().toString();
             const nonce = generateNonce();
