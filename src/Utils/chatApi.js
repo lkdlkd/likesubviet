@@ -60,8 +60,8 @@ axiosInstance.interceptors.request.use(
             const timestamp = Date.now().toString();
             const nonce = generateNonce();
 
-            // Lấy path từ URL (bỏ /api prefix)
-            const urlPath = config.url.replace('/api', '');
+            // Lấy path từ URL (bỏ /api prefix và query string)
+            const urlPath = config.url.replace('/api', '').split('?')[0];
             const method = config.method?.toUpperCase() || 'GET';
 
             // Payload: timestamp:method:path:nonce
