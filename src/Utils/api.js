@@ -115,7 +115,8 @@ export const refreshAccessToken = async () => {
     });
 
     if (!response.ok) {
-      throw new Error("Refresh token failed");
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || "Refresh token failed");
     }
 
     const data = await response.json();
