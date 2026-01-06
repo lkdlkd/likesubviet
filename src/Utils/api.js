@@ -31,132 +31,26 @@ export const isTokenExpired = (token) => {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
     const exp = payload.exp * 1000; // Convert to milliseconds
-    return Date.now() >= exp - 60000; // Hết hạn trước 1 phút
+    return Date.now() >= exp;
   } catch {
     return true;
   }
 };
 
-// ==================== AUTO REFRESH TOKEN SYSTEM ====================
-let refreshTimer = null;
-let isRefreshing = false;
+// ==================== SIMPLIFIED AUTH (không dùng refresh token) ====================
+// Access token có thời hạn 30 ngày, khi hết hạn user cần đăng nhập lại
 
-// Lấy thời gian còn lại trước khi token hết hạn (ms)
-const getTokenExpiryTime = (token) => {
-  if (!token) return 0;
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const exp = payload.exp * 1000;
-    return exp - Date.now();
-  } catch {
-    return 0;
-  }
-};
-
-// Đặt timer để tự động refresh token trước khi hết hạn
-export const scheduleTokenRefresh = (token) => {
-  // Xóa timer cũ nếu có
-  if (refreshTimer) {
-    clearTimeout(refreshTimer);
-    refreshTimer = null;
-  }
-
-  const timeUntilExpiry = getTokenExpiryTime(token);
-  const refreshTime = timeUntilExpiry - 60000;
-
-  if (refreshTime > 0) {
-    refreshTimer = setTimeout(async () => {
-      if (!isRefreshing) {
-        try {
-          await refreshAccessToken();
-        } catch (error) {
-        }
-      }
-    }, refreshTime);
-  }
-};
-
-// Dừng auto-refresh (dùng khi logout)
-export const stopTokenRefresh = () => {
-  if (refreshTimer) {
-    clearTimeout(refreshTimer);
-    refreshTimer = null;
-  }
-};
-
-// Refresh access token (chỉ dùng để update localStorage cho AuthContext)
-export const refreshAccessToken = async () => {
-  if (isRefreshing) {
-    // Đang refresh, chờ kết quả
-    return new Promise((resolve, reject) => {
-      const checkRefresh = setInterval(() => {
-        if (!isRefreshing) {
-          clearInterval(checkRefresh);
-          const token = getStoredToken();
-          if (token && !isTokenExpired(token)) {
-            resolve(token);
-          } else {
-            reject(new Error('Refresh failed'));
-          }
-        }
-      }, 100);
-    });
-  }
-
-  isRefreshing = true;
-  try {
-    const response = await fetch(`${API_BASE}/auth/refresh`, {
-      method: "POST",
-      credentials: "include", // Backend tự động đọc refreshToken cookie và set accessToken cookie mới
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-store",
-      },
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error || "Refresh token failed");
-    }
-
-    const data = await response.json();
-    // Lưu vào localStorage để AuthContext decode role/username
-    setStoredToken(data.token);
-    // Lưu sessionKey cho cross-origin signature
-    if (data.sessionKey) {
-      setSessionKey(data.sessionKey);
-    }
-
-    // Đặt timer cho lần refresh tiếp theo
-    scheduleTokenRefresh(data.token);
-
-    return data.token;
-  } catch (error) {
-    setStoredToken(null);
-    setSessionKey(null);
-    stopTokenRefresh();
+// Kiểm tra và redirect nếu token hết hạn
+export const checkTokenAndRedirect = () => {
+  const token = getStoredToken();
+  if (!token || isTokenExpired(token)) {
     localStorage.clear();
     sessionStorage.clear();
-    throw error;
-  } finally {
-    isRefreshing = false;
+    window.location.href = "/";
+    return false;
   }
+  return true;
 };
-
-// Khởi động auto-refresh khi page load (nếu đã có token)
-const initAutoRefresh = () => {
-  const token = getStoredToken();
-  if (token) {
-    if (isTokenExpired(token)) {
-      refreshAccessToken().catch(() => { });
-    } else {
-      scheduleTokenRefresh(token);
-    }
-  }
-};
-
-// Tự động khởi động khi module được load
-initAutoRefresh();
 
 // ==================== SIGNATURE GENERATION ====================
 // SessionKey được lưu trong localStorage (vì cross-origin không đọc được cookie)
@@ -168,14 +62,6 @@ export const setSessionKey = (key) => {
     localStorage.removeItem('sessionKey');
   }
 };
-
-// Đọc cookie theo tên (backup, không dùng cho sessionKey cross-origin)
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null;
-}
 
 // Tạo random nonce để chống replay attack
 function generateNonce() {
@@ -218,92 +104,50 @@ const generateSignatureHeaders = async (url, method) => {
   };
 };
 
-// Wrapper cho fetch với cookie authentication, signature và AUTO-RETRY
-const fetchWithAuth = async (url, options = {}, _isRetry = false) => {
+// Wrapper cho fetch với Authorization header và signature (không dùng cookie)
+const fetchWithAuth = async (url, options = {}) => {
   const method = options.method || 'GET';
   const signatureHeaders = await generateSignatureHeaders(url, method);
 
+  // Lấy token từ localStorage và gửi qua Authorization header
+  const token = getStoredToken();
+
   const response = await fetch(url, {
     ...options,
-    credentials: "include",
     headers: {
       ...options.headers,
       ...signatureHeaders,
+      // Gửi token qua Authorization header (không dùng cookie)
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     },
   });
 
-  // =============== AUTO-RETRY LOGIC ===============
-  // Nếu nhận 401/403 và chưa retry, thử refresh token rồi retry request
-  if ((response.status === 401 || response.status === 403) && !_isRetry) {
+  // =============== LOGOUT ON AUTH ERRORS ===============
+  // Nếu token hết hạn thì logout luôn
+  if (response.status === 401 || response.status === 403 || response.status === 404) {
     const data = await response.clone().json().catch(() => ({}));
 
-    // Các lỗi có thể retry bằng refresh token
-    const retryableErrors = [
+    const logoutErrors = [
       "Token không hợp lệ hoặc đã hết hạn",
       "Không có token, truy cập bị từ chối",
-      "Không hợp lệ",           // Signature không khớp (sessionKey cũ)
-      "Thiếu thông tin xác thực", // Thiếu signature headers
-    ];
-
-    // Các lỗi cần logout ngay (không retry)
-    const immediateLogoutErrors = [
+      "Không hợp lệ",
+      "Thiếu thông tin xác thực",
       "Người dùng không tồn tại",
       "Tài khoản của bạn đã bị khóa"
     ];
 
-    if (immediateLogoutErrors.includes(data.error) || immediateLogoutErrors.includes(data.message)) {
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = "/dang-nhap";
-      throw new Error(data.error || data.message);
-    }
-
-    // Kiểm tra lỗi có thể retry
     const errorMsg = data.error || data.message || '';
-    if (retryableErrors.includes(errorMsg)) {
-      try {
-        // Thử refresh token (sẽ lấy token mới + sessionKey mới)
-        await refreshAccessToken();
-        // Retry request với credentials mới (đệ quy với _isRetry = true)
-        return fetchWithAuth(url, options, true);
-      } catch (refreshError) {
-        // Refresh thất bại → logout
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/dang-nhap";
-        throw new Error(errorMsg || "Phiên đăng nhập hết hạn");
-      }
-    }
-  }
-
-  // Xử lý 404 với lỗi cần logout (không retry vì đây là lỗi logic, không phải token)
-  if (response.status === 404) {
-    const data = await response.clone().json().catch(() => ({}));
-    const logoutErrors = [
-      "Người dùng không tồn tại",
-      "Tài khoản của bạn đã bị khóa"
-    ];
-    if (logoutErrors.includes(data.error)) {
+    if (logoutErrors.includes(errorMsg)) {
       localStorage.clear();
       sessionStorage.clear();
-      window.location.href = "/dang-nhap";
-      throw new Error(data.error);
+      window.location.href = "/";
+      throw new Error(errorMsg);
     }
   }
 
   return response;
 };
 
-// ==================== END TOKEN MANAGEMENT ====================
-
-export const Home = async (token) => {
-  const response = await fetchWithAuth(`${API_BASE}/home`, {
-    method: "GET",
-    headers: withNoStore({}),
-    cache: "no-store",
-  });
-  return handleResponse(response);
-};
 
 // Refund APIs
 export const getRefunds = async (token, status, page = 1, limit = 20, search = "", searchType = "madon") => {
@@ -483,41 +327,27 @@ export const login = async (data) => {
 
   const response = await fetch(`${API_BASE}/login`, {
     method: "POST",
-    credentials: "include", // Nhận cookies từ server (refreshToken + accessToken)
     headers: withNoStore({
       "Content-Type": "application/json",
-      "X-User-IP": userIP // Gửi IP thật của người dùng
+      "X-User-IP": userIP
     }),
     body: JSON.stringify(data),
   });
   const result = await handleResponse(response);
 
-  // Sau khi login thành công, lưu token và schedule auto-refresh
+  // Sau khi login thành công, lưu token và sessionKey vào localStorage
   if (result.token) {
     setStoredToken(result.token);
     if (result.sessionKey) {
       setSessionKey(result.sessionKey);
     }
-    scheduleTokenRefresh(result.token);
   }
 
   return result;
 };
 
-// Logout - Backend sẽ xóa cookies, frontend chỉ clear localStorage
+// Logout - chỉ clear localStorage (không dùng cookie)
 export const logout = async () => {
-  // Dừng auto-refresh timer
-  stopTokenRefresh();
-
-  try {
-    await fetch(`${API_BASE}/auth/logout`, {
-      method: "POST",
-      credentials: "include", // Backend sẽ clear cả 2 cookies (accessToken + refreshToken)
-      headers: withNoStore({}),
-    });
-  } catch (e) {
-
-  }
   // Clear localStorage/sessionStorage
   localStorage.clear();
   sessionStorage.clear();

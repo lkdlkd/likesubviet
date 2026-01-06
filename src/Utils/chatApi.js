@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getStoredToken, isTokenExpired, refreshAccessToken, getSessionKey } from './api';
+import { getStoredToken, isTokenExpired, getSessionKey } from './api';
 
 const API_URL = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
 
@@ -28,7 +28,7 @@ async function createSignature(payload, sessionKey) {
 }
 // ==================== END SIGNATURE GENERATION ====================
 
-// Tạo axios instance với interceptor cho auto refresh token
+// Tạo axios instance
 const axiosInstance = axios.create({
     baseURL: API_URL,
     withCredentials: true, // Gửi cookie
@@ -37,34 +37,29 @@ const axiosInstance = axios.create({
 // Request interceptor - thêm token và signature vào mỗi request
 axiosInstance.interceptors.request.use(
     async (config) => {
-        let token = getStoredToken();
+        const token = getStoredToken();
 
-        // Kiểm tra và refresh token nếu cần
+        // Kiểm tra token hết hạn thì redirect đến login
         if (token && isTokenExpired(token)) {
-            try {
-                token = await refreshAccessToken();
-            } catch {
-                // Redirect to login if refresh fails
-                window.location.href = '/dang-nhap';
-                return Promise.reject(new Error('Session expired'));
-            }
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = '/dang-nhap';
+            return Promise.reject(new Error('Session expired'));
         }
 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
 
-        // Thêm signature headers nếu có sessionKey (đọc từ localStorage cho cross-origin)
+        // Thêm signature headers nếu có sessionKey
         const sessionKey = getSessionKey();
         if (sessionKey) {
             const timestamp = Date.now().toString();
             const nonce = generateNonce();
 
-            // Lấy path từ URL (bỏ /api prefix và query string)
             const urlPath = config.url.replace('/api', '').split('?')[0];
             const method = config.method?.toUpperCase() || 'GET';
 
-            // Payload: timestamp:method:path:nonce
             const payload = `${timestamp}:${method}:${urlPath}:${nonce}`;
             const signature = await createSignature(payload, sessionKey);
 
@@ -82,21 +77,12 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
-        const originalRequest = error.config;
-
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-
-            try {
-                const token = await refreshAccessToken();
-                originalRequest.headers.Authorization = `Bearer ${token}`;
-                return axiosInstance(originalRequest);
-            } catch {
-                window.location.href = '/dang-nhap';
-                return Promise.reject(error);
-            }
+        // Nếu 401 thì logout
+        if (error.response?.status === 401) {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = '/dang-nhap';
         }
-
         return Promise.reject(error);
     }
 );
