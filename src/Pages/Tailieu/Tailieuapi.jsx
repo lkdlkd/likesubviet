@@ -1,8 +1,11 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
 import { Link } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
+
 export default function Tailieuapi() {
     const API_DOMAIN = `${process.env.REACT_APP_API_BASE}/api/v2`; // Lấy tên miền hiện tại và thêm đường dẫn API
+    const { configWeb } = useOutletContext();
 
     return (
         <div className="page-content">
@@ -32,6 +35,12 @@ export default function Tailieuapi() {
                                 <tr>
                                     <td className="text-gray-700">Response</td>
                                     <td className="fw-bolder">JSON</td>
+                                </tr>
+                                <tr>
+                                    <td className="text-gray-700">Tỉ giá</td>
+                                    <td className="fw-bolder">
+                                        {Number(configWeb?.tigia).toLocaleString('en-US')}
+                                    </td>
                                 </tr>
                             </tbody>
                         </Table>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login, register, getRecaptchaSiteKey, setStoredToken, setSessionKey } from '@/Utils/api';
 import { AuthContext } from '@/Context/AuthContext';
@@ -1194,6 +1194,7 @@ export default function Landing() {
                                         <tr><td style={{ padding: '16px 20px', color: '#808080', borderBottom: '1px solid rgba(255,255,255,0.05)', fontWeight: 500 }}>HTTP Method</td><td style={{ padding: '16px 20px', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#ffffff' }}>POST</td></tr>
                                         <tr><td style={{ padding: '16px 20px', color: '#808080', borderBottom: '1px solid rgba(255,255,255,0.05)', fontWeight: 500 }}>Content-Type</td><td style={{ padding: '16px 20px', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#ffffff' }}>application/json</td></tr>
                                         <tr><td style={{ padding: '16px 20px', color: '#808080', fontWeight: 500 }}>Response</td><td style={{ padding: '16px 20px', fontWeight: 600, color: '#ffffff' }}>JSON</td></tr>
+                                        <tr><td style={{ padding: '16px 20px', color: '#808080', fontWeight: 500 }}>Tỉ giá</td><td style={{ padding: '16px 20px', fontWeight: 600, color: '#ffffff' }}>{Number(config?.tigia).toLocaleString('en-US')}</td></tr>
                                     </tbody>
                                 </table>
                             </div>

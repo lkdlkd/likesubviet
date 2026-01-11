@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
+import Modal from "react-bootstrap/Modal";
 import Napthecao from "./Napthecao";
 import Banking from "./Banking";
 import CardHistory from "./CardHistory";
@@ -8,7 +9,7 @@ import {loadingg} from "@/JS/Loading";
 import { getBanking, getCardHistory, getCard, getPromotions, getTransactions } from "@/Utils/api";
 
 export default function NaptienPage() {
-    const { token, user } = useOutletContext();
+    const { token, user,configWeb } = useOutletContext();
     const [banking, setBanking] = useState([]);
     const [historycard, setHistoryCard] = useState([]);
     const [cardData, setCardData] = useState([]);
@@ -21,6 +22,7 @@ export default function NaptienPage() {
     const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
     // Responsive number of visible page buttons (desktop: 10, mobile: 4)
     const [maxVisible, setMaxVisible] = useState(4);
+    const [showNoteModal, setShowNoteModal] = useState(false); // Modal hiển thị ghi chú nạp tiền
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -115,12 +117,19 @@ export default function NaptienPage() {
         fetchData();
     }, [token]);
 
+    // Tự động hiển thị modal khi có notenaptien
+    useEffect(() => {
+        if (configWeb?.notenaptien) {
+            setShowNoteModal(true);
+        }
+    }, [configWeb?.notenaptien]);
+
 
     return (
         <div className="row">
             {/* Phần tiêu đề và nút chọn */}
             <div className="col-md-12 mb-4">
-                <div className="row">
+                <div className="row g-2">
                     <div className="col-6 d-grid gap-2">
                         <button
                             className={`btn rounded-pill shadow-sm fw-bold ${activeTab === "banking" ? "btn-primary" : "btn-outline-primary"
@@ -141,6 +150,41 @@ export default function NaptienPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal hiển thị ghi chú nạp tiền sử dụng react-bootstrap */}
+            <Modal 
+                show={showNoteModal && configWeb?.notenaptien} 
+                onHide={() => setShowNoteModal(false)}
+                size="lg"
+            >
+                <Modal.Header closeButton className="bg-info text-white">
+                    <Modal.Title>
+                        <i className="fas fa-info-circle me-2"></i>
+                        Lưu ý khi nạp tiền
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body 
+                    style={{
+                        maxHeight: '60vh',
+                        overflowY: 'auto'
+                    }}
+                >
+                    <div 
+                        className="content-html"
+                        dangerouslySetInnerHTML={{ __html: configWeb?.notenaptien || '' }}
+                    />
+                </Modal.Body>
+                <Modal.Footer>
+                    <button 
+                        type="button" 
+                        className="btn btn-secondary rounded-pill px-4"
+                        onClick={() => setShowNoteModal(false)}
+                    >
+                        <i className="fas fa-times me-2"></i>
+                        Đóng
+                    </button>
+                </Modal.Footer>
+            </Modal>
 
             {/* Nội dung hiển thị dựa trên trạng thái activeTab */}
             {activeTab === "banking" && (

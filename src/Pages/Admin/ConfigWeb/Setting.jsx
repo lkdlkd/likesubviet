@@ -6,18 +6,6 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { loadingg } from "@/JS/Loading";
 import Swal from "sweetalert2";
 
-// Suppress ResizeObserver errors
-const debounce = (func, wait) => {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-};
 
 // Handle ResizeObserver errors
 window.addEventListener('error', e => {
@@ -82,6 +70,8 @@ const Setting = () => {
         distributor: "", // Thêm trường distributor (nhà phân phối)
         headerJs: "", // Mã JS header
         footerJs: "", // Mã JS footer
+        tigia: "", // Tỷ giá
+        notenaptien: "", // Ghi chú nạp tiền
     });
     const [loading, setLoading] = useState(false);
     const editorRef = useRef(null);
@@ -106,6 +96,8 @@ const Setting = () => {
                 deleteHistory: config.data.deleteHistory || false, // Xóa lịch sử
                 headerJs: config.data.headerJs || "", // Lấy giá trị headerJs từ API
                 footerJs: config.data.footerJs || "", // Lấy giá trị footerJs từ API
+                tigia: config.data.tigia || 25000, // Lấy giá trị tigia từ API
+                notenaptien: config.data.notenaptien || "", // Lấy giá trị notenaptien từ API
             });
         } catch (error) {
             toast.error("Không thể tải cấu hình website!");
@@ -144,6 +136,8 @@ const Setting = () => {
                 deleteHistory: formData.deleteHistory, // Xóa lịch sử
                 headerJs: formData.headerJs, // Gửi mã JS header lên API
                 footerJs: formData.footerJs, // Gửi mã JS footer lên API
+                tigia: formData.tigia, // Gửi tỷ giá lên API
+                notenaptien: formData.notenaptien, // Gửi ghi chú nạp tiền lên API
             };
             await updateConfigWeb(sanitizedData, token);
             fetchConfig(); // Tải lại cấu hình sau khi cập nhật
@@ -334,6 +328,69 @@ const Setting = () => {
                                                     <span className="input-group-text">VNĐ</span>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Tỷ giá */}
+                                    <div className="card border-0 shadow-sm mb-3">
+                                        <div className="card-header bg-gradient-primary text-white border-0 py-2">
+                                            <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
+                                                <i className="fas fa-exchange-alt me-2"></i>
+                                                Tỷ giá
+                                            </h6>
+                                        </div>
+                                        <div className="card-body p-3">
+                                            <div className="mb-0">
+                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                    <i className="fas fa-money-bill-wave me-1 text-success"></i>
+                                                    Tỷ giá VNĐ / USD
+                                                </label>
+                                                <div className="input-group input-group-sm">
+                                                    <input
+                                                        type="number"
+                                                        className="form-control"
+                                                        value={formData.tigia}
+                                                        onChange={(e) => setFormData({ ...formData, tigia: e.target.value })}
+                                                        placeholder="25000"
+                                                    />
+                                                    <span className="input-group-text">VNĐ</span>
+                                                </div>
+                                                <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
+                                                    <i className="fas fa-info-circle me-1"></i>
+                                                    Tỷ giá được dùng để quy đổi giá dịch vụ
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Ghi chú nạp tiền */}
+                                    <div className="card border-0 shadow-sm mb-3">
+                                        <div className="card-header bg-gradient-success text-white border-0 py-2">
+                                            <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
+                                                <i className="fas fa-sticky-note me-2"></i>
+                                                Ghi chú nạp tiền
+                                            </h6>
+                                        </div>
+                                        <div className="card-body p-3">
+                                            <CKEditor
+                                                editor={ClassicEditor}
+                                                data={formData.notenaptien}
+                                                onReady={(editor) => {
+                                                    setTimeout(() => {
+                                                        if (editor && editor.ui && editor.ui.view && editor.ui.view.editable && editor.ui.view.editable.element) {
+                                                            editor.ui.view.editable.element.style.height = "200px";
+                                                        }
+                                                    }, 100);
+                                                }}
+                                                onChange={(event, editor) => {
+                                                    const data = editor.getData();
+                                                    setFormData((prev) => ({ ...prev, notenaptien: data }));
+                                                }}
+                                            />
+                                            <small className="text-muted d-block mt-2" style={{ fontSize: '0.75rem' }}>
+                                                <i className="fas fa-info-circle me-1"></i>
+                                                Ghi chú này sẽ hiển thị ở trang nạp tiền
+                                            </small>
                                         </div>
                                     </div>
 
