@@ -61,7 +61,6 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
                     setBankApps(sorted);
                 }
             } catch (error) {
-                toast.error("Lỗi khi tải danh sách app ngân hàng!");
             } finally {
                 setLoadingApps(false);
             }
@@ -514,7 +513,7 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr className="d-lg-none">
+                                        {/* <tr className="d-lg-none">
                                             <td>
                                                 <i className="fas fa-mobile-alt me-2 text-primary"></i>
                                                 Mở App Ngân Hàng
@@ -538,7 +537,7 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
                                                     Mở App
                                                 </button>
                                             </td>
-                                        </tr>
+                                        </tr> */}
                                     </tbody>
                                 </table>
                             </div>
