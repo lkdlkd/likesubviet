@@ -85,8 +85,12 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
     // Build deeplink URL for selected bank app
     const getDeeplinkWithParams = (baseDeeplink, bank, amount) => {
         if (!bank) return baseDeeplink;
-        const params = `&ba=${bank.account_number}@${bank.bank_name?.toLowerCase()}&am=${amount || ''}&tn=${encodeURIComponent(`${cuphap} ${depositCode}`.trim())}&bn=${encodeURIComponent(bank.account_name || '')}`;
-        return baseDeeplink + params;
+        // Kiểm tra xem deeplink đã có query string chưa
+        const separator = baseDeeplink.includes('?') ? '&' : '?';
+        // Lấy mã ngân hàng từ bank.bank_code hoặc rút gọn từ bank.bank_name
+        const bankCode = bank.bank_code || bank.bank_name?.toLowerCase().replace(/\s+/g, '');
+        const params = `ba=${bank.account_number}@${bankCode}&am=${amount || ''}&tn=${encodeURIComponent(`${cuphap} ${depositCode}`.trim())}&bn=${encodeURIComponent(bank.account_name || '')}`;
+        return baseDeeplink + separator + params;
     };
 
     // Step state: 1 = select app, 2 = enter amount
