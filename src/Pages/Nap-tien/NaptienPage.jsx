@@ -4,18 +4,18 @@ import Modal from "react-bootstrap/Modal";
 import Napthecao from "./Napthecao";
 import Banking from "./Banking";
 import CardHistory from "./CardHistory";
-import {loadingg} from "@/JS/Loading";
+import { loadingg } from "@/JS/Loading";
 // import HistoryBank from "./HistoryBanking";
-import { getBanking, getCardHistory, getCard, getPromotions, getTransactions } from "@/Utils/api";
+import { getBanking, getCardHistory, getCard, getPromotions, getTransactions, generateDepositCode } from "@/Utils/api";
 
 export default function NaptienPage() {
-    const { token, user,configWeb } = useOutletContext();
+    const { token, user, setUser, configWeb } = useOutletContext();
     const [banking, setBanking] = useState([]);
     const [historycard, setHistoryCard] = useState([]);
     const [cardData, setCardData] = useState([]);
     const [promotions, setPromotions] = useState([]);
     const [activeTab, setActiveTab] = useState("banking");
-    const username = user?.username;
+    const [depositCode, setDepositCode] = useState(user?.depositCode || "");
     const [history, setHistory] = useState([]); // Danh sách giao dịch
     const [page, setPage] = useState(1); // Trang hiện tại
     const [limit, setLimit] = useState(10); // Số lượng giao dịch mỗi trang
@@ -23,6 +23,26 @@ export default function NaptienPage() {
     // Responsive number of visible page buttons (desktop: 10, mobile: 4)
     const [maxVisible, setMaxVisible] = useState(4);
     const [showNoteModal, setShowNoteModal] = useState(false); // Modal hiển thị ghi chú nạp tiền
+
+    // Sync depositCode when user changes
+    useEffect(() => {
+        if (user?.depositCode) {
+            setDepositCode(user.depositCode);
+        }
+    }, [user?.depositCode]);
+
+    // Handler để tạo mã nạp tiền mới
+    const handleGenerateNewDepositCode = async () => {
+        const result = await generateDepositCode(token);
+        if (result.success && result.depositCode) {
+            setDepositCode(result.depositCode);
+            // Update user context
+            if (setUser) {
+                setUser(prev => ({ ...prev, depositCode: result.depositCode }));
+            }
+        }
+        return result;
+    };
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -79,7 +99,7 @@ export default function NaptienPage() {
             loadingg("", false);
         } catch (error) {
             // console.error("Lỗi khi gọi API ngân hàng:", error);
-        }finally {
+        } finally {
             loadingg("", false);
         }
     };
@@ -152,8 +172,8 @@ export default function NaptienPage() {
             </div>
 
             {/* Modal hiển thị ghi chú nạp tiền sử dụng react-bootstrap */}
-            <Modal 
-                show={showNoteModal && configWeb?.notenaptien} 
+            <Modal
+                show={showNoteModal && configWeb?.notenaptien}
                 onHide={() => setShowNoteModal(false)}
                 size="lg"
             >
@@ -163,20 +183,20 @@ export default function NaptienPage() {
                         Lưu ý khi nạp tiền
                     </Modal.Title>
                 </Modal.Header>
-                <Modal.Body 
+                <Modal.Body
                     style={{
                         maxHeight: '60vh',
                         overflowY: 'auto'
                     }}
                 >
-                    <div 
+                    <div
                         className="content-html"
                         dangerouslySetInnerHTML={{ __html: configWeb?.notenaptien || '' }}
                     />
                 </Modal.Body>
                 <Modal.Footer>
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         className="btn btn-secondary rounded-pill px-4"
                         onClick={() => setShowNoteModal(false)}
                     >
@@ -191,7 +211,7 @@ export default function NaptienPage() {
                 <>
                     <div className="col-md-12">
                         {/* Hiển thị thông tin banking trước */}
-                        <Banking banking={banking} username={username} />
+                        <Banking banking={banking} depositCode={depositCode} onGenerateNewCode={handleGenerateNewDepositCode} />
                     </div>
                     {/* Sau đó mới hiển thị các trường khác */}
                     <div className="col-md-12">
@@ -354,7 +374,7 @@ export default function NaptienPage() {
                         <div className="card promotion-banner mb-3">
                             <div className="card-body text-center py-3">
                                 <div className="mb-2">
-                                    <i className="fas fa-tags text-primary" style={{fontSize: '2rem'}}></i>
+                                    <i className="fas fa-tags text-primary" style={{ fontSize: '2rem' }}></i>
                                 </div>
                                 <h4 className="fw-bold mb-1">CHƯƠNG TRÌNH KHUYẾN MÃI</h4>
                                 <p className="text-muted mb-0">Nạp tiền ngay để nhận ưu đãi</p>
@@ -389,7 +409,7 @@ export default function NaptienPage() {
                                                         {/* Amount Section */}
                                                         <div className="col-12">
                                                             <div className="d-flex align-items-center p-3 rounded border">
-                                                                <i className="fas fa-money-bill-wave text-primary me-3" style={{fontSize: '1.5rem'}}></i>
+                                                                <i className="fas fa-money-bill-wave text-primary me-3" style={{ fontSize: '1.5rem' }}></i>
                                                                 <div>
                                                                     <div className="text-muted">Nạp tối thiểu</div>
                                                                     <h5 className="mb-0 fw-bold">
@@ -462,7 +482,7 @@ export default function NaptienPage() {
                                                             const startTime = new Date(promotion.startTime);
                                                             const endTime = new Date(promotion.endTime);
                                                             const isActive = now >= startTime && now <= endTime;
-                                                            
+
                                                             if (isActive) {
                                                                 return (
                                                                     <span className="badge bg-success">
@@ -493,7 +513,7 @@ export default function NaptienPage() {
                                 <div className="card">
                                     <div className="card-body text-center py-4">
                                         <div className="mb-3">
-                                            <i className="fas fa-gift text-muted" style={{fontSize: '3rem'}}></i>
+                                            <i className="fas fa-gift text-muted" style={{ fontSize: '3rem' }}></i>
                                         </div>
                                         <h5 className="fw-bold mb-2">Hiện tại chưa có khuyến mãi</h5>
                                         <p className="text-muted mb-3">

@@ -33,6 +33,7 @@ const Layout = () => {
         setUser((prevUser) => ({
             ...prevUser,
             balance: data.newBalance,
+            depositCode: data.newDepositCode,
         }));
     }, []);
 

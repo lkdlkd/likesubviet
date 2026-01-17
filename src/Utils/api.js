@@ -468,6 +468,18 @@ export const getMe = async (token) => {
   return handleResponse(response);
 };
 
+// User tạo mã nạp tiền mới
+export const generateDepositCode = async (token) => {
+  const response = await fetchWithAuth(`${API_BASE}/user/generate-deposit-code`, {
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+    }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
 export const changePassword = async (id, data, token) => {
   const response = await fetchWithAuth(`${API_BASE}/user/changePassword/${id}`, {
     method: "PUT",
