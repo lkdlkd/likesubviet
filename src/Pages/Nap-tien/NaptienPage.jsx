@@ -175,6 +175,8 @@ export default function NaptienPage() {
             <Modal
                 show={showNoteModal && configWeb?.notenaptien}
                 onHide={() => setShowNoteModal(false)}
+                backdrop="static"
+                keyboard={false}
                 size="lg"
             >
                 <Modal.Header closeButton className="bg-info text-white">

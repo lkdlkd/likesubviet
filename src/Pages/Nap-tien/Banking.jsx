@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useOutletContext } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
-
+import Swal from "sweetalert2";
 export default function Banking({ banking = [], depositCode, onGenerateNewCode }) {
     const { configWeb } = useOutletContext();
     const cuphap = configWeb?.cuphap;
@@ -88,7 +88,8 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
         const separator = baseDeeplink.includes('?') ? '&' : '?';
         // Lấy mã ngân hàng từ bank.bank_code hoặc rút gọn từ bank.bank_name
         const bankCode = bank.bank_code || bank.bank_name?.toLowerCase().replace(/\s+/g, '');
-        const params = `ba=${bank.account_number}@${bankCode}&am=${amount || ''}&tn=${encodeURIComponent(`${cuphap} ${depositCode}`.trim())}&bn=${encodeURIComponent(bank.account_name || '')}`;
+        const transferContent = cuphap ? `${cuphap} ${depositCode}` : depositCode;
+        const params = `ba=${bank.account_number}@${bankCode}&am=${amount || ''}&tn=${encodeURIComponent(transferContent || '')}&bn=${encodeURIComponent(bank.account_name || '')}`;
         return baseDeeplink + separator + params;
     };
 
@@ -148,6 +149,21 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
 
     const handleGenerateNewCode = async () => {
         if (!onGenerateNewCode) return;
+
+        // Hỏi xác nhận trước khi tạo mã mới
+        const result = await Swal.fire({
+            title: 'Xác nhận tạo mã nạp tiền mới',
+            text: 'Nếu đã chuyển khoản bằng mã hiện tại thì vui lòng không tạo mã mới để tránh không cộng tiền',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy bỏ'
+        });
+
+        if (!result.isConfirmed) return;
+
         setIsGenerating(true);
         try {
             await onGenerateNewCode();
@@ -468,11 +484,11 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
                                             </td>
                                             <td>
                                                 <div className="account-info">
-                                                    <span>{cuphap} {depositCode || 'Đang tải...'}</span>
+                                                    <span>{cuphap ? `${cuphap} ${depositCode || 'Đang tải...'}` : (depositCode || 'Đang tải...')}</span>
                                                     <div> <button
                                                         type="button"
                                                         className="btn btn-outline-primary btn-sm btn-copy"
-                                                        onClick={() => handleCopy(`${cuphap} ${depositCode}`)}
+                                                        onClick={() => handleCopy(cuphap ? `${cuphap} ${depositCode}` : depositCode)}
                                                         title="Sao chép nội dung chuyển khoản"
                                                         disabled={!depositCode}
                                                     >
@@ -552,7 +568,7 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
                                     <img
                                         src={`https://img.vietqr.io/image/${bank.bank_name}-${bank.account_number}-qronly2.jpg?accountName=${encodeURIComponent(
                                             bank.account_name
-                                        )}&addInfo=${encodeURIComponent(`${cuphap} ${depositCode || ''}`)}`}
+                                        )}&addInfo=${encodeURIComponent(cuphap ? `${cuphap} ${depositCode || ''}` : (depositCode || ''))}`}
                                         alt="QR CODE"
                                         width={280}
                                         height={280}

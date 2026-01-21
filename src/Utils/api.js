@@ -1066,7 +1066,7 @@ export const deletePromotion = async (id, token) => {
   });
   return handleResponse(response);
 };
-export const getTransactions = async (token, page = 1, limit = 10, username = "", transactionID = "") => {
+export const getTransactions = async (token, page = 1, limit = 10, username = "", transactionID = "", code = "") => {
   // Xây dựng query string
   const queryParams = new URLSearchParams({
     page,
@@ -1081,9 +1081,27 @@ export const getTransactions = async (token, page = 1, limit = 10, username = ""
     queryParams.append("transactionID", transactionID);
   }
 
+  if (code) {
+    queryParams.append("code", code);
+  }
+
   const response = await fetchWithAuth(`${API_BASE}/transactions?${queryParams.toString()}`, {
     method: "GET",
     headers: withNoStore({}),
+    cache: "no-store",
+  });
+
+  return handleResponse(response);
+};
+
+// Manual deposit - Admin cộng tiền thủ công
+export const manualDeposit = async (depositCode, amount) => {
+  const response = await fetchWithAuth(`${API_BASE}/transactions/manual-deposit`, {
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify({ depositCode, amount }),
     cache: "no-store",
   });
 

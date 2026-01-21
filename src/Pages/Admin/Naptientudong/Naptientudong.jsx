@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { getTransactions } from "@/Utils/api";
+import { getTransactions, manualDeposit } from "@/Utils/api";
 import Table from "react-bootstrap/Table";
-import moment from "moment";
+import Modal from "react-bootstrap/Modal";
+import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading";
 
 export default function Naptientudong() {
@@ -13,13 +14,24 @@ export default function Naptientudong() {
     const [hasMore, setHasMore] = useState(false); // Kiểm tra xem còn dữ liệu để phân trang không
     const [searchInput, setSearchInput] = useState(""); // Giá trị nhập vào ô tìm kiếm
     const [search, setSearch] = useState(""); // Giá trị tìm kiếm thực tế (khi nhấn nút)
+    const [searchType, setSearchType] = useState("username"); // Loại tìm kiếm: username, transactionID, code
+
+    // Modal state
+    const [showModal, setShowModal] = useState(false);
+    const [modalDepositCode, setModalDepositCode] = useState("");
+    const [modalAmount, setModalAmount] = useState("");
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const fetchTransactions = async () => {
         setLoading(true);
         loadingg("Đang tải danh sách giao dịch...", true, 9999999);
         try {
             const token = localStorage.getItem("token"); // Lấy token từ localStorage
-            const data = await getTransactions(token, page, limit, search); // Gọi API với page, limit và search
+            // Truyền params theo loại tìm kiếm
+            const username = searchType === "username" ? search : "";
+            const transactionID = searchType === "transactionID" ? search : "";
+            const code = searchType === "code" ? search : "";
+            const data = await getTransactions(token, page, limit, username, transactionID, code);
             setTransactions(data); // Lưu danh sách giao dịch
             setHasMore(data.length === limit); // Nếu số lượng giao dịch trả về bằng `limit`, có thể còn dữ liệu
         } catch (err) {
@@ -32,12 +44,52 @@ export default function Naptientudong() {
 
     useEffect(() => {
         fetchTransactions();
-    }, [page, limit, search]); // Gọi lại API khi page, limit hoặc search thay đổi
+    }, [page, limit, search, searchType]); // Gọi lại API khi page, limit, search hoặc searchType thay đổi
 
     const handleSearch = () => {
         setError(null); // Xóa lỗi trước khi tìm kiếm
         setPage(1); // Reset về trang đầu tiên khi tìm kiếm
         setSearch(searchInput); // Cập nhật giá trị tìm kiếm thực tế
+    };
+
+    // Modal handlers
+    const handleOpenModal = () => {
+        setModalDepositCode("");
+        setModalAmount("");
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setModalDepositCode("");
+        setModalAmount("");
+    };
+
+    const handleManualDeposit = async () => {
+        if (!modalDepositCode.trim()) {
+            toast.error("Vui lòng nhập mã nạp tiền");
+            return;
+        }
+        if (!modalAmount || parseFloat(modalAmount) <= 0) {
+            toast.error("Vui lòng nhập số tiền hợp lệ");
+            return;
+        }
+
+        setIsProcessing(true);
+        try {
+            const result = await manualDeposit(modalDepositCode.trim(), parseFloat(modalAmount));
+            if (result.success) {
+                toast.success(result.message);
+                handleCloseModal();
+                fetchTransactions(); // Refresh danh sách
+            } else {
+                toast.error(result.message || "Có lỗi xảy ra");
+            }
+        } catch (err) {
+            toast.error(err.message || "Có lỗi xảy ra khi cộng tiền");
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     return (
@@ -261,6 +313,23 @@ export default function Naptientudong() {
                         margin: 0;
                         color: #495057;
                     }
+
+                    .btn-manual-deposit {
+                        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                        border: none;
+                        color: white;
+                        padding: 0.6rem 1.2rem;
+                        border-radius: 8px;
+                        font-weight: 500;
+                        font-size: 14px;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .btn-manual-deposit:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                        color: white;
+                    }
                     
                     @media (max-width: 768px) {
                         .recharge-container {
@@ -327,18 +396,35 @@ export default function Naptientudong() {
                                         <option value={500}>500</option>
                                     </select>
                                 </div>
+                                <div className="recharge-control-group">
+                                    <select
+                                        className="form-select recharge-form-control"
+                                        value={searchType}
+                                        onChange={(e) => setSearchType(e.target.value)}
+                                        style={{ minWidth: '140px' }}
+                                    >
+                                        <option value="username">Username</option>
+                                        <option value="code">Mã nạp tiền</option>
+                                        <option value="transactionID">Mã giao dịch</option>
+                                    </select>
+                                </div>
                                 <div className="recharge-search-group">
                                     <input
                                         type="text"
                                         className="form-control recharge-search-input"
-                                        placeholder="Tìm kiếm theo username"
+                                        placeholder={`Tìm kiếm theo ${searchType === 'username' ? 'username' : searchType === 'code' ? 'mã nạp tiền' : 'mã giao dịch'}`}
                                         value={searchInput}
                                         onChange={(e) => setSearchInput(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                                     />
                                     <button className="btn recharge-search-btn" onClick={handleSearch}>
                                         <i className="fas fa-search"></i>
                                     </button>
                                 </div>
+                                <button className="btn btn-manual-deposit" onClick={handleOpenModal}>
+                                    <i className="fas fa-plus-circle me-2"></i>
+                                    Cộng tiền thủ công
+                                </button>
                             </div>
                             {loading ? (
                                 <div className="recharge-loading">
@@ -352,6 +438,7 @@ export default function Naptientudong() {
                                             <th>#</th>
                                             <th>Ngân hàng</th>
                                             <th>Username</th>
+                                            <th>Mã nạp tiền</th>
                                             <th>Mã giao dịch</th>
                                             <th>Số tiền</th>
                                             <th>Trạng thái</th>
@@ -361,7 +448,7 @@ export default function Naptientudong() {
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td colSpan={8} className="text-center">
+                                            <td colSpan={9} className="text-center">
                                                 <div className="recharge-empty-state">
                                                     <div className="recharge-empty-icon">
                                                         <svg width="184" height="152" viewBox="0 0 184 152" xmlns="http://www.w3.org/2000/svg"><g fill="none" fillRule="evenodd"><g transform="translate(24 31.67)"><ellipse fillOpacity=".8" fill="#F5F5F7" cx="67.797" cy="106.89" rx="67.797" ry="12.668"></ellipse><path d="M122.034 69.674L98.109 40.229c-1.148-1.386-2.826-2.225-4.593-2.225h-51.44c-1.766 0-3.444.839-4.592 2.225L13.56 69.674v15.383h108.475V69.674z" fill="#AEB8C2"></path><path d="M101.537 86.214L80.63 61.102c-1.001-1.207-2.507-1.867-4.048-1.867H31.724c-1.54 0-3.047.66-4.048 1.867L6.769 86.214v13.792h94.768V86.214z" fill="url(#linearGradient-1)" transform="translate(13.56)"></path><path d="M33.83 0h67.933a4 4 0 0 1 4 4v93.344a4 4 0 0 1-4 4H33.83a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z" fill="#F5F5F7"></path><path d="M42.678 9.953h50.237a2 2 0 0 1 2 2V36.91a2 2 0 0 1-2 2H42.678a2 2 0 0 1-2-2V11.953a2 2 0 0 1 2-2zM42.94 49.767h49.713a2.262 2.262 0 1 1 0 4.524H42.94a2.262 2.262 0 0 1 0-4.524zM42.94 61.53h49.713a2.262 2.262 0 1 1 0 4.525H42.94a2.262 2.262 0 0 1 0-4.525zM121.813 105.032c-.775 3.071-3.497 5.36-6.735 5.36H20.515c-3.238 0-5.96-2.29-6.734-5.36a7.309 7.309 0 0 1-.222-1.79V69.675h26.318c2.907 0 5.25 2.448 5.25 5.42v.04c0 2.971 2.37 5.37 5.277 5.37h34.785c2.907 0 5.277-2.421 5.277-5.393V75.1c0-2.972 2.343-5.426 5.25-5.426h26.318v33.569c0 .617-.077 1.216-.221 1.789z" fill="#DCE0E6"></path></g><path d="M149.121 33.292l-6.83 2.65a1 1 0 0 1-1.317-1.23l1.937-6.207c-2.589-2.944-4.109-6.534-4.109-10.408C138.802 8.102 148.92 0 161.402 0 173.881 0 184 8.102 184 18.097c0 9.995-10.118 18.097-22.599 18.097-4.528 0-8.744-1.066-12.28-2.902z" fill="#DCE0E6"></path><g transform="translate(149.65 15.383)" fill="#FFF"><ellipse cx="20.654" cy="3.167" rx="2.849" ry="2.815"></ellipse><path d="M5.698 5.63H0L2.898.704zM9.259.704h4.985V5.63H9.259z"></path></g></g></svg>
@@ -381,6 +468,7 @@ export default function Naptientudong() {
                                                 <th>Ngân hàng</th>
                                                 <th>Số tài khoản</th>
                                                 <th>Username</th>
+                                                <th>Mã nạp tiền</th>
                                                 <th>Mã giao dịch</th>
                                                 <th>Số tiền</th>
                                                 <th>Trạng thái</th>
@@ -396,8 +484,9 @@ export default function Naptientudong() {
                                                         <td>{transaction.typeBank || "N/A"}</td>
                                                         <td>{transaction.accountNumber || "N/A"}</td>
                                                         <td>{transaction.username || "N/A"}</td>
+                                                        <td>{transaction.code || "N/A"}</td>
                                                         <td>{transaction.transactionID || "N/A"}</td>
-                                                        <td>{transaction.amount || "N/A"}</td>
+                                                        <td>{transaction.amount ? Number(transaction.amount).toLocaleString('en-US') : "N/A"}</td>
                                                         <td>
                                                             {transaction.status === "COMPLETED" ? (
                                                                 <span className="badge bg-success">Thành công</span>
@@ -420,7 +509,7 @@ export default function Naptientudong() {
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    <td colSpan="8" className="text-center">
+                                                    <td colSpan="10" className="text-center">
                                                         Không có giao dịch nào.
                                                     </td>
                                                 </tr>
@@ -452,6 +541,75 @@ export default function Naptientudong() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal Cộng tiền thủ công */}
+            <Modal show={showModal} onHide={handleCloseModal} centered>
+                <Modal.Header closeButton style={{ background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)', color: 'white' }}>
+                    <Modal.Title>
+                        <i className="fas fa-plus-circle me-2"></i>
+                        Cộng tiền thủ công
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Mã nạp tiền <span className="text-danger">*</span></label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Nhập mã nạp tiền (6 ký tự)"
+                            value={modalDepositCode}
+                            onChange={(e) => setModalDepositCode(e.target.value.toUpperCase())}
+                            maxLength={6}
+                            style={{ textTransform: 'uppercase' }}
+                        />
+                        <small className="text-muted">Nhập mã nạp tiền của user cần cộng tiền</small>
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Số tiền <span className="text-danger">*</span></label>
+                        <div className="input-group">
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Nhập số tiền"
+                                value={modalAmount ? Number(modalAmount).toLocaleString('en-US') : ''}
+                                onChange={(e) => setModalAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                            />
+                            <span className="input-group-text">VNĐ</span>
+                        </div>
+                    </div>
+                    <div className="alert alert-info mb-0">
+                        <i className="fas fa-info-circle me-2"></i>
+                        <strong>Lưu ý:</strong>
+                        <ul className="mb-0 mt-2">
+                            <li>Nếu mã nạp tiền không tồn tại, hệ thống sẽ báo lỗi</li>
+                            <li>Nếu mã đã được cộng tiền trước đó, hệ thống sẽ từ chối</li>
+                            <li>Sau khi cộng tiền, mã nạp tiền của user sẽ được đổi mới</li>
+                        </ul>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <button className="btn btn-secondary" onClick={handleCloseModal} disabled={isProcessing}>
+                        Hủy
+                    </button>
+                    <button
+                        className="btn btn-success"
+                        onClick={handleManualDeposit}
+                        disabled={isProcessing || !modalDepositCode.trim() || !modalAmount}
+                    >
+                        {isProcessing ? (
+                            <>
+                                <i className="fas fa-spinner fa-spin me-2"></i>
+                                Đang xử lý...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fas fa-check me-2"></i>
+                                Cộng tiền
+                            </>
+                        )}
+                    </button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 }
