@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { register, getRecaptchaSiteKey } from "@/Utils/api";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link } from "react-router-dom";
@@ -14,8 +14,18 @@ export default function Register() {
     const [siteKey, setSiteKey] = useState("");
     const [siteKeyLoading, setSiteKeyLoading] = useState(true);
     const [recaptchaReady, setRecaptchaReady] = useState(false);
+    const [referralCode, setReferralCode] = useState("");
     const recaptchaRef = useRef(null);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    // Lấy referral code từ URL
+    useEffect(() => {
+        const ref = searchParams.get('ref');
+        if (ref) {
+            setReferralCode(ref.toUpperCase());
+        }
+    }, [searchParams]);
 
     // Lấy site key từ backend
     useEffect(() => {
@@ -69,7 +79,7 @@ export default function Register() {
         }
 
         try {
-            const data = await register({ username, password, recaptchaToken });
+            const data = await register({ username, password, recaptchaToken, referralCode: referralCode || undefined });
             setSuccess(data.message || "Đăng ký thành công!"); // Hiển thị thông báo đăng ký thành công
             setTimeout(() => {
                 navigate("/dang-nhap"); // Chuyển hướng về trang đăng nhập sau khi đăng ký thành công

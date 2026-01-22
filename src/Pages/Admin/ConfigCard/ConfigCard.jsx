@@ -11,6 +11,7 @@ const ConfigCard = () => {
     RATE: "",
   });
   const [loading, setLoading] = useState(false);
+  const callback = `${process.env.REACT_APP_API_BASE}/api/charge/callback`;
   const fetchConfigCard = async () => {
     try {
       loadingg("Đang tải cấu hình thẻ nạp...", true, 9999999);
@@ -147,6 +148,25 @@ const ConfigCard = () => {
                   setFormData({ ...formData, RATE: e.target.value })
                 }
                 placeholder="Nhập chiết khấu không nhỏ hơn 1"
+                style={{
+                  borderRadius: '8px',
+                  border: '1px solid #dee2e6',
+                  padding: '0.6rem 1rem',
+                  fontSize: '14px',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label fw-semibold">
+                <i className="fas fa-percentage me-2 text-danger"></i>
+                Callback
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                value={callback}
+                disabled
                 style={{
                   borderRadius: '8px',
                   border: '1px solid #dee2e6',

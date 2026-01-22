@@ -362,6 +362,16 @@ function MenuUser({ user, categories, configWeb }) {
                                                         <span className="pc-mtext">Cài đặt khuyễn mãi</span>
                                                     </Link>
                                                 </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/affiliate" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Cấu hình Affiliate</span>
+                                                    </Link>
+                                                </li>
+                                                <li className="pc-item">
+                                                    <Link to="/admin/affiliate-commissions" onClick={() => handleNavigation()} className="pc-link">
+                                                        <span className="pc-mtext">Duyệt hoa hồng</span>
+                                                    </Link>
+                                                </li>
                                                 {/* <li className="pc-item">
                                                 <Link to="/admin/setting-thecao" className="pc-link">
                                                     <span className="pc-mtext">Cấu hình nạp thẻ</span>
@@ -531,6 +541,14 @@ function MenuUser({ user, categories, configWeb }) {
                                                 style={{ cursor: "pointer" }}
                                             >
                                                 <span className="pc-mtext">Tạo Web Riêng</span>
+                                            </Link>
+                                        </li>
+                                        <li className="pc-item">
+                                            <Link to="/affiliate" className="pc-link"
+                                                onClick={() => handleNavigation()}
+                                                style={{ cursor: "pointer" }}
+                                            >
+                                                <span className="pc-mtext">Giới thiệu nhận tiền</span>
                                             </Link>
                                         </li>
                                         <li className="pc-item">

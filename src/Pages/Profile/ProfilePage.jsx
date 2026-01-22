@@ -3,6 +3,7 @@ import { useState } from "react";
 import ProfileInfo from "./ProfileInfo";
 import ChangePasswordForm from "./ChangePasswordForm";
 import TwoFASettings from "./TwoFASettings";
+import AffiliatePanel from "./AffiliatePanel";
 
 export default function ProfilePage() {
     const { user, token, configWeb } = useOutletContext();
@@ -47,6 +48,17 @@ export default function ProfilePage() {
                             >
                                 <i className="fas fa-shield-alt me-2"></i>
                                 Bảo mật
+                            </button>
+                        </li>
+                        <li className="nav-item" role="presentation">
+                            <button
+                                className={`nav-link ${activeTab === 'affiliate' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('affiliate')}
+                                type="button"
+                                role="tab"
+                            >
+                                <i className="fas fa-users me-2"></i>
+                                Affiliate
                             </button>
                         </li>
                     </ul>
@@ -213,6 +225,13 @@ export default function ProfilePage() {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Affiliate Tab */}
+                        {activeTab === 'affiliate' && (
+                            <div className="tab-pane fade show active">
+                                <AffiliatePanel token={token} />
                             </div>
                         )}
                     </div>

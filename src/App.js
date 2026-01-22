@@ -34,6 +34,9 @@ import OrderAdmin from "./Pages/Admin/Donhang/OrderAdmin";
 import Webrieng from "./Pages/Webrieng/Webrieng";
 import ScheduledOrders from "./Pages/Muadon/ScheduledOrders";
 import AdminChat from "./Pages/Admin/Chat/AdminChat";
+import AffiliateAdmin from "./Pages/Admin/Affiliate/AffiliateAdmin";
+import AffiliateCommissions from "./Pages/Admin/Affiliate/AffiliateCommissions";
+import AffiliatePanel from "./Pages/Profile/AffiliatePanel";
 function App() {
   const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
@@ -41,103 +44,106 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
-        <Routes>
-          {/* Landing Page - hiển thị khi chưa có token */}
-          <Route
-            path="/"
-            element={
-              <AuthContext.Consumer>
-                {({ auth }) =>
-                  auth.token ? <Navigate to="/home" replace /> : <Langding />
-                }
-              </AuthContext.Consumer>
-            }
-          />
-          {/* <Route path="/landing" element={<Langding />} /> */}
+          <Routes>
+            {/* Landing Page - hiển thị khi chưa có token */}
+            <Route
+              path="/"
+              element={
+                <AuthContext.Consumer>
+                  {({ auth }) =>
+                    auth.token ? <Navigate to="/home" replace /> : <Langding />
+                  }
+                </AuthContext.Consumer>
+              }
+            />
+            {/* <Route path="/landing" element={<Langding />} /> */}
 
-          {/* Routes không có Layout */}
-          <Route path="/dang-nhap" element={<Login />} />
-          <Route path="/dang-ky" element={<Register />} />
+            {/* Routes không có Layout */}
+            <Route path="/dang-nhap" element={<Login />} />
+            <Route path="/dang-ky" element={<Register />} />
 
-          {/* Routes cho User Layout */}
-          <Route
-            path="/home"
-            element={
-              <AuthContext.Consumer>
-                {({ auth }) =>
-                  auth.token ? <Layout /> : <Navigate to="/" />
-                }
-              </AuthContext.Consumer>
-            }
-          >
-            <Route index element={<Home />} />
-          </Route>
+            {/* Routes cho User Layout */}
+            <Route
+              path="/home"
+              element={
+                <AuthContext.Consumer>
+                  {({ auth }) =>
+                    auth.token ? <Layout /> : <Navigate to="/" />
+                  }
+                </AuthContext.Consumer>
+              }
+            >
+              <Route index element={<Home />} />
+            </Route>
 
-          {/* User routes with Layout */}
-          <Route
-            path="/"
-            element={
-              <AuthContext.Consumer>
-                {({ auth }) =>
-                  auth.token ? <Layout /> : <Navigate to="/" />
-                }
-              </AuthContext.Consumer>
-            }
-          >
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/nap-tien" element={<NaptienPage />} />
-            <Route path="/lich-su-hoat-dong" element={<HistoryPage />} />
-            <Route path="/order" element={<Ordernhanh />} />
-            <Route path="/danh-sach-don" element={<Danhsachdon />} />
-            <Route path="/scheduled" element={<ScheduledOrders />} />
-            <Route path="/order/:path" element={<Order />} />
-            <Route path="/tai-lieu-api" element={<Tailieuapi />} />
-            <Route path="/bang-gia" element={<Banggia />} />
-            <Route path="/tao-web-rieng" element={<Webrieng />} />
-          </Route>
+            {/* User routes with Layout */}
+            <Route
+              path="/"
+              element={
+                <AuthContext.Consumer>
+                  {({ auth }) =>
+                    auth.token ? <Layout /> : <Navigate to="/" />
+                  }
+                </AuthContext.Consumer>
+              }
+            >
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/nap-tien" element={<NaptienPage />} />
+              <Route path="/lich-su-hoat-dong" element={<HistoryPage />} />
+              <Route path="/order" element={<Ordernhanh />} />
+              <Route path="/danh-sach-don" element={<Danhsachdon />} />
+              <Route path="/scheduled" element={<ScheduledOrders />} />
+              <Route path="/order/:path" element={<Order />} />
+              <Route path="/tai-lieu-api" element={<Tailieuapi />} />
+              <Route path="/bang-gia" element={<Banggia />} />
+              <Route path="/tao-web-rieng" element={<Webrieng />} />
+              <Route path="/affiliate" element={<AffiliatePanel />} />
+            </Route>
 
-          {/* Routes cho Admin Layout */}
-          <Route
-            path="/admin"
-            element={
-              <AuthContext.Consumer>
-                {({ auth }) =>
-                  auth.token && auth.role === "admin" ? (
-                    <Layout />
-                  ) : (
-                    <Navigate to="/404" />
-                  )
-                }
-              </AuthContext.Consumer>
-            }
-          >
-            <Route path="/admin/thongke" element={<ThongkePage />} />
-            <Route index element={<Navigate to="/admin/thongke" replace />} />
-            <Route path="/admin/tai-khoan" element={<TaikhoanPage />} />
-            <Route path="/admin/taothongbao" element={<Taothongbaopage />} />
-            <Route path="/admin/bank-king" element={<BankingAdmin />} />
-            <Route path="/admin/doitac" element={<Doitacpage />} />
-            <Route path="/admin/nen-tang" element={<PlatformsPage />} />
-            {!isAllowedApiUrl && (
-              <Route path="/admin/dich-vu" element={<CategoriesPage />} />
-            )}
-            <Route path="/admin/server" element={<Dichvupage />} />
-            <Route path="/admin/setting" element={<Setting />} />
-            {/* <Route path="/admin/setting-thecao" element={<ConfigCard />} /> */}
-            <Route path="/admin/khuyen-mai" element={<Khuyenmai />} />
-            <Route path="/admin/nap-tien-tu-dong" element={<Naptientudong />} />
-            <Route path="/admin/config-tele" element={<ConfigTelePage />} />
-            <Route path="/admin/refund" element={<Refund />} />
-            <Route path="/admin/orders" element={<OrderAdmin />} />
-            <Route path="/admin/chat" element={<AdminChat />} />
-          </Route>
+            {/* Routes cho Admin Layout */}
+            <Route
+              path="/admin"
+              element={
+                <AuthContext.Consumer>
+                  {({ auth }) =>
+                    auth.token && auth.role === "admin" ? (
+                      <Layout />
+                    ) : (
+                      <Navigate to="/404" />
+                    )
+                  }
+                </AuthContext.Consumer>
+              }
+            >
+              <Route path="/admin/thongke" element={<ThongkePage />} />
+              <Route index element={<Navigate to="/admin/thongke" replace />} />
+              <Route path="/admin/tai-khoan" element={<TaikhoanPage />} />
+              <Route path="/admin/taothongbao" element={<Taothongbaopage />} />
+              <Route path="/admin/bank-king" element={<BankingAdmin />} />
+              <Route path="/admin/doitac" element={<Doitacpage />} />
+              <Route path="/admin/nen-tang" element={<PlatformsPage />} />
+              {!isAllowedApiUrl && (
+                <Route path="/admin/dich-vu" element={<CategoriesPage />} />
+              )}
+              <Route path="/admin/server" element={<Dichvupage />} />
+              <Route path="/admin/setting" element={<Setting />} />
+              {/* <Route path="/admin/setting-thecao" element={<ConfigCard />} /> */}
+              <Route path="/admin/khuyen-mai" element={<Khuyenmai />} />
+              <Route path="/admin/nap-tien-tu-dong" element={<Naptientudong />} />
+              <Route path="/admin/config-tele" element={<ConfigTelePage />} />
+              <Route path="/admin/refund" element={<Refund />} />
+              <Route path="/admin/orders" element={<OrderAdmin />} />
+              <Route path="/admin/chat" element={<AdminChat />} />
+              <Route path="/admin/affiliate" element={<AffiliateAdmin />} />
+              <Route path="/admin/affiliate-commissions" element={<AffiliateCommissions />} />
+            </Route>
 
-          {/* 404 Not Found */}
-          <Route path="/404" element={<NotFoundPage />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+            {/* 404 Not Found */}
+            <Route path="/404" element={<NotFoundPage />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

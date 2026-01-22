@@ -1130,3 +1130,69 @@ export const updateConfigTele = async (data, token) => {
   });
   return handleResponse(response);
 };
+
+// ==================== AFFILIATE APIs ====================
+// Lấy thông tin affiliate của user
+export const getAffiliateInfo = async (token) => {
+  const response = await fetchWithAuth(`${API_BASE}/affiliate/info`, {
+    method: "GET",
+    headers: withNoStore({}),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Lấy danh sách người đã giới thiệu
+export const getAffiliateReferrals = async (token, page = 1, limit = 10, level = 1) => {
+  const queryString = `?page=${page}&limit=${limit}&level=${level}`;
+  const response = await fetchWithAuth(`${API_BASE}/affiliate/referrals${queryString}`, {
+    method: "GET",
+    headers: withNoStore({}),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Lấy hoa hồng đang chờ duyệt của user
+export const getMyPendingCommissions = async (token) => {
+  const response = await fetchWithAuth(`${API_BASE}/affiliate/pending`, {
+    method: "GET",
+    headers: withNoStore({}),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// ==================== ADMIN AFFILIATE APIs ====================
+// Lấy danh sách commission (admin)
+export const getAffiliateCommissions = async (token, status = 'pending', page = 1, limit = 20) => {
+  const queryString = `?status=${status}&page=${page}&limit=${limit}`;
+  const response = await fetchWithAuth(`${API_BASE}/admin/affiliate/commissions${queryString}`, {
+    method: "GET",
+    headers: withNoStore({}),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Duyệt hoa hồng (admin)
+export const approveAffiliateCommission = async (token, commissionId) => {
+  const response = await fetchWithAuth(`${API_BASE}/admin/affiliate/approve/${commissionId}`, {
+    method: "POST",
+    headers: withNoStore({ "Content-Type": "application/json" }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Từ chối hoa hồng (admin)
+export const rejectAffiliateCommission = async (token, commissionId, reason = '') => {
+  const response = await fetchWithAuth(`${API_BASE}/admin/affiliate/reject/${commissionId}`, {
+    method: "POST",
+    headers: withNoStore({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ reason }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
