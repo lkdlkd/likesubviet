@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAffiliateInfo, getAffiliateReferrals, getMyPendingCommissions } from '@/Utils/api';
 import Table from "react-bootstrap/Table";
+import { useOutletContext } from "react-router-dom";
 
 export default function AffiliatePanel({ token }) {
     const [affiliateInfo, setAffiliateInfo] = useState(null);
@@ -10,6 +11,7 @@ export default function AffiliatePanel({ token }) {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [pendingInfo, setPendingInfo] = useState({ totalPending: 0, count: 0, pendingCommissions: [] });
+    const { configWeb } = useOutletContext();
 
     useEffect(() => {
         fetchAffiliateInfo();
@@ -298,15 +300,6 @@ export default function AffiliatePanel({ token }) {
                                                 </button>
                                             </div>
                                         </div>
-
-                                        {affiliateInfo.referredByCode && (
-                                            <div className="aff-alert">
-                                                <small>
-                                                    <i className="fas fa-user-friends me-2"></i>
-                                                    Bạn được giới thiệu bởi: <strong>{affiliateInfo.referredByCode}</strong>
-                                                </small>
-                                            </div>
-                                        )}
                                     </>
                                 ) : (
                                     <div className="text-center py-3" style={{ color: 'var(--aff-text-secondary)' }}>
@@ -363,6 +356,29 @@ export default function AffiliatePanel({ token }) {
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Chính sách hoa hồng */}
+                    <div className="col-12 mb-4">
+                        <div className="aff-alert">
+                            <div className="d-flex align-items-center gap-3 flex-wrap">
+                                <div className="d-flex align-items-center gap-2">
+                                    <i className="fas fa-info-circle" style={{ color: 'var(--aff-primary)', fontSize: '1.25rem' }}></i>
+                                    <strong>Chính sách hoa hồng:</strong>
+                                </div>
+                                <div className="d-flex align-items-center gap-3 flex-wrap">
+                                    <span>
+                                        khi người được giới thiệu nạp tiền vào tài khoản thành công.
+                                    </span>
+                                    <i className="fas fa-wallet me-1" style={{ color: 'var(--aff-warning)' }}></i>
+                                    Nạp tối thiểu: <strong style={{ color: 'var(--aff-warning)' }}>{formatMoney(configWeb?.affiliateMinDeposit || 0)} đ</strong>
+                                    <span>
+                                        bạn sẽ nhận được hoa hồng
+                                    </span>
+                                    Tỷ lệ: <strong style={{ color: 'var(--aff-success)' }}>{configWeb?.affiliateCommissionPercent || 0}%</strong>
                                 </div>
                             </div>
                         </div>
