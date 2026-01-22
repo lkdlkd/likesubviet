@@ -1196,3 +1196,60 @@ export const rejectAffiliateCommission = async (token, commissionId, reason = ''
   return handleResponse(response);
 };
 
+// ==================== COMMISSION WITHDRAWAL APIs ====================
+// User: Yêu cầu rút hoa hồng
+export const requestCommissionWithdrawal = async (data, token) => {
+  const response = await fetchWithAuth(`${API_BASE}/affiliate/withdraw`, {
+    method: "POST",
+    headers: withNoStore({ "Content-Type": "application/json" }),
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// User: Xem lịch sử rút hoa hồng
+export const getMyWithdrawals = async (token, page = 1, limit = 10, status = '') => {
+  let queryString = `?page=${page}&limit=${limit}`;
+  if (status) queryString += `&status=${status}`;
+  const response = await fetchWithAuth(`${API_BASE}/affiliate/withdrawals${queryString}`, {
+    method: "GET",
+    headers: withNoStore({}),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Admin: Lấy danh sách yêu cầu rút
+export const getAdminWithdrawals = async (token, status = 'pending', page = 1, limit = 20, search = '') => {
+  let queryString = `?status=${status}&page=${page}&limit=${limit}`;
+  if (search) queryString += `&search=${encodeURIComponent(search)}`;
+  const response = await fetchWithAuth(`${API_BASE}/admin/affiliate/withdrawals${queryString}`, {
+    method: "GET",
+    headers: withNoStore({}),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Admin: Duyệt yêu cầu rút
+export const approveWithdrawal = async (token, id, adminNote = '') => {
+  const response = await fetchWithAuth(`${API_BASE}/admin/affiliate/withdraw/approve/${id}`, {
+    method: "POST",
+    headers: withNoStore({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ adminNote }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
+// Admin: Từ chối yêu cầu rút
+export const rejectWithdrawal = async (token, id, adminNote = '') => {
+  const response = await fetchWithAuth(`${API_BASE}/admin/affiliate/withdraw/reject/${id}`, {
+    method: "POST",
+    headers: withNoStore({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ adminNote }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};

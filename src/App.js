@@ -37,6 +37,7 @@ import AdminChat from "./Pages/Admin/Chat/AdminChat";
 import AffiliateAdmin from "./Pages/Admin/Affiliate/AffiliateAdmin";
 import AffiliateCommissions from "./Pages/Admin/Affiliate/AffiliateCommissions";
 import AffiliatePanel from "./Pages/Profile/AffiliatePanel";
+import WithdrawalRequests from "./Pages/Admin/Affiliate/WithdrawalRequests";
 function App() {
   const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
 
@@ -136,6 +137,7 @@ function App() {
               <Route path="/admin/chat" element={<AdminChat />} />
               <Route path="/admin/affiliate" element={<AffiliateAdmin />} />
               <Route path="/admin/affiliate-commissions" element={<AffiliateCommissions />} />
+              <Route path="/admin/withdrawal-requests" element={<WithdrawalRequests />} />
             </Route>
 
             {/* 404 Not Found */}

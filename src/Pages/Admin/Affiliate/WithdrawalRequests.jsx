@@ -1,29 +1,31 @@
 import React, { useState, useEffect } from "react";
-import { getAffiliateCommissions, approveAffiliateCommission, rejectAffiliateCommission } from "@/Utils/api";
+import { getAdminWithdrawals, approveWithdrawal, rejectWithdrawal } from "@/Utils/api";
 import { toast } from "react-toastify";
 import { loadingg } from "@/JS/Loading";
 import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
 
-const AffiliateCommissions = () => {
-    const [commissions, setCommissions] = useState([]);
+const WithdrawalRequests = () => {
+    const [withdrawals, setWithdrawals] = useState([]);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('pending');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
+    const [search, setSearch] = useState('');
+    const [searchKey, setSearchKey] = useState(''); // trigger fetch
 
-    const fetchCommissions = async () => {
+    const fetchWithdrawals = async () => {
         try {
             setLoading(true);
             loadingg("Đang tải...", true, 9999999);
             const token = localStorage.getItem("token");
-            const data = await getAffiliateCommissions(token, status, page, 20);
-            setCommissions(data.commissions || []);
+            const data = await getAdminWithdrawals(token, status, page, 20, searchKey);
+            setWithdrawals(data.withdrawals || []);
             setTotalPages(data.totalPages || 1);
             setTotal(data.total || 0);
         } catch (error) {
-            toast.error("Không thể tải danh sách hoa hồng!");
+            toast.error("Không thể tải danh sách!");
         } finally {
             setLoading(false);
             loadingg("", false);
@@ -31,13 +33,25 @@ const AffiliateCommissions = () => {
     };
 
     useEffect(() => {
-        fetchCommissions();
-    }, [status, page]);
+        fetchWithdrawals();
+    }, [status, page, searchKey]);
 
-    const handleApprove = async (commissionId) => {
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setPage(1);
+        setSearchKey(search); // trigger useEffect
+    };
+
+    const handleClearSearch = () => {
+        setSearch('');
+        setSearchKey('');
+        setPage(1);
+    };
+
+    const handleApprove = async (id) => {
         const result = await Swal.fire({
             title: 'Xác nhận duyệt?',
-            text: "Số tiền sẽ được cộng vào tài khoản người nhận!",
+            text: "Nếu rút về số dư, tiền sẽ được cộng vào tài khoản user!",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#22c55e',
@@ -50,9 +64,9 @@ const AffiliateCommissions = () => {
             try {
                 loadingg("Đang xử lý...", true, 9999999);
                 const token = localStorage.getItem("token");
-                const data = await approveAffiliateCommission(token, commissionId);
+                const data = await approveWithdrawal(token, id);
                 toast.success(data.message || "Duyệt thành công!");
-                fetchCommissions();
+                fetchWithdrawals();
             } catch (error) {
                 toast.error(error.message || "Có lỗi xảy ra!");
             } finally {
@@ -61,16 +75,16 @@ const AffiliateCommissions = () => {
         }
     };
 
-    const handleReject = async (commissionId) => {
+    const handleReject = async (id) => {
         const { value: reason } = await Swal.fire({
-            title: 'Từ chối hoa hồng',
+            title: 'Từ chối yêu cầu',
             input: 'textarea',
-            inputLabel: 'Lý do từ chối',
-            inputPlaceholder: 'Nhập lý do (tuỳ chọn)...',
+            inputLabel: 'Lý do (tiền sẽ được hoàn lại)',
+            inputPlaceholder: 'Nhập lý do...',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#64748b',
-            confirmButtonText: 'Từ chối',
+            confirmButtonText: 'Từ chối & Hoàn tiền',
             cancelButtonText: 'Hủy'
         });
 
@@ -78,9 +92,9 @@ const AffiliateCommissions = () => {
             try {
                 loadingg("Đang xử lý...", true, 9999999);
                 const token = localStorage.getItem("token");
-                await rejectAffiliateCommission(token, commissionId, reason);
-                toast.success("Đã từ chối hoa hồng!");
-                fetchCommissions();
+                await rejectWithdrawal(token, id, reason);
+                toast.success("Đã từ chối và hoàn tiền!");
+                fetchWithdrawals();
             } catch (error) {
                 toast.error(error.message || "Có lỗi xảy ra!");
             } finally {
@@ -89,12 +103,12 @@ const AffiliateCommissions = () => {
         }
     };
 
-    const formatMoney = (num) => Number(num || 0).toLocaleString('vi-VN');
+    const formatMoney = (num) => Math.floor(Number(num)).toLocaleString("en-US");
     const formatDate = (date) => new Date(date).toLocaleString('vi-VN');
 
     const getStatusBadge = (s) => {
         switch (s) {
-            case 'pending': return <span className="badge bg-warning text-dark">Chờ duyệt</span>;
+            case 'pending': return <span className="badge bg-warning text-dark">Chờ xử lý</span>;
             case 'approved': return <span className="badge bg-success">Đã duyệt</span>;
             case 'rejected': return <span className="badge bg-danger">Từ chối</span>;
             default: return <span className="badge bg-secondary">{s}</span>;
@@ -117,7 +131,7 @@ const AffiliateCommissions = () => {
         <>
             <style>
                 {`
-                    .aff-comm {
+                    .wd-comm {
                         --aff-primary: #3b82f6;
                         --aff-primary-dark: #2563eb;
                         --aff-bg: #ffffff;
@@ -129,8 +143,8 @@ const AffiliateCommissions = () => {
                         --aff-danger: #ef4444;
                     }
                     
-                    [data-bs-theme="dark"] .aff-comm,
-                    .dark .aff-comm {
+                    [data-bs-theme="dark"] .wd-comm,
+                    .dark .wd-comm {
                         --aff-primary: #60a5fa;
                         --aff-primary-dark: #3b82f6;
                         --aff-bg: #1e293b;
@@ -142,14 +156,14 @@ const AffiliateCommissions = () => {
                         --aff-danger: #f87171;
                     }
                     
-                    .aff-comm .aff-card {
+                    .wd-comm .aff-card {
                         background: var(--aff-bg);
                         border: 1px solid var(--aff-border);
                         border-radius: 12px;
                         overflow: hidden;
                     }
                     
-                    .aff-comm .aff-header {
+                    .wd-comm .aff-header {
                         background: var(--aff-primary);
                         padding: 1.25rem 1.5rem;
                         display: flex;
@@ -159,13 +173,13 @@ const AffiliateCommissions = () => {
                         gap: 1rem;
                     }
                     
-                    .aff-comm .aff-header-left {
+                    .wd-comm .aff-header-left {
                         display: flex;
                         align-items: center;
                         gap: 1rem;
                     }
                     
-                    .aff-comm .aff-header-icon {
+                    .wd-comm .aff-header-icon {
                         width: 44px;
                         height: 44px;
                         border-radius: 10px;
@@ -174,55 +188,55 @@ const AffiliateCommissions = () => {
                         justify-content: center;
                     }
                     
-                    .aff-comm .aff-header-icon i {
+                    .wd-comm .aff-header-icon i {
                         font-size: 20px;
                         color: #fff;
                     }
                     
-                    .aff-comm .aff-header-title {
+                    .wd-comm .aff-header-title {
                         font-size: 1.25rem;
                         font-weight: 600;
                         color: #fff;
                         margin: 0;
                     }
                     
-                    .aff-comm .aff-header-sub {
+                    .wd-comm .aff-header-sub {
                         font-size: 0.875rem;
                         color: rgba(255,255,255,0.8);
                         margin: 0;
                     }
                     
-                    .aff-comm .aff-filter {
+                    .wd-comm .aff-filter {
                         border-radius: 8px;
                         padding: 0.5rem 1rem;
                         font-weight: 500;
                     }
                     
-                    .aff-comm .aff-filter option {
+                    .wd-comm .aff-filter option {
                         background: var(--aff-bg);
                         color: var(--aff-text);
                     }
                     
-                    .aff-comm .aff-body {
+                    .wd-comm .aff-body {
                         padding: 1rem;
                     }
                     
-                    .aff-comm .aff-user {
+                    .wd-comm .aff-user {
                         font-weight: 600;
                         color: var(--aff-primary);
                     }
                     
-                    .aff-comm .aff-amount {
+                    .wd-comm .aff-amount {
                         font-weight: 700;
                         color: var(--aff-success);
                     }
                     
-                    .aff-comm .aff-date {
+                    .wd-comm .aff-date {
                         color: var(--aff-text-secondary);
                         font-size: 0.85rem;
                     }
                     
-                    .aff-comm .aff-btn {
+                    .wd-comm .aff-btn {
                         padding: 0.4rem 0.75rem;
                         border-radius: 6px;
                         font-weight: 500;
@@ -232,21 +246,21 @@ const AffiliateCommissions = () => {
                         transition: opacity 0.2s;
                     }
                     
-                    .aff-comm .aff-btn:hover {
+                    .wd-comm .aff-btn:hover {
                         opacity: 0.85;
                     }
                     
-                    .aff-comm .aff-btn-approve {
+                    .wd-comm .aff-btn-approve {
                         background: var(--aff-success);
                         color: #fff;
                     }
                     
-                    .aff-comm .aff-btn-reject {
+                    .wd-comm .aff-btn-reject {
                         background: var(--aff-danger);
                         color: #fff;
                     }
                     
-                    .aff-comm .aff-pagination {
+                    .wd-comm .aff-pagination {
                         display: flex;
                         justify-content: center;
                         align-items: center;
@@ -255,7 +269,7 @@ const AffiliateCommissions = () => {
                         border-top: 1px solid var(--aff-border);
                     }
                     
-                    .aff-comm .aff-page-btn {
+                    .wd-comm .aff-page-btn {
                         background: var(--aff-bg-secondary);
                         border: 1px solid var(--aff-border);
                         color: var(--aff-text);
@@ -264,18 +278,18 @@ const AffiliateCommissions = () => {
                         cursor: pointer;
                     }
                     
-                    .aff-comm .aff-page-btn:hover:not(:disabled) {
+                    .wd-comm .aff-page-btn:hover:not(:disabled) {
                         background: var(--aff-primary);
                         color: #fff;
                         border-color: var(--aff-primary);
                     }
                     
-                    .aff-comm .aff-page-btn:disabled {
+                    .wd-comm .aff-page-btn:disabled {
                         opacity: 0.5;
                         cursor: not-allowed;
                     }
                     
-                    .aff-comm .aff-page-info {
+                    .wd-comm .aff-page-info {
                         background: var(--aff-primary);
                         color: #fff;
                         padding: 0.5rem 1rem;
@@ -283,17 +297,22 @@ const AffiliateCommissions = () => {
                         font-weight: 500;
                     }
                     
+                    .wd-comm .aff-bank-info {
+                        font-size: 0.8rem;
+                        color: var(--aff-text-secondary);
+                    }
+                    
                     @media (max-width: 768px) {
-                        .aff-comm .aff-header {
+                        .wd-comm .aff-header {
                             flex-direction: column;
                             text-align: center;
                         }
                         
-                        .aff-comm .aff-header-left {
+                        .wd-comm .aff-header-left {
                             flex-direction: column;
                         }
                         
-                        .aff-comm .aff-btn {
+                        .wd-comm .aff-btn {
                             padding: 0.35rem 0.5rem;
                             font-size: 0.75rem;
                         }
@@ -301,7 +320,7 @@ const AffiliateCommissions = () => {
                 `}
             </style>
 
-            <div className="aff-comm">
+            <div className="wd-comm">
                 <div className="row">
                     <div className="col-12">
                         {/* Header Card */}
@@ -309,34 +328,58 @@ const AffiliateCommissions = () => {
                             <div className="aff-header">
                                 <div className="aff-header-left">
                                     <div className="aff-header-icon">
-                                        <i className="fas fa-hand-holding-usd"></i>
+                                        <i className="fas fa-money-bill-transfer"></i>
                                     </div>
                                     <div>
-                                        <h2 className="aff-header-title">Duyệt hoa hồng Affiliate</h2>
+                                        <h2 className="aff-header-title">Duyệt rút hoa hồng</h2>
                                         <p className="aff-header-sub">Tổng: {total} yêu cầu</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Filter Form */}
+                        {/* Search/Filter Form */}
                         <div className="aff-card mb-3">
                             <div className="aff-body">
-                                <div className="row g-3 align-items-end">
-                                    <div className="col-md-4">
-                                        <label className="form-label fw-semibold">Trạng thái</label>
-                                        <select
-                                            className="form-select"
-                                            value={status}
-                                            onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-                                        >
-                                            <option value="pending">Chờ duyệt</option>
-                                            <option value="approved">Đã duyệt</option>
-                                            <option value="rejected">Từ chối</option>
-                                            <option value="all">Tất cả</option>
-                                        </select>
+                                <form onSubmit={handleSearch}>
+                                    <div className="row g-3 align-items-end">
+                                        <div className="col-md-4">
+                                            <label className="form-label fw-semibold">Tìm kiếm</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Nhập username..."
+                                                value={search}
+                                                onChange={(e) => setSearch(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="col-md-3">
+                                            <label className="form-label fw-semibold">Trạng thái</label>
+                                            <select
+                                                className="form-select"
+                                                value={status}
+                                                onChange={(e) => { setStatus(e.target.value); setPage(1); setSearchKey(''); setSearch(''); }}
+                                            >
+                                                <option value="pending">Chờ xử lý</option>
+                                                <option value="approved">Đã duyệt</option>
+                                                <option value="rejected">Từ chối</option>
+                                                <option value="all">Tất cả</option>
+                                            </select>
+                                        </div>
+                                        <div className="col-md-3">
+                                            <button type="submit" className="btn btn-primary w-100">
+                                                <i className="fas fa-search me-2"></i>Tìm kiếm
+                                            </button>
+                                        </div>
+                                        {searchKey && (
+                                            <div className="col-md-2">
+                                                <button type="button" className="btn btn-outline-secondary w-100" onClick={handleClearSearch}>
+                                                    <i className="fas fa-times me-1"></i>Xóa lọc
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
 
@@ -347,20 +390,22 @@ const AffiliateCommissions = () => {
                                     <thead className="table-primary">
                                         <tr>
                                             <th>Thao tác</th>
-                                            <th>Người nhận</th>
-                                            <th>Từ</th>
-                                            <th className="text-end">Nạp</th>
-                                            <th className="text-end">Hoa hồng</th>
-                                            <th className="text-center">Trạng thái</th>
+                                            <th>Người dùng</th>
+                                            <th>Số tiền</th>
+                                            <th>Phí</th>
+                                            <th>Thực nhận</th>
+                                            <th>Loại</th>
+                                            <th>Trạng thái</th>
                                             <th>Thời gian</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {loading ? (
                                             <EmptyState />
-                                        ) : commissions.length > 0 ? (
-                                            commissions.map((c) => (
-                                                <tr key={c._id}>
+                                        ) : withdrawals.length > 0 ? (
+                                            withdrawals.map((w) => (
+                                                <tr key={w._id}>
+
                                                     <td className="text-center">
                                                         <div className="dropdown-placeholder mt-1">
                                                             <button
@@ -369,37 +414,46 @@ const AffiliateCommissions = () => {
                                                                 data-bs-toggle="dropdown"
                                                                 aria-expanded="false"
                                                             >
-                                                                Thao tác
+                                                                Thao tác <i className="las la-angle-right ms-1"></i>
                                                             </button>
                                                             <ul className="dropdown-menu">
-                                                                <li>
-                                                                    <button
-                                                                        className="dropdown-item text-success"
-                                                                        onClick={() => handleApprove(c._id)}
-                                                                    >
-                                                                        Duyệt
-                                                                    </button>
-                                                                </li>
-                                                                <li>
-                                                                    <button
-                                                                        className="dropdown-item text-danger"
-                                                                        onClick={() => handleReject(c._id)}
-                                                                    >
-                                                                        Từ chối
-                                                                    </button>
-                                                                </li>
+                                                                {w.status === "pending" && (
+                                                                    <li>
+
+                                                                        <button
+                                                                            className="dropdown-item text-success"
+                                                                            onClick={() => handleApprove(w._id)}
+
+                                                                        >
+                                                                            Duyệt
+                                                                        </button>
+                                                                        <button
+                                                                            className="dropdown-item text-danger"
+                                                                            onClick={() => handleReject(w._id)}
+                                                                        >
+                                                                            Từ chối
+                                                                        </button>
+
+                                                                    </li>
+                                                                )}
+
                                                             </ul>
                                                         </div>
                                                     </td>
-                                                    <td className="aff-user">{c.referrerUsername}</td>
-                                                    <td>{c.depositorUsername}</td>
-                                                    <td className="text-end">{formatMoney(c.depositAmount)} đ</td>
-                                                    <td className="text-end">
-                                                        <span className="aff-amount">+{formatMoney(c.commissionAmount)} đ</span>
-                                                        <small className="text-muted ms-1">({c.commissionPercent}%)</small>
+
+                                                    <td>{w.username}</td>
+                                                    <td>{formatMoney(w.amount)} đ</td>
+                                                    <td>{formatMoney(w.fee)} đ</td>
+                                                    <td>
+                                                        <span className="aff-amount">{formatMoney(w.netAmount)} đ</span>
                                                     </td>
-                                                    <td className="text-center">{getStatusBadge(c.status)}</td>
-                                                    <td className="aff-date">{formatDate(c.createdAt)}</td>
+                                                    <td>{w.type === 'bank' ? <td>
+                                                        Ngân hàng: <span>{w.bankInfo?.bankName}</span> <br />
+                                                        STK: <span>{w.bankInfo?.accountNumber}</span> <br />
+                                                        Tên chủ TK: <span>{w.bankInfo?.accountName}</span>
+                                                    </td> : <span >Số dư web</span>}</td>
+                                                    <td>{getStatusBadge(w.status)}</td>
+                                                    <td>{formatDate(w.createdAt)}</td>
 
                                                 </tr>
                                             ))
@@ -439,4 +493,4 @@ const AffiliateCommissions = () => {
     );
 };
 
-export default AffiliateCommissions;
+export default WithdrawalRequests;

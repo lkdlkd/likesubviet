@@ -7,22 +7,34 @@ const AffiliateAdmin = () => {
     const [formData, setFormData] = useState({
         affiliateEnabled: true,
         affiliateMinDeposit: 50000,
-        affiliateCommissionPercent: 5
+        affiliateCommissionPercent: 5,
+        withdrawMinAmount: 50000,
+        withdrawMaxAmount: 10000000,
+        withdrawFeePercent: 0,
+        withdrawFeeFixed: 0,
+        withdrawToBankEnabled: true,
+        withdrawToBalanceEnabled: true
     });
     const [loading, setLoading] = useState(false);
 
     const fetchConfig = async () => {
         try {
-            loadingg("Đang tải cấu hình affiliate...", true, 9999999);
+            loadingg("Đang tải...", true, 9999999);
             const token = localStorage.getItem("token");
             const config = await getConfigWeb(token);
             setFormData({
                 affiliateEnabled: config.data.affiliateEnabled ?? true,
                 affiliateMinDeposit: config.data.affiliateMinDeposit || 50000,
-                affiliateCommissionPercent: config.data.affiliateCommissionPercent || 5
+                affiliateCommissionPercent: config.data.affiliateCommissionPercent || 5,
+                withdrawMinAmount: config.data.withdrawMinAmount || 50000,
+                withdrawMaxAmount: config.data.withdrawMaxAmount || 10000000,
+                withdrawFeePercent: config.data.withdrawFeePercent || 0,
+                withdrawFeeFixed: config.data.withdrawFeeFixed || 0,
+                withdrawToBankEnabled: config.data.withdrawToBankEnabled !== false,
+                withdrawToBalanceEnabled: config.data.withdrawToBalanceEnabled !== false
             });
         } catch (error) {
-            toast.error("Không thể tải cấu hình affiliate!");
+            toast.error("Không thể tải cấu hình!");
         } finally {
             loadingg("", false);
         }
@@ -35,337 +47,242 @@ const AffiliateAdmin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        loadingg("Đang lưu cấu hình affiliate...", true, 9999999);
+        loadingg("Đang lưu...", true, 9999999);
         try {
             const token = localStorage.getItem("token");
             await updateConfigWeb({
                 affiliateEnabled: formData.affiliateEnabled,
                 affiliateMinDeposit: Number(formData.affiliateMinDeposit),
-                affiliateCommissionPercent: Number(formData.affiliateCommissionPercent)
+                affiliateCommissionPercent: Number(formData.affiliateCommissionPercent),
+                withdrawMinAmount: Number(formData.withdrawMinAmount),
+                withdrawMaxAmount: Number(formData.withdrawMaxAmount),
+                withdrawFeePercent: Number(formData.withdrawFeePercent),
+                withdrawFeeFixed: Number(formData.withdrawFeeFixed),
+                withdrawToBankEnabled: formData.withdrawToBankEnabled,
+                withdrawToBalanceEnabled: formData.withdrawToBalanceEnabled
             }, token);
             fetchConfig();
-            toast.success("Cập nhật cấu hình affiliate thành công!");
+            toast.success("Cập nhật thành công!");
         } catch (error) {
-            toast.error("Cập nhật cấu hình thất bại!");
+            toast.error("Cập nhật thất bại!");
         } finally {
             setLoading(false);
             loadingg("", false);
         }
     };
 
-    const formatMoney = (num) => {
-        return Number(num || 0).toLocaleString('vi-VN');
-    };
+    const formatMoney = (num) => Number(num || 0).toLocaleString('vi-VN');
 
     return (
-        <>
-            <style>
-                {`
-                    .aff-admin {
-                        --aff-primary: #3b82f6;
-                        --aff-primary-dark: #2563eb;
-                        --aff-bg: #ffffff;
-                        --aff-bg-secondary: #f8fafc;
-                        --aff-border: #e2e8f0;
-                        --aff-text: #1e293b;
-                        --aff-text-secondary: #64748b;
-                        --aff-success: #22c55e;
-                        --aff-warning: #f59e0b;
-                    }
-                    
-                    [data-bs-theme="dark"] .aff-admin,
-                    .dark .aff-admin {
-                        --aff-primary: #60a5fa;
-                        --aff-primary-dark: #3b82f6;
-                        --aff-bg: #1e293b;
-                        --aff-bg-secondary: #334155;
-                        --aff-border: #475569;
-                        --aff-text: #f1f5f9;
-                        --aff-text-secondary: #94a3b8;
-                        --aff-success: #4ade80;
-                        --aff-warning: #fbbf24;
-                    }
-                    
-                    .aff-admin .aff-card {
-                        background: var(--aff-bg);
-                        border: 1px solid var(--aff-border);
-                        border-radius: 12px;
-                        overflow: hidden;
-                    }
-                    
-                    .aff-admin .aff-header {
-                        background: var(--aff-primary);
-                        padding: 1.25rem 1.5rem;
-                        display: flex;
-                        align-items: center;
-                        gap: 1rem;
-                    }
-                    
-                    .aff-admin .aff-header-icon {
-                        width: 44px;
-                        height: 44px;
-                        background: rgba(255,255,255,0.2);
-                        border-radius: 10px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
-                    
-                    .aff-admin .aff-header-icon i {
-                        font-size: 20px;
-                        color: #fff;
-                    }
-                    
-                    .aff-admin .aff-header-title {
-                        font-size: 1.25rem;
-                        font-weight: 600;
-                        color: #fff;
-                        margin: 0;
-                    }
-                    
-                    .aff-admin .aff-header-sub {
-                        font-size: 0.875rem;
-                        color: rgba(255,255,255,0.8);
-                        margin: 0;
-                    }
-                    
-                    .aff-admin .aff-body {
-                        padding: 1.5rem;
-                    }
-                    
-                    .aff-admin .aff-form-group {
-                        background: var(--aff-bg-secondary);
-                        border: 1px solid var(--aff-border);
-                        border-radius: 10px;
-                        padding: 1.25rem;
-                        margin-bottom: 1rem;
-                    }
-                    
-                    .aff-admin .aff-label {
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                        font-weight: 600;
-                        color: var(--aff-text);
-                        margin-bottom: 0.75rem;
-                    }
-                    
-                    .aff-admin .aff-label i {
-                        color: var(--aff-primary);
-                    }
-                    
-                    .aff-admin .aff-hint {
-                        font-size: 0.8rem;
-                        color: var(--aff-text-secondary);
-                        margin-top: 0.5rem;
-                    }
-                    
-                    .aff-admin .aff-switch-row {
-                        display: flex;
-                        align-items: center;
-                        gap: 1rem;
-                    }
-                    
-                    .aff-admin .aff-switch {
-                        width: 50px !important;
-                        height: 26px !important;
-                    }
-                    
-                    .aff-admin .aff-switch:checked {
-                        background-color: var(--aff-success) !important;
-                        border-color: var(--aff-success) !important;
-                    }
-                    
-                    .aff-admin .aff-input-group {
-                        max-width: 220px;
-                    }
-                    
-                    .aff-admin .aff-input {
-                        background: var(--aff-bg);
-                        border: 1px solid var(--aff-border);
-                        color: var(--aff-text);
-                        font-weight: 600;
-                    }
-                    
-                    .aff-admin .aff-input:focus {
-                        border-color: var(--aff-primary);
-                        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-                    }
-                    
-                    .aff-admin .aff-addon {
-                        background: var(--aff-primary);
-                        border: none;
-                        color: #fff;
-                        font-weight: 600;
-                    }
-                    
-                    .aff-admin .aff-example {
-                        background: var(--aff-bg-secondary);
-                        border: 1px solid var(--aff-border);
-                        border-radius: 10px;
-                        padding: 1.25rem;
-                        margin-bottom: 1.5rem;
-                    }
-                    
-                    .aff-admin .aff-example-title {
-                        font-weight: 600;
-                        color: var(--aff-warning);
-                        margin-bottom: 0.5rem;
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                    }
-                    
-                    .aff-admin .aff-example-text {
-                        color: var(--aff-text);
-                    }
-                    
-                    .aff-admin .aff-example-highlight {
-                        color: var(--aff-success);
-                        font-weight: 700;
-                    }
-                    
-                    .aff-admin .aff-btn-submit {
-                        background: var(--aff-primary);
-                        border: none;
-                        color: #fff;
-                        padding: 0.75rem 2rem;
-                        border-radius: 8px;
-                        font-weight: 600;
-                        transition: all 0.2s;
-                    }
-                    
-                    .aff-admin .aff-btn-submit:hover:not(:disabled) {
-                        background: var(--aff-primary-dark);
-                    }
-                    
-                    .aff-admin .aff-btn-submit:disabled {
-                        opacity: 0.6;
-                    }
-                `}
-            </style>
+        <div className="card">
+            <div className="card-header">
+                <h5 className="mb-0">
+                    <i className="fas fa-users-cog me-2"></i>
+                    Cấu hình Affiliate & Rút hoa hồng
+                </h5>
+            </div>
+            <div className="card-body">
+                <form onSubmit={handleSubmit}>
+                    <div className="row">
+                        {/* Cột trái - Cấu hình Affiliate */}
+                        <div className="col-lg-6">
+                            <h6 className="text-primary mb-3">
+                                <i className="fas fa-hand-holding-usd me-2"></i>
+                                Cấu hình hoa hồng
+                            </h6>
 
-            <div className="aff-admin">
-                <div className="row">
-                    <div className="col-12">
-                        <div className="aff-card">
-                            <div className="aff-header">
-                                <div className="aff-header-icon">
-                                    <i className="fas fa-users"></i>
-                                </div>
-                                <div>
-                                    <h2 className="aff-header-title">Cấu hình Affiliate</h2>
-                                    <p className="aff-header-sub">Hoa hồng cho người giới thiệu</p>
-                                </div>
-                            </div>
-                            <div className="aff-body">
-                                <form onSubmit={handleSubmit}>
-                                    {/* Bật/tắt */}
-                                    <div className="aff-form-group">
-                                        <label className="aff-label">
-                                            <i className="fas fa-toggle-on"></i>
-                                            Trạng thái Affiliate
-                                        </label>
-                                        <div className="aff-switch-row">
-                                            <input
-                                                className="form-check-input aff-switch"
-                                                type="checkbox"
-                                                role="switch"
-                                                checked={formData.affiliateEnabled}
-                                                onChange={(e) => setFormData({ ...formData, affiliateEnabled: e.target.checked })}
-                                            />
+                            {/* Bật/tắt */}
+                            <div className="mb-3">
+                                <label className="form-label fw-semibold">Trạng thái</label>
+                                <div className="d-flex align-items-center gap-2">
+                                    <div className="form-check form-switch">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            role="switch"
+                                            id="affiliateEnabled"
+                                            checked={formData.affiliateEnabled}
+                                            onChange={(e) => setFormData({ ...formData, affiliateEnabled: e.target.checked })}
+                                        />
+                                        <label className="form-check-label" htmlFor="affiliateEnabled">
                                             {formData.affiliateEnabled ? (
                                                 <span className="badge bg-success">Đang bật</span>
                                             ) : (
                                                 <span className="badge bg-secondary">Đã tắt</span>
                                             )}
-                                        </div>
-                                        <div className="aff-hint">
-                                            <i className="fas fa-info-circle me-1"></i>
-                                            Khi tắt, hệ thống sẽ không tính hoa hồng
-                                        </div>
-                                    </div>
-
-                                    {/* Phần trăm */}
-                                    <div className="aff-form-group">
-                                        <label className="aff-label">
-                                            <i className="fas fa-percent"></i>
-                                            Tỷ lệ hoa hồng
                                         </label>
-                                        <div className="input-group aff-input-group">
-                                            <input
-                                                type="number"
-                                                className="form-control aff-input text-center"
-                                                value={formData.affiliateCommissionPercent}
-                                                onChange={(e) => setFormData({ ...formData, affiliateCommissionPercent: e.target.value })}
-                                                min="0"
-                                                max="100"
-                                            />
-                                            <span className="input-group-text aff-addon">%</span>
-                                        </div>
-                                        <div className="aff-hint">
-                                            <i className="fas fa-info-circle me-1"></i>
-                                            Người giới thiệu nhận {formData.affiliateCommissionPercent}% khi người được giới thiệu nạp tiền
-                                        </div>
                                     </div>
+                                </div>
+                                <small className="text-muted">Khi tắt, hệ thống sẽ không tính hoa hồng</small>
+                            </div>
 
-                                    {/* Mức nạp tối thiểu */}
-                                    <div className="aff-form-group">
-                                        <label className="aff-label">
-                                            <i className="fas fa-money-bill-wave"></i>
-                                            Mức nạp tối thiểu
+                            {/* Tỷ lệ */}
+                            <div className="mb-3">
+                                <label className="form-label fw-semibold">Tỷ lệ hoa hồng</label>
+                                <div className="input-group" style={{ maxWidth: '180px' }}>
+                                    <input
+                                        type="number"
+                                        className="form-control text-center"
+                                        value={formData.affiliateCommissionPercent}
+                                        onChange={(e) => setFormData({ ...formData, affiliateCommissionPercent: e.target.value })}
+                                        min="0"
+                                        max="100"
+                                    />
+                                    <span className="input-group-text">%</span>
+                                </div>
+                                <small className="text-muted">Người giới thiệu nhận {formData.affiliateCommissionPercent}% khi người được giới thiệu nạp tiền</small>
+                            </div>
+
+                            {/* Nạp tối thiểu */}
+                            <div className="mb-3">
+                                <label className="form-label fw-semibold">Nạp tối thiểu để tính hoa hồng</label>
+                                <div className="input-group" style={{ maxWidth: '200px' }}>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        value={formData.affiliateMinDeposit}
+                                        onChange={(e) => setFormData({ ...formData, affiliateMinDeposit: e.target.value })}
+                                        min="0"
+                                    />
+                                    <span className="input-group-text">VNĐ</span>
+                                </div>
+                            </div>
+
+                            {/* Ví dụ */}
+                            <div className="alert alert-info">
+                                <i className="fas fa-lightbulb me-2"></i>
+                                <strong>Ví dụ:</strong> Với {formData.affiliateCommissionPercent}%, khi B nạp 100,000đ → A nhận <strong className="text-success">{formatMoney(100000 * formData.affiliateCommissionPercent / 100)}đ</strong>
+                            </div>
+                        </div>
+
+                        {/* Cột phải - Cấu hình rút */}
+                        <div className="col-lg-6">
+                            <h6 className="text-primary mb-3">
+                                <i className="fas fa-money-bill-transfer me-2"></i>
+                                Cấu hình rút hoa hồng
+                            </h6>
+
+                            <div className="row">
+                                {/* Rút tối thiểu */}
+                                <div className="col-6 mb-3">
+                                    <label className="form-label fw-semibold">Rút tối thiểu</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={formData.withdrawMinAmount}
+                                            onChange={(e) => setFormData({ ...formData, withdrawMinAmount: e.target.value })}
+                                            min="0"
+                                        />
+                                        <span className="input-group-text">đ</span>
+                                    </div>
+                                </div>
+
+                                {/* Rút tối đa */}
+                                <div className="col-6 mb-3">
+                                    <label className="form-label fw-semibold">Rút tối đa</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={formData.withdrawMaxAmount}
+                                            onChange={(e) => setFormData({ ...formData, withdrawMaxAmount: e.target.value })}
+                                            min="0"
+                                        />
+                                        <span className="input-group-text">đ</span>
+                                    </div>
+                                </div>
+
+                                {/* Phí % */}
+                                <div className="col-6 mb-3">
+                                    <label className="form-label fw-semibold">Phí rút (%)</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={formData.withdrawFeePercent}
+                                            onChange={(e) => setFormData({ ...formData, withdrawFeePercent: e.target.value })}
+                                            min="0"
+                                            max="100"
+                                        />
+                                        <span className="input-group-text">%</span>
+                                    </div>
+                                </div>
+
+                                {/* Phí cố định */}
+                                <div className="col-6 mb-3">
+                                    <label className="form-label fw-semibold">Phí cố định</label>
+                                    <div className="input-group">
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={formData.withdrawFeeFixed}
+                                            onChange={(e) => setFormData({ ...formData, withdrawFeeFixed: e.target.value })}
+                                            min="0"
+                                        />
+                                        <span className="input-group-text">đ</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Loại rút cho phép */}
+                            <div className="mb-3">
+                                <label className="form-label fw-semibold">Loại rút cho phép</label>
+                                <div className="d-flex gap-4">
+                                    <div className="form-check">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id="withdrawToBalance"
+                                            checked={formData.withdrawToBalanceEnabled}
+                                            onChange={(e) => setFormData({ ...formData, withdrawToBalanceEnabled: e.target.checked })}
+                                        />
+                                        <label className="form-check-label" htmlFor="withdrawToBalance">
+                                            Về số dư web
                                         </label>
-                                        <div className="input-group aff-input-group">
-                                            <input
-                                                type="number"
-                                                className="form-control aff-input"
-                                                value={formData.affiliateMinDeposit}
-                                                onChange={(e) => setFormData({ ...formData, affiliateMinDeposit: e.target.value })}
-                                                min="0"
-                                            />
-                                            <span className="input-group-text aff-addon">VNĐ</span>
-                                        </div>
-                                        <div className="aff-hint">
-                                            <i className="fas fa-info-circle me-1"></i>
-                                            Chỉ tính hoa hồng khi nạp từ {formatMoney(formData.affiliateMinDeposit)} VNĐ
-                                        </div>
                                     </div>
+                                    <div className="form-check">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id="withdrawToBank"
+                                            checked={formData.withdrawToBankEnabled}
+                                            onChange={(e) => setFormData({ ...formData, withdrawToBankEnabled: e.target.checked })}
+                                        />
+                                        <label className="form-check-label" htmlFor="withdrawToBank">
+                                            Về ngân hàng
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
 
-                                    {/* Ví dụ */}
-                                    <div className="aff-example">
-                                        <div className="aff-example-title">
-                                            <i className="fas fa-lightbulb"></i>
-                                            Ví dụ
-                                        </div>
-                                        <div className="aff-example-text">
-                                            Với {formData.affiliateCommissionPercent}% hoa hồng, khi B nạp 100,000 VNĐ:
-                                            <br />
-                                            → A (người giới thiệu) nhận: <span className="aff-example-highlight">{formatMoney(100000 * formData.affiliateCommissionPercent / 100)} VNĐ</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <button type="submit" className="btn aff-btn-submit" disabled={loading}>
-                                            {loading ? (
-                                                <>
-                                                    <span className="spinner-border spinner-border-sm me-2"></span>
-                                                    Đang lưu...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <i className="fas fa-save me-2"></i>
-                                                    Lưu cấu hình
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                </form>
+                            {/* Info */}
+                            <div className="alert alert-warning">
+                                <i className="fas fa-info-circle me-2"></i>
+                                Phí = {formData.withdrawFeePercent}% + {formatMoney(formData.withdrawFeeFixed)}đ mỗi lần rút
                             </div>
                         </div>
                     </div>
-                </div>
+
+                    {/* Nút lưu */}
+                    <div className="text-center mt-4 pt-3 border-top">
+                        <button type="submit" className="btn btn-primary px-4" disabled={loading}>
+                            {loading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2"></span>
+                                    Đang lưu...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fas fa-save me-2"></i>
+                                    Lưu cấu hình
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </form>
             </div>
-        </>
+        </div>
     );
 };
 
