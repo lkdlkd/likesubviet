@@ -4,12 +4,17 @@ import { toast } from "react-toastify";
 import { useOutletContext } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import Swal from "sweetalert2";
-export default function Banking({ banking = [], depositCode, onGenerateNewCode }) {
+export default function Banking({ banking = [], depositCode, username, onGenerateNewCode }) {
     const { configWeb } = useOutletContext();
     const cuphap = configWeb?.cuphap;
+    const depositMatchType = configWeb?.depositMatchType || 'code'; // 'code' or 'username'
     const [isGenerating, setIsGenerating] = useState(false);
     const [bankApps, setBankApps] = useState([]);
     const [loadingApps, setLoadingApps] = useState(false);
+
+    // Nội dung chuyển khoản dựa vào depositMatchType
+    const transferIdentifier = depositMatchType === 'username' ? username : depositCode;
+    const transferContent = cuphap ? `${cuphap} ${transferIdentifier || ''}` : (transferIdentifier || '');
 
     // Modal state
     const [showAppModal, setShowAppModal] = useState(false);
@@ -88,7 +93,6 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
         const separator = baseDeeplink.includes('?') ? '&' : '?';
         // Lấy mã ngân hàng từ bank.bank_code hoặc rút gọn từ bank.bank_name
         const bankCode = bank.bank_code || bank.bank_name?.toLowerCase().replace(/\s+/g, '');
-        const transferContent = cuphap ? `${cuphap} ${depositCode}` : depositCode;
         const params = `ba=${bank.account_number}@${bankCode}&am=${amount || ''}&tn=${encodeURIComponent(transferContent || '')}&bn=${encodeURIComponent(bank.account_name || '')}`;
         return baseDeeplink + separator + params;
     };
@@ -484,17 +488,17 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
                                             </td>
                                             <td>
                                                 <div className="account-info">
-                                                    <span>{cuphap ? `${cuphap} ${depositCode || 'Đang tải...'}` : (depositCode || 'Đang tải...')}</span>
+                                                    <span>{transferContent || 'Đang tải...'}</span>
                                                     <div> <button
                                                         type="button"
                                                         className="btn btn-outline-primary btn-sm btn-copy"
-                                                        onClick={() => handleCopy(cuphap ? `${cuphap} ${depositCode}` : depositCode)}
+                                                        onClick={() => handleCopy(transferContent)}
                                                         title="Sao chép nội dung chuyển khoản"
-                                                        disabled={!depositCode}
+                                                        disabled={!transferIdentifier}
                                                     >
                                                         <i className="fas fa-copy"></i>
                                                     </button>
-                                                        {onGenerateNewCode && (
+                                                        {depositMatchType === 'code' && onGenerateNewCode && (
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-outline-warning btn-sm ms-2"
@@ -568,7 +572,7 @@ export default function Banking({ banking = [], depositCode, onGenerateNewCode }
                                     <img
                                         src={`https://img.vietqr.io/image/${bank.bank_name}-${bank.account_number}-qronly2.jpg?accountName=${encodeURIComponent(
                                             bank.account_name
-                                        )}&addInfo=${encodeURIComponent(cuphap ? `${cuphap} ${depositCode || ''}` : (depositCode || ''))}`}
+                                        )}&addInfo=${encodeURIComponent(transferContent || '')}`}
                                         alt="QR CODE"
                                         width={280}
                                         height={280}

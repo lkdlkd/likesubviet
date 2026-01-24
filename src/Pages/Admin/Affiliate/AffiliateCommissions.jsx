@@ -12,13 +12,14 @@ const AffiliateCommissions = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
+    const [maxVisible, setMaxVisible] = useState(5);
 
     const fetchCommissions = async () => {
         try {
             setLoading(true);
             loadingg("Đang tải...", true, 9999999);
             const token = localStorage.getItem("token");
-            const data = await getAffiliateCommissions(token, status, page, 20);
+            const data = await getAffiliateCommissions(token, status, page, 10);
             setCommissions(data.commissions || []);
             setTotalPages(data.totalPages || 1);
             setTotal(data.total || 0);
@@ -33,6 +34,25 @@ const AffiliateCommissions = () => {
     useEffect(() => {
         fetchCommissions();
     }, [status, page]);
+
+    // Responsive number of visible page buttons
+    useEffect(() => {
+        const updateMaxVisible = () => {
+            try {
+                const width = window.innerWidth || 0;
+                if (width >= 1200) {
+                    setMaxVisible(20);
+                } else if (width >= 700) {
+                    setMaxVisible(15);
+                } else {
+                    setMaxVisible(5);
+                }
+            } catch { /* no-op for non-browser envs */ }
+        };
+        updateMaxVisible();
+        window.addEventListener('resize', updateMaxVisible);
+        return () => window.removeEventListener('resize', updateMaxVisible);
+    }, []);
 
     const handleApprove = async (commissionId) => {
         const result = await Swal.fire({
@@ -89,7 +109,7 @@ const AffiliateCommissions = () => {
         }
     };
 
-    const formatMoney = (num) => Number(num || 0).toLocaleString('vi-VN');
+    const formatMoney = (num) => Math.floor(Number(num)).toLocaleString("en-US");
     const formatDate = (date) => new Date(date).toLocaleString('vi-VN');
 
     const getStatusBadge = (s) => {
@@ -114,328 +134,191 @@ const AffiliateCommissions = () => {
     );
 
     return (
-        <>
-            <style>
-                {`
-                    .aff-comm {
-                        --aff-primary: #3b82f6;
-                        --aff-primary-dark: #2563eb;
-                        --aff-bg: #ffffff;
-                        --aff-bg-secondary: #f8fafc;
-                        --aff-border: #e2e8f0;
-                        --aff-text: #1e293b;
-                        --aff-text-secondary: #64748b;
-                        --aff-success: #22c55e;
-                        --aff-danger: #ef4444;
-                    }
-                    
-                    [data-bs-theme="dark"] .aff-comm,
-                    .dark .aff-comm {
-                        --aff-primary: #60a5fa;
-                        --aff-primary-dark: #3b82f6;
-                        --aff-bg: #1e293b;
-                        --aff-bg-secondary: #334155;
-                        --aff-border: #475569;
-                        --aff-text: #f1f5f9;
-                        --aff-text-secondary: #94a3b8;
-                        --aff-success: #4ade80;
-                        --aff-danger: #f87171;
-                    }
-                    
-                    .aff-comm .aff-card {
-                        background: var(--aff-bg);
-                        border: 1px solid var(--aff-border);
-                        border-radius: 12px;
-                        overflow: hidden;
-                    }
-                    
-                    .aff-comm .aff-header {
-                        background: var(--aff-primary);
-                        padding: 1.25rem 1.5rem;
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        flex-wrap: wrap;
-                        gap: 1rem;
-                    }
-                    
-                    .aff-comm .aff-header-left {
-                        display: flex;
-                        align-items: center;
-                        gap: 1rem;
-                    }
-                    
-                    .aff-comm .aff-header-icon {
-                        width: 44px;
-                        height: 44px;
-                        border-radius: 10px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
-                    
-                    .aff-comm .aff-header-icon i {
-                        font-size: 20px;
-                        color: #fff;
-                    }
-                    
-                    .aff-comm .aff-header-title {
-                        font-size: 1.25rem;
-                        font-weight: 600;
-                        color: #fff;
-                        margin: 0;
-                    }
-                    
-                    .aff-comm .aff-header-sub {
-                        font-size: 0.875rem;
-                        color: rgba(255,255,255,0.8);
-                        margin: 0;
-                    }
-                    
-                    .aff-comm .aff-filter {
-                        border-radius: 8px;
-                        padding: 0.5rem 1rem;
-                        font-weight: 500;
-                    }
-                    
-                    .aff-comm .aff-filter option {
-                        background: var(--aff-bg);
-                        color: var(--aff-text);
-                    }
-                    
-                    .aff-comm .aff-body {
-                        padding: 1rem;
-                    }
-                    
-                    .aff-comm .aff-user {
-                        font-weight: 600;
-                        color: var(--aff-primary);
-                    }
-                    
-                    .aff-comm .aff-amount {
-                        font-weight: 700;
-                        color: var(--aff-success);
-                    }
-                    
-                    .aff-comm .aff-date {
-                        color: var(--aff-text-secondary);
-                        font-size: 0.85rem;
-                    }
-                    
-                    .aff-comm .aff-btn {
-                        padding: 0.4rem 0.75rem;
-                        border-radius: 6px;
-                        font-weight: 500;
-                        font-size: 0.85rem;
-                        border: none;
-                        cursor: pointer;
-                        transition: opacity 0.2s;
-                    }
-                    
-                    .aff-comm .aff-btn:hover {
-                        opacity: 0.85;
-                    }
-                    
-                    .aff-comm .aff-btn-approve {
-                        background: var(--aff-success);
-                        color: #fff;
-                    }
-                    
-                    .aff-comm .aff-btn-reject {
-                        background: var(--aff-danger);
-                        color: #fff;
-                    }
-                    
-                    .aff-comm .aff-pagination {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        gap: 0.5rem;
-                        padding: 1rem;
-                        border-top: 1px solid var(--aff-border);
-                    }
-                    
-                    .aff-comm .aff-page-btn {
-                        background: var(--aff-bg-secondary);
-                        border: 1px solid var(--aff-border);
-                        color: var(--aff-text);
-                        padding: 0.5rem 0.75rem;
-                        border-radius: 6px;
-                        cursor: pointer;
-                    }
-                    
-                    .aff-comm .aff-page-btn:hover:not(:disabled) {
-                        background: var(--aff-primary);
-                        color: #fff;
-                        border-color: var(--aff-primary);
-                    }
-                    
-                    .aff-comm .aff-page-btn:disabled {
-                        opacity: 0.5;
-                        cursor: not-allowed;
-                    }
-                    
-                    .aff-comm .aff-page-info {
-                        background: var(--aff-primary);
-                        color: #fff;
-                        padding: 0.5rem 1rem;
-                        border-radius: 6px;
-                        font-weight: 500;
-                    }
-                    
-                    @media (max-width: 768px) {
-                        .aff-comm .aff-header {
-                            flex-direction: column;
-                            text-align: center;
-                        }
-                        
-                        .aff-comm .aff-header-left {
-                            flex-direction: column;
-                        }
-                        
-                        .aff-comm .aff-btn {
-                            padding: 0.35rem 0.5rem;
-                            font-size: 0.75rem;
-                        }
-                    }
-                `}
-            </style>
+        <div className="row">
+            <div className="col-12">
+                <div className="card border-0 shadow-sm">
+                    {/* Header Card */}
+                    <div className="card-header bg-primary text-white">
+                        <i className="fas fa-hand-holding-usd me-2"></i>Duyệt hoa hồng Affiliate
+                    </div>
 
-            <div className="aff-comm">
-                <div className="row">
-                    <div className="col-12">
-                        {/* Header Card */}
-                        <div className="aff-card mb-3">
-                            <div className="aff-header">
-                                <div className="aff-header-left">
-                                    <div className="aff-header-icon">
-                                        <i className="fas fa-hand-holding-usd"></i>
-                                    </div>
-                                    <div>
-                                        <h2 className="aff-header-title">Duyệt hoa hồng Affiliate</h2>
-                                        <p className="aff-header-sub">Tổng: {total} yêu cầu</p>
-                                    </div>
+
+                    {/* Filter Form */}
+                    <div className="p-3">
+                        <div className="row g-3 align-items-end">
+                            <div className="col-md-4">
+                                <label className="form-label fw-semibold text-muted mb-2">Trạng thái</label>
+                                <select
+                                    className="form-select"
+                                    value={status}
+                                    onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+                                >
+                                    <option value="pending">Chờ duyệt</option>
+                                    <option value="approved">Đã duyệt</option>
+                                    <option value="rejected">Từ chối</option>
+                                    <option value="all">Tất cả</option>
+                                </select>
+                            </div>
+                            <div className="col-md-8">
+                                <div className="text-muted">
+                                    <i className="fas fa-info-circle me-2"></i>
+                                    Tổng: <strong>{total}</strong> yêu cầu
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Filter Form */}
-                        <div className="aff-card mb-3">
-                            <div className="aff-body">
-                                <div className="row g-3 align-items-end">
-                                    <div className="col-md-4">
-                                        <label className="form-label fw-semibold">Trạng thái</label>
-                                        <select
-                                            className="form-select"
-                                            value={status}
-                                            onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-                                        >
-                                            <option value="pending">Chờ duyệt</option>
-                                            <option value="approved">Đã duyệt</option>
-                                            <option value="rejected">Từ chối</option>
-                                            <option value="all">Tất cả</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Table Card */}
-                        <div className="aff-card">
-                            <div className="aff-body">
-                                <Table striped bordered responsive hover>
-                                    <thead className="table-primary">
+                    {/* Table Card */}
+                    <div className="">
+                        <div className="card-body p-2">
+                            <Table striped bordered responsive hover>
+                                <thead className="table-primary">
+                                    <tr>
+                                        <th>Thao tác</th>
+                                        <th>Người nhận</th>
+                                        <th>Từ</th>
+                                        <th className="text-end">Nạp</th>
+                                        <th className="text-end">Hoa hồng</th>
+                                        <th className="text-center">Trạng thái</th>
+                                        <th>Thời gian</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {loading ? (
                                         <tr>
-                                            <th>Thao tác</th>
-                                            <th>Người nhận</th>
-                                            <th>Từ</th>
-                                            <th className="text-end">Nạp</th>
-                                            <th className="text-end">Hoa hồng</th>
-                                            <th className="text-center">Trạng thái</th>
-                                            <th>Thời gian</th>
+                                            <td colSpan={7} className="text-center py-5">
+                                                <div className="d-flex flex-column align-items-center justify-content-center">
+                                                    <div className="spinner-border text-primary mb-2" role="status">
+                                                        <span className="visually-hidden">Loading...</span>
+                                                    </div>
+                                                    <span className="mt-2">Đang tải dữ liệu...</span>
+                                                </div>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {loading ? (
-                                            <EmptyState />
-                                        ) : commissions.length > 0 ? (
-                                            commissions.map((c) => (
-                                                <tr key={c._id}>
-                                                    <td className="text-center">
-                                                        <div className="dropdown-placeholder mt-1">
-                                                            <button
-                                                                className="btn btn-primary btn-sm"
-                                                                type="button"
-                                                                data-bs-toggle="dropdown"
-                                                                aria-expanded="false"
-                                                            >
-                                                                Thao tác
-                                                            </button>
-                                                            <ul className="dropdown-menu">
-                                                                <li>
-                                                                    <button
-                                                                        className="dropdown-item text-success"
-                                                                        onClick={() => handleApprove(c._id)}
-                                                                    >
-                                                                        Duyệt
-                                                                    </button>
-                                                                </li>
-                                                                <li>
-                                                                    <button
-                                                                        className="dropdown-item text-danger"
-                                                                        onClick={() => handleReject(c._id)}
-                                                                    >
-                                                                        Từ chối
-                                                                    </button>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </td>
-                                                    <td className="aff-user">{c.referrerUsername}</td>
-                                                    <td>{c.depositorUsername}</td>
-                                                    <td className="text-end">{formatMoney(c.depositAmount)} đ</td>
-                                                    <td className="text-end">
-                                                        <span className="aff-amount">+{formatMoney(c.commissionAmount)} đ</span>
-                                                        <small className="text-muted ms-1">({c.commissionPercent}%)</small>
-                                                    </td>
-                                                    <td className="text-center">{getStatusBadge(c.status)}</td>
-                                                    <td className="aff-date">{formatDate(c.createdAt)}</td>
+                                    ) : commissions.length > 0 ? (
+                                        commissions.map((c) => (
+                                            <tr key={c._id}>
+                                                <td className="text-center">
+                                                    <div className="dropdown-placeholder mt-1">
+                                                        <button
+                                                            className="btn btn-primary btn-sm"
+                                                            type="button"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false"
+                                                        >
+                                                            Thao tác
+                                                        </button>
+                                                        <ul className="dropdown-menu">
+                                                            <li>
+                                                                <button
+                                                                    className="dropdown-item text-success"
+                                                                    onClick={() => handleApprove(c._id)}
+                                                                >
+                                                                    Duyệt
+                                                                </button>
+                                                            </li>
+                                                            <li>
+                                                                <button
+                                                                    className="dropdown-item text-danger"
+                                                                    onClick={() => handleReject(c._id)}
+                                                                >
+                                                                    Từ chối
+                                                                </button>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                                <td><strong>{c.referrerUsername}</strong></td>
+                                                <td>{c.depositorUsername}</td>
+                                                <td className="text-end">{formatMoney(c.depositAmount)}</td>
+                                                <td className="text-end text-success fw-bold">
+                                                    +{formatMoney(c.commissionAmount)}
+                                                    <small className="text-muted ms-1">({c.commissionPercent}%)</small>
+                                                </td>
+                                                <td className="text-center">{getStatusBadge(c.status)}</td>
+                                                <td>{formatDate(c.createdAt)}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <EmptyState />
+                                    )}
+                                </tbody>
+                            </Table>
+                            {totalPages > 1 && (
+                                <>
+                                    <span className="text-muted">Trang {page} / {totalPages}</span>
+                                    <div className="pagination d-flex justify-content-between align-items-center mt-3 gap-2">
+                                        <div
+                                            className="d-flex align-items-center gap-2 flex-nowrap overflow-auto text-nowrap flex-grow-1"
+                                            style={{ maxWidth: '100%' }}
+                                        >
+                                            <button
+                                                className="btn btn-secondary"
+                                                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                                                disabled={page === 1}
+                                            >
+                                                <i className="fas fa-angle-left"></i>
+                                            </button>
 
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <EmptyState />
-                                        )}
-                                    </tbody>
-                                </Table>
-                            </div>
+                                            {(() => {
+                                                const pages = [];
+                                                const start = Math.max(1, page - Math.floor(maxVisible / 2));
+                                                const end = Math.min(totalPages, start + maxVisible - 1);
+                                                const adjustedStart = Math.max(1, Math.min(start, end - maxVisible + 1));
+
+                                                if (adjustedStart > 1) {
+                                                    pages.push(
+                                                        <button key={1} className={`btn btn-sm ${page === 1 ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setPage(1)}>1</button>
+                                                    );
+                                                    if (adjustedStart > 2) {
+                                                        pages.push(<span key="start-ellipsis" className="px-1">...</span>);
+                                                    }
+                                                }
+
+                                                for (let p = adjustedStart; p <= end; p++) {
+                                                    pages.push(
+                                                        <button
+                                                            key={p}
+                                                            className={`btn btn-sm ${page === p ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                            onClick={() => setPage(p)}
+                                                        >
+                                                            {p}
+                                                        </button>
+                                                    );
+                                                }
+
+                                                if (end < totalPages) {
+                                                    if (end < totalPages - 1) {
+                                                        pages.push(<span key="end-ellipsis" className="px-1">...</span>);
+                                                    }
+                                                    pages.push(
+                                                        <button key={totalPages} className={`btn btn-sm ${page === totalPages ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setPage(totalPages)}>{totalPages}</button>
+                                                    );
+                                                }
+
+                                                return pages;
+                                            })()}
+
+                                            <button
+                                                className="btn btn-secondary"
+                                                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                                                disabled={page === totalPages}
+                                            >
+                                                <i className="fas fa-angle-right"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
                         </div>
 
-                        {totalPages > 1 && (
-                            <div className="aff-card mt-3">
-                                <div className="aff-pagination">
-                                    <button
-                                        className="aff-page-btn"
-                                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                                        disabled={page === 1}
-                                    >
-                                        <i className="fas fa-chevron-left"></i>
-                                    </button>
-                                    <span className="aff-page-info">Trang {page}/{totalPages}</span>
-                                    <button
-                                        className="aff-page-btn"
-                                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                        disabled={page >= totalPages}
-                                    >
-                                        <i className="fas fa-chevron-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+
                     </div>
                 </div>
             </div>
-        </>
+        </div>
+
     );
 };
 

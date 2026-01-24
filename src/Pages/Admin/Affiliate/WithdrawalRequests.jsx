@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAdminWithdrawals, approveWithdrawal, rejectWithdrawal } from "@/Utils/api";
-import { toast } from "react-toastify";
+import { toast } from "react-toastify"
 import { loadingg } from "@/JS/Loading";
 import Swal from "sweetalert2";
 import Table from "react-bootstrap/Table";
@@ -14,13 +14,14 @@ const WithdrawalRequests = () => {
     const [total, setTotal] = useState(0);
     const [search, setSearch] = useState('');
     const [searchKey, setSearchKey] = useState(''); // trigger fetch
+    const [maxVisible, setMaxVisible] = useState(5);
 
     const fetchWithdrawals = async () => {
         try {
             setLoading(true);
             loadingg("Đang tải...", true, 9999999);
             const token = localStorage.getItem("token");
-            const data = await getAdminWithdrawals(token, status, page, 20, searchKey);
+            const data = await getAdminWithdrawals(token, status, page, 10, searchKey);
             setWithdrawals(data.withdrawals || []);
             setTotalPages(data.totalPages || 1);
             setTotal(data.total || 0);
@@ -35,6 +36,25 @@ const WithdrawalRequests = () => {
     useEffect(() => {
         fetchWithdrawals();
     }, [status, page, searchKey]);
+
+    // Responsive number of visible page buttons
+    useEffect(() => {
+        const updateMaxVisible = () => {
+            try {
+                const width = window.innerWidth || 0;
+                if (width >= 1200) {
+                    setMaxVisible(20);
+                } else if (width >= 700) {
+                    setMaxVisible(15);
+                } else {
+                    setMaxVisible(5);
+                }
+            } catch { /* no-op for non-browser envs */ }
+        };
+        updateMaxVisible();
+        window.addEventListener('resize', updateMaxVisible);
+        return () => window.removeEventListener('resize', updateMaxVisible);
+    }, []);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -129,363 +149,224 @@ const WithdrawalRequests = () => {
 
     return (
         <>
-            <style>
-                {`
-                    .wd-comm {
-                        --aff-primary: #3b82f6;
-                        --aff-primary-dark: #2563eb;
-                        --aff-bg: #ffffff;
-                        --aff-bg-secondary: #f8fafc;
-                        --aff-border: #e2e8f0;
-                        --aff-text: #1e293b;
-                        --aff-text-secondary: #64748b;
-                        --aff-success: #22c55e;
-                        --aff-danger: #ef4444;
-                    }
-                    
-                    [data-bs-theme="dark"] .wd-comm,
-                    .dark .wd-comm {
-                        --aff-primary: #60a5fa;
-                        --aff-primary-dark: #3b82f6;
-                        --aff-bg: #1e293b;
-                        --aff-bg-secondary: #334155;
-                        --aff-border: #475569;
-                        --aff-text: #f1f5f9;
-                        --aff-text-secondary: #94a3b8;
-                        --aff-success: #4ade80;
-                        --aff-danger: #f87171;
-                    }
-                    
-                    .wd-comm .aff-card {
-                        background: var(--aff-bg);
-                        border: 1px solid var(--aff-border);
-                        border-radius: 12px;
-                        overflow: hidden;
-                    }
-                    
-                    .wd-comm .aff-header {
-                        background: var(--aff-primary);
-                        padding: 1.25rem 1.5rem;
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        flex-wrap: wrap;
-                        gap: 1rem;
-                    }
-                    
-                    .wd-comm .aff-header-left {
-                        display: flex;
-                        align-items: center;
-                        gap: 1rem;
-                    }
-                    
-                    .wd-comm .aff-header-icon {
-                        width: 44px;
-                        height: 44px;
-                        border-radius: 10px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
-                    
-                    .wd-comm .aff-header-icon i {
-                        font-size: 20px;
-                        color: #fff;
-                    }
-                    
-                    .wd-comm .aff-header-title {
-                        font-size: 1.25rem;
-                        font-weight: 600;
-                        color: #fff;
-                        margin: 0;
-                    }
-                    
-                    .wd-comm .aff-header-sub {
-                        font-size: 0.875rem;
-                        color: rgba(255,255,255,0.8);
-                        margin: 0;
-                    }
-                    
-                    .wd-comm .aff-filter {
-                        border-radius: 8px;
-                        padding: 0.5rem 1rem;
-                        font-weight: 500;
-                    }
-                    
-                    .wd-comm .aff-filter option {
-                        background: var(--aff-bg);
-                        color: var(--aff-text);
-                    }
-                    
-                    .wd-comm .aff-body {
-                        padding: 1rem;
-                    }
-                    
-                    .wd-comm .aff-user {
-                        font-weight: 600;
-                        color: var(--aff-primary);
-                    }
-                    
-                    .wd-comm .aff-amount {
-                        font-weight: 700;
-                        color: var(--aff-success);
-                    }
-                    
-                    .wd-comm .aff-date {
-                        color: var(--aff-text-secondary);
-                        font-size: 0.85rem;
-                    }
-                    
-                    .wd-comm .aff-btn {
-                        padding: 0.4rem 0.75rem;
-                        border-radius: 6px;
-                        font-weight: 500;
-                        font-size: 0.85rem;
-                        border: none;
-                        cursor: pointer;
-                        transition: opacity 0.2s;
-                    }
-                    
-                    .wd-comm .aff-btn:hover {
-                        opacity: 0.85;
-                    }
-                    
-                    .wd-comm .aff-btn-approve {
-                        background: var(--aff-success);
-                        color: #fff;
-                    }
-                    
-                    .wd-comm .aff-btn-reject {
-                        background: var(--aff-danger);
-                        color: #fff;
-                    }
-                    
-                    .wd-comm .aff-pagination {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        gap: 0.5rem;
-                        padding: 1rem;
-                        border-top: 1px solid var(--aff-border);
-                    }
-                    
-                    .wd-comm .aff-page-btn {
-                        background: var(--aff-bg-secondary);
-                        border: 1px solid var(--aff-border);
-                        color: var(--aff-text);
-                        padding: 0.5rem 0.75rem;
-                        border-radius: 6px;
-                        cursor: pointer;
-                    }
-                    
-                    .wd-comm .aff-page-btn:hover:not(:disabled) {
-                        background: var(--aff-primary);
-                        color: #fff;
-                        border-color: var(--aff-primary);
-                    }
-                    
-                    .wd-comm .aff-page-btn:disabled {
-                        opacity: 0.5;
-                        cursor: not-allowed;
-                    }
-                    
-                    .wd-comm .aff-page-info {
-                        background: var(--aff-primary);
-                        color: #fff;
-                        padding: 0.5rem 1rem;
-                        border-radius: 6px;
-                        font-weight: 500;
-                    }
-                    
-                    .wd-comm .aff-bank-info {
-                        font-size: 0.8rem;
-                        color: var(--aff-text-secondary);
-                    }
-                    
-                    @media (max-width: 768px) {
-                        .wd-comm .aff-header {
-                            flex-direction: column;
-                            text-align: center;
-                        }
-                        
-                        .wd-comm .aff-header-left {
-                            flex-direction: column;
-                        }
-                        
-                        .wd-comm .aff-btn {
-                            padding: 0.35rem 0.5rem;
-                            font-size: 0.75rem;
-                        }
-                    }
-                `}
-            </style>
 
-            <div className="wd-comm">
-                <div className="row">
-                    <div className="col-12">
+            <div className="row">
+                <div className="col-12">
+                    <div className="card border-0 shadow-sm">
                         {/* Header Card */}
-                        <div className="aff-card mb-3">
-                            <div className="aff-header">
-                                <div className="aff-header-left">
-                                    <div className="aff-header-icon">
-                                        <i className="fas fa-money-bill-transfer"></i>
-                                    </div>
-                                    <div>
-                                        <h2 className="aff-header-title">Duyệt rút hoa hồng</h2>
-                                        <p className="aff-header-sub">Tổng: {total} yêu cầu</p>
-                                    </div>
-                                </div>
-                            </div>
+                        <div className="card-header bg-primary text-white">
+                            <i className="fas fa-wallet me-2"></i>Duyệt rút hoa hồng
                         </div>
 
                         {/* Search/Filter Form */}
-                        <div className="aff-card mb-3">
-                            <div className="aff-body">
-                                <form onSubmit={handleSearch}>
-                                    <div className="row g-3 align-items-end">
-                                        <div className="col-md-4">
-                                            <label className="form-label fw-semibold">Tìm kiếm</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                placeholder="Nhập username..."
-                                                value={search}
-                                                onChange={(e) => setSearch(e.target.value)}
-                                            />
-                                        </div>
-                                        <div className="col-md-3">
-                                            <label className="form-label fw-semibold">Trạng thái</label>
-                                            <select
-                                                className="form-select"
-                                                value={status}
-                                                onChange={(e) => { setStatus(e.target.value); setPage(1); setSearchKey(''); setSearch(''); }}
-                                            >
-                                                <option value="pending">Chờ xử lý</option>
-                                                <option value="approved">Đã duyệt</option>
-                                                <option value="rejected">Từ chối</option>
-                                                <option value="all">Tất cả</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-md-3">
-                                            <button type="submit" className="btn btn-primary w-100">
-                                                <i className="fas fa-search me-2"></i>Tìm kiếm
+                        <div className="card-body p-3">
+                            <form onSubmit={handleSearch}>
+                                <div className="row g-3 align-items-end">
+                                    <div className="col-md-4">
+                                        <label className="form-label fw-semibold text-muted mb-2">Tìm kiếm</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Nhập username..."
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-md-3">
+                                        <label className="form-label fw-semibold text-muted mb-2">Trạng thái</label>
+                                        <select
+                                            className="form-select"
+                                            value={status}
+                                            onChange={(e) => { setStatus(e.target.value); setPage(1); setSearchKey(''); setSearch(''); }}
+                                        >
+                                            <option value="pending">Chờ xử lý</option>
+                                            <option value="approved">Đã duyệt</option>
+                                            <option value="rejected">Từ chối</option>
+                                            <option value="all">Tất cả</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-md-3">
+                                        <button type="submit" className="btn btn-primary w-100">
+                                            <i className="fas fa-search me-2"></i>Tìm kiếm
+                                        </button>
+                                    </div>
+                                    {searchKey && (
+                                        <div className="col-md-2">
+                                            <button type="button" className="btn btn-outline-secondary w-100" onClick={handleClearSearch}>
+                                                <i className="fas fa-times me-1"></i>Xóa lọc
                                             </button>
                                         </div>
-                                        {searchKey && (
-                                            <div className="col-md-2">
-                                                <button type="button" className="btn btn-outline-secondary w-100" onClick={handleClearSearch}>
-                                                    <i className="fas fa-times me-1"></i>Xóa lọc
-                                                </button>
-                                            </div>
-                                        )}
+                                    )}
+                                    <div className="col-12">
+                                        <div className="text-muted">
+                                            <i className="fas fa-info-circle me-2"></i>
+                                            Tổng: <strong>{total}</strong> yêu cầu
+                                        </div>
                                     </div>
-                                </form>
-                            </div>
+                                </div>
+                            </form>
                         </div>
 
                         {/* Table Card */}
-                        <div className="aff-card">
-                            <div className="aff-body">
-                                <Table striped bordered responsive hover>
-                                    <thead className="table-primary">
+                        <div className="card-body p-2">
+                            <Table striped bordered responsive hover>
+                                <thead className="table-primary">
+                                    <tr>
+                                        <th>Thao tác</th>
+                                        <th>Người dùng</th>
+                                        <th>Số tiền</th>
+                                        <th>Thông tin thanh toán</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thời gian</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {loading ? (
                                         <tr>
-                                            <th>Thao tác</th>
-                                            <th>Người dùng</th>
-                                            <th>Số tiền</th>
-                                            <th>Phí</th>
-                                            <th>Thực nhận</th>
-                                            <th>Loại</th>
-                                            <th>Trạng thái</th>
-                                            <th>Thời gian</th>
+                                            <td colSpan={8} className="text-center py-5">
+                                                <div className="d-flex flex-column align-items-center justify-content-center">
+                                                    <div className="spinner-border text-primary mb-2" role="status">
+                                                        <span className="visually-hidden">Loading...</span>
+                                                    </div>
+                                                    <span className="mt-2">Đang tải dữ liệu...</span>
+                                                </div>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {loading ? (
-                                            <EmptyState />
-                                        ) : withdrawals.length > 0 ? (
-                                            withdrawals.map((w) => (
-                                                <tr key={w._id}>
-
-                                                    <td className="text-center">
-                                                        <div className="dropdown-placeholder mt-1">
-                                                            <button
-                                                                className="btn btn-primary btn-sm"
-                                                                type="button"
-                                                                data-bs-toggle="dropdown"
-                                                                aria-expanded="false"
-                                                            >
-                                                                Thao tác <i className="las la-angle-right ms-1"></i>
-                                                            </button>
-                                                            <ul className="dropdown-menu">
-                                                                {w.status === "pending" && (
+                                    ) : withdrawals.length > 0 ? (
+                                        withdrawals.map((w) => (
+                                            <tr key={w._id}>
+                                                <td className="text-center">
+                                                    <div className="dropdown-placeholder mt-1">
+                                                        <button
+                                                            className="btn btn-primary btn-sm"
+                                                            type="button"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false"
+                                                        >
+                                                            Thao tác <i className="las la-angle-right ms-1"></i>
+                                                        </button>
+                                                        <ul className="dropdown-menu">
+                                                            {w.status === "pending" && (
+                                                                <>
                                                                     <li>
-
                                                                         <button
                                                                             className="dropdown-item text-success"
                                                                             onClick={() => handleApprove(w._id)}
-
                                                                         >
                                                                             Duyệt
                                                                         </button>
+                                                                    </li>
+                                                                    <li>
                                                                         <button
                                                                             className="dropdown-item text-danger"
                                                                             onClick={() => handleReject(w._id)}
                                                                         >
                                                                             Từ chối
                                                                         </button>
-
                                                                     </li>
-                                                                )}
+                                                                </>
+                                                            )}
+                                                            {w.status !== "pending" && (
+                                                                <li>
+                                                                    <span className="dropdown-item text-muted">Không có thao tác</span>
+                                                                </li>
+                                                            )}
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                                <td className="fw-bold text-primary">{w.username}</td>
+                                                <td>
+                                                    số tiền: <span>{formatMoney(w.amount)}</span> <br />
+                                                    phí: <span>{formatMoney(w.fee)}</span> <br />
+                                                    số tiền nhận: <span>{formatMoney(w.netAmount)}</span>
+                                                </td>
+                                                <td>
+                                                    {w.type === 'bank' ? (
+                                                        <>
+                                                            Ngân hàng: <span>{w.bankInfo?.bankName}</span> <br />
+                                                            STK: <span>{w.bankInfo?.accountNumber}</span> <br />
+                                                            Tên chủ TK: <span>{w.bankInfo?.accountName}</span>
+                                                        </>
+                                                    ) : (
+                                                        <span>Số dư web</span>
+                                                    )}
+                                                </td>
+                                                <td>{getStatusBadge(w.status)}</td>
+                                                <td>{formatDate(w.createdAt)}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <EmptyState />
+                                    )}
+                                </tbody>
+                            </Table>
+                            {totalPages > 1 && (
+                                <>
+                                    <span className="text-muted">Trang {page} / {totalPages}</span>
+                                    <div className="pagination d-flex justify-content-between align-items-center mt-3 gap-2">
+                                        <div
+                                            className="d-flex align-items-center gap-2 flex-nowrap overflow-auto text-nowrap flex-grow-1"
+                                            style={{ maxWidth: '100%' }}
+                                        >
+                                            <button
+                                                className="btn btn-secondary"
+                                                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                                                disabled={page === 1}
+                                            >
+                                                <i className="fas fa-angle-left"></i>
+                                            </button>
 
-                                                            </ul>
-                                                        </div>
-                                                    </td>
+                                            {(() => {
+                                                const pages = [];
+                                                const start = Math.max(1, page - Math.floor(maxVisible / 2));
+                                                const end = Math.min(totalPages, start + maxVisible - 1);
+                                                const adjustedStart = Math.max(1, Math.min(start, end - maxVisible + 1));
 
-                                                    <td>{w.username}</td>
-                                                    <td>{formatMoney(w.amount)} đ</td>
-                                                    <td>{formatMoney(w.fee)} đ</td>
-                                                    <td>
-                                                        <span className="aff-amount">{formatMoney(w.netAmount)} đ</span>
-                                                    </td>
-                                                    <td>{w.type === 'bank' ? <td>
-                                                        Ngân hàng: <span>{w.bankInfo?.bankName}</span> <br />
-                                                        STK: <span>{w.bankInfo?.accountNumber}</span> <br />
-                                                        Tên chủ TK: <span>{w.bankInfo?.accountName}</span>
-                                                    </td> : <span >Số dư web</span>}</td>
-                                                    <td>{getStatusBadge(w.status)}</td>
-                                                    <td>{formatDate(w.createdAt)}</td>
+                                                if (adjustedStart > 1) {
+                                                    pages.push(
+                                                        <button key={1} className={`btn btn-sm ${page === 1 ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setPage(1)}>1</button>
+                                                    );
+                                                    if (adjustedStart > 2) {
+                                                        pages.push(<span key="start-ellipsis" className="px-1">...</span>);
+                                                    }
+                                                }
 
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <EmptyState />
-                                        )}
-                                    </tbody>
-                                </Table>
-                            </div>
+                                                for (let p = adjustedStart; p <= end; p++) {
+                                                    pages.push(
+                                                        <button
+                                                            key={p}
+                                                            className={`btn btn-sm ${page === p ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                            onClick={() => setPage(p)}
+                                                        >
+                                                            {p}
+                                                        </button>
+                                                    );
+                                                }
+
+                                                if (end < totalPages) {
+                                                    if (end < totalPages - 1) {
+                                                        pages.push(<span key="end-ellipsis" className="px-1">...</span>);
+                                                    }
+                                                    pages.push(
+                                                        <button key={totalPages} className={`btn btn-sm ${page === totalPages ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setPage(totalPages)}>{totalPages}</button>
+                                                    );
+                                                }
+
+                                                return pages;
+                                            })()}
+
+                                            <button
+                                                className="btn btn-secondary"
+                                                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                                                disabled={page === totalPages}
+                                            >
+                                                <i className="fas fa-angle-right"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
-
-                        {totalPages > 1 && (
-                            <div className="aff-card mt-3">
-                                <div className="aff-pagination">
-                                    <button
-                                        className="aff-page-btn"
-                                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                                        disabled={page === 1}
-                                    >
-                                        <i className="fas fa-chevron-left"></i>
-                                    </button>
-                                    <span className="aff-page-info">Trang {page}/{totalPages}</span>
-                                    <button
-                                        className="aff-page-btn"
-                                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                        disabled={page >= totalPages}
-                                    >
-                                        <i className="fas fa-chevron-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>

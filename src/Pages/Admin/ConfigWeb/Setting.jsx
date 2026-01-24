@@ -66,6 +66,7 @@ const Setting = () => {
         deleteUsers: false, // Xóa user không nạp tiền
         deleteHistory: false, // Xóa lịch sử
         cuphap: "", // Thêm trường cuphap
+        depositMatchType: "code", // 'code' hoặc 'username'
         daily: "", // Thêm trường daily (đại lý)
         distributor: "", // Thêm trường distributor (nhà phân phối)
         headerJs: "", // Mã JS header
@@ -84,6 +85,7 @@ const Setting = () => {
                 ...config.data,
                 lienhe: Array.isArray(config.data.lienhe) ? config.data.lienhe : [],
                 cuphap: config.data.cuphap || "", // Lấy giá trị cuphap từ API
+                depositMatchType: config.data.depositMatchType || "code", // Lấy giá trị depositMatchType từ API
                 linktele: config.data.linktele || "",
                 daily: config.data.daily || "", // Lấy giá trị daily từ API
                 distributor: config.data.distributor || "", // Lấy giá trị distributor từ API
@@ -111,6 +113,13 @@ const Setting = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validation: nếu chọn username thì phải có cuphap
+        if (formData.depositMatchType === 'username' && !formData.cuphap?.trim()) {
+            toast.error('Khi chọn "Username người dùng", bạn phải nhập "Cú pháp nạp tiền"!');
+            return;
+        }
+
         setLoading(true);
         loadingg("Đang lưu cấu hình website...", true, 9999999);
         try {
@@ -124,6 +133,7 @@ const Setting = () => {
                     (contact) => contact.type || contact.value || contact.logolienhe
                 ),
                 cuphap: formData.cuphap, // Gửi trường cuphap lên API
+                depositMatchType: formData.depositMatchType, // Gửi trường depositMatchType lên API
                 linktele: formData.linktele, // Gửi trường linktele lên API
                 daily: formData.daily, // Gửi trường daily lên API
                 distributor: formData.distributor, // Gửi trường distributor lên API
@@ -470,6 +480,32 @@ const Setting = () => {
                                                     onChange={(e) => setFormData({ ...formData, cuphap: e.target.value })}
                                                     placeholder="naptien, donate,..."
                                                 />
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                    <i className="fas fa-id-badge me-1 text-primary"></i>
+                                                    Loại nội dung nạp tiền
+                                                </label>
+                                                <select
+                                                    className="form-select"
+                                                    value={formData.depositMatchType || 'code'}
+                                                    onChange={(e) => setFormData({ ...formData, depositMatchType: e.target.value })}
+                                                >
+                                                    <option value="code">Mã nạp tiền (tự động tạo)</option>
+                                                    <option value="username">Username người dùng</option>
+                                                </select>
+                                                <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
+                                                    <i className="fas fa-info-circle me-1"></i>
+                                                    {formData.depositMatchType === 'username'
+                                                        ? 'Nội dung chuyển khoản sẽ dùng USERNAME của người dùng'
+                                                        : 'Nội dung chuyển khoản sẽ dùng MÃ NẠP TIỀN tự động tạo'}
+                                                </small>
+                                                {formData.depositMatchType === 'username' && !formData.cuphap?.trim() && (
+                                                    <div className="alert alert-danger mt-2 mb-0 py-2 px-3" role="alert" style={{ fontSize: '0.8rem' }}>
+                                                        <i className="fas fa-exclamation-triangle me-1"></i>
+                                                        <strong>Bắt buộc:</strong> Khi chọn Username, bạn phải nhập "Cú pháp nạp tiền" ở trên (VD: donate, naptien...). Nếu không có cú pháp, hệ thống sẽ tự động dùng mã nạp tiền.
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="mb-3">
                                                 <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>

@@ -213,7 +213,7 @@ export default function NaptienPage() {
                 <>
                     <div className="col-md-12">
                         {/* Hiển thị thông tin banking trước */}
-                        <Banking banking={banking} depositCode={depositCode} onGenerateNewCode={handleGenerateNewDepositCode} />
+                        <Banking banking={banking} depositCode={depositCode} username={user?.username} onGenerateNewCode={handleGenerateNewDepositCode} />
                     </div>
                     {/* Sau đó mới hiển thị các trường khác */}
                     <div className="col-md-12">
