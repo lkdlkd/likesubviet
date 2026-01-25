@@ -195,6 +195,19 @@ export async function Dongbo(token) {
   return handleResponse(response);
 }
 
+// Sync services from a specific SMM partner
+export async function syncServicesFromSmm(smmId, token) {
+  const response = await fetchWithAuth(`${API_BASE}/admin/sync-services/${smmId}`, {
+    method: "POST",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+    }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+}
+
+
 export const adminDeleteRefunds = async (data, token) => {
   const response = await fetchWithAuth(`${API_BASE}/refund`, {
     method: "DELETE",

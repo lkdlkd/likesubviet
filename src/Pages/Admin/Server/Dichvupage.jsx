@@ -1,11 +1,10 @@
 'use client';
 import { loadingg } from "@/JS/Loading";
-import { deleteServer, getAllSmmPartners, getServer, updatePartnerPrices, Dongbo } from "@/Utils/api";
+import { deleteServer, getAllSmmPartners, getServer, updatePartnerPrices, Dongbo, syncServicesFromSmm } from "@/Utils/api";
 import { useEffect, useState } from "react";
 import Table from "react-bootstrap/Table";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import Adddichvu from "./Adddichvu";
 import EditModal from "./EditModal";
 
 export default function Dichvupage() {
@@ -26,8 +25,8 @@ export default function Dichvupage() {
   const [showEditModal, setShowEditModal] = useState(false); // Trạng thái hiển thị modal chỉnh sửa
   const [selectedService, setSelectedService] = useState(null); // Dịch vụ được chọn để chỉnh sửa
   const [quickAddMode, setQuickAddMode] = useState(true); // <--- ADD THIS
-  const [showAddModal, setShowAddModal] = useState(false); // Trạng thái hiển thị modal thêm dịch vụ
   const [isSearching, setIsSearching] = useState(false); // Trạng thái tìm kiếm
+  const navigate = useNavigate(); // Navigation hook
   // Lấy danh sách nền tảng duy nhất
   const platforms = Array.from(new Set(servers.map((s) => s.type)));
   const [selectedType, setSelectedType] = useState("");
@@ -39,6 +38,10 @@ export default function Dichvupage() {
   const [adjustMemberPct, setAdjustMemberPct] = useState(0);
   const [adjustAgentPct, setAdjustAgentPct] = useState(0);
   const [adjustDistributorPct, setAdjustDistributorPct] = useState(0);
+
+  // Sync state
+  const [syncing, setSyncing] = useState(false);
+  const [selectedSyncSmm, setSelectedSyncSmm] = useState("");
 
   // Filter states (pending - chưa áp dụng)
   const [filterSource, setFilterSource] = useState("");
@@ -94,6 +97,55 @@ export default function Dichvupage() {
       // silent fail; dropdown will be empty
     }
   };
+
+  // Sync services from selected SMM partner
+  const handleSync = async () => {
+    if (!selectedSyncSmm) {
+      Swal.fire({
+        title: "Lỗi",
+        text: "Vui lòng chọn nguồn SMM!",
+        icon: "warning",
+        confirmButtonText: "Xác nhận",
+      });
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Xác nhận đồng bộ?",
+      text: " Hệ thống sẽ tự động đồng bộ tất cả dịch vụ từ API vào website của bạn (phù hợp cho website chỉ kết nối duy nhất 1 API) ( Nếu bạn có nhiều hơn 1 API thì không nên sử dụng tránh xung đột)",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Đồng bộ",
+      cancelButtonText: "Hủy",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setSyncing(true);
+    loadingg("Đang đồng bộ d\u1ecbch v\u1ee5...", true, 999999);
+
+    try {
+      await syncServicesFromSmm(selectedSyncSmm, token);
+      Swal.fire({
+        title: "Thành công",
+        text: "Đồng bộ dịch vụ thành công!",
+        icon: "success",
+        confirmButtonText: "Xác nhận",
+      });
+      fetchServers(); // Refresh service list
+    } catch (error) {
+      Swal.fire({
+        title: "Lỗi",
+        text: error.message || "Lỗi khi đồng bộ dịch vụ!",
+        icon: "error",
+        confirmButtonText: "Xác nhận",
+      });
+    } finally {
+      setSyncing(false);
+      loadingg("Đang tải...", false);
+    }
+  };
+
   useEffect(() => {
     if (cate && Array.isArray(cate)) {
       setCategories(cate);
@@ -688,14 +740,41 @@ export default function Dichvupage() {
                           Đồng bộ
                         </button>
                       ) : (
-                        <button
-                          type="button"
-                          className="btn service-btn-primary"
-                          onClick={() => setShowAddModal(true)}
-                        >
-                          <i className="fas fa-plus me-2"></i>
-                          Thêm dịch vụ
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className="btn service-btn-primary"
+                            onClick={() => navigate('/admin/server/add')}
+                          >
+                            <i className="fas fa-plus me-2"></i>
+                            Thêm dịch vụ
+                          </button>
+                          {/* Manual Sync from specific SMM partner */}
+                          <select
+                            className="form-select"
+                            style={{ width: "auto", minWidth: "200px" }}
+                            value={selectedSyncSmm}
+                            onChange={(e) => setSelectedSyncSmm(e.target.value)}
+                            disabled={syncing}
+                          >
+                            <option value="">Chọn nguồn SMM...</option>
+                            {smmPartners.filter(p => p.status === "on" && !p.ordertay).map((partner) => (
+                              <option key={partner._id} value={partner._id}>
+                                {partner.name}
+                              </option>
+                            ))}
+                          </select>
+
+                          <button
+                            type="button"
+                            className="btn btn-info"
+                            onClick={handleSync}
+                            disabled={syncing || !selectedSyncSmm}
+                          >
+                            <i className={`fas ${syncing ? 'fa-spinner fa-spin' : 'fa-sync-alt'} me-2`}></i>
+                            {syncing ? "Đang đồng bộ..." : "Đồng bộ theo nguồn"}
+                          </button>
+                        </>
                       )}
                       <button
                         type="button"
@@ -932,20 +1011,6 @@ export default function Dichvupage() {
                   </div>
                 </div>
               </div>
-              <Adddichvu
-                fetchServers={fetchServers}
-                show={showAddModal}
-                onClose={() => setShowAddModal(false)}
-                categories={categories}
-                token={token}
-                editMode={false}
-                initialData={{}}
-                datasmm={smmPartners}
-                onSuccess={() => {
-                  setShowAddModal(false);
-                  fetchServers();
-                }}
-              />
 
               {/* Tìm kiếm và Bộ lọc gộp chung */}
               <div className="card border-0 shadow-sm mb-3">

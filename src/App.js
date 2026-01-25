@@ -21,6 +21,7 @@ import Doitacpage from "./Pages/Admin/Doi-tac/Doitacpage";
 import PlatformsPage from "./Pages/Admin/Nen-tang/PlatformsPage";
 import CategoriesPage from "./Pages/Admin/Dich-vu/CategoriesPage";
 import Dichvupage from "./Pages/Admin/Server/Dichvupage";
+import Adddichvu from "./Pages/Admin/Server/Adddichvu";
 import Setting from "./Pages/Admin/ConfigWeb/Setting";
 // import ConfigCard from "./Pages/Admin/ConfigCard/ConfigCard";
 import Tailieuapi from "./Pages/Tailieu/Tailieuapi";
@@ -127,6 +128,9 @@ function App() {
                 <Route path="/admin/dich-vu" element={<CategoriesPage />} />
               )}
               <Route path="/admin/server" element={<Dichvupage />} />
+              {!isAllowedApiUrl && (
+                <Route path="/admin/server/add" element={<Adddichvu />} />
+              )}
               <Route path="/admin/setting" element={<Setting />} />
               {/* <Route path="/admin/setting-thecao" element={<ConfigCard />} /> */}
               <Route path="/admin/khuyen-mai" element={<Khuyenmai />} />

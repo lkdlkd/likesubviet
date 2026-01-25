@@ -200,9 +200,9 @@ export default function EditModal({ show, fetchServers, onClose, initialData, to
           Chỉnh sửa dịch vụ
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body className="p-4 bg-light">
+      <Modal.Body className=" bg-light">
         <form onSubmit={handleSubmit}>
-          <div className="container-fluid">
+          <div >
             {/* Platform and Service Information */}
             <div className="card border-0 shadow-sm mb-4">
               <div className="card-header bg-info text-white">
