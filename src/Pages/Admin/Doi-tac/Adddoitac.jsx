@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { loadingg } from "@/JS/Loading";
+import Swal from "sweetalert2";
 
 export default function Adddoitac({
   token,
@@ -13,6 +14,7 @@ export default function Adddoitac({
   editingPartner,
   onUpdate,
   onClose,
+  smmPartners = [], // Thêm prop để kiểm tra số lượng đối tác hiện tại
 }) {
   const baseUrl = (
     process.env.REACT_APP_ALLOWED_API_URL || process.env.NEXT_PUBLIC_ALLOWED_API_URL || ""
@@ -23,7 +25,7 @@ export default function Adddoitac({
     : ""; // nếu không có biến môi trường thì rỗng
 
   const ALLOWED_API_URL = ENV_ALLOWED || null; // null nếu không giới hạn
-
+  const check = process.env.REACT_APP_API_URL || process.env.NEXT_PUBLIC_API_URL || true;
   const [formData, setFormData] = useState({
     name: "",
     url_api: ALLOWED_API_URL || "",
@@ -87,17 +89,45 @@ export default function Adddoitac({
     setLoading(true);
     loadingg(editingPartner ? "Đang cập nhật đối tác..." : "Đang thêm đối tác...", true, 9999999);
     try {
+      const normalize = (u) => (u || "").trim().replace(/\/+$/, "");
+
+      // Kiểm tra nếu check có giá trị (REACT_APP_API_URL được cấu hình)
+      if (check && typeof check === 'string') {
+        // Chỉ cho phép sử dụng URL từ REACT_APP_API_URL
+        if (normalize(formData.url_api) !== normalize(check)) {
+          toast.error(`Chỉ được phép sử dụng URL API: ${check}` + " nếu muốn thêm hãy liên hệ admin thêm phí");
+          setLoading(false);
+          loadingg("", false);
+          return;
+        }
+
+        // Kiểm tra số lượng đối tác nếu đang thêm mới (không tính ordertay = true)
+        if (!editingPartner) {
+          const normalPartners = smmPartners.filter(partner => !partner.ordertay);
+          if (normalPartners && normalPartners.length > 0) {
+            toast.error("Hệ thống chỉ cho phép thêm 1 đối tác duy nhất. Vui lòng xóa đối tác hiện tại trước khi thêm mới!");
+            setLoading(false);
+            loadingg("", false);
+            return;
+          }
+        }
+      }
+
+      // Logic cho ALLOWED_API_URL (giữ nguyên)
       if (ALLOWED_API_URL) {
         formData.tigia = 25;
         formData.name = "webme";
         formData.url_api = ALLOWED_API_URL;
       }
-      // Nếu cấu hình biến môi trường, chỉ cho phép 1 URL API cụ thể
-      const normalize = (u) => (u || "").trim().replace(/\/+$/, "");
+
+      // Nếu cấu hình ALLOWED_API_URL, chỉ cho phép 1 URL API cụ thể
       if (ALLOWED_API_URL && normalize(formData.url_api) !== normalize(ALLOWED_API_URL)) {
         toast.error(`Chỉ được phép sử dụng URL API: ${ALLOWED_API_URL}`);
+        setLoading(false);
+        loadingg("", false);
         return;
       }
+
       if (editingPartner) {
         // Cập nhật đối tác
         const updatedPartner = await updateSmmPartner(editingPartner._id, formData, token);

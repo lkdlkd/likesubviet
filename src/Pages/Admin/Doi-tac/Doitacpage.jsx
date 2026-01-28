@@ -11,7 +11,7 @@ export default function Doitacpage() {
   const [isAdding, setIsAdding] = useState(false);
   const [loading, setLoading] = useState(true);
   const isAllowedApiUrl = !!process.env.REACT_APP_ALLOWED_API_URL;
-
+  const check = process.env.REACT_APP_API_URL || process.env.NEXT_PUBLIC_API_URL || "";
   const token = localStorage.getItem("token") || "";
 
   // const fetchBalancesForPartners = async (partners) => {
@@ -33,8 +33,10 @@ export default function Doitacpage() {
       const partners = await getAllSmmPartners(token);
       setSmmPartners(partners);
       // await fetchBalancesForPartners(partners);
+      return partners; // Trả về để có thể sử dụng trong validation
     } catch (error) {
       Swal.fire("Lỗi!", "Không thể tải danh sách đối tác. Vui lòng thử lại.", "error");
+      return []; // Trả về mảng rỗng nếu có lỗi
     } finally {
       loadingg("", false);
       setLoading(false);
@@ -300,6 +302,7 @@ export default function Doitacpage() {
                   setIsAdding(false);
                   setEditingPartner(null);
                 }}
+                smmPartners={smmPartners}
               />
             )}
 
@@ -371,7 +374,7 @@ export default function Doitacpage() {
                                         Sửa
                                       </button>
                                     </li>
-                                    {!isAllowedApiUrl && (
+                                    {!isAllowedApiUrl && !check && (
                                       <li>
                                         <button
                                           className="dropdown-item text-danger"

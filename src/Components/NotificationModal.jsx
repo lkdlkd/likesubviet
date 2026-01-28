@@ -2,10 +2,9 @@ import React, { useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 
-export default function NotificationModal({ notifications = [] }) {
+export default function NotificationModal({ notifications = [], config = {} }) {
     const [noti, setNoti] = useState(notifications[0] || {});
     const [showModal, setShowModal] = useState(false);
-
     // Kiểm tra và hiển thị modal khi load trang
     useEffect(() => {
         if (notifications.length > 0) {
@@ -207,68 +206,73 @@ export default function NotificationModal({ notifications = [] }) {
                     box-shadow: 0 4px 12px rgba(0,123,255,0.3);
                 }
             `}</style>
-
-            {/* Danh sách thông báo */}
-            <div className="card mb-3 notification-card">
-                <div className="card-header">
-                    <h5 className="card-title mb-0">
-                        <i className="ti ti-bell-ringing me-2 text-primary"></i>
-                        Thông báo gần đây
-                    </h5>
-                </div>
-                <div className="card-body">
-                    <div className="custom-scrollbar" style={{ maxHeight: 350, overflowY: 'auto' }}>
-                        {notifications.length > 0 ? (
-                            notifications.map((notification, idx) => (
-                                <div key={notification._id || idx} className="list-group list-group-flush">
-                                    <div
-                                        className="list-group-item list-group-item-action py-3 px-3 notification-item"
-                                        style={{ cursor: "pointer", border: "none" }}
-                                        onClick={() => openModal(notification)}
-                                    >
-                                        <div className="media align-items-center gap-3">
-                                            <div className="chat-avtar">
-                                                <div className="avtar avtar-s bg-light-info notification-icon">
-                                                    <i className="ti ti-bell-ringing fs-4"></i>
+            {/* Chỉ hiển thị danh sách thông báo khi KHÔNG bật Order nhanh */}
+            {(!config || !config.showordernhanh) && (
+                <>
+                    {/* Danh sách thông báo */}
+                    < div className="card mb-3 notification-card">
+                        <div className="card-header">
+                            <h5 className="card-title mb-0">
+                                <i className="ti ti-bell-ringing me-2 text-primary"></i>
+                                Thông báo gần đây
+                            </h5>
+                        </div>
+                        <div className="card-body">
+                            <div className="custom-scrollbar" style={{ maxHeight: 350, overflowY: 'auto' }}>
+                                {notifications.length > 0 ? (
+                                    notifications.map((notification, idx) => (
+                                        <div key={notification._id || idx} className="list-group list-group-flush">
+                                            <div
+                                                className="list-group-item list-group-item-action py-3 px-3 notification-item"
+                                                style={{ cursor: "pointer", border: "none" }}
+                                                onClick={() => openModal(notification)}
+                                            >
+                                                <div className="media align-items-center gap-3">
+                                                    <div className="chat-avtar">
+                                                        <div className="avtar avtar-s bg-light-info notification-icon">
+                                                            <i className="ti ti-bell-ringing fs-4"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div className="media-body mx-2 notification-content">
+                                                        <h6 className="card-title mb-1 fw-semibold">{notification.title}</h6>
+                                                        <span
+                                                            className="f-15  mb-1 d-block"
+                                                            style={{
+                                                                display: '-webkit-box',
+                                                                WebkitLineClamp: 2,
+                                                                WebkitBoxOrient: 'vertical',
+                                                                overflow: 'hidden'
+                                                            }}
+                                                            dangerouslySetInnerHTML={{ __html: notification.content || "" }}
+                                                        />
+                                                        <p className="f-12 text-muted mb-0 notification-time">
+                                                            <i className="ti ti-clock me-1"></i>
+                                                            {new Date(notification.created_at).toLocaleString("vi-VN", {
+                                                                day: "2-digit",
+                                                                month: "2-digit",
+                                                                year: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                                second: "2-digit",
+                                                            })}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="media-body mx-2 notification-content">
-                                                <h6 className="card-title mb-1 fw-semibold">{notification.title}</h6>
-                                                <span
-                                                    className="f-15  mb-1 d-block"
-                                                    style={{
-                                                        display: '-webkit-box',
-                                                        WebkitLineClamp: 2,
-                                                        WebkitBoxOrient: 'vertical',
-                                                        overflow: 'hidden'
-                                                    }}
-                                                    dangerouslySetInnerHTML={{ __html: notification.content || "" }}
-                                                />
-                                                <p className="f-12 text-muted mb-0 notification-time">
-                                                    <i className="ti ti-clock me-1"></i>
-                                                    {new Date(notification.created_at).toLocaleString("vi-VN", {
-                                                        day: "2-digit",
-                                                        month: "2-digit",
-                                                        year: "numeric",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                        second: "2-digit",
-                                                    })}
-                                                </p>
-                                            </div>
                                         </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-4">
+                                        <i className="ti ti-bell-off fs-1 text-muted mb-2 d-block"></i>
+                                        <span className="text-muted">Chưa có thông báo</span>
                                     </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="text-center py-4">
-                                <i className="ti ti-bell-off fs-1 text-muted mb-2 d-block"></i>
-                                <span className="text-muted">Chưa có thông báo</span>
+                                )}
                             </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+                        </div>
+                    </div >
+                </>
+            )
+            }
 
             {/* React Bootstrap Modal */}
             <Modal

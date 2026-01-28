@@ -73,8 +73,11 @@ const Setting = () => {
         footerJs: "", // Mã JS footer
         tigia: "", // Tỷ giá
         notenaptien: "", // Ghi chú nạp tiền
+        priceDisplayUnit: 1000, // Đơn vị hiển thị giá (1 hoặc 1000)
+        showordernhanh: false, // Hiển thị Order nhanh trên trang chủ
     });
     const [loading, setLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState("basic"); // Tab đang active
     const editorRef = useRef(null);
     const fetchConfig = async () => {
         try {
@@ -100,6 +103,8 @@ const Setting = () => {
                 footerJs: config.data.footerJs || "", // Lấy giá trị footerJs từ API
                 tigia: config.data.tigia || 25000, // Lấy giá trị tigia từ API
                 notenaptien: config.data.notenaptien || "", // Lấy giá trị notenaptien từ API
+                priceDisplayUnit: config.data.priceDisplayUnit || 1000, // Lấy giá trị priceDisplayUnit từ API
+                showordernhanh: config.data.showordernhanh !== false, // Lấy giá trị showordernhanh từ API
             });
         } catch (error) {
             toast.error("Không thể tải cấu hình website!");
@@ -117,6 +122,30 @@ const Setting = () => {
         // Validation: nếu chọn username thì phải có cuphap
         if (formData.depositMatchType === 'username' && !formData.cuphap?.trim()) {
             toast.error('Khi chọn "Username người dùng", bạn phải nhập "Cú pháp nạp tiền"!');
+            return;
+        }
+
+        // Validation: Cấp bậc đại lý không được < 1 không để trống
+        if (!formData.daily &&  Number(formData.daily) < 1){
+            toast.error('Số tiền nâng cấp Đại lý không được nhỏ hơn 1!');
+            return;
+        }
+
+        // Validation: Cấp bậc nhà phân phối không được < 1 không để trống
+        if (!formData.distributor && Number(formData.distributor) < 1) {
+            toast.error('Số tiền nâng cấp Nhà phân phối không được nhỏ hơn 1!');
+            return;
+        }
+
+        // Validation: Tỷ giá không được < 1 (nếu có nhập)
+        if (!formData.tigia && Number(formData.tigia) < 1) {
+            toast.error('Tỷ giá không được nhỏ hơn 1!');
+            return;
+        }
+
+        // Validation: Nếu bật xóa tự động thì thời gian xóa không được để trống
+        if (formData.autoremove && (!formData.autoDeleteMonths || Number(formData.autoDeleteMonths) < 1)) {
+            toast.error('Vui lòng nhập thời gian xóa tự động (tối thiểu 1 tháng)!');
             return;
         }
 
@@ -148,6 +177,8 @@ const Setting = () => {
                 footerJs: formData.footerJs, // Gửi mã JS footer lên API
                 tigia: formData.tigia, // Gửi tỷ giá lên API
                 notenaptien: formData.notenaptien, // Gửi ghi chú nạp tiền lên API
+                priceDisplayUnit: formData.priceDisplayUnit, // Gửi đơn vị hiển thị giá lên API
+                showordernhanh: formData.showordernhanh, // Gửi cấu hình hiển thị Order nhanh lên API
             };
             await updateConfigWeb(sanitizedData, token);
             fetchConfig(); // Tải lại cấu hình sau khi cập nhật
@@ -185,652 +216,762 @@ const Setting = () => {
     return (
         <div className="row">
             <div className="col-md-12">
-                <div className="card border-0 shadow-lg">
-                    <div className="card-header bg-gradient-primary text-white border-0 py-3">
-                        <div className="d-flex align-items-center">
-                            <div className="icon-circle bg-white bg-opacity-20 me-3" style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
-                                <i className="fas fa-cogs text-white fs-5"></i>
-                            </div>
-                            <div>
-                                <h2 className="mb-0 fw-bold" style={{ fontSize: '1.5rem' }}>Cấu hình Website</h2>
-                                <p className="mb-0 opacity-75" style={{ fontSize: '0.875rem' }}>Thiết lập thông tin và giao diện website</p>
-                            </div>
-                        </div>
+                <div className="card border">
+                    <div className="card-header bg-white border-bottom py-3">
+                        <h5 className="mb-0 fw-bold text-dark">
+                            <i className="fas fa-cog me-2 text-secondary"></i>
+                            Cấu hình Website
+                        </h5>
                     </div>
                     <div className="card-body p-3">
                         <form onSubmit={handleSubmit}>
-                            {/* Thông báo GHIM - Full width */}
-                            <div className="card border-0 shadow-sm mb-3">
-                                <div className="card-header bg-warning text-white border-0 py-2">
-                                    <h6 className="mb-0 fw-bold" style={{ fontSize: '0.95rem' }}>
-                                        <i className="fas fa-thumbtack me-2"></i>
-                                        Thông báo GHIM
-                                    </h6>
-                                </div>
-                                <div className="card-body p-3">
-                                    <CKEditor
-                                        editor={ClassicEditor}
-                                        data={formData.tieude}
-                                        onReady={(editor) => {
-                                            editorRef.current = editor;
-                                            setTimeout(() => {
-                                                if (editor && editor.ui && editor.ui.view && editor.ui.view.editable && editor.ui.view.editable.element) {
-                                                    editor.ui.view.editable.element.style.height = "200px";
-                                                }
-                                            }, 100);
-                                        }}
-                                        onChange={(event, editor) => {
-                                            const data = editor.getData();
-                                            setFormData((prev) => ({ ...prev, tieude: data }));
-                                        }}
-                                    />
-                                </div>
-                            </div>
+                            {/* Tab Navigation */}
+                            <ul className="nav nav-tabs nav-fill mb-4" id="settingTabs" role="tablist">
+                                <li className="nav-item" role="presentation">
+                                    <button
+                                        className={`nav-link ${activeTab === "basic" ? "active" : ""}`}
+                                        onClick={() => setActiveTab("basic")}
+                                        type="button"
+                                    >
+                                        <i className="fas fa-info-circle me-2"></i>
+                                        Thông tin cơ bản
+                                    </button>
+                                </li>
+                                <li className="nav-item" role="presentation">
+                                    <button
+                                        className={`nav-link ${activeTab === "finance" ? "active" : ""}`}
+                                        onClick={() => setActiveTab("finance")}
+                                        type="button"
+                                    >
+                                        <i className="fas fa-money-bill-wave me-2"></i>
+                                        Cấp bậc và giá
+                                    </button>
+                                </li>
+                                <li className="nav-item" role="presentation">
+                                    <button
+                                        className={`nav-link ${activeTab === "system" ? "active" : ""}`}
+                                        onClick={() => setActiveTab("system")}
+                                        type="button"
+                                    >
+                                        <i className="fas fa-sliders-h me-2"></i>
+                                        Hệ thống
+                                    </button>
+                                </li>
+                                <li className="nav-item" role="presentation">
+                                    <button
+                                        className={`nav-link ${activeTab === "script" ? "active" : ""}`}
+                                        onClick={() => setActiveTab("script")}
+                                        type="button"
+                                    >
+                                        <i className="fas fa-code me-2"></i>
+                                        Mã JS
+                                    </button>
+                                </li>
+                                <li className="nav-item" role="presentation">
+                                    <button
+                                        className={`nav-link ${activeTab === "contact" ? "active" : ""}`}
+                                        onClick={() => setActiveTab("contact")}
+                                        type="button"
+                                    >
+                                        <i className="fas fa-address-book me-2"></i>
+                                        Liên hệ
+                                    </button>
+                                </li>
+                            </ul>
 
-                            {/* Layout 2 cột */}
-                            <div className="row g-3">
-                                {/* Cột trái */}
-                                <div className="col-lg-6">
-                                    {/* Thông tin cơ bản */}
-                                    <div className="card border-0 shadow-sm mb-3">
-                                        <div className="card-header bg-info text-white border-0 py-2">
-                                            <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
-                                                <i className="fas fa-info-circle me-2"></i>
-                                                Thông tin cơ bản
-                                            </h6>
-                                        </div>
-                                        <div className="card-body p-3">
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-heading me-1 text-success"></i>
-                                                    Tiêu đề Website
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={formData.title}
-                                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                                    placeholder="Nhập tiêu đề website"
-                                                />
-                                            </div>
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-image me-1 text-info"></i>
-                                                    Logo Website
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={formData.logo}
-                                                    onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                                                    placeholder="Nhập URL logo"
-                                                />
-                                            </div>
-                                            <div className="mb-0">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-star me-1 text-warning"></i>
-                                                    Favicon
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control mb-2"
-                                                    value={formData.favicon}
-                                                    onChange={(e) => setFormData({ ...formData, favicon: e.target.value })}
-                                                    placeholder="Nhập URL favicon"
-                                                />
-                                                <select
-                                                    className="form-select form-select-sm"
-                                                    value={formData.favicon}
-                                                    onChange={(e) => setFormData({ ...formData, favicon: e.target.value })}
-                                                >
-                                                    <option value="">Chọn favicon có sẵn</option>
-                                                    {faviconList.map(f => (
-                                                        <option value={f.url} key={f.url}>{f.label}</option>
-                                                    ))}
-                                                </select>
-                                                {formData.favicon && (
-                                                    <div className="mt-2 text-center">
-                                                        <img src={formData.favicon} alt="Preview" className="border rounded" style={{ maxWidth: "40px" }} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Nâng cấp bậc */}
-                                    <div className="card border-0 shadow-sm mb-3">
-                                        <div className="card-header bg-gradient-warning text-white border-0 py-2">
-                                            <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
-                                                <i className="fas fa-level-up-alt me-2"></i>
-                                                Nâng cấp bậc tự động
-                                            </h6>
-                                        </div>
-                                        <div className="card-body p-3">
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-user-tie me-1 text-warning"></i>
-                                                    Đại lý
-                                                </label>
-                                                <div className="input-group input-group-sm">
-                                                    <input
-                                                        type="number"
-                                                        className="form-control"
-                                                        value={formData.daily}
-                                                        onChange={(e) => setFormData({ ...formData, daily: e.target.value })}
-                                                        placeholder="0"
-                                                    />
-                                                    <span className="input-group-text">VNĐ</span>
+                            {/* Tab Content */}
+                            <div className="tab-content">
+                                {/* TAB 1: Thông tin cơ bản */}
+                                {activeTab === "basic" && (
+                                    <div className="row g-3">
+                                        {/* Thông báo GHIM - Full width */}
+                                        <div className="col-12">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                        <i className="fas fa-thumbtack me-2 text-secondary"></i>
+                                                        Thông báo GHIM
+                                                    </h6>
                                                 </div>
-                                            </div>
-                                            <div className="mb-0">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-industry me-1 text-dark"></i>
-                                                    Nhà phân phối
-                                                </label>
-                                                <div className="input-group input-group-sm">
-                                                    <input
-                                                        type="number"
-                                                        className="form-control"
-                                                        value={formData.distributor}
-                                                        onChange={(e) => setFormData({ ...formData, distributor: e.target.value })}
-                                                        placeholder="0"
-                                                    />
-                                                    <span className="input-group-text">VNĐ</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Tỷ giá */}
-                                    <div className="card border-0 shadow-sm mb-3">
-                                        <div className="card-header bg-gradient-primary text-white border-0 py-2">
-                                            <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
-                                                <i className="fas fa-exchange-alt me-2"></i>
-                                                Tỷ giá
-                                            </h6>
-                                        </div>
-                                        <div className="card-body p-3">
-                                            <div className="mb-0">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-money-bill-wave me-1 text-success"></i>
-                                                    Tỷ giá VNĐ / USD
-                                                </label>
-                                                <div className="input-group input-group-sm">
-                                                    <input
-                                                        type="number"
-                                                        className="form-control"
-                                                        value={formData.tigia}
-                                                        onChange={(e) => setFormData({ ...formData, tigia: e.target.value })}
-                                                        placeholder="25000"
-                                                    />
-                                                    <span className="input-group-text">VNĐ</span>
-                                                </div>
-                                                <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
-                                                    <i className="fas fa-info-circle me-1"></i>
-                                                    Tỷ giá được dùng để quy đổi giá dịch vụ
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Ghi chú nạp tiền */}
-                                    <div className="card border-0 shadow-sm mb-3">
-                                        <div className="card-header bg-gradient-success text-white border-0 py-2">
-                                            <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
-                                                <i className="fas fa-sticky-note me-2"></i>
-                                                Ghi chú nạp tiền
-                                            </h6>
-                                        </div>
-                                        <div className="card-body p-3">
-                                            <CKEditor
-                                                editor={ClassicEditor}
-                                                data={formData.notenaptien}
-                                                onReady={(editor) => {
-                                                    setTimeout(() => {
-                                                        if (editor && editor.ui && editor.ui.view && editor.ui.view.editable && editor.ui.view.editable.element) {
-                                                            editor.ui.view.editable.element.style.height = "200px";
-                                                        }
-                                                    }, 100);
-                                                }}
-                                                onChange={(event, editor) => {
-                                                    const data = editor.getData();
-                                                    setFormData((prev) => ({ ...prev, notenaptien: data }));
-                                                }}
-                                            />
-                                            <small className="text-muted d-block mt-2" style={{ fontSize: '0.75rem' }}>
-                                                <i className="fas fa-info-circle me-1"></i>
-                                                Ghi chú này sẽ hiển thị ở trang nạp tiền
-                                            </small>
-                                        </div>
-                                    </div>
-
-                                    {/* Mã JavaScript */}
-                                    <div className="card border-0 shadow-sm mb-3">
-                                        <div className="card-header bg-gradient-success text-white border-0 py-2">
-                                            <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
-                                                <i className="fas fa-code me-2"></i>
-                                                Mã JavaScript tùy chỉnh
-
-                                            </h6>
-                                            <span className="text-danger">Cẩn thận với script có thể ảnh hưởng đến bảo mật website</span><br />
-                                            <span className="text-danger">KHÔNG BIẾT DÙNG TỐT NHẤT ĐỂ TRỐNG</span>
-                                        </div>
-                                        <div className="card-body p-3">
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-file-code me-1 text-success"></i>
-                                                    Script/HTML Header
-                                                </label>
-                                                <textarea
-                                                    className="form-control font-monospace"
-                                                    rows="4"
-                                                    value={formData.headerJs}
-                                                    onChange={(e) => setFormData({ ...formData, headerJs: e.target.value })}
-                                                    placeholder="<script>&#10;  // Mã JS được chèn vào <head>&#10;</script>"
-                                                    style={{ fontSize: '0.85rem' }}
-                                                />
-                                                <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
-                                                    <i className="fas fa-info-circle me-1"></i>
-                                                    Mã này sẽ được chèn vào thẻ &lt;head&gt; ( Link , Meta tags, Script.)
-
-                                                </small>
-                                            </div>
-                                            <div className="mb-0">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-file-code me-1 text-info"></i>
-                                                    Script/HTML Footer
-                                                </label>
-                                                <textarea
-                                                    className="form-control font-monospace"
-                                                    rows="4"
-                                                    value={formData.footerJs}
-                                                    onChange={(e) => setFormData({ ...formData, footerJs: e.target.value })}
-                                                    placeholder="<script>&#10;  // Mã JS được chèn trước </body>&#10;</script>"
-                                                    style={{ fontSize: '0.85rem' }}
-                                                />
-                                                <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
-                                                    <i className="fas fa-info-circle me-1"></i>
-                                                    Mã này sẽ được chèn trước thẻ đóng &lt;/body&gt; (Chatbox, Tuyết rơi, v.v.)
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Cột phải */}
-                                <div className="col-lg-6">
-                                    {/* Cài đặt hệ thống */}
-                                    <div className="card border-0 shadow-sm mb-3">
-                                        <div className="card-header bg-secondary text-white border-0 py-2">
-                                            <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
-                                                <i className="fas fa-sliders-h me-2"></i>
-                                                Cài đặt hệ thống
-                                            </h6>
-                                        </div>
-                                        <div className="card-body p-3">
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-terminal me-1 text-secondary"></i>
-                                                    Cú pháp nạp tiền
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={formData.cuphap}
-                                                    onChange={(e) => setFormData({ ...formData, cuphap: e.target.value })}
-                                                    placeholder="naptien, donate,..."
-                                                />
-                                            </div>
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-id-badge me-1 text-primary"></i>
-                                                    Loại nội dung nạp tiền
-                                                </label>
-                                                <select
-                                                    className="form-select"
-                                                    value={formData.depositMatchType || 'code'}
-                                                    onChange={(e) => setFormData({ ...formData, depositMatchType: e.target.value })}
-                                                >
-                                                    <option value="code">Mã nạp tiền (tự động tạo)</option>
-                                                    <option value="username">Username người dùng</option>
-                                                </select>
-                                                <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
-                                                    <i className="fas fa-info-circle me-1"></i>
-                                                    {formData.depositMatchType === 'username'
-                                                        ? 'Nội dung chuyển khoản sẽ dùng USERNAME của người dùng'
-                                                        : 'Nội dung chuyển khoản sẽ dùng MÃ NẠP TIỀN tự động tạo'}
-                                                </small>
-                                                {formData.depositMatchType === 'username' && !formData.cuphap?.trim() && (
-                                                    <div className="alert alert-danger mt-2 mb-0 py-2 px-3" role="alert" style={{ fontSize: '0.8rem' }}>
-                                                        <i className="fas fa-exclamation-triangle me-1"></i>
-                                                        <strong>Bắt buộc:</strong> Khi chọn Username, bạn phải nhập "Cú pháp nạp tiền" ở trên (VD: donate, naptien...). Nếu không có cú pháp, hệ thống sẽ tự động dùng mã nạp tiền.
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-eye me-1 text-info"></i>
-                                                    Hiển thị lượt bán
-                                                </label>
-                                                <select
-                                                    className="form-select"
-                                                    value={formData.viewluotban ? "true" : "false"}
-                                                    onChange={(e) => setFormData({ ...formData, viewluotban: e.target.value === "true" })}
-                                                >
-                                                    <option value="false">Ẩn</option>
-                                                    <option value="true">Hiển thị</option>
-                                                </select>
-                                            </div>
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-sync-alt me-1 text-success"></i>
-                                                    Trạng thái dịch vụ tự động theo nguồn
-                                                </label>
-                                                <select
-                                                    className="form-select"
-                                                    value={formData.autoactive ? "true" : "false"}
-                                                    onChange={(e) => setFormData({ ...formData, autoactive: e.target.value === "true" })}
-                                                >
-                                                    <option value="false">Tắt</option>
-                                                    <option value="true">Bật</option>
-                                                </select>
-                                            </div>
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fab fa-telegram me-1"></i>
-                                                    Link Bot Telegram
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={formData.linktele}
-                                                    onChange={(e) => setFormData({ ...formData, linktele: e.target.value })}
-                                                    placeholder="https://t.me/xxxxxx_bot"
-                                                />
-                                            </div>
-                                            <div className="mb-3">
-                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                    <i className="fas fa-trash-alt me-1 text-danger"></i>
-                                                    Tự động xóa dữ liệu cũ
-                                                </label>
-                                                <select
-                                                    className="form-select"
-                                                    value={formData.autoremove ? "true" : "false"}
-                                                    onChange={(e) => {
-                                                        const newValue = e.target.value === "true";
-                                                        if (newValue) {
-                                                            // Hiển thị cảnh báo khi bật
-                                                            Swal.fire({
-                                                                title: 'Bạn có chắc chắn muốn bật tính năng xóa tự động?',
-                                                                text: "Dữ liệu đã xóa sẽ KHÔNG THỂ KHÔI PHỤC!\n\nVui lòng cân nhắc kỹ trước khi bật tính năng này.",
-                                                                icon: 'warning',
-                                                                showCancelButton: true,
-                                                                confirmButtonColor: '#d33',
-                                                                cancelButtonColor: '#3085d6',
-                                                                confirmButtonText: 'Có, tôi chắc chắn!'
-                                                            }).then((result) => {
-                                                                if (result.isConfirmed) {
-                                                                    setFormData({ ...formData, autoremove: true });
+                                                <div className="card-body p-3">
+                                                    <CKEditor
+                                                        editor={ClassicEditor}
+                                                        data={formData.tieude}
+                                                        onReady={(editor) => {
+                                                            editorRef.current = editor;
+                                                            setTimeout(() => {
+                                                                if (editor && editor.ui && editor.ui.view && editor.ui.view.editable && editor.ui.view.editable.element) {
+                                                                    editor.ui.view.editable.element.style.height = "200px";
                                                                 }
-                                                            });
-                                                        } else {
-                                                            setFormData({ ...formData, autoremove: false });
-                                                        }
-                                                    }}
-                                                >
-                                                    <option value="false">Tắt</option>
-                                                    <option value="true">Bật</option>
-                                                </select>
-                                                {formData.autoremove && (
-                                                    <div className="alert alert-warning mt-2 mb-0 py-2 px-3" role="alert" style={{ fontSize: '0.75rem' }}>
-                                                        <i className="fas fa-exclamation-triangle me-1"></i>
-                                                        <strong>Lưu ý:</strong> Dữ liệu đã xóa sẽ không thể khôi phục!
-                                                    </div>
-                                                )}
+                                                            }, 100);
+                                                        }}
+                                                        onChange={(event, editor) => {
+                                                            const data = editor.getData();
+                                                            setFormData((prev) => ({ ...prev, tieude: data }));
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
-                                            {formData.autoremove && (
-                                                <div className="mb-0">
-                                                    <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
-                                                        <i className="fas fa-calendar-alt me-1 text-warning"></i>
-                                                        Thời gian xóa tự động
-                                                    </label>
-                                                    <div className="input-group mb-2">
-                                                        <input
-                                                            type="number"
-                                                            className="form-control"
-                                                            value={formData.autoDeleteMonths}
-                                                            onChange={(e) => setFormData({ ...formData, autoDeleteMonths: e.target.value })}
-                                                            placeholder="3"
-                                                            min="1"
-                                                            max="12"
-                                                        />
-                                                        <span className="input-group-text">Tháng</span>
-                                                    </div>
-                                                    <small className="text-muted d-block mb-3" style={{ fontSize: '0.75rem' }}>
-                                                        <i className="fas fa-info-circle me-1"></i>
-                                                        Dữ liệu cũ hơn {formData.autoDeleteMonths || 3} tháng sẽ bị xóa tự động hằng ngày
-                                                    </small>
+                                        </div>
 
-                                                    {/* Tùy chọn xóa */}
-                                                    <div className="border rounded p-3" style={{ backgroundColor: '#f8f9fa' }}>
-                                                        <label className="form-label fw-semibold mb-2" style={{ fontSize: '0.875rem' }}>
-                                                            <i className="fas fa-list-check me-1 text-primary"></i>
-                                                            Chọn dữ liệu cần xóa
+                                        {/* Thông tin cơ bản */}
+                                        <div className="col-lg-6">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                        <i className="fas fa-info-circle me-2 text-secondary"></i>
+                                                        Thông tin cơ bản
+                                                    </h6>
+                                                </div>
+                                                <div className="card-body p-3">
+                                                    <div className="mb-3">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-heading me-1 text-success"></i>
+                                                            Tiêu đề Website
                                                         </label>
-
-                                                        <div className="form-check mb-2">
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                id="deleteOrders"
-                                                                checked={formData.deleteOrders}
-                                                                onChange={(e) => setFormData({ ...formData, deleteOrders: e.target.checked })}
-                                                            />
-                                                            <label className="form-check-label" htmlFor="deleteOrders" style={{ fontSize: '0.85rem' }}>
-                                                                <i className="fas fa-shopping-cart me-1 text-danger"></i>
-                                                                Xóa đơn hàng cũ
-                                                            </label>
-                                                        </div>
-
-                                                        <div className="form-check mb-2">
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                id="deleteUsers"
-                                                                checked={formData.deleteUsers}
-                                                                onChange={(e) => setFormData({ ...formData, deleteUsers: e.target.checked })}
-                                                            />
-                                                            <label className="form-check-label" htmlFor="deleteUsers" style={{ fontSize: '0.85rem' }}>
-                                                                <i className="fas fa-user-times me-1 text-warning"></i>
-                                                                Xóa user không nạp tiền
-                                                            </label>
-                                                        </div>
-
-                                                        <div className="form-check mb-0">
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                id="deleteHistory"
-                                                                checked={formData.deleteHistory}
-                                                                onChange={(e) => setFormData({ ...formData, deleteHistory: e.target.checked })}
-                                                            />
-                                                            <label className="form-check-label" htmlFor="deleteHistory" style={{ fontSize: '0.85rem' }}>
-                                                                <i className="fas fa-history me-1 text-info"></i>
-                                                                Xóa lịch sử hoạt động
-                                                            </label>
-                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            value={formData.title}
+                                                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                                            placeholder="Nhập tiêu đề website"
+                                                        />
+                                                    </div>
+                                                    <div className="mb-3">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-image me-1 text-info"></i>
+                                                            Logo Website
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            value={formData.logo}
+                                                            onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                                                            placeholder="Nhập URL logo"
+                                                        />
+                                                    </div>
+                                                    <div className="mb-0">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-star me-1 text-warning"></i>
+                                                            Favicon
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control mb-2"
+                                                            value={formData.favicon}
+                                                            onChange={(e) => setFormData({ ...formData, favicon: e.target.value })}
+                                                            placeholder="Nhập URL favicon"
+                                                        />
+                                                        <select
+                                                            className="form-select form-select-sm"
+                                                            value={formData.favicon}
+                                                            onChange={(e) => setFormData({ ...formData, favicon: e.target.value })}
+                                                        >
+                                                            <option value="">Chọn favicon có sẵn</option>
+                                                            {faviconList.map(f => (
+                                                                <option value={f.url} key={f.url}>{f.label}</option>
+                                                            ))}
+                                                        </select>
+                                                        {formData.favicon && (
+                                                            <div className="mt-2 text-center">
+                                                                <img src={formData.favicon} alt="Preview" className="border rounded" style={{ maxWidth: "70px" }} />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
-                                            )}
+                                            </div>
+                                        </div>
+
+                                        {/* Link Bot Telegram */}
+                                        <div className="col-lg-6">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                        <i className="fab fa-telegram me-2 text-secondary"></i>
+                                                        Telegram
+                                                    </h6>
+                                                </div>
+                                                <div className="card-body p-3">
+                                                    <div className="mb-0">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fab fa-telegram me-1"></i>
+                                                            Link Bot Telegram
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            value={formData.linktele}
+                                                            onChange={(e) => setFormData({ ...formData, linktele: e.target.value })}
+                                                            placeholder="https://t.me/xxxxxx_bot"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+                                )}
 
-                                    {/* Danh sách liên hệ */}
-                                    <div className="card border-0 shadow-sm mb-3">
-                                        <div className="card-header bg-gradient-dark text-white border-0 py-2">
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                <h6 className="mb-0 fw-bold text-white" style={{ fontSize: '0.95rem' }}>
-                                                    <i className="fas fa-address-book me-2"></i>
-                                                    Danh sách liên hệ ({formData.lienhe.length}/10)
-                                                </h6>
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-light btn-sm"
-                                                    onClick={addContact}
-                                                    disabled={formData.lienhe.length >= 10}
-                                                    style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
-                                                >
-                                                    <i className="fas fa-plus me-1"></i>
-                                                    Thêm
-                                                </button>
+                                {/* TAB 2: Tài chính */}
+                                {activeTab === "finance" && (
+                                    <div className="row g-3">
+                                        {/* Nâng cấp bậc tự động */}
+                                        <div className="col-lg-6">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                        <i className="fas fa-level-up-alt me-2 text-secondary"></i>
+                                                        Nâng cấp bậc tự động
+                                                    </h6>
+                                                </div>
+                                                <div className="card-body p-3">
+                                                    <div className="mb-3">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-user-tie me-1 text-warning"></i>
+                                                            Đại lý
+                                                        </label>
+                                                        <div className="input-group input-group-sm">
+                                                            <input
+                                                                type="number"
+                                                                className="form-control"
+                                                                value={formData.daily}
+                                                                onChange={(e) => setFormData({ ...formData, daily: e.target.value })}
+                                                                placeholder="0"
+                                                            />
+                                                            <span className="input-group-text">VNĐ</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mb-0">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-industry me-1 text-dark"></i>
+                                                            Nhà phân phối
+                                                        </label>
+                                                        <div className="input-group input-group-sm">
+                                                            <input
+                                                                type="number"
+                                                                className="form-control"
+                                                                value={formData.distributor}
+                                                                onChange={(e) => setFormData({ ...formData, distributor: e.target.value })}
+                                                                placeholder="0"
+                                                            />
+                                                            <span className="input-group-text">VNĐ</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="card-body p-3" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                                            {formData.lienhe.length === 0 ? (
-                                                <div className="text-center py-3">
-                                                    <i className="fas fa-address-book fs-1 text-muted mb-2"></i>
-                                                    <p className="text-muted mb-0" style={{ fontSize: '0.875rem' }}>Chưa có liên hệ nào</p>
+
+                                        {/* Tỷ giá */}
+                                        <div className="col-lg-6">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                        <i className="fas fa-exchange-alt me-2 text-secondary"></i>
+                                                        Tỷ giá & Hiển thị
+                                                    </h6>
                                                 </div>
-                                            ) : (
-                                                <div className="row g-2">
-                                                    {formData.lienhe.map((contact, index) => (
-                                                        <div key={index} className="col-12">
-                                                            <div className="card border shadow-sm">
-                                                                <div className="card-header bg-light border-0 py-2 d-flex justify-content-between align-items-center">
-                                                                    <span className="fw-semibold" style={{ fontSize: '0.85rem', color: '#2c3e50' }}>
-                                                                        <i className="fas fa-hashtag me-1" style={{ fontSize: '0.75rem' }}></i>{index + 1}
-                                                                    </span>
-                                                                    <button
-                                                                        type="button"
-                                                                        className="btn btn-outline-danger btn-sm"
-                                                                        onClick={() => removeContact(index)}
-                                                                        style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
-                                                                    >
-                                                                        <i className="fas fa-trash"></i>
-                                                                    </button>
-                                                                </div>
-                                                                <div className="card-body p-2">
-                                                                    <div className="mb-2">
-                                                                        <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>
-                                                                            <i className="fas fa-tag me-1 text-info" style={{ fontSize: '0.75rem' }}></i>
-                                                                            Loại
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control form-control-sm"
-                                                                            value={contact.type}
-                                                                            onChange={(e) => updateContact(index, "type", e.target.value)}
-                                                                            placeholder="email, phone, facebook..."
-                                                                            style={{ fontSize: '0.8rem' }}
-                                                                        />
-                                                                    </div>
-                                                                    <div className="mb-2">
-                                                                        <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>
-                                                                            <i className="fas fa-link me-1 text-success" style={{ fontSize: '0.75rem' }}></i>
-                                                                            Link
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control form-control-sm"
-                                                                            value={contact.value}
-                                                                            onChange={(e) => updateContact(index, "value", e.target.value)}
-                                                                            placeholder="https://..."
-                                                                            style={{ fontSize: '0.8rem' }}
-                                                                        />
-                                                                    </div>
-                                                                    <div className="mb-2">
-                                                                        <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>
-                                                                            <i className="fas fa-image me-1 text-warning" style={{ fontSize: '0.75rem' }}></i>
-                                                                            Logo URL
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control form-control-sm"
-                                                                            value={contact.logolienhe}
-                                                                            onChange={(e) => updateContact(index, "logolienhe", e.target.value)}
-                                                                            placeholder="URL logo"
-                                                                            style={{ fontSize: '0.8rem' }}
-                                                                        />
-                                                                    </div>
-                                                                    <div>
-                                                                        <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>
-                                                                            <i className="fas fa-images me-1 text-primary" style={{ fontSize: '0.75rem' }}></i>
-                                                                            Chọn logo
-                                                                        </label>
-                                                                        <div className="border rounded p-2" style={{ maxHeight: 120, overflowY: 'auto', backgroundColor: '#f8f9fa' }}>
-                                                                            <div className="d-flex flex-wrap gap-1">
-                                                                                {Object.entries(platformLogos).map(([platform, url], idx) => (
-                                                                                    <div
-                                                                                        key={idx}
-                                                                                        onClick={() => updateContact(index, "logolienhe", url)}
-                                                                                        style={{
-                                                                                            width: '40px',
-                                                                                            height: '40px',
-                                                                                            border: contact.logolienhe === url ? '2px solid #007bff' : '1px solid #dee2e6',
-                                                                                            borderRadius: '6px',
-                                                                                            padding: '4px',
-                                                                                            cursor: 'pointer',
-                                                                                            background: contact.logolienhe === url ? '#e3f2fd' : '#fff',
-                                                                                            display: 'flex',
-                                                                                            alignItems: 'center',
-                                                                                            justifyContent: 'center',
-                                                                                            transition: 'all 0.2s'
-                                                                                        }}
-                                                                                    >
-                                                                                        <img
-                                                                                            src={url}
-                                                                                            alt={platform}
-                                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                                        />
-                                                                                    </div>
-                                                                                ))}
-                                                                            </div>
-                                                                        </div>
-                                                                        {contact.logolienhe && (
-                                                                            <div className="mt-2 text-center">
-                                                                                <img src={contact.logolienhe} alt="Preview" style={{ maxWidth: "30px" }} className="rounded" />
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
+                                                <div className="card-body p-3">
+                                                    <div className="mb-3">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-money-bill-wave me-1 text-success"></i>
+                                                            Tỷ giá VNĐ / USD
+                                                        </label>
+                                                        <div className="input-group input-group-sm">
+                                                            <input
+                                                                type="number"
+                                                                className="form-control"
+                                                                value={formData.tigia}
+                                                                onChange={(e) => setFormData({ ...formData, tigia: e.target.value })}
+                                                                placeholder="25000"
+                                                            />
+                                                            <span className="input-group-text">VNĐ</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mb-0">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-tags me-1 text-info"></i>
+                                                            Đơn vị hiển thị giá
+                                                        </label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={formData.priceDisplayUnit || 1000}
+                                                            onChange={(e) => setFormData({ ...formData, priceDisplayUnit: Number(e.target.value) })}
+                                                        >
+                                                            <option value={1000}>Hiển thị giá / 1000</option>
+                                                            <option value={1}>Hiển thị giá / 1</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Cú pháp nạp tiền */}
+                                        <div className="col-lg-6">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                        <i className="fas fa-terminal me-2 text-secondary"></i>
+                                                        Cấu hình nạp tiền
+                                                    </h6>
+                                                </div>
+                                                <div className="card-body p-3">
+                                                    <div className="mb-3">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-terminal me-1 text-secondary"></i>
+                                                            Cú pháp nạp tiền
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            value={formData.cuphap}
+                                                            onChange={(e) => setFormData({ ...formData, cuphap: e.target.value })}
+                                                            placeholder="naptien, donate,..."
+                                                        />
+                                                    </div>
+                                                    <div className="mb-0">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-id-badge me-1 text-primary"></i>
+                                                            Loại nội dung nạp tiền
+                                                        </label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={formData.depositMatchType || 'code'}
+                                                            onChange={(e) => setFormData({ ...formData, depositMatchType: e.target.value })}
+                                                        >
+                                                            <option value="code">Mã nạp tiền (tự động tạo)</option>
+                                                            <option value="username">Username người dùng</option>
+                                                        </select>
+                                                        {formData.depositMatchType === 'username' && !formData.cuphap?.trim() && (
+                                                            <div className="alert alert-danger mt-2 mb-0 py-2 px-3" role="alert" style={{ fontSize: '0.8rem' }}>
+                                                                <i className="fas fa-exclamation-triangle me-1"></i>
+                                                                <strong>Bắt buộc:</strong> Khi chọn Username, bạn phải nhập cú pháp nạp tiền.
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Ghi chú nạp tiền */}
+                                        <div className="col-lg-6">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                        <i className="fas fa-sticky-note me-2 text-secondary"></i>
+                                                        Ghi chú nạp tiền
+                                                    </h6>
+                                                </div>
+                                                <div className="card-body p-3">
+                                                    <CKEditor
+                                                        editor={ClassicEditor}
+                                                        data={formData.notenaptien}
+                                                        onReady={(editor) => {
+                                                            setTimeout(() => {
+                                                                if (editor && editor.ui && editor.ui.view && editor.ui.view.editable && editor.ui.view.editable.element) {
+                                                                    editor.ui.view.editable.element.style.height = "120px";
+                                                                }
+                                                            }, 100);
+                                                        }}
+                                                        onChange={(event, editor) => {
+                                                            const data = editor.getData();
+                                                            setFormData((prev) => ({ ...prev, notenaptien: data }));
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* TAB 3: Hệ thống */}
+                                {activeTab === "system" && (
+                                    <div className="row g-3">
+                                        {/* Cài đặt hiển thị */}
+                                        <div className="col-lg-6">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                        <i className="fas fa-eye me-2 text-secondary"></i>
+                                                        Cài đặt hiển thị
+                                                    </h6>
+                                                </div>
+                                                <div className="card-body p-3">
+                                                    <div className="mb-3">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-eye me-1 text-info"></i>
+                                                            Hiển thị lượt bán
+                                                        </label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={formData.viewluotban ? "true" : "false"}
+                                                            onChange={(e) => setFormData({ ...formData, viewluotban: e.target.value === "true" })}
+                                                        >
+                                                            <option value="false">Ẩn</option>
+                                                            <option value="true">Hiển thị</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="mb-3">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-bolt me-1 text-warning"></i>
+                                                            Hiển thị Order nhanh (Trang chủ)
+                                                        </label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={formData.showordernhanh ? "true" : "false"}
+                                                            onChange={(e) => setFormData({ ...formData, showordernhanh: e.target.value === "true" })}
+                                                        >
+                                                            <option value="true">Hiển thị</option>
+                                                            <option value="false">Ẩn</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="mb-0">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-sync-alt me-1 text-success"></i>
+                                                            Trạng thái dịch vụ tự động theo nguồn
+                                                        </label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={formData.autoactive ? "true" : "false"}
+                                                            onChange={(e) => setFormData({ ...formData, autoactive: e.target.value === "true" })}
+                                                        >
+                                                            <option value="false">Tắt</option>
+                                                            <option value="true">Bật</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Tự động xóa dữ liệu */}
+                                        <div className="col-lg-6">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                        <i className="fas fa-trash-alt me-2 text-secondary"></i>
+                                                        Tự động xóa dữ liệu cũ
+                                                    </h6>
+                                                </div>
+                                                <div className="card-body p-3">
+                                                    <div className="mb-3">
+                                                        <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                            <i className="fas fa-trash-alt me-1 text-danger"></i>
+                                                            Tự động xóa dữ liệu cũ
+                                                        </label>
+                                                        <select
+                                                            className="form-select"
+                                                            value={formData.autoremove ? "true" : "false"}
+                                                            onChange={(e) => {
+                                                                const newValue = e.target.value === "true";
+                                                                if (newValue) {
+                                                                    // Hiển thị cảnh báo khi bật
+                                                                    Swal.fire({
+                                                                        title: 'Bạn có chắc chắn muốn bật tính năng xóa tự động?',
+                                                                        text: "Dữ liệu đã xóa sẽ KHÔNG THỂ KHÔI PHỤC!\n\nVui lòng cân nhắc kỹ trước khi bật tính năng này.",
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonColor: '#d33',
+                                                                        cancelButtonColor: '#3085d6',
+                                                                        confirmButtonText: 'Có, tôi chắc chắn!'
+                                                                    }).then((result) => {
+                                                                        if (result.isConfirmed) {
+                                                                            setFormData({ ...formData, autoremove: true });
+                                                                        }
+                                                                    });
+                                                                } else {
+                                                                    setFormData({ ...formData, autoremove: false });
+                                                                }
+                                                            }}
+                                                        >
+                                                            <option value="false">Tắt</option>
+                                                            <option value="true">Bật</option>
+                                                        </select>
+                                                        {formData.autoremove && (
+                                                            <div className="alert alert-warning mt-2 mb-0 py-2 px-3" role="alert" style={{ fontSize: '0.75rem' }}>
+                                                                <i className="fas fa-exclamation-triangle me-1"></i>
+                                                                <strong>Lưu ý:</strong> Dữ liệu đã xóa sẽ không thể khôi phục!
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {formData.autoremove && (
+                                                        <>
+                                                            <div className="mb-3">
+                                                                <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                                    <i className="fas fa-calendar-alt me-1 text-warning"></i>
+                                                                    Thời gian xóa tự động
+                                                                </label>
+                                                                <div className="input-group">
+                                                                    <input
+                                                                        type="number"
+                                                                        className="form-control"
+                                                                        value={formData.autoDeleteMonths}
+                                                                        onChange={(e) => setFormData({ ...formData, autoDeleteMonths: e.target.value })}
+                                                                        placeholder="3"
+                                                                        min="1"
+                                                                        max="12"
+                                                                    />
+                                                                    <span className="input-group-text">Tháng</span>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                            <small className="text-muted d-block mb-3" style={{ fontSize: '0.75rem' }}>
+                                                                <i className="fas fa-info-circle me-1"></i>
+                                                                Dữ liệu cũ hơn {formData.autoDeleteMonths || 3} tháng sẽ bị xóa tự động hằng ngày
+                                                            </small>
+                                                            <div className="border rounded p-3" style={{ backgroundColor: '#f8f9fa' }}>
+                                                                <label className="form-label fw-semibold mb-2" style={{ fontSize: '0.875rem' }}>
+                                                                    <i className="fas fa-list-check me-1 text-primary"></i>
+                                                                    Chọn dữ liệu cần xóa
+                                                                </label>
+                                                                <div className="form-check mb-2">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="deleteOrders"
+                                                                        checked={formData.deleteOrders}
+                                                                        onChange={(e) => setFormData({ ...formData, deleteOrders: e.target.checked })}
+                                                                    />
+                                                                    <label className="form-check-label" htmlFor="deleteOrders" style={{ fontSize: '0.85rem' }}>
+                                                                        <i className="fas fa-shopping-cart me-1 text-danger"></i>
+                                                                        Xóa đơn hàng cũ
+                                                                    </label>
+                                                                </div>
+                                                                <div className="form-check mb-2">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="deleteUsers"
+                                                                        checked={formData.deleteUsers}
+                                                                        onChange={(e) => setFormData({ ...formData, deleteUsers: e.target.checked })}
+                                                                    />
+                                                                    <label className="form-check-label" htmlFor="deleteUsers" style={{ fontSize: '0.85rem' }}>
+                                                                        <i className="fas fa-user-times me-1 text-warning"></i>
+                                                                        Xóa user không nạp tiền
+                                                                    </label>
+                                                                </div>
+                                                                <div className="form-check mb-0">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="deleteHistory"
+                                                                        checked={formData.deleteHistory}
+                                                                        onChange={(e) => setFormData({ ...formData, deleteHistory: e.target.checked })}
+                                                                    />
+                                                                    <label className="form-check-label" htmlFor="deleteHistory" style={{ fontSize: '0.85rem' }}>
+                                                                        <i className="fas fa-history me-1 text-info"></i>
+                                                                        Xóa lịch sử hoạt động
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
+
+                                {/* TAB 4: Mã JS */}
+                                {activeTab === "script" && (
+                                    <div className="row g-3">
+                                        <div className="col-12">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                        <i className="fas fa-code me-2 text-secondary"></i>
+                                                        Mã JavaScript tùy chỉnh
+                                                        <small className="text-danger ms-2" style={{ fontSize: '0.75rem' }}>(Cẩn thận - có thể ảnh hưởng bảo mật)</small>
+                                                    </h6>
+                                                </div>
+                                                <div className="card-body p-3">
+                                                    <div className="row g-3">
+                                                        <div className="col-lg-6">
+                                                            <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                                <i className="fas fa-file-code me-1 text-success"></i>
+                                                                Script/HTML Header
+                                                            </label>
+                                                            <textarea
+                                                                className="form-control font-monospace"
+                                                                rows="8"
+                                                                value={formData.headerJs}
+                                                                onChange={(e) => setFormData({ ...formData, headerJs: e.target.value })}
+                                                                placeholder="<script>...</script>"
+                                                                style={{ fontSize: '0.85rem' }}
+                                                            />
+                                                            <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
+                                                                Mã này sẽ được chèn vào thẻ &lt;head&gt;
+                                                            </small>
+                                                        </div>
+                                                        <div className="col-lg-6">
+                                                            <label className="form-label fw-semibold mb-1" style={{ fontSize: '0.875rem' }}>
+                                                                <i className="fas fa-file-code me-1 text-info"></i>
+                                                                Script/HTML Footer
+                                                            </label>
+                                                            <textarea
+                                                                className="form-control font-monospace"
+                                                                rows="8"
+                                                                value={formData.footerJs}
+                                                                onChange={(e) => setFormData({ ...formData, footerJs: e.target.value })}
+                                                                placeholder="<script>...</script>"
+                                                                style={{ fontSize: '0.85rem' }}
+                                                            />
+                                                            <small className="text-muted d-block mt-1" style={{ fontSize: '0.75rem' }}>
+                                                                Mã này sẽ được chèn trước thẻ đóng &lt;/body&gt;
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* TAB 5: Liên hệ */}
+                                {activeTab === "contact" && (
+                                    <div className="row g-3">
+                                        <div className="col-12">
+                                            <div className="card border mb-3">
+                                                <div className="card-header bg-light border-bottom py-2">
+                                                    <div className="d-flex justify-content-between align-items-center">
+                                                        <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                                            <i className="fas fa-address-book me-2 text-secondary"></i>
+                                                            Danh sách liên hệ ({formData.lienhe.length}/10)
+                                                        </h6>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-light btn-sm"
+                                                            onClick={addContact}
+                                                            disabled={formData.lienhe.length >= 10}
+                                                            style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
+                                                        >
+                                                            <i className="fas fa-plus me-1"></i>
+                                                            Thêm
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="card-body p-3" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                                                    {formData.lienhe.length === 0 ? (
+                                                        <div className="text-center py-3">
+                                                            <i className="fas fa-address-book fs-1 text-muted mb-2"></i>
+                                                            <p className="text-muted mb-0" style={{ fontSize: '0.875rem' }}>Chưa có liên hệ nào</p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="row g-3">
+                                                            {formData.lienhe.map((contact, index) => (
+                                                                <div key={index} className="col-lg-4 col-md-6">
+                                                                    <div className="card border shadow-sm h-100">
+                                                                        <div className="card-header bg-light border-0 py-2 d-flex justify-content-between align-items-center">
+                                                                            <span className="fw-semibold" style={{ fontSize: '0.85rem', color: '#2c3e50' }}>
+                                                                                <i className="fas fa-hashtag me-1" style={{ fontSize: '0.75rem' }}></i>{index + 1}
+                                                                            </span>
+                                                                            <button
+                                                                                type="button"
+                                                                                className="btn btn-outline-danger btn-sm"
+                                                                                onClick={() => removeContact(index)}
+                                                                                style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                                                                            >
+                                                                                <i className="fas fa-trash"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div className="card-body p-2">
+                                                                            <div className="mb-2">
+                                                                                <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>
+                                                                                    <i className="fas fa-tag me-1 text-info" style={{ fontSize: '0.75rem' }}></i>
+                                                                                    Loại
+                                                                                </label>
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control form-control-sm"
+                                                                                    value={contact.type}
+                                                                                    onChange={(e) => updateContact(index, "type", e.target.value)}
+                                                                                    placeholder="email, phone, facebook..."
+                                                                                    style={{ fontSize: '0.8rem' }}
+                                                                                />
+                                                                            </div>
+                                                                            <div className="mb-2">
+                                                                                <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>
+                                                                                    <i className="fas fa-link me-1 text-success" style={{ fontSize: '0.75rem' }}></i>
+                                                                                    Link
+                                                                                </label>
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control form-control-sm"
+                                                                                    value={contact.value}
+                                                                                    onChange={(e) => updateContact(index, "value", e.target.value)}
+                                                                                    placeholder="https://..."
+                                                                                    style={{ fontSize: '0.8rem' }}
+                                                                                />
+                                                                            </div>
+                                                                            <div className="mb-2">
+                                                                                <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>
+                                                                                    <i className="fas fa-image me-1 text-warning" style={{ fontSize: '0.75rem' }}></i>
+                                                                                    Logo URL
+                                                                                </label>
+                                                                                <input
+                                                                                    type="text"
+                                                                                    className="form-control form-control-sm"
+                                                                                    value={contact.logolienhe}
+                                                                                    onChange={(e) => updateContact(index, "logolienhe", e.target.value)}
+                                                                                    placeholder="URL logo"
+                                                                                    style={{ fontSize: '0.8rem' }}
+                                                                                />
+                                                                            </div>
+                                                                            <div>
+                                                                                <label className="form-label mb-1 fw-semibold" style={{ fontSize: '0.8rem' }}>
+                                                                                    <i className="fas fa-images me-1 text-primary" style={{ fontSize: '0.75rem' }}></i>
+                                                                                    Chọn logo
+                                                                                </label>
+                                                                                <div className="border rounded p-2" style={{ maxHeight: 100, overflowY: 'auto', backgroundColor: '#f8f9fa' }}>
+                                                                                    <div className="d-flex flex-wrap gap-1">
+                                                                                        {Object.entries(platformLogos).map(([platform, url], idx) => (
+                                                                                            <div
+                                                                                                key={idx}
+                                                                                                onClick={() => updateContact(index, "logolienhe", url)}
+                                                                                                style={{
+                                                                                                    width: '45px',
+                                                                                                    height: '45px',
+                                                                                                    border: contact.logolienhe === url ? '2px solid #007bff' : '1px solid #dee2e6',
+                                                                                                    borderRadius: '6px',
+                                                                                                    padding: '3px',
+                                                                                                    cursor: 'pointer',
+                                                                                                    background: contact.logolienhe === url ? '#e3f2fd' : '#fff',
+                                                                                                    display: 'flex',
+                                                                                                    alignItems: 'center',
+                                                                                                    justifyContent: 'center',
+                                                                                                    transition: 'all 0.2s'
+                                                                                                }}
+                                                                                            >
+                                                                                                <img
+                                                                                                    src={url}
+                                                                                                    alt={platform}
+                                                                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                                                />
+                                                                                            </div>
+                                                                                        ))}
+                                                                                    </div>
+                                                                                </div>
+                                                                                {contact.logolienhe && (
+                                                                                    <div className="mt-2 text-center">
+                                                                                        <img src={contact.logolienhe} alt="Preview" style={{ maxWidth: "45px" }} className="rounded" />
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Submit Button */}
-                            <div className="text-center mt-3">
+                            <div className="text-center mt-4">
                                 <button
                                     type="submit"
-                                    className="btn btn-lg px-5 fw-bold"
+                                    className="btn btn-primary px-4"
                                     disabled={loading}
-                                    style={{
-                                        background: loading ? '#6c757d' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                        border: 'none',
-                                        borderRadius: '10px',
-                                        color: 'white',
-                                        transition: 'all 0.3s ease',
-                                        boxShadow: loading ? '0 4px 15px rgba(108, 117, 125, 0.3)' : '0 6px 20px rgba(102, 126, 234, 0.4)',
-                                        cursor: loading ? 'not-allowed' : 'pointer',
-                                        fontSize: '1rem'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (!loading) {
-                                            e.target.style.transform = 'translateY(-2px)';
-                                            e.target.style.boxShadow = '0 8px 30px rgba(102, 126, 234, 0.6)';
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (!loading) {
-                                            e.target.style.transform = 'translateY(0)';
-                                            e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
-                                        }
-                                    }}
                                 >
                                     {loading ? (
                                         <>
@@ -844,12 +985,6 @@ const Setting = () => {
                                         </>
                                     )}
                                 </button>
-                                <div className="mt-2">
-                                    <small style={{ fontSize: '0.8rem', color: '#6c757d' }}>
-                                        <i className="fas fa-info-circle me-1"></i>
-                                        Các thay đổi sẽ được áp dụng ngay lập tức
-                                    </small>
-                                </div>
                             </div>
                         </form>
                     </div>

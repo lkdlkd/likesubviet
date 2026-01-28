@@ -450,16 +450,16 @@ export default function Adddichvu() {
             </button>
           </div>
 
-          <div className="card border-0 shadow-lg">
-            <div className="card-header bg-gradient-primary text-white py-3">
+          <div className="card border">
+            <div className="card-header bg-white border-bottom py-3">
               <div className="d-flex justify-content-between align-items-center">
-                <h4 className="mb-0 d-flex align-items-center">
-                  <i className="fas fa-plus-circle me-2"></i>
+                <h5 className="mb-0 fw-bold text-dark">
+                  <i className="fas fa-plus-circle me-2 text-secondary"></i>
                   Thêm mới dịch vụ
-                </h4>
+                </h5>
                 <button
                   type="button"
-                  className="btn btn-light btn-sm"
+                  className="btn btn-outline-secondary btn-sm"
                   onClick={() => navigate('/admin/server')}
                 >
                   <i className="fas fa-times me-1"></i>
@@ -467,14 +467,14 @@ export default function Adddichvu() {
                 </button>
               </div>
             </div>
-            <div className="card-body p-2 bg-light">
+            <div className="card-body p-3">
               <div className="form-group">
                 <form className="smmdv-form" onSubmit={handleAddSubmit}>
                   {/* Quick Add Mode Toggle */}
-                  <div className="card border-0 shadow-sm mb-4">
-                    <div className="card-header bg-warning text-white">
-                      <h6 className="mb-0">
-                        <i className="fas fa-bolt me-2"></i>
+                  <div className="card border mb-3">
+                    <div className="card-header bg-light border-bottom py-2">
+                      <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                        <i className="fas fa-bolt me-2 text-secondary"></i>
                         Chế độ thêm nhanh
                       </h6>
                     </div>
@@ -507,10 +507,10 @@ export default function Adddichvu() {
                   </div>
 
                   {/* Basic Information Section */}
-                  <div className="card border-0 shadow-sm mb-4">
-                    <div className="card-header bg-primary text-white">
-                      <h6 className="mb-0">
-                        <i className="fas fa-info-circle me-2"></i>
+                  <div className="card border mb-3">
+                    <div className="card-header bg-light border-bottom py-2">
+                      <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                        <i className="fas fa-info-circle me-2 text-secondary"></i>
                         Thông tin cơ bản
                       </h6>
                     </div>
@@ -642,10 +642,10 @@ export default function Adddichvu() {
                     </div>
                   </div>
                   {/* Functions Section */}
-                  <div className="card border-0 shadow-sm mb-4">
-                    <div className="card-header bg-success text-white">
-                      <h6 className="mb-0">
-                        <i className="fas fa-cogs me-2"></i>
+                  <div className="card border mb-3">
+                    <div className="card-header bg-light border-bottom py-2">
+                      <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                        <i className="fas fa-cogs me-2 text-secondary"></i>
                         Các chức năng
                       </h6>
                     </div>
@@ -744,10 +744,10 @@ export default function Adddichvu() {
                   </div>
 
                   {/* SMM Information Section */}
-                  <div className="card border-0 shadow-sm mb-4">
-                    <div className="card-header bg-info text-white">
-                      <h6 className="mb-0">
-                        <i className="fas fa-network-wired me-2"></i>
+                  <div className="card border mb-3">
+                    <div className="card-header bg-light border-bottom py-2">
+                      <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                        <i className="fas fa-network-wired me-2 text-secondary"></i>
                         Thông tin SMM
                       </h6>
                     </div>
@@ -1222,10 +1222,10 @@ export default function Adddichvu() {
                     </div>
                   </div>
                   {quickAddMode && (
-                    <div className="card border-0 shadow-sm mb-4">
-                      <div className="card-header bg-warning text-white">
-                        <h6 className="mb-0">
-                          <i className="fas fa-rocket me-2"></i>
+                    <div className="card border mb-3">
+                      <div className="card-header bg-light border-bottom py-2">
+                        <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                          <i className="fas fa-rocket me-2 text-secondary"></i>
                           {formData.ordertay ? "Thêm nhanh dịch vụ Order Tay" : "Chọn nhanh dịch vụ theo danh mục"}
                         </h6>
                       </div>
@@ -1509,14 +1509,13 @@ export default function Adddichvu() {
                   )}
 
                   {/* Form Actions */}
-                  <div className="card border-0 shadow-sm">
+                  <div className="card border">
                     <div className="card-body text-center">
                       <Button
                         type="submit"
-                        variant="success"
+                        variant="primary"
                         disabled={loading}
-                        className="px-5 py-2 fw-bold"
-                        style={{ minWidth: '200px' }}
+                        className="px-4"
                       >
                         {loading ? (
                           <>

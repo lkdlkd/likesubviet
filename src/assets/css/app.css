@@ -3343,10 +3343,7 @@
     color: #e9ecef !important;
 }
 
-/* Alert info with inline background */
-[data-bs-theme="dark"] .alert.bg-info {
-    background-color: #0dcaf0 !important;
-}
+
 
 [data-bs-theme="dark"] .alert.bg-primary {
     background-color: #0d6efd !important;

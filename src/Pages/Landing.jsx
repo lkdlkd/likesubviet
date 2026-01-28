@@ -899,10 +899,10 @@ export default function Landing() {
                                 <div className="hero-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '60px', alignItems: 'center' }}>
                                     {/* Left - Content */}
                                     <div className="hero-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                        <h1 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 800, lineHeight: 1.15, marginBottom: '16px', color: '#ffffff', textAlign: 'left' }}>
+                                        <h1 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 700, lineHeight: 1.15, marginBottom: '16px', color: '#ffffff', textAlign: 'left' }}>
                                             Hệ Thống Dịch Vụ Mạng Xã Hội Hàng Đầu Việt Nam
                                         </h1>
-                                        <h2 style={{ fontSize: 'clamp(22px, 3vw, 36px)', fontWeight: 700, marginBottom: '24px', textAlign: 'left' }}>
+                                        <h2 style={{ fontSize: 'clamp(22px, 3vw, 34px)', fontWeight: 700, marginBottom: '24px', textAlign: 'left' }}>
                                             <span className="rainbow-text">SMMPANEL - Social Media Marketing</span>
                                         </h2>
                                         <p style={{ fontSize: '17px', color: '#b0b0b0', lineHeight: 1.8, marginBottom: '32px', textAlign: 'left' }}>
@@ -1041,7 +1041,7 @@ export default function Landing() {
                                 <ScrollReveal>
                                     <div style={{ textAlign: 'center', marginBottom: '60px' }}>
                                         <div className="badge" style={{ marginBottom: '20px' }}>✦ Về Chúng Tôi ✦</div>
-                                        <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 700, lineHeight: 1.4, color: '#ffffff' }}>
+                                        <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 700, lineHeight: 1.4, color: '#ffffff' }}>
                                             Giải pháp tăng tương tác mạng xã hội <span className="rainbow-text">nhanh, an toàn và hiệu quả</span>
                                             <br />cho Facebook, TikTok, Instagram và YouTube
                                         </h2>

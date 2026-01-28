@@ -575,26 +575,22 @@ function MenuUser({ user, categories, configWeb }) {
                             <li className="pc-item pc-caption">
                                 <label>Danh Sách Dịch Vụ</label>
                             </li>
-                            <li className="pc-item pc-hasmenu">
-                                <Link to="/order" className="pc-link pulse-item"
-                                    onClick={() => handleNavigation()}
-                                    style={{ cursor: "pointer" }}
-                                >
-                                    <span className="pc-micon">
-                                        <img src="https://i.imgur.com/LtJfhAt.gif" className="wid-35" alt="" width={35} height={35} />
-                                    </span>
-                                    <span className="pc-mtext">Mua dịch vụ</span>
-                                </Link>
-                                {/* <a
-                                style={{ cursor: "pointer" }}
-                                onClick={() => handleNavigation("/order")}
-                                className="pc-link">
-                                <span className="pc-micon">
-                                    <img src="https://i.imgur.com/LtJfhAt.gif" className="wid-35" alt="" width={35} height={35} />
-                                </span>
-                                <span className="pc-mtext">Mua dịch vụ</span>
-                            </a> */}
-                            </li>
+                            {config && !config.showordernhanh && (
+                                <>
+
+                                    <li className="pc-item pc-hasmenu">
+                                        <Link to="/order" className="pc-link pulse-item"
+                                            onClick={() => handleNavigation()}
+                                            style={{ cursor: "pointer" }}
+                                        >
+                                            <span className="pc-micon">
+                                                <img src="https://i.imgur.com/LtJfhAt.gif" className="wid-35" alt="" width={35} height={35} />
+                                            </span>
+                                            <span className="pc-mtext">Mua dịch vụ</span>
+                                        </Link>
+                                    </li>
+                                </>
+                            )}
                             <li className="pc-item">
                                 <Link
                                     onClick={() => handleNavigation()}

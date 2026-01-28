@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import NotificationModal from '@/Components/NotificationModal';
 import { useOutletContext } from "react-router-dom";
 import { Link } from 'react-router-dom';
+
+// Lazy load Ordernhanh để đợi load xong mới hiển thị
+const Ordernhanh = lazy(() => import('./Order/Ordernhanh'));
 const Home = () => {
     const { configWeb, user, notifications } = useOutletContext();
     const config = configWeb || {};
@@ -291,28 +294,47 @@ const Home = () => {
                     </div>
                 </div>
             </div>
+            {configWeb && !configWeb.showordernhanh && (
+                <>
+                    {/* Thông báo GHIM */}
+                    <div className="col-md-4 fade-in-up">
+                        <div className="card card-animate notification-section">
+                            <div className="card-body">
+                                <h4 className="header-title mb-3">
+                                    <i className="ti ti-pin me-2 text-warning"></i>
+                                    Thông báo GHIM
+                                </h4>
+                                <div className="inbox-widget" data-simplebar="init">
+                                    <div className="inbox-item">
+                                        <div dangerouslySetInnerHTML={{ __html: config.tieude || " không có thông báo ghim" }} />
 
-            {/* Thông báo GHIM */}
-            <div className="col-md-4 fade-in-up">
-                <div className="card card-animate notification-section">
-                    <div className="card-body">
-                        <h4 className="header-title mb-3">
-                            <i className="ti ti-pin me-2 text-warning"></i>
-                            Thông báo GHIM
-                        </h4>
-                        <div className="inbox-widget" data-simplebar="init">
-                            <div className="inbox-item">
-                                <div dangerouslySetInnerHTML={{ __html: config.tieude || " không có thông báo ghim" }} />
-
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </>
+            )}
+            {configWeb && configWeb.showordernhanh && (
+                <Suspense fallback={
+                    <div className="col-12 fade-in-up">
+                        <div className="card">
+                            <div className="card-body text-center py-4">
+                                <div className="spinner-border text-primary" role="status">
+                                    <span className="visually-hidden">Đang tải...</span>
+                                </div>
+                                <p className="text-muted mt-2 mb-0">Đang tải Order nhanh...</p>
+                            </div>
+                        </div>
+                    </div>
+                }>
+                    <Ordernhanh />
+                </Suspense>
+            )}
 
             {/* Thông báo gần đây - dùng Client Component */}
             <div className="col-md-8 fade-in-up notification-section">
-                <NotificationModal notifications={notifications} />
+                <NotificationModal notifications={notifications} config={configWeb} />
             </div>
         </div>
     );

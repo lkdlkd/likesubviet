@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Select from "react-select";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-
+import { useOutletContext } from "react-router-dom";
 export default function Ordernhanh() {
+    const { configWeb } = useOutletContext();
     // Các state của form
     const [servers, setServers] = useState([]);
     const [selectedType, setSelectedType] = useState(null);
@@ -26,6 +27,8 @@ export default function Ordernhanh() {
     const [isConverting, setIsConverting] = useState(false);
     const [isScheduledOrder, setIsScheduledOrder] = useState(false);
     const [scheduleTime, setScheduleTime] = useState("");
+    const [isMultiLink, setIsMultiLink] = useState(false); // Chế độ mua nhiều link
+    const [multiLinks, setMultiLinks] = useState(""); // Lưu nhiều link (mỗi dòng 1 link)
     const token = localStorage.getItem("token");
     let decoded = {};
     if (token) {
@@ -269,6 +272,29 @@ export default function Ordernhanh() {
         setQuantity(100);
         setComments("");
         setNote("");
+
+        if (option) {
+            // Tìm server đầu tiên theo category (và type nếu có chọn)
+            let firstServer;
+            if (selectedType) {
+                // Nếu đã chọn type cụ thể
+                firstServer = servers.find(s => s.type === selectedType.value && s.category === option.value);
+            } else {
+                // Nếu chọn All (selectedType = null), tìm server đầu tiên theo category
+                firstServer = servers.find(s => s.category === option.value);
+            }
+
+            if (firstServer) {
+                setSelectedMagoi(firstServer.Magoi);
+                setMin(firstServer.min);
+                setMax(firstServer.max);
+                setRate(firstServer.rate);
+            } else {
+                setSelectedMagoi("");
+            }
+        } else {
+            setSelectedMagoi("");
+        }
     };
 
     // Tính tổng chi phí dựa vào dịch vụ được chọn
@@ -352,6 +378,121 @@ export default function Ordernhanh() {
             });
             return;
         }
+
+        // Xử lý chế độ mua nhiều link
+        if (isMultiLink) {
+            const links = multiLinks.split(/\r?\n/).map(l => l.trim()).filter(l => l !== "");
+            if (links.length === 0 || !selectedMagoi) {
+                Swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng chọn dịch vụ và nhập ít nhất 1 link.",
+                    icon: "error",
+                    confirmButtonText: "Xác nhận",
+                });
+                return;
+            }
+            const selectedService = filteredServers.find(
+                (service) => service.Magoi === selectedMagoi
+            );
+            const qty = selectedService && selectedService.comment === "on" ? cmtqlt : quantity;
+            if (!qty || Number(qty) <= 0) {
+                Swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng nhập số lượng hợp lệ.",
+                    icon: "error",
+                    confirmButtonText: "Xác nhận",
+                });
+                return;
+            }
+            if (isScheduledOrder) {
+                if (!scheduleTime) {
+                    Swal.fire({
+                        title: "Lỗi",
+                        text: "Vui lòng chọn thời gian hẹn giờ.",
+                        icon: "error",
+                        confirmButtonText: "Xác nhận",
+                    });
+                    return;
+                }
+                const scheduleDate = new Date(scheduleTime);
+                if (Number.isNaN(scheduleDate.getTime()) || scheduleDate <= new Date()) {
+                    Swal.fire({
+                        title: "Lỗi",
+                        text: "Thời gian hẹn giờ phải lớn hơn thời điểm hiện tại.",
+                        icon: "error",
+                        confirmButtonText: "Xác nhận",
+                    });
+                    return;
+                }
+            }
+            const totalCostMulti = links.length * (selectedService && selectedService.comment === "on" ? cmtqlt * selectedService.rate : quantity * rate);
+            const confirmResult = await Swal.fire({
+                title: "Xác nhận thanh toán",
+                html: `Bạn sẽ tạo <b>${links.length}</b> đơn hàng, mỗi đơn <b>${qty}</b> lượng </b><br/>Tổng thanh toán: <b>${Math.round(totalCostMulti).toLocaleString("de-DE")} VNĐ</b>.`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Xác nhận",
+                cancelButtonText: "Hủy",
+            });
+            if (confirmResult.isConfirmed) {
+                loadingg("Đang xử lý đơn hàng...", true, 9999999);
+                let successCount = 0;
+                let failCount = 0;
+                const failedLinks = [];
+                for (const link of links) {
+                    try {
+                        const shortenedLink = shortenSocialLink(link);
+                        const payload = {
+                            link: shortenedLink,
+                            category: selectedCategory ? selectedCategory.value : "",
+                            magoi: selectedMagoi,
+                            note,
+                            ObjectLink: shortenedLink,
+                            isScheduled: isScheduledOrder,
+                            scheduleTime: isScheduledOrder ? scheduleTime : undefined,
+                        };
+                        if (selectedService && selectedService.comment === "on") {
+                            payload.quantity = qty;
+                            payload.comments = comments;
+                        } else {
+                            payload.quantity = quantity;
+                        }
+                        const res = await addOrder(payload, token);
+                        if (res.success) {
+                            successCount++;
+                        } else {
+                            failCount++;
+                            failedLinks.push(link);
+                        }
+                    } catch (error) {
+                        failCount++;
+                        failedLinks.push(link);
+                    }
+                }
+                loadingg("", false);
+                if (failCount === 0) {
+                    await Swal.fire({
+                        title: "Thành công",
+                        html: `Đã tạo thành công <b>${successCount}</b> đơn hàng!`,
+                        icon: "success",
+                        confirmButtonText: "Xác nhận",
+                    });
+                    setMultiLinks("");
+                } else {
+                    await Swal.fire({
+                        title: "Hoàn tất",
+                        html: `Thành công: <b>${successCount}</b> đơn.<br/>Thất bại: <b>${failCount}</b> đơn.`,
+                        icon: successCount > 0 ? "warning" : "error",
+                        confirmButtonText: "Xác nhận",
+                    });
+                }
+                setIsScheduledOrder(false);
+                setScheduleTime("");
+            }
+            return;
+        }
+
+        // Xử lý chế độ mua 1 link (code cũ)
         const finalLink = convertedUID || rawLink;
         if (!finalLink || !selectedMagoi) {
             Swal.fire({
@@ -398,12 +539,9 @@ export default function Ordernhanh() {
             }
         }
         const confirmResult = await Swal.fire({
-            title: "Xác nhận thanh toán",
-            text: isScheduledOrder
-                ? `Bạn sẽ hẹn giờ mua ${qty} lượng với giá ${rate} đ. Tổng dự kiến: ${totalCost.toLocaleString("en-US")} VNĐ. Đơn sẽ chạy vào ${new Date(scheduleTime).toLocaleString("vi-VN")}.`
-                : `Bạn sẽ tăng ${qty} lượng với giá ${rate} đ. Tổng thanh toán: ${totalCost.toLocaleString(
-                    "en-US"
-                )} VNĐ.`,
+            title: isScheduledOrder
+                ? `Bạn sẽ tăng số lượng ${qty} <br/>Tổng dự kiến: ${Math.round(totalCost).toLocaleString("de-DE")} VNĐ.<br/>Đơn sẽ chạy vào ${new Date(scheduleTime).toLocaleString("vi-VN")}.`
+                : `Bạn sẽ tăng số lượng ${qty} <br/>Tổng thanh toán: ${Math.round(totalCost).toLocaleString("de-DE")} VNĐ.`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonText: "Xác nhận",
@@ -461,7 +599,7 @@ export default function Ordernhanh() {
     const convertNumberToWords = (number) => {
         const chuSo = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
 
-        function docSoHangTram(so) {
+        function docSoHangTram(so, coHangTramPhiaTruoc = false) {
             let tram = Math.floor(so / 100);
             let chuc = Math.floor((so % 100) / 10);
             let donvi = so % 10;
@@ -469,15 +607,30 @@ export default function Ordernhanh() {
 
             if (tram > 0) {
                 ketqua += `${chuSo[tram]} trăm `;
+            } else if (coHangTramPhiaTruoc && (chuc > 0 || donvi > 0)) {
+                ketqua += "không trăm ";
             }
 
             if (chuc > 1) {
                 ketqua += `${chuSo[chuc]} mươi `;
-                if (donvi > 0) ketqua += chuSo[donvi];
+                if (donvi === 1) {
+                    ketqua += "mốt";
+                } else if (donvi === 5) {
+                    ketqua += "lăm";
+                } else if (donvi > 0) {
+                    ketqua += chuSo[donvi];
+                }
             } else if (chuc === 1) {
                 ketqua += "mười ";
-                if (donvi > 0) ketqua += donvi === 5 ? "lăm" : chuSo[donvi];
-            } else if (donvi > 0) {
+                if (donvi === 5) {
+                    ketqua += "lăm";
+                } else if (donvi > 0) {
+                    ketqua += chuSo[donvi];
+                }
+            } else if (chuc === 0 && donvi > 0) {
+                if (tram > 0 || coHangTramPhiaTruoc) {
+                    ketqua += "lẻ ";
+                }
                 ketqua += chuSo[donvi];
             }
 
@@ -493,41 +646,32 @@ export default function Ordernhanh() {
             let hangNghin = Math.floor((n % 1_000_000) / 1000);
             let hangDonVi = n % 1000;
 
-            if (hangTy > 0) result += `${docSoHangTram(hangTy)} tỷ `;
-            if (hangTrieu > 0) result += `${docSoHangTram(hangTrieu)} triệu `;
-            if (hangNghin > 0) result += `${docSoHangTram(hangNghin)} nghìn `;
-            if (hangDonVi > 0) result += `${docSoHangTram(hangDonVi)}`;
+            if (hangTy > 0) {
+                result += `${docSoHangTram(hangTy)} tỷ `;
+            }
+            if (hangTrieu > 0) {
+                result += `${docSoHangTram(hangTrieu, hangTy > 0)} triệu `;
+            }
+            if (hangNghin > 0) {
+                result += `${docSoHangTram(hangNghin, hangTy > 0 || hangTrieu > 0)} nghìn `;
+            }
+            if (hangDonVi > 0) {
+                result += `${docSoHangTram(hangDonVi, hangTy > 0 || hangTrieu > 0 || hangNghin > 0)}`;
+            }
 
-            return result.trim().replace(/,\s*$/, '');
+            return result.trim();
         }
 
-        // ✅ Loại bỏ dấu phẩy khỏi chuỗi số
-        number = number.toString().replace(/,/g, '');
+        // Chuyển về số nguyên (làm tròn)
+        const soNguyen = Math.round(Number(number));
 
-        // ✅ Làm tròn 4 chữ số phần thập phân
-        number = Number(number).toFixed(4);
+        let ketQua = docSoNguyen(soNguyen);
 
-        // ✅ Xoá số 0 vô nghĩa ở cuối phần thập phân
-        number = number.replace(/(\.\d*?[1-9])0+$/g, '$1');
-        number = number.replace(/\.0+$/g, '');
-
-        const [phanNguyenStr, phanThapPhanStr] = number.split(".");
-        const phanNguyen = Number(phanNguyenStr);
-
-        let ketQua = docSoNguyen(phanNguyen);
-
-        // if (phanThapPhanStr) {
-        //     ketQua += " phẩy";
-        //     for (let digit of phanThapPhanStr) {
-        //         ketQua += ` ${chuSo[Number(digit)]}`;
-        //     }
-        // }
-
-        // ✅ Viết hoa chữ cái đầu & chuẩn dấu phẩy
+        // Viết hoa chữ cái đầu
         ketQua = ketQua.charAt(0).toUpperCase() + ketQua.slice(1);
         return ketQua;
     };
-    const tien = useMemo(() => convertNumberToWords(Number(totalCost).toLocaleString("en-US")), [totalCost]);
+    const tien = useMemo(() => convertNumberToWords(totalCost), [totalCost]);
     // Tạo options cho Select tìm dịch vụ nhanh (chỉ giữ 1 useMemo, mỗi option có server)
     const serviceOptions = useMemo(() => {
         // Lấy thứ tự category xuất hiện đầu tiên
@@ -543,28 +687,30 @@ export default function Ordernhanh() {
             const bIdx = categoryOrder.indexOf(b.category);
             return aIdx - bIdx;
         });
+        // Hàm strip HTML để lấy text thuần từ name
+        const stripHtml = (html) => {
+            if (!html) return '';
+            return html.replace(/<[^>]*>/g, '').trim();
+        };
         return sorted.map((s) => ({
             value: s.Magoi,
             label: (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span className="font-semibold"> {s.logo && (
                         <img src={s.logo} alt={s.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
-                    )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} <span style={{ lineHeight: "1.2", verticalAlign: "middle" }} dangerouslySetInnerHTML={{ __html: s.name }} /> <span className="badge bg-primary">{(() => {
-                        const rate = String(s.rate);
-                        if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
-                        if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
-                        return rate; // giữ nguyên nếu chỉ là số thường
-                    })()}đ</span>
-                        <span className={`badge ms-1 ${s.isActive ? 'bg-success' : 'bg-danger'}`}>{s.isActive ? " Hoạt động" : " Bảo trì"}</span>
+                    )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} <span style={{ lineHeight: "1.2", verticalAlign: "middle" }} dangerouslySetInnerHTML={{ __html: s.name }} /> <span className="badge bg-primary">{configWeb?.priceDisplayUnit === 1000 ? `${Math.round(s.rate * 1000).toLocaleString('de-DE')}đ / 1000` : `${s.rate}đ`}</span>
+                        {!s.isActive && (<span className="badge ms-1 bg-danger"> Bảo trì</span>)}
                         {s.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}
                         {s.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
                     </span>
 
                 </div>
             ),
+            // Thêm searchLabel để tìm kiếm theo tên hoặc Magoi
+            searchLabel: `${s.Magoi} ${stripHtml(s.name)} ${s.maychu || ''} ${s.category || ''} ${s.type || ''}`,
             server: s
         }));
-    }, [servers]);
+    }, [servers, configWeb?.priceDisplayUnit]);
 
 
 
@@ -643,14 +789,9 @@ export default function Ordernhanh() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span className="font-semibold"> {server.logo && (
                         <img src={server.logo} alt={server.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
-                    )} <strong className="badge bg-info">[{server.Magoi}]</strong> - {server.maychu} <span style={{ lineHeight: "1.2", verticalAlign: "middle" }} dangerouslySetInnerHTML={{ __html: server.name }} /> <span className="badge bg-primary">{(() => {
-                        const rate = String(server.rate);
-                        if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
-                        if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
-                        return rate; // giữ nguyên nếu chỉ là số thường
-                    })()}đ
+                    )} <strong className="badge bg-info">[{server.Magoi}]</strong> - {server.maychu} <span style={{ lineHeight: "1.2", verticalAlign: "middle" }} dangerouslySetInnerHTML={{ __html: server.name }} /> <span className="badge bg-primary">{configWeb?.priceDisplayUnit === 1000 ? `${Math.round(server.rate * 1000).toLocaleString('de-DE')}đ / 1000` : `${server.rate}đ`}
                         </span>
-                        <span className={`badge ms-1 ${server.isActive ? 'bg-success' : 'bg-danger'}`}>{server.isActive ? " Hoạt động" : " Bảo trì"}</span>
+                        {!server.isActive && (<span className="badge ms-1 bg-danger"> Bảo trì</span>)}
                         {server.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}
                         {server.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
                     </span>
@@ -712,9 +853,16 @@ export default function Ordernhanh() {
                                             setSelectedMagoi("");
                                         }
                                     }}
-                                    placeholder="---Tìm dịch vụ---"
+                                    placeholder="---Tìm dịch vụ theo tên hoặc mã---"
                                     isClearable
                                     isSearchable
+                                    filterOption={(option, inputValue) => {
+                                        if (!inputValue) return true;
+                                        const searchText = inputValue.toLowerCase();
+                                        // Tìm theo searchLabel (chứa Magoi, name, maychu, category, type)
+                                        return option.data.searchLabel?.toLowerCase().includes(searchText) || 
+                                               option.value?.toLowerCase().includes(searchText);
+                                    }}
                                 />
                             </div>
                             <div className="form-group mb-3">
@@ -813,27 +961,72 @@ export default function Ordernhanh() {
                                 )
                             ))} */}
                             <form onSubmit={handleSubmit}>
+                                {/* Toggle mua nhiều link */}
+                                <div className="form-group mb-1 form-switch d-flex align-items-center gap-2">
+                                    <input
+                                        id="multiLinkToggle"
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        checked={isMultiLink}
+                                        onChange={(e) => {
+                                            setIsMultiLink(e.target.checked);
+                                            if (e.target.checked) {
+                                                // Chuyển sang chế độ nhiều link
+                                                setRawLink("");
+                                                setConvertedUID("");
+                                            } else {
+                                                // Chuyển về chế độ 1 link
+                                                setMultiLinks("");
+                                            }
+                                        }}
+                                    />
+                                    <label className="form-check-label" htmlFor="multiLinkToggle">
+                                        Đặt nhiều link
+                                    </label>
+                                    {isMultiLink && (
+                                        <span className="badge bg-info ms-2">
+                                            {multiLinks.split(/\r?\n/).filter(l => l.trim() !== "").length} link
+                                        </span>
+                                    )}
+                                </div>
+
                                 <div className="form-group mb-3">
                                     <label htmlFor="object_id" className="form-label">
                                         <strong>Link Hoặc UID:</strong>
                                     </label>
-                                    <input
-                                        className="form-control ipt-link"
-                                        type="text"
-                                        value={isConverting ? "Đang xử lý..." : displayLink}
-                                        onChange={(e) => {
-                                            let val = e.target.value.replace(/\s+/g, ''); // Bỏ tất cả khoảng trắng
-                                            // Nếu là link TikTok thì rút gọn
-                                            if (val !== "") {
-                                                val = shortenSocialLink(val);
-                                                setObjectLink(val); // Lưu input gốc
-                                            }
-                                            setRawLink(val);
-                                            setConvertedUID("");
-                                        }}
-                                        placeholder="Nhập link hoặc ID tùy các máy chủ"
-                                        disabled={isConverting}
-                                    />
+                                    {isMultiLink ? (
+                                        <textarea
+                                            className="form-control"
+                                            rows="5"
+                                            value={multiLinks}
+                                            onChange={(e) => setMultiLinks(e.target.value)}
+                                            placeholder="Nhập mỗi link 1 dòng&#10;https://example.com/link1&#10;https://example.com/link2&#10;https://example.com/link3"
+                                        />
+                                    ) : (
+                                        <input
+                                            className="form-control ipt-link"
+                                            type="text"
+                                            value={isConverting ? "Đang xử lý..." : displayLink}
+                                            onChange={(e) => {
+                                                let val = e.target.value.replace(/\s+/g, ''); // Bỏ tất cả khoảng trắng
+                                                // Nếu là link TikTok thì rút gọn
+                                                if (val !== "") {
+                                                    val = shortenSocialLink(val);
+                                                    setObjectLink(val); // Lưu input gốc
+                                                }
+                                                setRawLink(val);
+                                                setConvertedUID("");
+                                            }}
+                                            placeholder="Nhập link hoặc ID tùy các máy chủ"
+                                            disabled={isConverting}
+                                        />
+                                    )}
+                                    {isMultiLink && (
+                                        <small className="form-text text-muted">
+                                            <i className="fas fa-info-circle me-1"></i>
+                                            Mỗi link sẽ tạo 1 đơn hàng riêng với cùng số lượng và cấu hình.
+                                        </small>
+                                    )}
                                 </div>
 
                                 {(() => {
@@ -848,7 +1041,7 @@ export default function Ordernhanh() {
                                                 style={{ display: "block" }}
                                             >
                                                 <strong>
-                                                    Số lượng: <span id="quantity_limit">({Number(min).toLocaleString("en-US")} ~ {Number(max).toLocaleString("en-US")})</span>
+                                                    Số lượng: <span id="quantity_limit">({Number(min).toLocaleString("de-DE")} ~ {Number(max).toLocaleString("de-DE")})</span>
                                                 </strong>
                                                 <label htmlFor="comments" className="form-label">
                                                     <strong>Nội dung bình luận: </strong>
@@ -870,7 +1063,7 @@ export default function Ordernhanh() {
                                             <div className="form-group mb-3 quantity" id="quantity_type">
                                                 <label htmlFor="quantity" className="form-label">
                                                     <strong>
-                                                        Số lượng: <span id="quantity_limit">({Number(min).toLocaleString("en-US")} ~ {Number(max).toLocaleString("en-US")})</span>
+                                                        Số lượng: <span id="quantity_limit">({Number(min).toLocaleString("de-DE")} ~ {Number(max).toLocaleString("de-DE")})</span>
                                                     </strong>
                                                 </label>
                                                 <input
@@ -936,22 +1129,32 @@ export default function Ordernhanh() {
                                         selectedService && selectedService.comment === "on"
                                             ? cmtqlt
                                             : quantity;
+                                    const linkCount = isMultiLink ? multiLinks.split(/\r?\n/).filter(l => l.trim() !== "").length : 1;
+                                    const totalCostDisplay = isMultiLink ? totalCost * linkCount : totalCost;
+                                    const tienDisplay = convertNumberToWords(totalCostDisplay);
                                     return (
                                         <div className="form-group mb-3">
                                             <div className="alert bg-primary text-center text-white">
                                                 <h3 className="alert-heading">
                                                     Tổng thanh toán:{" "}
                                                     <span className="text-danger">
-                                                        {Math.floor(Number(totalCost)).toLocaleString("en-US")}
+                                                        {Math.round(Number(totalCostDisplay)).toLocaleString("de-DE")}
                                                     </span>{" "}
                                                     VNĐ
                                                 </h3>
-                                                <p className="fs-5 mb-0">{tien} đ</p>
-                                                <p className="fs-4 mb-0">
-                                                    Bạn sẽ tăng{" "}
-                                                    <span className="text-danger">{qty} </span>số lượng với giá{" "}
-                                                    <span className="text-danger">{rate}</span> đ
-                                                </p>
+                                                <p className="fs-5 mb-0">{tienDisplay} đ</p>
+                                                {isMultiLink ? (
+                                                    <p className="fs-4 mb-0">
+                                                        Bạn sẽ tạo{" "}
+                                                        <span className="text-danger">{linkCount} </span>đơn hàng, mỗi đơn{" "}
+                                                        <span className="text-danger">{qty} </span>lượng 
+                                                    </p>
+                                                ) : (
+                                                    <p className="fs-4 mb-0">
+                                                        Bạn sẽ tăng{" "}
+                                                        <span className="text-danger">{qty} </span>số lượng 
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                     );
