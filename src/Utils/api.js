@@ -621,6 +621,19 @@ export const updateServer = async (id, data, token) => {
   return handleResponse(response);
 };
 
+// Cập nhật thứ tự servers (chỉ admin)
+export const updateServersOrder = async (orderedIds, token) => {
+  const response = await fetchWithAuth(`${API_BASE}/servers-order`, {
+    method: "PUT",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify({ orderedIds }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
 // SMM (Admin)
 export const createSmmPartner = async (data, token) => {
   const response = await fetchWithAuth(`${API_BASE}/smm/create`, {
@@ -905,6 +918,20 @@ export const deleteCategory = async (id, token) => {
   });
   return handleResponse(response);
 };
+
+// Cập nhật thứ tự categories (chỉ admin)
+export const updateCategoriesOrder = async (orderedIds, token) => {
+  const response = await fetchWithAuth(`${API_BASE}/categories-order`, {
+    method: "PUT",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify({ orderedIds }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
 // Lấy danh sách platforms
 export const getPlatforms = async (token) => {
   const response = await fetchWithAuth(`${API_BASE}/platforms`, {
@@ -950,6 +977,20 @@ export const deletePlatform = async (id, token) => {
   });
   return handleResponse(response);
 };
+
+// Cập nhật thứ tự platforms (chỉ admin)
+export const updatePlatformsOrder = async (orderedIds, token) => {
+  const response = await fetchWithAuth(`${API_BASE}/platforms-order`, {
+    method: "PUT",
+    headers: withNoStore({
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify({ orderedIds }),
+    cache: "no-store",
+  });
+  return handleResponse(response);
+};
+
 export const getServerByTypeAndCategory = async (category = "", token) => {
   // Xây dựng query string
   let queryString = "";

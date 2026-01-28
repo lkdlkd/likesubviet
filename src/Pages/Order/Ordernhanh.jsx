@@ -65,13 +65,62 @@ export default function Ordernhanh() {
         setScheduleTime(value);
     };
 
+    // ===== SỬ DỤNG TRỰC TIẾP DỮ LIỆU HIERARCHICAL (platforms → categories → services) =====
+    
+    // Tìm platform hiện tại dựa trên selectedType (platform_name)
+    const selectedPlatform = useMemo(() => {
+        if (!servers || !Array.isArray(servers) || !selectedType) return null;
+        return servers.find(p => p.platform_name === selectedType?.value);
+    }, [servers, selectedType]);
+
+    // Tìm category hiện tại dựa trên selectedCategory và selectedPlatform
+    const selectedCategoryData = useMemo(() => {
+        if (!selectedPlatform || !selectedCategory) return null;
+        return selectedPlatform.categories?.find(c => c.category_name === selectedCategory?.value);
+    }, [selectedPlatform, selectedCategory]);
+
+    // Lấy danh sách services của category đang chọn (TRUY CẬP TRỰC TIẾP - NHANH HƠN)
+    const currentServices = useMemo(() => {
+        if (!selectedCategoryData?.services) return [];
+        return selectedCategoryData.services.map(s => ({
+            ...s,
+            type: selectedPlatform?.platform_name,
+            category: selectedCategoryData.category_name,
+            logo: selectedPlatform?.platform_logo
+        }));
+    }, [selectedCategoryData, selectedPlatform]);
+
+    // Helper: Flatten CHỈ dùng cho serviceOptions (tìm kiếm nhanh tất cả dịch vụ)
+    const flattenedServers = useMemo(() => {
+        if (!Array.isArray(servers)) return [];
+        const result = [];
+        servers.forEach(platform => {
+            if (!platform.categories) return;
+            platform.categories.forEach(category => {
+                if (!category.services) return;
+                category.services.forEach(service => {
+                    result.push({
+                        ...service,
+                        type: platform.platform_name,
+                        category: category.category_name,
+                        logo: platform.platform_logo,
+                        platform_id: platform.platform_id,
+                        category_id: category.category_id,
+                        category_path: category.category_path,
+                    });
+                });
+            });
+        });
+        return result;
+    }, [servers]);
+
     // Cập nhật danh sách servers khi `server` thay đổi
     useEffect(() => {
         loadingg("Vui lòng chờ...", true, 9999999); // Hiển thị loading khi bắt đầu fetch
         const fetchServers = async () => {
             try {
                 const response = await getServer(token); // Gọi API với token
-                setServers(response.data || []); // Cập nhật danh sách servers
+                setServers(response.data || []); // Cập nhật danh sách servers (cấu trúc phân cấp)
             } catch (error) {
                 // Swal.fire({
                 //     title: "Lỗi",
@@ -87,159 +136,143 @@ export default function Ordernhanh() {
         fetchServers(); // Gọi hàm fetchServers
     }, [token]); // Chỉ gọi lại khi token thay đổi
 
-    // Khi servers thay đổi, set mặc định các lựa chọn đầu tiên
+    // Khi servers thay đổi, set mặc định các lựa chọn đầu tiên (SỬ DỤNG HIERARCHICAL TRỰC TIẾP)
     useEffect(() => {
-        if (servers.length > 0) {
-            // Lấy type đầu tiên
-            const firstType = servers[0].type;
-            // Tìm server đầu tiên có type này để lấy logo (nếu có)
-            const serverWithLogo = servers.find(s => s.type === firstType && s.logo);
+        if (servers && Array.isArray(servers) && servers.length > 0) {
+            // Lấy platform đầu tiên
+            const firstPlatform = servers[0];
+            const firstType = firstPlatform.platform_name;
+            const firstLogo = firstPlatform.platform_logo;
+            
             setSelectedType({
                 value: firstType,
                 label: (
                     <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {serverWithLogo && serverWithLogo.logo && (
-                            <img src={serverWithLogo.logo} alt={firstType} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                        {firstLogo && (
+                            <img src={firstLogo} alt={firstType} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                         )}
                         {firstType}
                     </span>
                 ),
                 rawLabel: firstType
             });
-            // Lấy category đầu tiên theo type
-            const firstCategory = servers.find(s => s.type === firstType)?.category;
+
+            // Lấy category đầu tiên của platform này
+            const firstCategory = firstPlatform.categories?.[0];
             if (firstCategory) {
-                // Tìm server đầu tiên có type và category này để lấy logo (nếu có)
-                const serverWithLogoCat = servers.find(s => s.type === firstType && s.category === firstCategory && s.logo);
+                const catName = firstCategory.category_name;
                 setSelectedCategory({
-                    value: firstCategory,
+                    value: catName,
                     label: (
                         <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            {serverWithLogoCat && serverWithLogoCat.logo && (
-                                <img src={serverWithLogoCat.logo} alt={firstCategory} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                            {firstLogo && (
+                                <img src={firstLogo} alt={catName} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                             )}
-                            {firstCategory}
+                            {catName}
                         </span>
                     ),
-                    rawLabel: firstCategory
+                    rawLabel: catName
                 });
-            }
-            // Lấy server đầu tiên theo type và category
-            const firstServer = servers.find(s => s.type === firstType && s.category === firstCategory);
-            if (firstServer) {
-                setSelectedMagoi(firstServer.Magoi);
-                setMin(firstServer.min);
-                setMax(firstServer.max);
-                setRate(firstServer.rate);
+
+                // Lấy server đầu tiên của category này
+                const firstService = firstCategory.services?.[0];
+                if (firstService) {
+                    setSelectedMagoi(firstService.Magoi);
+                    setMin(firstService.min);
+                    setMax(firstService.max);
+                    setRate(firstService.rate);
+                }
             }
         }
     }, [servers]);
 
-    // Tính toán danh sách các loại nền tảng (Type) độc nhất từ servers
+    // Tính toán danh sách các loại nền tảng (Type) - TRUY CẬP TRỰC TIẾP HIERARCHICAL
     const uniqueTypes = useMemo(() => {
         if (!Array.isArray(servers)) return [];
-        return Array.from(new Set(servers.map((server) => server.type)));
+        return servers.map(p => p.platform_name);
     }, [servers]);
 
-    // Tạo options cho react-select cho Type (bổ sung logo)
-    const typeOptions = uniqueTypes.map((type) => {
-        // Tìm server đầu tiên có type này để lấy logo (nếu có)
-        const serverWithLogo = servers.find(s => s.type === type && s.logo);
-        return {
-            value: type,
+    // Tạo options cho react-select cho Type - SỬ DỤNG HIERARCHICAL TRỰC TIẾP
+    const typeOptions = useMemo(() => {
+        if (!Array.isArray(servers)) return [];
+        return servers.map((platform) => ({
+            value: platform.platform_name,
             label: (
                 <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {serverWithLogo && serverWithLogo.logo && (
-                        <img src={serverWithLogo.logo} alt={type} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                    {platform.platform_logo && (
+                        <img src={platform.platform_logo} alt={platform.platform_name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                     )}
-                    {type}
+                    {platform.platform_name}
                 </span>
             ),
-            rawLabel: type // giữ lại label gốc nếu cần
-        };
-    });
+            rawLabel: platform.platform_name
+        }));
+    }, [servers]);
 
-    // Nếu đã chọn một Type, tạo danh sách options cho Category dựa theo Type đó (bổ sung logo)
+    // Tạo danh sách options cho Category - TRUY CẬP TRỰC TIẾP TỪ selectedPlatform
     const categoryOptions = useMemo(() => {
-        if (!selectedType || !Array.isArray(servers)) return [];
-        const categories = Array.from(
-            new Set(
-                servers
-                    .filter((server) => server.type === (selectedType.value || selectedType.rawLabel))
-                    .map((server) => server.category)
-            )
-        );
-        return categories.map((cat) => {
-            // Tìm server đầu tiên có type và category này để lấy logo (nếu có)
-            const serverWithLogo = servers.find(s => (s.type === (selectedType.value || selectedType.rawLabel)) && s.category === cat && s.logo);
-            return {
-                value: cat,
-                label: (
-                    <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {serverWithLogo && serverWithLogo.logo && (
-                            <img src={serverWithLogo.logo} alt={cat} style={{ width: 24, height: 24, objectFit: 'contain' }} />
-                        )}
-                        {cat}
-                    </span>
-                ),
-                rawLabel: cat // giữ lại label gốc nếu cần
-            };
-        });
-    }, [servers, selectedType]);
+        if (!selectedPlatform || !selectedPlatform.categories) return [];
+        return selectedPlatform.categories.map((cat) => ({
+            value: cat.category_name,
+            label: (
+                <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {selectedPlatform.platform_logo && (
+                        <img src={selectedPlatform.platform_logo} alt={cat.category_name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                    )}
+                    {cat.category_name}
+                </span>
+            ),
+            rawLabel: cat.category_name
+        }));
+    }, [selectedPlatform]);
 
-    // Lọc danh sách server theo Type và Category đã chọn
-    const filteredServers = useMemo(() => {
-        if (!Array.isArray(servers)) return [];
-        return servers.filter((server) => {
-            const matchType = selectedType ? server.type === selectedType.value : true;
-            const matchCategory = selectedCategory
-                ? server.category === selectedCategory.value
-                : true;
-            return matchType && matchCategory;
-        });
-    }, [servers, selectedType, selectedCategory]);
+    // Lọc danh sách server - SỬ DỤNG currentServices ĐÃ CÓ SẴN (NHANH HƠN)
+    const filteredServers = currentServices;
 
-    // Handler cho khi chọn Type từ react-select
+    // Handler cho khi chọn Type từ react-select - SỬ DỤNG HIERARCHICAL TRỰC TIẾP
     const handleTypeChange = (option) => {
         if (option) {
-            // Tìm server đầu tiên có type này để lấy logo (nếu có)
-            const serverWithLogo = servers.find(s => s.type === option.value && s.logo);
+            // Tìm platform trong servers (TRUY CẬP TRỰC TIẾP - NHANH HƠN)
+            const platform = servers.find(p => p.platform_name === option.value);
+            if (!platform) return;
+
             setSelectedType({
                 value: option.value,
                 label: (
                     <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {serverWithLogo && serverWithLogo.logo && (
-                            <img src={serverWithLogo.logo} alt={option.value} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                        {platform.platform_logo && (
+                            <img src={platform.platform_logo} alt={option.value} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                         )}
                         {option.value}
                     </span>
                 ),
                 rawLabel: option.value
             });
-            // Tìm category đầu tiên theo type mới chọn
-            const firstCategory = servers.find(s => s.type === option.value)?.category;
+
+            // Lấy category đầu tiên từ platform (TRUY CẬP TRỰC TIẾP)
+            const firstCategory = platform.categories?.[0];
             if (firstCategory) {
-                // Tìm server đầu tiên có type và category này để lấy logo (nếu có)
-                const serverWithLogoCat = servers.find(s => s.type === option.value && s.category === firstCategory && s.logo);
+                const catName = firstCategory.category_name;
                 setSelectedCategory({
-                    value: firstCategory,
+                    value: catName,
                     label: (
                         <span className="font-semibold" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            {serverWithLogoCat && serverWithLogoCat.logo && (
-                                <img src={serverWithLogoCat.logo} alt={firstCategory} style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                            {platform.platform_logo && (
+                                <img src={platform.platform_logo} alt={catName} style={{ width: 24, height: 24, objectFit: 'contain' }} />
                             )}
-                            {firstCategory}
+                            {catName}
                         </span>
                     ),
-                    rawLabel: firstCategory
+                    rawLabel: catName
                 });
-                // Tìm server đầu tiên theo type và category
-                const firstServer = servers.find(s => s.type === option.value && s.category === firstCategory);
-                if (firstServer) {
-                    setSelectedMagoi(firstServer.Magoi);
-                    setMin(firstServer.min);
-                    setMax(firstServer.max);
-                    setRate(firstServer.rate);
+
+                // Lấy server đầu tiên từ category (TRUY CẬP TRỰC TIẾP)
+                const firstService = firstCategory.services?.[0];
+                if (firstService) {
+                    setSelectedMagoi(firstService.Magoi);
+                    setMin(firstService.min);
+                    setMax(firstService.max);
+                    setRate(firstService.rate);
                 } else {
                     setSelectedMagoi("");
                 }
@@ -261,7 +294,7 @@ export default function Ordernhanh() {
         setNote("");
     };
 
-    // Handler cho khi chọn Category từ react-select
+    // Handler cho khi chọn Category từ react-select - SỬ DỤNG HIERARCHICAL TRỰC TIẾP
     const handleCategoryChange = (option) => {
         setSelectedCategory(option);
         setObjectLink(""); // Reset link gốc
@@ -273,22 +306,21 @@ export default function Ordernhanh() {
         setComments("");
         setNote("");
 
-        if (option) {
-            // Tìm server đầu tiên theo category (và type nếu có chọn)
-            let firstServer;
-            if (selectedType) {
-                // Nếu đã chọn type cụ thể
-                firstServer = servers.find(s => s.type === selectedType.value && s.category === option.value);
-            } else {
-                // Nếu chọn All (selectedType = null), tìm server đầu tiên theo category
-                firstServer = servers.find(s => s.category === option.value);
-            }
-
-            if (firstServer) {
-                setSelectedMagoi(firstServer.Magoi);
-                setMin(firstServer.min);
-                setMax(firstServer.max);
-                setRate(firstServer.rate);
+        if (option && selectedPlatform) {
+            // Tìm category từ selectedPlatform (TRUY CẬP TRỰC TIẾP - NHANH HƠN)
+            const category = selectedPlatform.categories?.find(c => c.category_name === option.value);
+            
+            if (category) {
+                // Lấy server đầu tiên từ category (TRUY CẬP TRỰC TIẾP)
+                const firstService = category.services?.[0];
+                if (firstService) {
+                    setSelectedMagoi(firstService.Magoi);
+                    setMin(firstService.min);
+                    setMax(firstService.max);
+                    setRate(firstService.rate);
+                } else {
+                    setSelectedMagoi("");
+                }
             } else {
                 setSelectedMagoi("");
             }
@@ -676,13 +708,13 @@ export default function Ordernhanh() {
     const serviceOptions = useMemo(() => {
         // Lấy thứ tự category xuất hiện đầu tiên
         const categoryOrder = [];
-        servers.forEach(s => {
+        flattenedServers.forEach(s => {
             if (s.category && !categoryOrder.includes(s.category)) {
                 categoryOrder.push(s.category);
             }
         });
         // Sắp xếp theo thứ tự category xuất hiện trong dữ liệu
-        const sorted = [...servers].sort((a, b) => {
+        const sorted = [...flattenedServers].sort((a, b) => {
             const aIdx = categoryOrder.indexOf(a.category);
             const bIdx = categoryOrder.indexOf(b.category);
             return aIdx - bIdx;
@@ -710,9 +742,7 @@ export default function Ordernhanh() {
             searchLabel: `${s.Magoi} ${stripHtml(s.name)} ${s.maychu || ''} ${s.category || ''} ${s.type || ''}`,
             server: s
         }));
-    }, [servers, configWeb?.priceDisplayUnit]);
-
-
+    }, [flattenedServers, configWeb?.priceDisplayUnit]);
 
 
     const shortenSocialLink = (url) => {
@@ -908,7 +938,7 @@ export default function Ordernhanh() {
                                     isClearable
                                 />
                             </div>
-                            {servers.map((server, index) => (
+                            {flattenedServers.map((server, index) => (
                                 selectedMagoi === server.Magoi && (
                                     <div key={index} >
 
@@ -945,7 +975,7 @@ export default function Ordernhanh() {
                                     </div>
                                 )
                             ))}
-                            {/* {servers.map((server, index) => (
+                            {/* {flattenedServers.map((server, index) => (
                                 selectedMagoi === server.Magoi && (
                                     <div key={index} className="alert text-white alert-info bg-info">
                                         <h6>

@@ -1,11 +1,11 @@
 import { loadingg } from "@/JS/Loading";
 import { getServer } from "@/Utils/api";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback, memo } from "react";
 import Table from "react-bootstrap/Table";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import Select from "react-select";
 const Banggia = () => {
-    const [servers, setServers] = useState([]);
+    const [servers, setServers] = useState([]); // Dữ liệu hierarchical từ API
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchService, setSearchService] = useState(null);
@@ -13,15 +13,16 @@ const Banggia = () => {
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
     const { configWeb } = useOutletContext();
-    const daily = configWeb && configWeb.daily ? configWeb.daily : 1000000; // Mặc định 1 triệu nếu không có config
-    const npp = configWeb && configWeb.distributor ? configWeb.distributor : 10000000; // Mặc định 10 triệu nếu không có config
+    const daily = configWeb && configWeb.daily ? configWeb.daily : 1000000;
+    const npp = configWeb && configWeb.distributor ? configWeb.distributor : 10000000;
+
     useEffect(() => {
         const fetchServers = async () => {
             setLoading(true);
             loadingg("Vui lòng chờ...", true, 9999999);
             try {
                 const response = await getServer(token);
-                setServers(response.data || []);
+                setServers(response.data || []); // Dữ liệu hierarchical: platforms → categories → services
                 setError(null);
             } catch (err) {
                 setError("Không thể tải bảng giá.");
@@ -33,78 +34,114 @@ const Banggia = () => {
         fetchServers();
     }, [token]);
 
-    // Lấy danh sách nền tảng duy nhất
-    const platforms = useMemo(() => {
-        return Array.from(new Set(servers.map((s) => s.type)));
+    // ===== TỐI ƯU: TẠO MAP ĐỂ TRUY CẬP O(1) =====
+    const platformMap = useMemo(() => {
+        if (!Array.isArray(servers)) return new Map();
+        const map = new Map();
+        servers.forEach(platform => {
+            map.set(platform.platform_name, platform);
+        });
+        return map;
     }, [servers]);
 
-    // Tạo options cho react-select, thêm option "Tất cả" ở đầu, sắp xếp theo category (giữ nguyên thứ tự xuất hiện, không theo A-Z)
+    // Lấy platform đang active - O(1) lookup
+    const activePlatformData = useMemo(() => {
+        return platformMap.get(activePlatform) || null;
+    }, [platformMap, activePlatform]);
+
+    // ===== FLATTEN CHỈ CHO TÌM KIẾM TOÀN CỤC (serviceOptions) =====
+    const flattenedServers = useMemo(() => {
+        if (!Array.isArray(servers)) return [];
+        const result = [];
+        servers.forEach(platform => {
+            if (!platform.categories) return;
+            platform.categories.forEach(category => {
+                if (!category.services) return;
+                category.services.forEach(service => {
+                    result.push({
+                        ...service,
+                        type: platform.platform_name,
+                        category: category.category_name,
+                        category_path: category.category_path,
+                        logo: platform.platform_logo,
+                    });
+                });
+            });
+        });
+        return result;
+    }, [servers]);
+
+    // Tạo Map cho tìm kiếm nhanh service theo Magoi - O(1)
+    const serviceMap = useMemo(() => {
+        const map = new Map();
+        flattenedServers.forEach(s => map.set(s.Magoi, s));
+        return map;
+    }, [flattenedServers]);
+
+    // Tạo options cho react-select
     const serviceOptions = useMemo(() => {
-        // Lấy thứ tự category xuất hiện đầu tiên
-        const categoryOrder = [];
-        servers.forEach(s => {
-            if (s.category && !categoryOrder.includes(s.category)) {
-                categoryOrder.push(s.category);
-            }
-        });
-        // Sắp xếp theo thứ tự category xuất hiện trong dữ liệu
-        const sorted = [...servers].sort((a, b) => {
-            const aIdx = categoryOrder.indexOf(a.category);
-            const bIdx = categoryOrder.indexOf(b.category);
-            return aIdx - bIdx;
-        });
         return [
             { value: '', label: 'Tất cả' },
-            ...sorted.map((s) => ({
+            ...flattenedServers.map((s) => ({
                 value: s.Magoi,
                 label: (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span className="font-semibold"> {s.logo && (
                             <img src={s.logo} alt={s.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
-                        )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} <span style={{ lineHeight: "1.2", verticalAlign: "middle" }} dangerouslySetInnerHTML={{ __html: s.name }} /> <span className="badge bg-primary">{(() => {
-                                const rate = String(s.rate);
-                                if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
-                                if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
-                                return rate; // giữ nguyên nếu chỉ là số thường
-                            })()}đ
-                            </span>
+                        )} <strong className="badge bg-info">[{s.Magoi}]</strong> - {s.maychu} <span style={{ lineHeight: "1.2", verticalAlign: "middle" }} dangerouslySetInnerHTML={{ __html: s.name }} /> <span className="badge bg-primary">{String(s.rate)}đ</span>
                             <span className={`badge ms-1 ${s.isActive ? 'bg-success' : 'bg-danger'}`}>{s.isActive ? " Hoạt động" : " Bảo trì"}</span>
                             {s.refil === "on" && (<span className="badge bg-success ms-1"> Bảo hành</span>)}
                             {s.cancel === "on" && (<span className="badge bg-warning ms-1"> Có hủy hoàn</span>)}
                         </span>
-
                     </div>
                 ),
-
-                // label: `${s.category ? `[${s.category}] ` : ''}${s.Magoi} - ${s.name} - ${Number(s.rate).toLocaleString("en-US")}đ`,
                 ...s
             }))
         ];
-    }, [servers]);
+    }, [flattenedServers]);
 
-    // Lọc servers theo searchService nếu có
-    const filteredServers = useMemo(() => {
-        if (!searchService || searchService.value === '') return servers;
-        return servers.filter((s) => s.Magoi === searchService.value);
-    }, [servers, searchService]);
+    // ===== TỐI ƯU: FILTER DATA DỰA TRÊN SEARCH - O(1) nếu có search =====
+    const displayData = useMemo(() => {
+        // Nếu có tìm kiếm cụ thể -> trả về service đó trong format phù hợp
+        if (searchService && searchService.value) {
+            const found = serviceMap.get(searchService.value);
+            if (found) {
+                // Trả về cấu trúc hierarchical với chỉ 1 service
+                return [{
+                    platform_name: found.type,
+                    platform_logo: found.logo,
+                    categories: [{
+                        category_name: found.category,
+                        category_path: found.category_path,
+                        services: [found]
+                    }]
+                }];
+            }
+            return [];
+        }
+        // Không tìm kiếm -> trả về platform đang active
+        if (activePlatformData) {
+            return [activePlatformData];
+        }
+        return servers;
+    }, [searchService, serviceMap, activePlatformData, servers]);
 
-    // Khi chọn dịch vụ, tự động set platform tương ứng
+    // Khi chọn dịch vụ, tự động set platform tương ứng - O(1)
     useEffect(() => {
         if (searchService && searchService.value) {
-            // Tìm server theo Magoi
-            const found = servers.find(s => s.Magoi === searchService.value);
+            const found = serviceMap.get(searchService.value);
             if (found && found.type) {
                 setActivePlatform(found.type);
             }
         }
-    }, [searchService, servers]);
+    }, [searchService, serviceMap]);
 
     // Khi load lần đầu, set tab đầu tiên
     useEffect(() => {
-        if (!activePlatform && platforms.length > 0) {
-            setActivePlatform(platforms[0]);
+        if (!activePlatform && servers.length > 0) {
+            setActivePlatform(servers[0]?.platform_name || "");
         }
-    }, [platforms, activePlatform]);
+    }, [servers, activePlatform]);
 
     // if (loading) return <div>Đang tải bảng giá...</div>;
     // if (error) return <div className="alert alert-danger">{error}</div>;
@@ -371,40 +408,46 @@ const Banggia = () => {
                         />
                         <div className="d-flex flex-column flex-md-row mt-3">
                             <ul style={{ width: 300 }} className="nav nav-tabs nav-pills border-0 flex-row flex-md-column me-5 mb-3 mb-md-0 fs-6" role="tablist">
-                                {platforms.map((platform, idx) => {
-                                    const safePlatformId = `services-${platform.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+                                {/* ===== TỐI ƯU: TRUY CẬP TRỰC TIẾP TỪ servers HIERARCHICAL ===== */}
+                                {servers.map((platform) => {
+                                    const safePlatformId = `services-${platform.platform_name.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
                                     return (
-                                        <li className="nav-item w-md-200px me-0" role="presentation" key={platform}>
+                                        <li className="nav-item w-md-200px me-0" role="presentation" key={platform.platform_id}>
                                             <a
-                                                className={`nav-link${activePlatform === platform ? " active" : ""}`}
+                                                className={`nav-link${activePlatform === platform.platform_name ? " active" : ""}`}
                                                 data-bs-toggle="tab"
                                                 href={`#${safePlatformId}`}
-                                                aria-selected={activePlatform === platform ? "true" : "false"}
+                                                aria-selected={activePlatform === platform.platform_name ? "true" : "false"}
                                                 role="tab"
-                                                onClick={() => setActivePlatform(platform)}
+                                                onClick={() => setActivePlatform(platform.platform_name)}
                                             >
-                                                {platform}
+                                                {platform.platform_logo && (
+                                                    <img src={platform.platform_logo} alt={platform.platform_name} 
+                                                        style={{ width: 20, height: 20, objectFit: 'contain', marginRight: 8 }} />
+                                                )}
+                                                {platform.platform_name}
                                             </a>
                                         </li>
                                     );
                                 })}
                             </ul>
                             <div className="tab-content w-100">
-                                {platforms.map((platform, idx) => {
-                                    const safePlatformId = `services-${platform.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+                                {/* ===== TỐI ƯU: RENDER TRỰC TIẾP TỪ displayData - KHÔNG FILTER LẠI ===== */}
+                                {displayData.map((platform) => {
+                                    const safePlatformId = `services-${platform.platform_name.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
                                     return (
                                         <div
-                                            className={`tab-pane fade${activePlatform === platform ? " active show" : ""}`}
+                                            className={`tab-pane fade${activePlatform === platform.platform_name ? " active show" : ""}`}
                                             id={safePlatformId}
                                             role="tabpanel"
-                                            key={platform}
+                                            key={platform.platform_name}
                                         >
                                             <div className="accordion accordion-flush" id={`accordion-${safePlatformId}`}>
-                                                {/* Lấy các category của platform này */}
-                                                {Array.from(new Set(filteredServers.filter(s => (s.type || '').trim() === platform.trim()).map(s => (s.category || '').trim()))).map((category, cidx) => {
-                                                    const safeCategoryId = `${platform}-${category}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+                                                {/* ===== TỐI ƯU: TRUY CẬP TRỰC TIẾP platform.categories - O(1) ===== */}
+                                                {(platform.categories || []).map((category, cidx) => {
+                                                    const safeCategoryId = `${platform.platform_name}-${category.category_name}`.replace(/[^a-zA-Z0-9_-]/g, "_");
                                                     return (
-                                                        <div className="accordion-item" key={category}>
+                                                        <div className="accordion-item" key={category.category_id || category.category_name}>
                                                             <h5 className="accordion-header m-0" id={`flush-heading-${safeCategoryId}`}>
                                                                 <button
                                                                     className="accordion-button fw-semibold collapsed bg-light"
@@ -414,7 +457,7 @@ const Banggia = () => {
                                                                     aria-expanded="false"
                                                                     aria-controls={`flush-collapse-${safeCategoryId}`}
                                                                 >
-                                                                    {category}
+                                                                    {category.category_name}
                                                                 </button>
                                                             </h5>
                                                             <div
@@ -438,7 +481,8 @@ const Banggia = () => {
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
-                                                                                {filteredServers.filter(s => (s.type || '').trim() === platform.trim() && (s.category || '').trim() === category).map((server) => (
+                                                                                {/* ===== TỐI ƯU: TRUY CẬP TRỰC TIẾP category.services - O(1) ===== */}
+                                                                                {(category.services || []).map((server) => (
                                                                                     <tr key={server.Magoi}>
                                                                                         <td className="text-center">{server.Magoi}</td>
                                                                                         <td style={{
@@ -449,20 +493,10 @@ const Banggia = () => {
                                                                                             fontSize: "0.85rem"
                                                                                         }}>{server.maychu} <span dangerouslySetInnerHTML={{ __html: server.name }} /></td>
                                                                                         <td className="text-end" style={{ fontSize: "0.85rem" }}>
-                                                                                            {(() => {
-                                                                                                const rate = String(server.rate);
-                                                                                                if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
-                                                                                                if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
-                                                                                                return rate; // giữ nguyên nếu chỉ là số thường
-                                                                                            })()}đ
+                                                                                            {server.rate}đ
                                                                                         </td>
                                                                                         <td className="text-end" style={{ fontSize: "0.85rem" }}>
-                                                                                            {(() => {
-                                                                                                const rate = String(server.ratevip);
-                                                                                                if (rate.includes(".")) return rate; // giữ nguyên nếu có dấu .
-                                                                                                if (rate.includes(",")) return rate.replace(/\./g, "."); // đổi . thành ,
-                                                                                                return rate; // giữ nguyên nếu chỉ là số thường
-                                                                                            })()}đ
+                                                                                            {server.ratevip}đ
                                                                                         </td>
                                                                                         <td className="text-end" style={{ fontSize: "0.85rem" }}>
                                                                                             {server.rateDistributor}đ
@@ -471,7 +505,7 @@ const Banggia = () => {
                                                                                         <td className="text-center">
                                                                                             <Link
                                                                                                 className="btn btn-sm btn-success"
-                                                                                                to={`/order/${String(server.path).toLowerCase()}`}
+                                                                                                to={`/order/${category.category_path || 'default'}?magoi=${server.Magoi}`}
                                                                                                 style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}
                                                                                             >
                                                                                                 Mua

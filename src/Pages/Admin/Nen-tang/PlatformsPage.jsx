@@ -1,11 +1,116 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { addPlatform, updatePlatform, deletePlatform, getPlatforms } from "@/Utils/api";
+import { addPlatform, updatePlatform, deletePlatform, getPlatforms, updatePlatformsOrder } from "@/Utils/api";
 import Swal from "sweetalert2";
 import PlatformModal from "./PlatformModal";
 import Table from "react-bootstrap/Table"; // Import Table từ react-bootstrap
 import { loadingg } from "@/JS/Loading";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Component cho mỗi row có thể kéo thả
+function SortableRow({ platform, onEdit, onDelete, isAllowedApiUrl }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: platform._id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    backgroundColor: isDragging ? '#f0f8ff' : undefined,
+  };
+
+  return (
+    <tr ref={setNodeRef} style={style}>
+      <td>
+        <div className="d-flex align-items-center gap-2">
+          <span
+            {...attributes}
+            {...listeners}
+            style={{ cursor: 'grab', padding: '0 8px' }}
+            title="Kéo để sắp xếp"
+          >
+            <i className="fas fa-grip-vertical text-secondary"></i>
+          </span>
+          {platform.thutu}
+        </div>
+      </td>
+      <td>
+        <div className="dropdown">
+          <button
+            className="btn btn-primary dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Thao tác <i className="las la-angle-right ms-1"></i>
+          </button>
+          <ul className="dropdown-menu">
+            <li>
+              <button
+                className="dropdown-item text-primary"
+                onClick={() => onEdit(platform)}
+              >
+                Sửa
+              </button>
+            </li>
+            {!isAllowedApiUrl && (
+              <li>
+                <button
+                  className="dropdown-item text-danger"
+                  onClick={() => onDelete(platform._id)}
+                >
+                  Xóa
+                </button>
+              </li>
+            )}
+          </ul>
+        </div>
+      </td>
+      <td>{platform.name}</td>
+      <td>
+        <span className="badge bg-info">{platform.categoriesCount || 0} danh mục</span>
+      </td>
+      <td>
+        <img
+          src={platform.logo}
+          alt={platform.name}
+          width={50}
+          height={50}
+          style={{ objectFit: "cover" }}
+        />
+      </td>
+      <td>
+        {platform.status ? (
+          <span className="badge bg-success">Hoạt động</span>
+        ) : (
+          <span className="badge bg-danger">Không hoạt động</span>
+        )}
+      </td>
+    </tr>
+  );
+}
 
 export default function PlatformsPage() {
   const [platforms, setPlatforms] = useState([]);
@@ -133,6 +238,44 @@ export default function PlatformsPage() {
         });
       } finally {
         loadingg("", false);
+      }
+    }
+  };
+
+  // Sensors cho drag-and-drop
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Xử lý khi kéo thả xong
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = platforms.findIndex((p) => p._id === active.id);
+      const newIndex = platforms.findIndex((p) => p._id === over.id);
+
+      const newPlatforms = arrayMove(platforms, oldIndex, newIndex);
+      setPlatforms(newPlatforms);
+
+      // Gọi API cập nhật thứ tự
+      try {
+        const orderedIds = newPlatforms.map((p) => p._id);
+        await updatePlatformsOrder(orderedIds, token);
+        // Cập nhật thutu hiển thị local
+        setPlatforms(newPlatforms.map((p, idx) => ({ ...p, thutu: idx + 1 })));
+      } catch (error) {
+        Swal.fire({
+          title: "Lỗi",
+          text: "Không thể cập nhật thứ tự.",
+          icon: "error",
+          confirmButtonText: "Xác nhận",
+        });
+        // Refresh lại danh sách nếu lỗi
+        fetchPlatforms();
       }
     }
   };
@@ -300,96 +443,53 @@ export default function PlatformsPage() {
             </div>
 
             <div className="platforms-content-card">
-              <Table striped bordered hover responsive>
-                <thead>
-                  <tr>
-                    <th>Thứ tự hiển thị</th>
-                    <th>Hành động</th>
-                    <th>Tên</th>
-                    <th>Logo</th>
-                    <th>Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {platforms.length > 0 ? (
-                    platforms.map((platform, index) =>
-                      platform && platform._id ? (
-                        <tr key={platform._id}>
-                          <td>{platform.thutu}</td>
-                          <td>
-                            <div className="dropdown">
-                              <button
-                                className="btn btn-primary dropdown-toggle"
-                                type="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                              >
-                                Thao tác <i className="las la-angle-right ms-1"></i>
-                              </button>
-                              <ul className="dropdown-menu">
-                                <li>
-                                  <button
-                                    className="dropdown-item text-primary"
-                                    onClick={() => {
-                                      if (platform && platform._id) {
-                                        setSelectedPlatform(platform);
-                                        setIsModalOpen(true);
-                                      } else {
-                                        //   console.error("Không thể sửa nền tảng: `_id` không tồn tại.");
-                                      }
-                                    }}
-                                  >
-                                    Sửa
-                                  </button>
-                                </li>
-                                {!isAllowedApiUrl && (
-                                  <li>
-                                    <button
-                                      className="dropdown-item text-danger"
-                                      onClick={() => {
-                                        if (platform && platform._id) {
-                                          handleDeletePlatform(platform._id);
-                                        } else {
-                                          //    console.error("Không thể xóa nền tảng: `_id` không tồn tại.");
-                                        }
-                                      }}
-                                    >
-                                      Xóa
-                                    </button>
-                                  </li>
-                                )}
-                              </ul>
-                            </div>
-                          </td>
-                          <td>{platform.name}</td>
-                          <td>
-                            <img
-                              src={platform.logo}
-                              alt={platform.name}
-                              width={50}
-                              height={50}
-                              style={{ objectFit: "cover" }}
-                            />
-                          </td>
-                          <td>
-                            {platform.status ? (
-                              <span className="badge bg-success">Hoạt động</span>
-                            ) : (
-                              <span className="badge bg-danger">Không hoạt động</span>
-                            )}
-                          </td>
-                        </tr>
-                      ) : null
-                    )
-                  ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <Table striped bordered hover responsive>
+                  <thead>
                     <tr>
-                      <td colSpan={6} className="text-center">
-                        Không có nền tảng nào.
-                      </td>
+                      <th>Thứ tự hiển thị</th>
+                      <th>Hành động</th>
+                      <th>Tên</th>
+                      <th>Số danh mục</th>
+                      <th>Logo</th>
+                      <th>Trạng thái</th>
                     </tr>
-                  )}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {platforms.length > 0 ? (
+                      <SortableContext
+                        items={platforms.map((p) => p._id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {platforms.map((platform) =>
+                          platform && platform._id ? (
+                            <SortableRow
+                              key={platform._id}
+                              platform={platform}
+                              isAllowedApiUrl={isAllowedApiUrl}
+                              onEdit={(p) => {
+                                setSelectedPlatform(p);
+                                setIsModalOpen(true);
+                              }}
+                              onDelete={handleDeletePlatform}
+                            />
+                          ) : null
+                        )}
+                      </SortableContext>
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="text-center">
+                          Không có nền tảng nào.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+              </DndContext>
 
               {isModalOpen && (
                 <PlatformModal

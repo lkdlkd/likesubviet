@@ -31,22 +31,6 @@ const Danhsachdon = () => {
     const userRole = decoded?.role || "user";
     const username = decoded.username;
 
-    // useEffect(() => {
-    //     const fetchServers = async () => {
-    //         try {
-    //             const response = await getServer(token); // Gọi API với token
-    //             setServers(response.data || []); // Cập nhật danh sách servers
-    //         } catch (error) {
-    //           //  console.error("Lỗi khi gọi API getServer:", error);
-    //             toast.error("Không có server!");
-
-    //         }
-    //     };
-
-    //     if (token) {
-    //         fetchServers(); // Gọi hàm fetchServers nếu có token
-    //     }
-    // }, [token]); // Chỉ gọi lại khi `token` thay đổi
     // Lấy danh sách nền tảng (type) duy nhất từ categories
     const uniqueTypes = useMemo(() => {
         if (!Array.isArray(categories)) return [];

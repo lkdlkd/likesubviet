@@ -1,12 +1,124 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { addCategory, updateCategory, deleteCategory, getCategories, getPlatforms } from "@/Utils/api";
+import { addCategory, updateCategory, deleteCategory, getCategories, getPlatforms, updateCategoriesOrder } from "@/Utils/api";
 import Swal from "sweetalert2";
 import CategoryModal from "@/Pages/Admin/Dich-vu/CategoryModal";
 import Table from "react-bootstrap/Table"; // Import Table từ react-bootstrap
 import { loadingg } from "@/JS/Loading";
 import React from "react";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Component cho mỗi row category có thể kéo thả
+function SortableCategoryRow({ category, onEdit, onDelete }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: category._id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        backgroundColor: isDragging ? '#f0f8ff' : undefined,
+    };
+
+    return (
+        <tr ref={setNodeRef} style={style}>
+            <td>
+                <div className="d-flex align-items-center gap-2">
+                    <span
+                        {...attributes}
+                        {...listeners}
+                        style={{ cursor: 'grab', padding: '0 8px' }}
+                        title="Kéo để sắp xếp"
+                    >
+                        <i className="fas fa-grip-vertical text-secondary"></i>
+                    </span>
+                    {category.thutu}
+                </div>
+            </td>
+            <td>
+                <div className="dropdown">
+                    <button
+                        className="btn btn-primary dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                    >
+                        Thao tác <i className="las la-angle-right ms-1"></i>
+                    </button>
+                    <ul className="dropdown-menu">
+                        <li>
+                            <button
+                                className="dropdown-item text-primary"
+                                onClick={() => onEdit(category)}
+                            >
+                                Sửa
+                            </button>
+                        </li>
+                        <li>
+                            <button
+                                className="dropdown-item text-danger"
+                                onClick={() => onDelete(category._id)}
+                            >
+                                Xóa
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+            <td>{category.name}</td>
+            <td>
+                <span className="badge bg-primary">{category.servicesCount || 0} dịch vụ</span>
+            </td>
+            <td>{category.path}</td>
+            <td>{category.status ? <span className="badge bg-success">Hoạt động</span> : <span className="badge bg-danger">Không hoạt động</span>}</td>
+            <td
+                style={{
+                    maxWidth: "250px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                }}
+                title={category.notes || "Không có"}
+            >
+                {category.notes || "Không có"}
+            </td>
+            <td
+                style={{
+                    maxWidth: "250px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                }}
+                title={category.modal_show || "Không có"}
+            >
+                {category.modal_show || "Không có"}
+            </td>
+        </tr>
+    );
+}
+
 export default function CategoriesPage() {
     const [categories, setCategories] = useState([]);
     const [platforms, setPlatforms] = useState([]);
@@ -123,16 +235,77 @@ export default function CategoriesPage() {
         }
     };
 
-    // Group categories by platform
+    // Group categories by platform (giữ nguyên reference để có thể cập nhật)
     const categoriesByPlatform = (() => {
         const map = {};
         categories.forEach(cat => {
             const platformName = cat.platforms_id?.name || "Không xác định";
-            if (!map[platformName]) map[platformName] = [];
-            map[platformName].push(cat);
+            const platformId = cat.platforms_id?._id || "unknown";
+            if (!map[platformName]) map[platformName] = { platformId, cats: [] };
+            map[platformName].cats.push(cat);
+        });
+        // Sort categories theo thutu trong mỗi platform
+        Object.values(map).forEach(platformData => {
+            platformData.cats.sort((a, b) => (a.thutu || 0) - (b.thutu || 0));
         });
         return map;
     })();
+
+    // Sensors cho drag-and-drop
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    // Xử lý khi kéo thả category xong
+    const handleCategoryDragEnd = async (event, platformName) => {
+        const { active, over } = event;
+
+        if (!over) return; // Không có vị trí thả hợp lệ
+
+        if (active.id !== over.id) {
+            const platformData = categoriesByPlatform[platformName];
+            const cats = platformData.cats;
+            const oldIndex = cats.findIndex((c) => c._id === active.id);
+            const newIndex = cats.findIndex((c) => c._id === over.id);
+
+            if (oldIndex === -1 || newIndex === -1) return;
+
+            const newCats = arrayMove(cats, oldIndex, newIndex);
+            
+            // Tạo map thutu mới cho các categories được sắp xếp lại
+            const newThutuMap = {};
+            newCats.forEach((cat, idx) => {
+                newThutuMap[cat._id] = idx + 1;
+            });
+            
+            // Cập nhật local state - chỉ cập nhật thutu cho categories trong platform này
+            setCategories(prevCategories => 
+                prevCategories.map(cat => {
+                    if (newThutuMap[cat._id] !== undefined) {
+                        return { ...cat, thutu: newThutuMap[cat._id] };
+                    }
+                    return cat;
+                })
+            );
+
+            // Gọi API cập nhật thứ tự (background)
+            try {
+                const orderedIds = newCats.map((c) => c._id);
+                await updateCategoriesOrder(orderedIds, token);
+            } catch (error) {
+                Swal.fire({
+                    title: "Lỗi",
+                    text: "Không thể cập nhật thứ tự.",
+                    icon: "error",
+                    confirmButtonText: "Xác nhận",
+                });
+                fetchCategories();
+            }
+        }
+    };
 
     return (
         <>
@@ -363,7 +536,7 @@ export default function CategoriesPage() {
                                 <div className="card-body p-0">
                                     <div className="accordion accordion-flush categories-accordion" id="platformAccordion">
                                         {Object.keys(categoriesByPlatform).length > 0 ? (
-                                            Object.entries(categoriesByPlatform).map(([platformName, cats], idx) => (
+                                            Object.entries(categoriesByPlatform).map(([platformName, platformData], idx) => (
                                                 <div className="accordion-item categories-accordion-item" key={platformName}>
                                                     <h2 className="accordion-header categories-accordion-header" id={`flush-heading-${idx}`}>
                                                         <button
@@ -375,6 +548,7 @@ export default function CategoriesPage() {
                                                         >
                                                             <i className="fas fa-server me-2"></i>
                                                             {platformName}
+                                                            <span className="badge bg-info ms-2">{platformData.cats.length} danh mục</span>
                                                         </button>
                                                     </h2>
                                                     <div
@@ -384,88 +558,44 @@ export default function CategoriesPage() {
                                                         data-bs-parent="#platformAccordion"
                                                     >
                                                         <div className="accordion-body categories-accordion-body p-3">
-                                                            <Table striped bordered hover responsive className="mb-0">
-                                                                <thead className="table-light">
-                                                                    <tr>
-                                                                        <th>Thứ tự</th>
-                                                                        <th>Thao tác</th>
-                                                                        <th>Tên</th>
-                                                                        <th>Đường dẫn</th>
-                                                                        <th>Trạng thái</th>
-                                                                        <th>Ghi chú</th>
-                                                                        <th>Hiển thị Modal</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {cats.map((category) => (
-                                                                        <tr key={category._id}>
-                                                                            <td>{category.thutu}</td>
-                                                                            <td>
-                                                                                <div className="dropdown">
-                                                                                    <button
-                                                                                        className="btn btn-primary dropdown-toggle"
-                                                                                        type="button"
-                                                                                        data-bs-toggle="dropdown"
-                                                                                        aria-expanded="false"
-                                                                                    >
-                                                                                        Thao tác <i className="las la-angle-right ms-1"></i>
-                                                                                    </button>
-                                                                                    <ul className="dropdown-menu">
-                                                                                        <li>
-                                                                                            <button
-                                                                                                className="dropdown-item text-danger"
-                                                                                                onClick={() => {
-                                                                                                    setSelectedCategory(category);
-                                                                                                    setIsModalOpen(true);
-                                                                                                }}
-                                                                                            >
-                                                                                                Sửa
-                                                                                            </button>
-                                                                                        </li>
-                                                                                        <li>
-                                                                                            <button
-                                                                                                className="dropdown-item text-danger"
-                                                                                                onClick={() => {
-                                                                                                    if (category._id) {
-                                                                                                        handleDeleteCategory(category._id);
-                                                                                                    }
-                                                                                                }}
-                                                                                            >
-                                                                                                Xóa
-                                                                                            </button>
-                                                                                        </li>
-                                                                                    </ul>
-                                                                                </div>
-                                                                            </td>
-                                                                            <td>{category.name}</td>
-                                                                            <td>{category.path}</td>
-                                                                            <td>{category.status ? <span className="badge bg-success">Hoạt động</span> : <span className="badge bg-danger">Không hoạt động</span>}</td>
-                                                                            <td
-                                                                                style={{
-                                                                                    maxWidth: "250px",
-                                                                                    whiteSpace: "nowrap",
-                                                                                    overflow: "hidden",
-                                                                                    textOverflow: "ellipsis",
-                                                                                }}
-                                                                                title={category.notes || "Không có"}
-                                                                            >
-                                                                                {category.notes || "Không có"}
-                                                                            </td>
-                                                                            <td
-                                                                                style={{
-                                                                                    maxWidth: "250px",
-                                                                                    whiteSpace: "nowrap",
-                                                                                    overflow: "hidden",
-                                                                                    textOverflow: "ellipsis",
-                                                                                }}
-                                                                                title={category.modal_show || "Không có"}
-                                                                            >
-                                                                                {category.modal_show || "Không có"}
-                                                                            </td>
+                                                            <DndContext
+                                                                sensors={sensors}
+                                                                collisionDetection={closestCenter}
+                                                                onDragEnd={(event) => handleCategoryDragEnd(event, platformName)}
+                                                            >
+                                                                <Table striped bordered hover responsive className="mb-0">
+                                                                    <thead className="table-light">
+                                                                        <tr>
+                                                                            <th>Thứ tự</th>
+                                                                            <th>Thao tác</th>
+                                                                            <th>Tên</th>
+                                                                            <th>Số dịch vụ</th>
+                                                                            <th>Đường dẫn</th>
+                                                                            <th>Trạng thái</th>
+                                                                            <th>Ghi chú</th>
+                                                                            <th>Hiển thị Modal</th>
                                                                         </tr>
-                                                                    ))}
-                                                                </tbody>
-                                                            </Table>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <SortableContext
+                                                                            items={platformData.cats.map((c) => c._id)}
+                                                                            strategy={verticalListSortingStrategy}
+                                                                        >
+                                                                            {platformData.cats.map((category) => (
+                                                                                <SortableCategoryRow
+                                                                                    key={category._id}
+                                                                                    category={category}
+                                                                                    onEdit={(cat) => {
+                                                                                        setSelectedCategory(cat);
+                                                                                        setIsModalOpen(true);
+                                                                                    }}
+                                                                                    onDelete={handleDeleteCategory}
+                                                                                />
+                                                                            ))}
+                                                                        </SortableContext>
+                                                                    </tbody>
+                                                                </Table>
+                                                            </DndContext>
                                                         </div>
                                                     </div>
                                                 </div>

@@ -1,15 +1,181 @@
 'use client';
 import { loadingg } from "@/JS/Loading";
-import { deleteServer, getAllSmmPartners, getServer, updatePartnerPrices, Dongbo, syncServicesFromSmm } from "@/Utils/api";
-import { useEffect, useState } from "react";
+import { deleteServer, getAllSmmPartners, getServer, updatePartnerPrices, Dongbo, syncServicesFromSmm, updateServersOrder } from "@/Utils/api";
+import { useEffect, useState, useMemo } from "react";
 import Table from "react-bootstrap/Table";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import EditModal from "./EditModal";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Component cho mỗi row server có thể kéo thả
+function SortableServerRow({ serverItem, idx2, selectedServers, setSelectedServers, handleEdit, handleDelete, selectedPlatform, category, isAllowedApiUrl, isDragEnabled = true }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: serverItem._id, disabled: !isDragEnabled });
+
+  const style = isDragEnabled ? {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    backgroundColor: isDragging ? '#f0f8ff' : undefined,
+  } : {};
+
+  // Fallback cho trường hợp không có selectedPlatform/category (chế độ phân trang)
+  const platformName = selectedPlatform?.name || serverItem.type || '';
+  const platformId = selectedPlatform?.id || serverItem.typeId || '';
+  const categoryName = category?.category_name || serverItem.category || '';
+  const categoryId = category?.category_id || serverItem.categoryId || '';
+
+  return (
+    <tr ref={isDragEnabled ? setNodeRef : undefined} style={style}>
+      <td>
+        <input
+          type="checkbox"
+          checked={selectedServers.includes(serverItem._id)}
+          onChange={(e) => {
+            if (e.target.checked) {
+              setSelectedServers((prev) => [...prev, serverItem._id]);
+            } else {
+              setSelectedServers((prev) =>
+                prev.filter((id) => id !== serverItem._id)
+              );
+            }
+          }}
+        />
+      </td>
+      <td>
+        <div className="d-flex align-items-center gap-2">
+          {isDragEnabled && (
+            <span
+              {...attributes}
+              {...listeners}
+              style={{ cursor: 'grab', padding: '0 8px' }}
+              title="Kéo để sắp xếp"
+            >
+              <i className="fas fa-grip-vertical text-secondary"></i>
+            </span>
+          )}
+          {serverItem.thutu}
+        </div>
+      </td>
+      <td>
+        <div className="dropdown">
+          <button
+            className="btn btn-primary dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Thao tác <i className="las la-angle-right ms-1"></i>
+          </button>
+          <ul className="dropdown-menu">
+            <li>
+              <button
+                className="dropdown-item text-warning"
+                onClick={() => handleEdit({
+                  ...serverItem,
+                  typeId: platformId,
+                  categoryId: categoryId,
+                  type: platformName,
+                  category: categoryName
+                })}
+              >
+                Sửa
+              </button>
+            </li>
+            {!isAllowedApiUrl && (
+              <li>
+                <button
+                  className="dropdown-item text-danger"
+                  onClick={() => handleDelete(serverItem._id || "")}
+                >
+                  Xóa
+                </button>
+              </li>
+            )}
+          </ul>
+        </div>
+      </td>
+      <td style={{
+        maxWidth: "350px",
+        whiteSpace: "normal",
+        wordWrap: "break-word",
+        overflowWrap: "break-word",
+      }}>
+        <ul>
+          <li><b>Mã gói</b> : {serverItem.Magoi}</li>
+          <li><b>Tên</b> : {serverItem.maychu} <span dangerouslySetInnerHTML={{ __html: serverItem.name }} /></li>
+          <li><b>Nền tảng</b> : {platformName}</li>
+          <li><b>Dịch vụ</b> : {categoryName}</li>
+          <li><b>Min-Max</b> : {serverItem.min} - {serverItem.max}</li>
+          <li>
+            <b>Trạng thái</b> :{" "}
+            {serverItem.isActive ? <span className="badge bg-success">Hoạt động</span> : <span className="badge bg-danger">Bảo trì</span>}
+            <br />
+            {serverItem.status ? <span className="badge bg-success ms-1">Hiện</span> : <span className="badge bg-danger ms-1">Ẩn</span>}
+          </li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li><b>Giá gốc</b> : {serverItem.originalRate}</li>
+          <li><b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}</li>
+          <li><b>Giá Đại Lý</b> : {serverItem.ratevip}</li>
+          <li><b>Giá Thành Viên</b> : {serverItem.rate}</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li><b>Get uid (Dành cho FB )</b>: {serverItem.getid === 'on' ? <span className="badge bg-success ms-1">ON</span> : <span className="badge bg-secondary ms-1">OFF</span>}</li>
+          <li><b>Bình luận</b>: {serverItem.comment === 'on' ? <span className="badge bg-success ms-1">ON</span> : <span className="badge bg-secondary ms-1">OFF</span>}</li>
+          <li><b>Hủy đơn</b>: {serverItem.cancel === 'on' ? <span className="badge bg-success ms-1">ON</span> : <span className="badge bg-secondary ms-1">OFF</span>}</li>
+          <li><b>Bảo hành</b>: {serverItem.refil === 'on' ? <span className="badge bg-success ms-1">ON</span> : <span className="badge bg-secondary ms-1">OFF</span>}</li>
+          <li><b>Mua không check giá</b>: {serverItem.ischeck === true ? <span className="badge bg-success ms-1">ON</span> : <span className="badge bg-secondary ms-1">OFF</span>}</li>
+          <li><b>Đơn tay</b>: {serverItem.ordertay === true ? <span className="badge bg-success ms-1">ON</span> : <span className="badge bg-secondary ms-1">OFF</span>}</li>
+          <li><b>Chiết khấu (%)</b>: {serverItem.chietkhau}</li>
+        </ul>
+      </td>
+      <td style={{
+        maxWidth: "350px",
+        whiteSpace: "normal",
+        wordWrap: "break-word",
+        overflowWrap: "break-word",
+      }}>
+        <ul>
+          <li><b>Nguồn</b>: {serverItem.DomainSmm}</li>
+          <li><b>ID server</b>: {serverItem.serviceId}</li>
+          <li><b>Tên server</b>: {serverItem.serviceName}</li>
+        </ul>
+      </td>
+      <td>{new Date(serverItem.createdAt).toLocaleString()}</td>
+    </tr>
+  );
+}
 
 export default function Dichvupage() {
   const { categories: cate } = useOutletContext();
-  const [servers, setServers] = useState([]);
+  const [rawServers, setRawServers] = useState([]); // Dữ liệu hierarchical từ API
   const [categories, setCategories] = useState([]); // Sử dụng categories từ Outlet context
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
@@ -27,9 +193,48 @@ export default function Dichvupage() {
   const [quickAddMode, setQuickAddMode] = useState(true); // <--- ADD THIS
   const [isSearching, setIsSearching] = useState(false); // Trạng thái tìm kiếm
   const navigate = useNavigate(); // Navigation hook
-  // Lấy danh sách nền tảng duy nhất
-  const platforms = Array.from(new Set(servers.map((s) => s.type)));
+
+  // ===== FLATTEN DỮ LIỆU HIERARCHICAL TỪ API =====
+  const servers = useMemo(() => {
+    if (!Array.isArray(rawServers)) return [];
+    const result = [];
+    rawServers.forEach(platform => {
+      if (!platform.categories) return;
+      platform.categories.forEach(category => {
+        if (!category.services) return;
+        category.services.forEach(service => {
+          result.push({
+            ...service,
+            type: platform.platform_name,
+            category: category.category_name,
+            logo: platform.platform_logo,
+          });
+        });
+      });
+    });
+    return result;
+  }, [rawServers]);
+
+  // Lấy danh sách nền tảng từ hierarchical data (quickAddMode) hoặc từ flattened servers
+  const platforms = useMemo(() => {
+    if (Array.isArray(rawServers) && rawServers.length > 0) {
+      return rawServers.map(p => ({
+        id: p.platform_id,
+        name: p.platform_name,
+        logo: p.platform_logo,
+        thutu: p.platform_thutu,
+        categories: p.categories || []
+      }));
+    }
+    return [];
+  }, [rawServers]);
+
   const [selectedType, setSelectedType] = useState("");
+  
+  // Lấy platform được chọn từ hierarchical data
+  const selectedPlatform = useMemo(() => {
+    return platforms.find(p => p.name === selectedType) || null;
+  }, [platforms, selectedType]);
   // SMM partners & update price state
   const [smmPartners, setSmmPartners] = useState([]);
   const [selectedSmm, setSelectedSmm] = useState("");
@@ -65,7 +270,7 @@ export default function Dichvupage() {
       loadingg("Đang tải...", true, 9999999);
       if (!quickAddMode) {
         const response = await getServer(token, currentPage, limit, debouncedSearch, appliedFilters);
-        setServers(response.data || []);
+        setRawServers(response.data || []); // Lưu dữ liệu hierarchical
         setPagination(response.pagination || {
           totalItems: 0,
           currentPage: 1,
@@ -74,7 +279,7 @@ export default function Dichvupage() {
         });
       } else {
         const response = await getServer(token, undefined, undefined, debouncedSearch, appliedFilters);
-        setServers(response.data || []);
+        setRawServers(response.data || []); // Lưu dữ liệu hierarchical
       }
     } catch (error) {
       Swal.fire({
@@ -272,11 +477,72 @@ export default function Dichvupage() {
     }
   };
 
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end for servers reordering within a category
+  const handleServerDragEnd = (categoryServices, categoryId) => async (event) => {
+    const { active, over } = event;
+    
+    if (!over) return; // Không có vị trí thả hợp lệ
+    
+    if (active.id !== over.id) {
+      // Tìm index trong danh sách servers của category hiện tại
+      const oldIndex = categoryServices.findIndex((s) => s._id === active.id);
+      const newIndex = categoryServices.findIndex((s) => s._id === over.id);
+      
+      if (oldIndex === -1 || newIndex === -1) return; // Server không thuộc category này
+      
+      const reorderedServices = arrayMove(categoryServices, oldIndex, newIndex);
+      
+      // Cập nhật thutu hiển thị local (không gọi API load lại)
+      const updatedServices = reorderedServices.map((s, idx) => ({
+        ...s,
+        thutu: idx + 1
+      }));
+      
+      // Cập nhật rawServers state với thứ tự mới
+      setRawServers(prevRawServers => {
+        return prevRawServers.map(platform => ({
+          ...platform,
+          categories: platform.categories.map(cat => {
+            if (cat.category_id === categoryId) {
+              return {
+                ...cat,
+                services: updatedServices
+              };
+            }
+            return cat;
+          })
+        }));
+      });
+      
+      // Gửi orderedIds của category này để cập nhật thứ tự lên server (background)
+      const orderedIds = reorderedServices.map((s) => s._id);
+      try {
+        await updateServersOrder(orderedIds, token);
+      } catch (error) {
+        console.error("Error updating servers order:", error);
+        Swal.fire("Lỗi!", "Có lỗi xảy ra khi cập nhật thứ tự.", "error");
+        // Rollback: load lại data nếu lỗi
+        fetchServers();
+      }
+    }
+  };
+
   // Khi ở chế độ hiện tất cả, lọc servers theo search nếu có
   const filteredServers = servers;
-  const categoriesByType = selectedType
-    ? Array.from(new Set(filteredServers.filter(s => s.type === selectedType).map(s => s.category)))
-    : [];
+  
+  // Lấy categories từ selectedPlatform (hierarchical data) - O(1) thay vì O(n) filter
+  const categoriesByType = useMemo(() => {
+    if (!selectedPlatform || !selectedPlatform.categories) return [];
+    return selectedPlatform.categories;
+  }, [selectedPlatform]);
 
   // Lấy danh sách nguồn từ smmPartners và category từ categories (giữ _id và name)
   const uniqueSources = smmPartners.filter(p => p._id && p.name);
@@ -1210,22 +1476,22 @@ export default function Dichvupage() {
                   <div className="d-flex flex-column flex-md-row mt-3">
                     {/* Nền tảng tab navigation */}
                     <ul className="nav nav-tabs service-nav-tabs nav-pills border-0 flex-row flex-md-column me-5 mb-3 mb-md-0 fs-6" role="tablist">
-                      {platforms.map((type) => (
-                        <li className="nav-item service-nav-item w-md-200px me-0" role="presentation" key={type}>
+                      {platforms.map((platform) => (
+                        <li className="nav-item service-nav-item w-md-200px me-0" role="presentation" key={platform.id}>
                           <a
-                            className={`nav-link service-nav-link${selectedType === type ? " active" : ""}`}
+                            className={`nav-link service-nav-link${selectedType === platform.name ? " active" : ""}`}
                             data-bs-toggle="tab"
-                            href={`#services-${type}`}
-                            aria-selected={selectedType === type ? "true" : "false"}
+                            href={`#services-${platform.id}`}
+                            aria-selected={selectedType === platform.name ? "true" : "false"}
                             role="tab"
                             onClick={e => {
                               e.preventDefault();
-                              setSelectedType(type);
+                              setSelectedType(platform.name);
                             }}
                             style={{ cursor: "pointer" }}
                           >
-                            {/* <i className="fas fa-server me-2"></i> */}
-                            {type}
+                            {platform.logo && <img src={platform.logo} alt="" style={{ width: 20, height: 20, marginRight: 8, objectFit: "contain" }} />}
+                            {platform.name}
                           </a>
                         </li>
                       ))}
@@ -1233,13 +1499,14 @@ export default function Dichvupage() {
                     {/* End Nền tảng tab navigation */}
 
                     <div className="tab-content w-100">
-                      {selectedType && (
+                      {selectedType && selectedPlatform && (
                         <div className="accordion accordion-flush service-accordion" id="accordion-category">
                           <div className="accordion accordion-flush service-accordion" id="accordion-category">
                             {categoriesByType.map((category, cidx) => {
-                              const safeCategoryId = `cat-${category}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+                              const safeCategoryId = `cat-${category.category_id}`;
+                              const categoryServices = category.services || [];
                               return (
-                                <div className="accordion-item service-accordion-item" key={category}>
+                                <div className="accordion-item service-accordion-item" key={category.category_id}>
                                   <h5 className="accordion-header service-accordion-header m-0" id={`flush-heading-${safeCategoryId}`}>
                                     <button
                                       className="accordion-button service-accordion-button fw-semibold collapsed"
@@ -1250,7 +1517,8 @@ export default function Dichvupage() {
                                       aria-controls={`flush-collapse-${safeCategoryId}`}
                                     >
                                       <i className="fas fa-layer-group me-2"></i>
-                                      {category}
+                                      {category.category_name}
+                                      <span className="badge bg-secondary ms-2">{categoryServices.length}</span>
                                     </button>
                                   </h5>
                                   <div
@@ -1260,225 +1528,72 @@ export default function Dichvupage() {
                                     data-bs-parent="#accordion-category"
                                   >
                                     <div className="table-responsive p-3">
-                                      <Table striped bordered hover responsive>
-                                        <thead>
-                                          <tr>
-                                            <th>
-                                              <input
-                                                type="checkbox"
-                                                onChange={(e) => {
-                                                  const visibleServerIds = filteredServers.filter(s => s.type === selectedType && s.category === category).map(s => s._id);
-                                                  if (e.target.checked) {
-                                                    setSelectedServers(prev => Array.from(new Set([...prev, ...visibleServerIds])));
-                                                  } else {
-                                                    setSelectedServers(prev => prev.filter(id => !visibleServerIds.includes(id)));
-                                                  }
-                                                }}
-                                                checked={
-                                                  filteredServers.filter(s => s.type === selectedType && s.category === category).every(s => selectedServers.includes(s._id)) &&
-                                                  filteredServers.filter(s => s.type === selectedType && s.category === category).length > 0
-                                                }
-                                              />
-                                            </th>
-                                            <th>THỨ TỰ</th>
-                                            <th>THAO TÁC</th>
-                                            <th>TÊN</th>
-                                            <th>GIÁ</th>
-                                            <th>CHỨC NĂNG</th>
-                                            <th>NGUỒN</th>
-                                            <th>THỜI GIAN THÊM</th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          {filteredServers.filter(s => s.type === selectedType && s.category === category).length > 0 ? (
-                                            filteredServers.filter(s => s.type === selectedType && s.category === category).map((serverItem, idx2) => (
-                                              <tr key={serverItem.id || serverItem.serviceId}>
-                                                <td>
-                                                  <input
-                                                    type="checkbox"
-                                                    checked={selectedServers.includes(serverItem._id)}
-                                                    onChange={(e) => {
-                                                      if (e.target.checked) {
-                                                        setSelectedServers((prev) => [...prev, serverItem._id]);
-                                                      } else {
-                                                        setSelectedServers((prev) =>
-                                                          prev.filter((id) => id !== serverItem._id)
-                                                        );
-                                                      }
-                                                    }}
-                                                  />
-                                                </td>
-                                                {/* <td>{(pagination.currentPage - 1) * limit + idx2 + 1}</td> */}
-                                                <td>{serverItem.thutu}</td>
-                                                <td>
-                                                  <div className="dropdown">
-                                                    <button
-                                                      className="btn btn-primary dropdown-toggle"
-                                                      type="button"
-                                                      data-bs-toggle="dropdown"
-                                                      aria-expanded="false"
-                                                    >
-                                                      Thao tác <i className="las la-angle-right ms-1"></i>
-                                                    </button>
-                                                    <ul className="dropdown-menu">
-                                                      <li>
-                                                        <button
-                                                          className="dropdown-item text-warning"
-                                                          onClick={() => handleEdit(serverItem)}
-                                                        >
-                                                          Sửa
-                                                        </button>
-                                                      </li>
-                                                      {!isAllowedApiUrl && (
-                                                        <li>
-                                                          <button
-                                                            className="dropdown-item text-danger"
-                                                            onClick={() => handleDelete(serverItem._id || "")}
-                                                          >
-                                                            Xóa
-                                                          </button>
-                                                        </li>
-                                                      )}
-                                                    </ul>
-                                                  </div>
-                                                </td>
-                                                <td style={{
-                                                  maxWidth: "350px",
-                                                  whiteSpace: "normal",
-                                                  wordWrap: "break-word",
-                                                  overflowWrap: "break-word",
-                                                }}>
-                                                  <ul>
-                                                    <li>
-                                                      <b>Mã gói</b> : {serverItem.Magoi}
-                                                    </li>
-                                                    <li>
-                                                      <b>Tên</b> : {serverItem.maychu} <span dangerouslySetInnerHTML={{ __html: serverItem.name }} />
-                                                    </li>
-                                                    <li>
-                                                      <b>Nền tảng</b> : {serverItem.type}
-                                                    </li>
-                                                    <li>
-                                                      <b>Dịch vụ</b> : {serverItem.category}
-                                                    </li>
-                                                    <li>
-                                                      <b>Min-Max</b> : {serverItem.min} - {serverItem.max}
-                                                    </li>
-                                                    <li>
-                                                      <b>Trạng thái</b> :{" "}
-                                                      {serverItem.isActive ? (
-                                                        <span className="badge bg-success">Hoạt động</span>
-                                                      ) : (
-                                                        <span className="badge bg-danger">Bảo trì</span>
-                                                      )}
-                                                      <br />
-                                                      {serverItem.status ? (
-                                                        <span className="badge bg-success ms-1">Hiện</span>
-                                                      ) : (
-                                                        <span className="badge bg-danger ms-1">Ẩn</span>
-                                                      )}
-                                                    </li>
-                                                  </ul>
-                                                </td>
-                                                <td>
-                                                  <ul>
-                                                    <li>
-                                                      <b>Giá gốc</b> : {serverItem.originalRate}
-                                                    </li>
-                                                    <li>
-                                                      <b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}
-                                                    </li>
-                                                    <li>
-                                                      <b>Giá Đại Lý</b> : {serverItem.ratevip}
-                                                    </li>
-                                                    <li>
-                                                      <b>Giá Thành Viên</b> : {serverItem.rate}
-                                                    </li>
-                                                  </ul>
-                                                </td>
-                                                <td >
-                                                  <ul>
-                                                    <li>
-                                                      <b>Get uid (Dành cho FB )</b>: {serverItem.getid === 'on' ? (
-                                                        <span className="badge bg-success ms-1">ON</span>
-                                                      ) : (
-                                                        <span className="badge bg-secondary ms-1">OFF</span>
-                                                      )}
-                                                    </li>
-                                                    <li>
-                                                      <b>Bình luận</b>: {serverItem.comment === 'on' ? (
-                                                        <span className="badge bg-success ms-1">ON</span>
-                                                      ) : (
-                                                        <span className="badge bg-secondary ms-1">OFF</span>
-                                                      )}
-                                                    </li>
-                                                    <li>
-                                                      <b>Hủy đơn</b>: {serverItem.cancel === 'on' ? (
-                                                        <span className="badge bg-success ms-1">ON</span>
-                                                      ) : (
-                                                        <span className="badge bg-secondary ms-1">OFF</span>
-                                                      )}
-                                                    </li>
-                                                    <li>
-                                                      <b>Bảo hành</b>: {serverItem.refil === 'on' ? (
-                                                        <span className="badge bg-success ms-1">ON</span>
-                                                      ) : (
-                                                        <span className="badge bg-secondary ms-1">OFF</span>
-                                                      )}
-                                                    </li>
-                                                    <li>
-                                                      <b>Mua không check giá</b>: {serverItem.ischeck === true ? (
-                                                        <span className="badge bg-success ms-1">ON</span>
-                                                      ) : (
-                                                        <span className="badge bg-secondary ms-1">OFF</span>
-                                                      )}
-                                                    </li>
-                                                    <li>
-                                                      <b>Đơn tay</b>: {serverItem.ordertay === true ? (
-                                                        <span className="badge bg-success ms-1">ON</span>
-                                                      ) : (
-                                                        <span className="badge bg-secondary ms-1">OFF</span>
-                                                      )}
-                                                    </li>
-                                                    <li>
-                                                      <b>Chiết khấu (%)</b>: {serverItem.chietkhau}
-                                                    </li>
-                                                  </ul>
-                                                </td>
-                                                <td style={{
-                                                  maxWidth: "350px",
-                                                  whiteSpace: "normal",
-                                                  wordWrap: "break-word",
-                                                  overflowWrap: "break-word",
-                                                }}>
-                                                  <ul>
-                                                    <li>
-                                                      <b>Nguồn</b>: {serverItem.DomainSmm}
-                                                    </li>
-                                                    <li>
-                                                      <b>ID server</b>: {serverItem.serviceId}
-                                                    </li>
-                                                    <li>
-                                                      <b>Tên server</b>: {serverItem.serviceName}
-                                                    </li>
-                                                    {/* <li>
-                                                <b>Trạng thái</b>:{" "}
-                                                <span className="badge bg-success">Hoạt động</span>
-                                              </li> */}
-                                                  </ul>
-                                                </td>
-                                                <td>{new Date(serverItem.createdAt).toLocaleString()}</td>
-                                              </tr>
-                                            ))
-                                          ) : (
+                                      <DndContext
+                                        sensors={sensors}
+                                        collisionDetection={closestCenter}
+                                        onDragEnd={handleServerDragEnd(categoryServices, category.category_id)}
+                                      >
+                                        <Table striped bordered hover responsive>
+                                          <thead>
                                             <tr>
-                                              <td colSpan={14} style={{ textAlign: "center" }}>
-                                                Không có server nào được tìm thấy.
-                                              </td>
+                                              <th>
+                                                <input
+                                                  type="checkbox"
+                                                  onChange={(e) => {
+                                                    const visibleServerIds = categoryServices.map(s => s._id);
+                                                    if (e.target.checked) {
+                                                      setSelectedServers(prev => Array.from(new Set([...prev, ...visibleServerIds])));
+                                                    } else {
+                                                      setSelectedServers(prev => prev.filter(id => !visibleServerIds.includes(id)));
+                                                    }
+                                                  }}
+                                                  checked={
+                                                    categoryServices.length > 0 &&
+                                                    categoryServices.every(s => selectedServers.includes(s._id))
+                                                  }
+                                                />
+                                              </th>
+                                              <th>THỨ TỰ</th>
+                                              <th>THAO TÁC</th>
+                                              <th>TÊN</th>
+                                              <th>GIÁ</th>
+                                              <th>CHỨC NĂNG</th>
+                                              <th>NGUỒN</th>
+                                              <th>THỜI GIAN THÊM</th>
                                             </tr>
-                                          )}
-                                        </tbody>
-                                      </Table>
+                                          </thead>
+                                          <SortableContext
+                                            items={categoryServices.map((s) => s._id)}
+                                            strategy={verticalListSortingStrategy}
+                                          >
+                                            <tbody>
+                                              {categoryServices.length > 0 ? (
+                                                categoryServices.map((serverItem, idx2) => (
+                                                  <SortableServerRow
+                                                    key={serverItem._id}
+                                                    serverItem={serverItem}
+                                                    idx2={idx2}
+                                                    selectedServers={selectedServers}
+                                                    setSelectedServers={setSelectedServers}
+                                                    handleEdit={handleEdit}
+                                                    handleDelete={handleDelete}
+                                                    selectedPlatform={selectedPlatform}
+                                                    category={category}
+                                                    isAllowedApiUrl={isAllowedApiUrl}
+                                                    isDragEnabled={true}
+                                                  />
+                                                ))
+                                              ) : (
+                                                <tr>
+                                                  <td colSpan={8} style={{ textAlign: "center" }}>
+                                                    Không có server nào được tìm thấy.
+                                                  </td>
+                                                </tr>
+                                              )}
+                                            </tbody>
+                                          </SortableContext>
+                                        </Table>
+                                      </DndContext>
                                     </div>
                                   </div>
                                 </div>
@@ -1494,229 +1609,73 @@ export default function Dichvupage() {
 
               {!quickAddMode && (
                 <div className="rsp-table">
-                  <Table striped bordered hover responsive>
-                    <thead>
-                      <tr>
-                        <th>
-                          <input
-                            type="checkbox"
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedServers(servers.map((server) => server._id)); // Chọn tất cả
-                              } else {
-                                setSelectedServers([]); // Bỏ chọn tất cả
-                              }
-                            }}
-                            checked={
-                              selectedServers.length === servers.length && servers.length > 0
-                            }
-                          />
-                        </th>
-                        <th>#</th>
-                        <th>THAO TÁC</th>
-                        <th>TÊN</th>
-                        <th>GIÁ</th>
-                        <th>CHỨC NĂNG</th>
-                        <th>NGUỒN</th>
-                        <th>THỜI GIAN THÊM</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {servers.length > 0 ? (
-                        servers.map((serverItem, index) => (
-                          <tr key={serverItem.id || serverItem.serviceId}>
-                            <td>
-                              <input
-                                type="checkbox"
-                                checked={selectedServers.includes(serverItem._id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedServers((prev) => [...prev, serverItem._id]); // Thêm vào danh sách đã chọn
-                                  } else {
-                                    setSelectedServers((prev) =>
-                                      prev.filter((id) => id !== serverItem._id) // Loại bỏ khỏi danh sách đã chọn
-                                    );
-                                  }
-                                }}
-                              />
-                            </td>
-                            <td>{(pagination.currentPage - 1) * limit + index + 1}</td>
-
-                            <td>
-                              <div className="dropdown">
-                                <button
-                                  className="btn btn-primary dropdown-toggle"
-                                  type="button"
-                                  data-bs-toggle="dropdown"
-                                  aria-expanded="false"
-                                >
-                                  Thao tác <i className="las la-angle-right ms-1"></i>
-                                </button>
-                                <ul className="dropdown-menu">
-                                  <li>
-                                    <button
-                                      className="dropdown-item text-warning"
-                                      onClick={() => handleEdit(serverItem)}
-                                    >
-                                      Sửa
-                                    </button>
-                                  </li>
-                                  {!isAllowedApiUrl && (
-                                    <li>
-                                      <button
-                                        className="dropdown-item text-danger"
-                                        onClick={() => handleDelete(serverItem._id || "")}
-                                      >
-                                        Xóa
-                                      </button>
-                                    </li>
-                                  )}
-                                </ul>
-                              </div>
-                            </td>
-                            <td style={{
-                              maxWidth: "350px",
-                              whiteSpace: "normal",
-                              wordWrap: "break-word",
-                              overflowWrap: "break-word",
-                            }}>
-                              <ul>
-                                <li>
-                                  <b>Mã gói</b> : {serverItem.Magoi}
-                                </li>
-                                <li>
-                                  <b>Tên</b> : {serverItem.maychu} {serverItem.name}
-                                </li>
-
-                                <li>
-                                  <b>Nền tảng</b> : {serverItem.type}
-                                </li>
-                                <li>
-                                  <b>Dịch vụ</b> : {serverItem.category}
-                                </li>
-
-                                <li>
-                                  <b>Min-Max</b> : {serverItem.min} - {serverItem.max}
-                                </li>
-                                <li>
-                                  <b>Trạng thái</b> :{" "}
-                                  {serverItem.isActive ? (
-                                    <span className="badge bg-success">Hoạt động</span>
-                                  ) : (
-                                    <span className="badge bg-danger">Bảo trì</span>
-                                  )}
-                                  <br />
-                                  {serverItem.status ? (
-                                    <span className="badge bg-success ms-1">Hiện</span>
-                                  ) : (
-                                    <span className="badge bg-danger ms-1">Ẩn</span>
-                                  )}
-                                </li>
-                              </ul>
-                            </td>
-                            <td>
-                              <ul>
-                                <li>
-                                  <b>Giá gốc</b> : {serverItem.originalRate}
-                                </li>
-                                <li>
-                                  <b>Giá Nhà Phân Phối</b> : {serverItem.rateDistributor}
-                                </li>
-                                <li>
-                                  <b>Giá Đại Lý</b> : {serverItem.ratevip}
-                                </li>
-                                <li>
-                                  <b>Giá Thành Viên</b> : {serverItem.rate}
-                                </li>
-                              </ul>
-                            </td>
-                            <td >
-                              <ul>
-                                <li>
-                                  <b>Get uid (Dành cho FB )</b>: {serverItem.getid === 'on' ? (
-                                    <span className="badge bg-success ms-1">ON</span>
-                                  ) : (
-                                    <span className="badge bg-secondary ms-1">OFF</span>
-                                  )}
-                                </li>
-                                <li>
-                                  <b>Bình luận</b>: {serverItem.comment === 'on' ? (
-                                    <span className="badge bg-success ms-1">ON</span>
-                                  ) : (
-                                    <span className="badge bg-secondary ms-1">OFF</span>
-                                  )}
-                                </li>
-                                <li>
-                                  <b>Hủy đơn</b>: {serverItem.cancel === 'on' ? (
-                                    <span className="badge bg-success ms-1">ON</span>
-                                  ) : (
-                                    <span className="badge bg-secondary ms-1">OFF</span>
-                                  )}
-                                </li>
-                                <li>
-                                  <b>Bảo hành</b>: {serverItem.refil === 'on' ? (
-                                    <span className="badge bg-success ms-1">ON</span>
-                                  ) : (
-                                    <span className="badge bg-secondary ms-1">OFF</span>
-                                  )}
-                                </li>
-                                <li>
-                                  <b>Mua không check giá</b>: {serverItem.ischeck === true ? (
-                                    <span className="badge bg-success ms-1">ON</span>
-                                  ) : (
-                                    <span className="badge bg-secondary ms-1">OFF</span>
-                                  )}
-                                </li>
-                                <li>
-                                  <b>Đơn tay</b>: {serverItem.ordertay === true ? (
-                                    <span className="badge bg-success ms-1">ON</span>
-                                  ) : (
-                                    <span className="badge bg-secondary ms-1">OFF</span>
-                                  )}
-                                </li>
-                                <li>
-                                  <b>Chiết khấu (%)</b>: {serverItem.chietkhau}
-                                </li>
-                              </ul>
-                            </td>
-                            <td style={{
-                              maxWidth: "350px",
-                              whiteSpace: "normal",
-                              wordWrap: "break-word",
-                              overflowWrap: "break-word",
-                            }}>
-                              <ul>
-                                <li>
-                                  <b>Nguồn</b>: {serverItem.DomainSmm}
-                                </li>
-
-                                <li>
-                                  <b>ID server</b>: {serverItem.serviceId}
-                                </li>
-                                <li>
-                                  <b>Tên server</b>: {serverItem.serviceName}
-                                </li>
-                                {/* <li>
-                                <b>Trạng thái</b>:{" "}
-                                <span className="badge bg-success">Hoạt động</span>
-                              </li> */}
-                              </ul>
-                            </td>
-                            <td>{new Date(serverItem.createdAt).toLocaleString()}</td>
-                          </tr>
-                        ))
-                      ) : (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleServerDragEnd(servers, null)}
+                  >
+                    <Table striped bordered hover responsive>
+                      <thead>
                         <tr>
-                          <td colSpan={14} className="text-center">
-                            <div>
-                              <svg width="184" height="152" viewBox="0 0 184 152" xmlns="http://www.w3.org/2000/svg"><g fill="none" fillRule="evenodd"><g transform="translate(24 31.67)"><ellipse fillOpacity=".8" fill="#F5F5F7" cx="67.797" cy="106.89" rx="67.797" ry="12.668"></ellipse><path d="M122.034 69.674L98.109 40.229c-1.148-1.386-2.826-2.225-4.593-2.225h-51.44c-1.766 0-3.444.839-4.592 2.225L13.56 69.674v15.383h108.475V69.674z" fill="#AEB8C2"></path><path d="M101.537 86.214L80.63 61.102c-1.001-1.207-2.507-1.867-4.048-1.867H31.724c-1.54 0-3.047.66-4.048 1.867L6.769 86.214v13.792h94.768V86.214z" fill="url(#linearGradient-1)" transform="translate(13.56)"></path><path d="M33.83 0h67.933a4 4 0 0 1 4 4v93.344a4 4 0 0 1-4 4H33.83a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z" fill="#F5F5F7"></path><path d="M42.678 9.953h50.237a2 2 0 0 1 2 2V36.91a2 2 0 0 1-2 2H42.678a2 2 0 0 1-2-2V11.953a2 2 0 0 1 2-2zM42.94 49.767h49.713a2.262 2.262 0 1 1 0 4.524H42.94a2.262 2.262 0 0 1 0-4.524zM42.94 61.53h49.713a2.262 2.262 0 1 1 0 4.525H42.94a2.262 2.262 0 0 1 0-4.525zM121.813 105.032c-.775 3.071-3.497 5.36-6.735 5.36H20.515c-3.238 0-5.96-2.29-6.734-5.36a7.309 7.309 0 0 1-.222-1.79V69.675h26.318c2.907 0 5.25 2.448 5.25 5.42v.04c0 2.971 2.37 5.37 5.277 5.37h34.785c2.907 0 5.277-2.421 5.277-5.393V75.1c0-2.972 2.343-5.426 5.25-5.426h26.318v33.569c0 .617-.077 1.216-.221 1.789z" fill="#DCE0E6"></path></g><path d="M149.121 33.292l-6.83 2.65a1 1 0 0 1-1.317-1.23l1.937-6.207c-2.589-2.944-4.109-6.534-4.109-10.408C138.802 8.102 148.92 0 161.402 0 173.881 0 184 8.102 184 18.097c0 9.995-10.118 18.097-22.599 18.097-4.528 0-8.744-1.066-12.28-2.902z" fill="#DCE0E6"></path><g transform="translate(149.65 15.383)" fill="#FFF"><ellipse cx="20.654" cy="3.167" rx="2.849" ry="2.815"></ellipse><path d="M5.698 5.63H0L2.898.704zM9.259.704h4.985V5.63H9.259z"></path></g></g></svg>
-                              <p className="font-semibold" >Không có dữ liệu</p>
-                            </div>
-                          </td>
+                          <th>
+                            <input
+                              type="checkbox"
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedServers(servers.map((server) => server._id)); // Chọn tất cả
+                                } else {
+                                  setSelectedServers([]); // Bỏ chọn tất cả
+                                }
+                              }}
+                              checked={
+                                selectedServers.length === servers.length && servers.length > 0
+                              }
+                            />
+                          </th>
+                          <th>#</th>
+                          <th>THAO TÁC</th>
+                          <th>TÊN</th>
+                          <th>GIÁ</th>
+                          <th>CHỨC NĂNG</th>
+                          <th>NGUỒN</th>
+                          <th>THỜI GIAN THÊM</th>
                         </tr>
-                      )}
-                    </tbody>
-                  </Table>
+                      </thead>
+                      <SortableContext
+                        items={servers.map((s) => s._id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <tbody>
+                          {servers.length > 0 ? (
+                            servers.map((serverItem, index) => (
+                              <SortableServerRow
+                                key={serverItem._id}
+                                serverItem={serverItem}
+                                index={index}
+                                pagination={pagination}
+                                limit={limit}
+                                selectedServers={selectedServers}
+                                setSelectedServers={setSelectedServers}
+                                handleEdit={handleEdit}
+                                handleDelete={handleDelete}
+                                isAllowedApiUrl={isAllowedApiUrl}
+                                isDragEnabled={false}
+                              />
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={15} className="text-center">
+                                <div>
+                                  <svg width="184" height="152" viewBox="0 0 184 152" xmlns="http://www.w3.org/2000/svg"><g fill="none" fillRule="evenodd"><g transform="translate(24 31.67)"><ellipse fillOpacity=".8" fill="#F5F5F7" cx="67.797" cy="106.89" rx="67.797" ry="12.668"></ellipse><path d="M122.034 69.674L98.109 40.229c-1.148-1.386-2.826-2.225-4.593-2.225h-51.44c-1.766 0-3.444.839-4.592 2.225L13.56 69.674v15.383h108.475V69.674z" fill="#AEB8C2"></path><path d="M101.537 86.214L80.63 61.102c-1.001-1.207-2.507-1.867-4.048-1.867H31.724c-1.54 0-3.047.66-4.048 1.867L6.769 86.214v13.792h94.768V86.214z" fill="url(#linearGradient-1)" transform="translate(13.56)"></path><path d="M33.83 0h67.933a4 4 0 0 1 4 4v93.344a4 4 0 0 1-4 4H33.83a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z" fill="#F5F5F7"></path><path d="M42.678 9.953h50.237a2 2 0 0 1 2 2V36.91a2 2 0 0 1-2 2H42.678a2 2 0 0 1-2-2V11.953a2 2 0 0 1 2-2zM42.94 49.767h49.713a2.262 2.262 0 1 1 0 4.524H42.94a2.262 2.262 0 0 1 0-4.524zM42.94 61.53h49.713a2.262 2.262 0 1 1 0 4.525H42.94a2.262 2.262 0 0 1 0-4.525zM121.813 105.032c-.775 3.071-3.497 5.36-6.735 5.36H20.515c-3.238 0-5.96-2.29-6.734-5.36a7.309 7.309 0 0 1-.222-1.79V69.675h26.318c2.907 0 5.25 2.448 5.25 5.42v.04c0 2.971 2.37 5.37 5.277 5.37h34.785c2.907 0 5.277-2.421 5.277-5.393V75.1c0-2.972 2.343-5.426 5.25-5.426h26.318v33.569c0 .617-.077 1.216-.221 1.789z" fill="#DCE0E6"></path></g><path d="M149.121 33.292l-6.83 2.65a1 1 0 0 1-1.317-1.23l1.937-6.207c-2.589-2.944-4.109-6.534-4.109-10.408C138.802 8.102 148.92 0 161.402 0 173.881 0 184 8.102 184 18.097c0 9.995-10.118 18.097-22.599 18.097-4.528 0-8.744-1.066-12.28-2.902z" fill="#DCE0E6"></path><g transform="translate(149.65 15.383)" fill="#FFF"><ellipse cx="20.654" cy="3.167" rx="2.849" ry="2.815"></ellipse><path d="M5.698 5.63H0L2.898.704zM9.259.704h4.985V5.63H9.259z"></path></g></g></svg>
+                                  <p className="font-semibold" >Không có dữ liệu</p>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </SortableContext>
+                    </Table>
+                  </DndContext>
                 </div>
               )}
               {!quickAddMode &&
